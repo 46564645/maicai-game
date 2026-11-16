@@ -1,0 +1,70 @@
+/* ==========================================================================
+   demo.css —— 演示控制条样式（REQUIREMENTS §8：显示在游戏画面外侧，不遮挡
+   游戏主体；默认隐藏，?demo=1 或 D 开合）。只用 tokens.css 变量。
+   ========================================================================== */
+
+.demo-bar {
+  position: relative;
+  z-index: 1; /* 全屏 3D 画布（z-index:0）之上 */
+  width: 100%;
+  max-width: var(--stage-width);
+  margin: 0 auto var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-5);
+  background: var(--color-surface-dim);
+  border: 2px dashed var(--color-line-strong);
+  border-radius: var(--radius-card);
+  font-size: var(--font-size-sm);
+}
+
+.demo-title {
+  font-weight: var(--font-weight-bold);
+}
+
+.demo-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.demo-bot {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.demo-label {
+  color: var(--color-muted);
+}
+
+.demo-chip {
+  min-height: var(--tap-min-size);
+  padding: var(--space-1) var(--space-3);
+  background: var(--color-surface);
+  border: 2px solid var(--color-line-strong);
+  border-radius: var(--radius-button);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+
+.demo-chip--on {
+  border-color: var(--color-primary);
+  border-width: 3px;
+  font-weight: var(--font-weight-bold);
+}
+
+.demo-chip--go {
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  border-color: var(--color-primary);
+}
+
+.demo-chip--warn {
+  background: var(--color-accent-yellow);
+  color: var(--color-warning-contrast);
+  border-color: var(--color-line-strong);
+}

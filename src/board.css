@@ -1,0 +1,448 @@
+/* ==========================================================================
+   game.css —— M3 界面组件样式。只允许使用 tokens.css 的 CSS 变量；
+   禁止裸色值 / 裸字号 / 裸圆角（ww 正式 UI 来了一次换皮）。
+   ========================================================================== */
+
+
+/* —— 顶条 —— */
+.game-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+}
+
+.game-topbar-actions .btn {
+  min-height: var(--tap-min-size);
+  padding: 0 var(--space-4);
+  font-size: var(--font-size-md);
+}
+
+/* —— 棋盘 —— */
+.board-station {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-2);
+  background: var(--color-surface);
+  border: 2px solid var(--color-line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+  min-height: 72px;
+}
+
+.board-station--featured {
+  border-color: var(--color-line-strong);
+  padding: var(--space-4) var(--space-3);
+}
+
+.board-station--current {
+  border-color: var(--color-primary);
+  border-width: 3px;
+  box-shadow: var(--shadow-md);
+}
+
+.board-station-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--key-hint-size);
+  height: var(--key-hint-size);
+  border-radius: var(--radius-button);
+  background: var(--color-surface-dim);
+  color: var(--color-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.board-station--current .board-station-num {
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+}
+
+.board-station-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.board-station--featured .board-station-name {
+  font-size: var(--font-size-md);
+  color: var(--color-primary);
+}
+
+.board-pawns {
+  display: flex;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: var(--space-1);
+}
+
+.pawn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-size);
+  height: var(--icon-size);
+  border-radius: var(--radius-button);
+  border: 2px solid var(--color-surface);
+  font-size: var(--font-size-sm);
+  box-shadow: var(--shadow-sm);
+}
+
+.pawn--active {
+  outline: 3px solid var(--color-focus);
+}
+
+.board-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-surface-dim);
+  border: 2px dashed var(--color-line-strong);
+  border-radius: var(--radius-card);
+  text-align: center;
+}
+
+.board-town {
+  font-size: var(--font-size-sm);
+  color: var(--color-muted);
+}
+
+.board-status {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+.board-log {
+  font-size: var(--font-size-sm);
+  color: var(--color-muted);
+}
+
+/* 中央「进入这一站」主按钮：不限制单行，宁可折行也不溢出被裁 */
+.board-enter {
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+}
+
+/* 竖屏（触屏无键盘）：隐藏「（Enter / 空格）」提示，收窄内边距保证一行放下 */
+@media (max-width: 640px) {
+  .board-center {
+    padding: var(--space-3) var(--space-2);
+  }
+
+  .board-enter {
+    padding: 0 var(--space-4);
+  }
+
+  .board-enter .btn-kbd-hint {
+    display: none;
+  }
+}
+
+/* —— 3D 棋盘（Board3D）：canvas 铺满整屏铺底（ww M4.5.5：不再框在中间小卡片），
+   2D 面板/弹窗浮在上面；DOM overlay + 回正钮 + 状态行 —— */
+.board3d {
+  position: fixed;
+  inset: 0;
+  z-index: 0; /* 在页面背景之上、全部 2D UI（z-index≥1）之下 */
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  /* 天空 = 页面同款奶油 → 浅蓝渐变（canvas 透明） */
+  background: var(--gradient-page);
+  touch-action: none; /* 双指捏合/拖拽交给相机，页面不滚不缩放 */
+}
+
+.board3d-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.board3d-canvas canvas {
+  display: block;
+  outline: none;
+}
+
+/* T4 手机档廉价镜头（Board3D PhoneLens）：上下渐隐虚化带 + 暗角。
+   backdrop-filter 只作用于画布合成结果，不进 WebGL 渲染管线；
+   mask 让虚化在清晰带边缘渐隐，不出现硬边。 */
+.board3d-lens {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.board3d-lens-band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 24%;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+.board3d-lens-band--top {
+  top: 0;
+  mask-image: linear-gradient(to bottom, black 25%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 25%, transparent 100%);
+}
+
+.board3d-lens-band--bottom {
+  bottom: 0;
+  mask-image: linear-gradient(to top, black 25%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to top, black 25%, transparent 100%);
+}
+
+.board3d-lens-vignette {
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 90px rgba(30, 30, 42, 0.16);
+}
+
+/* 「回默认视角」：收在底部 overlay 里的小胶囊钮（DOM，≥48px 可点；
+   全屏后画布 z-index:0，放 overlay 内才不会被两侧浮层挡住）
+   UI 迭代 R1：桌面横条里只留状态行 + 主按钮，回正钮改为贴在条的
+   右上外侧（棋盘区右下水域上方），不再占条内整行；≤900px 回文档流
+   时恢复静态排布（见底部媒体查询），手机横屏沿用 overlay 定位。 */
+.board3d-reset {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + var(--space-2));
+  min-height: var(--tap-min-size);
+  padding: 0 var(--space-4);
+  border: 2px solid var(--color-line-strong);
+  border-radius: var(--radius-button);
+  background: var(--color-surface);
+  color: var(--color-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* 中央偏下 overlay：复用 board-center 的样式气质，半透明奶油底不挡岛。
+   桌面锚在棋盘区（.game-board-area）底缘 —— 正好在底栏上方，
+   不再盖住「求助牌」下面的字（马教授 M4.5.6 反馈 A）；
+   ≤900px 单列/手机回文档流排在状态行下方（见底部媒体查询）
+   UI 迭代 R1（A/B 实测）：桌面改横排矮条 —— 旧竖排卡 480×184 把岛的
+   上中部整块盖住（岛屿包围盒遮挡 39.3%）。状态行 + 主按钮 + 回正钮
+   同排，日志行整宽折到第二行；高度降到 ~76px（带日志 ~104px），
+   主按钮仍是整排最显眼的元素、≥56px 不变。 */
+.board3d-overlay {
+  position: absolute;
+  left: 50%;
+  bottom: var(--space-2);
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2) var(--space-3);
+  /* 显式宽度：width:auto 的 flex 容器只会缩到最宽单项的宽度，
+     横排会立刻折成竖排（R1 第一版实测），必须给足整排的宽度。
+     R1 第三版：整排只放状态行 + 主按钮（~713px），「回正」钮移出
+     条外（见 .board3d-reset）——三件全塞进一排要 860px+，条宽被迫
+     52rem 时面积反而比旧竖卡还大（R1 第二版实测岛屿遮挡不降反升）。 */
+  width: min(96%, 46rem);
+  padding: var(--space-2) var(--space-3);
+  background: color-mix(in srgb, var(--color-bg) 82%, var(--color-surface));
+  border: 2px solid var(--color-line-strong);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-md);
+  text-align: center;
+  pointer-events: none; /* 空处不挡相机拖拽，只有按钮可点 */
+}
+
+.board3d-overlay .board-status {
+  flex: 1 1 auto;
+  font-size: var(--font-size-md);
+  text-align: left;
+}
+
+.board3d-overlay .board-log {
+  flex: 1 1 100%;
+  order: 3;
+}
+
+.board3d-overlay .board-enter {
+  flex: none;
+  /* 整条放得下时主按钮文案不折行（折行会把矮条又撑高）；
+     ≤900px 媒体查询里恢复 normal 折行 */
+  white-space: nowrap;
+}
+
+.board3d-overlay :is(button, a) {
+  pointer-events: auto;
+}
+
+/* 3D 里小镇本身就是画面，不再显示「小镇插画区」占位字 */
+.board3d-overlay .board-town {
+  display: none;
+}
+
+/* 画布下的文字状态行：全屏画布 z-index:0，它要浮在 3D 上才看得见；
+   奶油小胶囊底保证压在岛上也能读 */
+.board3d-status {
+  position: relative;
+  z-index: 1;
+  width: fit-content;
+  margin: var(--space-2) auto 0;
+  padding: var(--space-1) var(--space-4);
+  background: color-mix(in srgb, var(--color-surface) 80%, transparent);
+  border-radius: var(--radius-button);
+  font-size: var(--font-size-sm);
+  color: var(--color-muted);
+  text-align: center;
+}
+
+/* —— UI 迭代 R4（>900px）：吸底后条高必须恒定 ——
+   非 intro 阶段条里是「状态行 + 日志行」，日志原本整宽折到第二行
+   （条高 76 → 104），条一长高就会重新压住拟合带里的岛底。故桌面
+   改为同排：状态行定宽、日志行吃掉余宽、过长省略号（全文仍在
+   aria-live 日志语义里）。条高恒 76，底部栈恒 189px，与
+   CameraRig FIT_RECT.desktop 的 b=0.24 配套。回正钮右移一档，
+   避开拟合后岛核心的右下角，整颗落在浅滩水面上。 */
+@media (min-width: 901px) {
+  .board3d-overlay .board-log {
+    flex: 1 1 0;
+    order: 0;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+  }
+
+  .board3d-overlay:has(.board-log) .board-status {
+    flex: 0 1 auto;
+  }
+
+  .board3d-reset {
+    right: calc(-1 * var(--space-5));
+  }
+}
+
+@media (max-width: 900px) {
+  /* ≤900px 单列：overlay 回文档流——竖排布局顶条/bot 卡/底栏从上到下都可能
+     压满高度，吸底会被盖住「进入这一站」；排在状态行下、
+     浮在全屏画布之上（z-index:1），永远够得着 */
+  .board3d-overlay {
+    position: relative;
+    z-index: 1;
+    left: auto;
+    bottom: auto;
+    transform: none;
+    width: 100%;
+    max-width: none;
+    margin: var(--space-2) 0 0;
+    padding: var(--space-2) var(--space-3);
+    /* R1 的横排矮条只限桌面；窄屏回竖排整宽（R1 前行为） */
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .board3d-overlay .board-status {
+    text-align: center;
+  }
+
+  .board3d-overlay .board-enter {
+    white-space: normal;
+  }
+
+  /* 窄屏回文档流：回正钮回到条内静态排布，不再外挂 */
+  .board3d-reset {
+    position: static;
+  }
+
+  .board3d-overlay .board-log {
+    display: none; /* 竖屏 overlay 只留状态行和主按钮，log 走 Toast */
+  }
+}
+
+/* —— bot 小卡与圈序卡 —— */
+.bot-card {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border: 2px solid var(--color-line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
+  text-align: left;
+}
+
+.bot-card--thinking {
+  border-color: var(--color-primary);
+}
+
+.bot-card-avatar {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-min-size);
+  height: var(--tap-min-size);
+  border-radius: var(--radius-button);
+  background: var(--color-surface-dim);
+  font-size: var(--font-size-lg);
+}
+
+.bot-card-info {
+  min-width: 0;
+}
+
+.bot-card-name {
+  font-weight: var(--font-weight-bold);
+}
+
+.bot-card-personality {
+  margin-left: var(--space-2);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-muted);
+}
+
+.bot-card-line {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+
+.bot-card-thinking {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-bold);
+}
+
+.lap-card {
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border: 2px solid var(--color-line);
+  border-radius: var(--radius-card);
+  font-size: var(--font-size-sm);
+}
+
+.lap-card-lap {
+  font-weight: var(--font-weight-bold);
+}
+
+.lap-card-order {
+  color: var(--color-muted);
+  /* UI 迭代 R3：「Sprout→Steady→Zip→Tag」是无空格长串，在 190px 列里
+     放不下会整行溢出卡外甚至顶出屏幕右缘（基线截图实测）——
+     允许在任意位置折行，文案一字不改 */
+  overflow-wrap: anywhere;
+}
+

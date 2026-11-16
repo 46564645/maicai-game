@@ -1,0 +1,129 @@
+/* ==========================================================================
+   tokens.css —— 全项目唯一定义视觉 token 的地方
+   组件 CSS 只允许引用这里的变量，禁止裸色值 / 裸字号 / 裸圆角。
+
+   当前使用【ww 临时色板 · 待确认】（REQUIREMENTS §10 / PLAN 4.1.5）：
+   暖橙主色、黄=待付夹/提醒、蓝/薄荷/淡紫点缀、奶油底、墨色文字。
+   每个玩家一种颜色：你=暖橙、小稳=蓝、小冲=黄、小跟=薄荷；淡紫=AI 家长/强调。
+   ww 正式 UI 定稿后只改本文件即可整体换皮。
+
+   线框对齐（§10.0.1，Figma bRN84q0Qis3xckwXjScRbV，横屏画板 1280×800）：
+   - 卡片圆角 16px、弹窗 28px、按钮全圆角（pill）
+   - 选项按钮左侧圆形数字键徽标（1/2/3）
+
+   【灰阶回退参考 · 不再启用】（M1/M2 期间的默认灰阶，ww 换正式 UI 前可回退）：
+     --color-primary: #3d3d3d;  --color-bg: #f2f2f2;  --color-text: #1c1c1c;
+     --color-muted: #6b6b6b;    --color-line: #dee0db; --color-warning: #5a5a5a;
+     主按钮深灰底白字、次按钮白底深灰描边。
+
+   【备选】Figma 493:2 绿色系（ww 正式 UI 定稿后整体换皮用，现在不要启用）：
+     --color-primary: #46a171;   主绿
+     --color-bg:      #f1f7f0;   浅绿面板
+   ========================================================================== */
+
+:root {
+  /* —— 画板参考值（ww 线框 1280×800，仅作布局参照，不做硬缩）—— */
+  --stage-width: 1280px;
+  --stage-height: 800px;
+
+  /* —— 颜色（ww 临时色板【待确认】）—— */
+  --color-primary: #FF6B2C;        /* 暖橙·主色（主按钮底、强调） */
+  --color-primary-contrast: #ffffff;
+  --color-accent-yellow: #FFC93C;  /* 黄·待付夹/提醒 */
+  --color-blue: #5B7CFA;
+  --color-mint: #7ED9B5;
+  --color-purple: #B9A3F0;         /* 淡紫·AI 家长/强调 */
+  --color-bg: #FFF6EC;             /* 奶油底 */
+  --color-surface: #ffffff;        /* 卡片/面板 */
+  --color-surface-dim: #f7ede0;    /* 凹陷/槽位（奶油底上的浅暖灰） */
+  --color-text: #1E1E2A;           /* 墨色 */
+  --color-muted: #6b6572;          /* 次要文字 */
+  --color-line: #e8ddd0;           /* 分隔线 */
+  --color-line-strong: #cbbfae;    /* 强调描边 */
+  --color-warning: var(--color-accent-yellow); /* 待付夹=黄底墨字 */
+  --color-warning-contrast: var(--color-text);
+  --color-backdrop: rgba(30, 30, 42, 0.45); /* 弹窗遮罩 */
+  --color-focus: var(--color-text);           /* 焦点描边 */
+  --color-disabled: #c9c2b8;
+
+  /* —— 页面背景【ww M4.5.5】：奶油 → 浅蓝渐变（只派生现有色板，不改色板值）—— */
+  --gradient-page: linear-gradient(
+    180deg,
+    var(--color-bg) 0%,
+    color-mix(in srgb, var(--color-blue) 16%, var(--color-surface)) 100%
+  );
+
+  /* —— 玩家颜色【待确认】：你=橙 / 小稳=蓝 / 小冲=黄 / 小跟=薄荷 —— */
+  --player-you: var(--color-primary);
+  --player-steady: #5B7CFA;
+  --player-impulsive: #FFC93C;
+  --player-follower: #7ED9B5;
+
+  /* —— 字体 —— */
+  --font-family: "Noto Sans SC", "PingFang SC", system-ui, sans-serif;
+  --font-size-xs: 0.875rem;   /* 14px，仅辅助说明 */
+  --font-size-sm: 1rem;       /* 16px */
+  --font-size-md: 1.25rem;    /* 20px，正文 ≥20px */
+  --font-size-lg: 1.5rem;     /* 24px，按钮/站名 */
+  --font-size-xl: 2rem;       /* 32px，小标题 */
+  --font-size-xxl: 3rem;      /* 48px，主标题 */
+  --font-weight-regular: 400;
+  --font-weight-bold: 700;
+  --line-height: 1.5;
+
+  /* —— 圆角（ww §10.0.1：卡片 16px、弹窗 28px、按钮全圆角）—— */
+  --radius-card: 16px;
+  --radius-modal: 28px;
+  --radius-button: 999px;
+  /* 旧名兼容：新代码请用上面三个；旧变量引用新变量，后续统一替换 */
+  --radius-sm: 10px;
+  --radius-md: var(--radius-card);
+  --radius-lg: var(--radius-card);
+  --radius-pill: var(--radius-button);
+
+  /* —— 间距 —— */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  /* —— 阴影 —— */
+  --shadow-sm: 0 1px 3px rgba(28, 28, 28, 0.12);
+  --shadow-md: 0 4px 12px rgba(28, 28, 28, 0.14);
+  --shadow-lg: 0 8px 28px rgba(28, 28, 28, 0.2);
+
+  /* —— 按钮（主按钮=主色底白字；次按钮白底主色描边）—— */
+  --button-primary-bg: var(--color-primary);
+  --button-primary-fg: var(--color-primary-contrast);
+  --button-secondary-bg: var(--color-surface);
+  --button-secondary-fg: var(--color-text);
+  --button-secondary-border: var(--color-primary);
+  --button-height: 56px;                     /* 按钮高（最小 48px 见 --tap-min-size） */
+  --button-min-height: var(--button-height); /* 旧名兼容 */
+  --tap-min-size: 48px;                      /* 一切可点目标 ≥48×48px */
+
+  /* —— 选项数字键徽标（G2/G4 线框：按钮左侧圆形 1/2/3）—— */
+  --key-hint-size: 28px;
+  --key-hint-bg: var(--color-primary);       /* 次按钮内：深灰底 */
+  --key-hint-fg: var(--color-surface);       /* 次按钮内：白字 */
+  --key-hint-bg-on-primary: var(--color-surface); /* 主按钮内反色：白底 */
+  --key-hint-fg-on-primary: var(--color-primary); /* 主按钮内反色：深灰字 */
+
+  /* —— 尺寸 —— */
+  --popup-sheet-height: 80vh; /* 竖屏底部抽屉最大高（上方留给 Toast 的安全区） */
+  --icon-size: 32px;
+  --coin-size: 28px;
+  --weather-wheel-size: 120px; /* 天气转盘直径 */
+  --weather-wheel-r: 44px;     /* 天气图标到盘心的距离 */
+  --weather-wheel-size-sm: 96px; /* 竖屏小转盘：给事件正文和选项让出高度 */
+  --weather-wheel-r-sm: 34px;
+
+  /* —— 动效（仅付钱/开饭/转盘占位演出用 CSS 动画）—— */
+  --motion-fast: 150ms;
+  --motion-med: 300ms;
+  --motion-slow: 900ms; /* 天气转盘转到位 */
+  --motion-ease: ease-out;
+}

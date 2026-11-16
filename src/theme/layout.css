@@ -1,0 +1,211 @@
+/* ==========================================================================
+   layout.css —— 横屏 / 竖屏布局（同一套组件，只靠媒体查询切换）
+   断点（REQUIREMENTS §10.2）：约 900px（横屏多列 → 单列）、约 640px（弹窗 →
+   底部抽屉）。横屏按 ww 线框 G1：顶条 / bot 左2右1 / 中央棋盘 / 底部真人区。
+   ========================================================================== */
+
+/* —— 通用页面骨架 —— */
+.app-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-5) var(--space-4);
+  /* 任何情况下不允许横向滚动（验收：390×844 竖屏无横向滚动） */
+  overflow-x: hidden;
+  width: 100%;
+}
+
+.app-main {
+  width: 100%;
+  max-width: 1100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+/* —— 游戏主界面（G1）—— */
+.game-screen {
+  width: 100%;
+  max-width: var(--stage-width);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.game-topbar {
+  /* 3D 画布 fixed 铺底（z-index:0），顶条等 2D UI 一律浮在 z-index:1 */
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.game-topbar-actions {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.game-layout {
+  display: grid;
+  width: 100%;
+  grid-template-columns: minmax(150px, 190px) 1fr minmax(150px, 190px);
+  grid-template-areas:
+    "left board right"
+    "bottom bottom bottom";
+  gap: var(--space-4);
+  align-items: stretch;
+}
+
+.game-left {
+  position: relative;
+  z-index: 1; /* 浮在全屏 3D 画布上 */
+  grid-area: left;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  justify-content: space-between;
+}
+
+.game-right {
+  position: relative;
+  z-index: 1;
+  grid-area: right;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  justify-content: space-between;
+}
+
+.game-board-area {
+  grid-area: board;
+  min-width: 0;
+  /* 3D 画布 fixed 铺底不算高度；「轮到你了」卡片（.board3d-overlay）
+     锚在本区底缘 —— 正好压在底栏上方而不盖住它（马教授 M4.5.6 反馈 A） */
+  position: relative;
+}
+
+.game-bottom {
+  position: relative;
+  z-index: 1;
+  grid-area: bottom;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+/* —— 8 站环路棋盘（上 ①②、右 ③④、下 ⑥⑤、左 ⑧⑦，中央为状态区）—— */
+.board {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: auto minmax(120px, 1fr) minmax(120px, 1fr) auto;
+  grid-template-areas:
+    ".  b1 b2 ."
+    "b8 cc cc b3"
+    "b7 cc cc b4"
+    ".  b6 b5 .";
+  gap: var(--space-3);
+  height: 100%;
+}
+
+.board-center {
+  grid-area: cc;
+}
+
+/* —— UI 迭代 R4（>900px 桌面）：整屏高 —— 游戏屏撑满视口高，底栏落到
+   屏幕真底部；棋盘区随之拉高，提示条（.board3d-overlay）锚在棋盘区
+   底缘 = 正好吸在底栏上方，屏幕中段不再有任何面板（用户反馈：
+   横条横在中间挡视野）。≤900px 单列/手机横屏不走这套（下方媒体
+   查询与 phone.css 各自管），故全部规则收进 min-width 断点。 —— */
+@media (min-width: 901px) {
+  .app-shell {
+    /* 底部栈每矮 1px，岛就多露 1px：壳下 padding 收一档（24 → 16） */
+    padding-bottom: var(--space-4);
+  }
+
+  .app-main {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .game-screen:not(.game-screen--phone-land) {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .game-screen:not(.game-screen--phone-land) .game-layout {
+    flex: 1 1 auto;
+    min-height: 0;
+    /* 第一行（左右列 + 棋盘区）吃掉全部剩余高度，第二行底栏自然吸底 */
+    grid-template-rows: minmax(0, 1fr) auto;
+    /* 行间隙收一档（16 → 8，列间隙不变）：底部栈再矮 8px */
+    row-gap: var(--space-2);
+  }
+}
+
+/* —— 竖屏（≤900px）：单列 —— 棋盘在上 → bot 横排 → 底部真人区 —— */
+@media (max-width: 900px) {
+  .game-layout {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "board"
+      "left"
+      "right"
+      "bottom";
+  }
+
+  .game-left,
+  .game-right {
+    flex-direction: row;
+    gap: var(--space-3);
+  }
+
+  .game-left > *,
+  .game-right > * {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .app-shell {
+    padding: var(--space-4) var(--space-3);
+  }
+}
+
+/* —— 小屏（≤640px）：棋盘压缩、站点弹窗改整宽底部抽屉 —— */
+@media (max-width: 640px) {
+  .app-shell {
+    padding: var(--space-3) var(--space-2);
+  }
+
+  .board {
+    grid-template-rows: auto auto auto auto;
+    gap: var(--space-2);
+  }
+
+  /* 提级（.app-shell 前缀）：本文件先于 hud.css 加载，裸 .popup-backdrop /
+     .popup 会被其居中 + 86vh 基线规则盖掉 */
+  .app-shell .popup-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .popup-backdrop > .popup {
+    width: 100%;
+    max-width: none;
+    max-height: var(--popup-sheet-height);
+    border-radius: var(--radius-modal) var(--radius-modal) 0 0;
+  }
+
+  .auto-panel .btn {
+    width: 100%;
+  }
+
+  .intro-title {
+    font-size: var(--font-size-xl);
+  }
+}

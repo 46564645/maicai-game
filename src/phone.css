@@ -1,0 +1,866 @@
+/* ==========================================================================
+   phone.css —— M4.5.6 手机布局（只用 tokens.css 变量）
+   手机只支持横屏：竖屏 → 「把手机横过来」全屏提示；横屏（874×402）
+   → 左 2/3 3D 岛 + 右竖栏（轮到你了 + 当前站要做的事）+ 左上小头像排
+   + 左下钱包/求助圆钮。由 usePhoneMode 判定，只作用于触屏小屏设备，
+   不影响电脑与平板。
+   ========================================================================== */
+
+:root {
+  /* 右竖栏宽：岛占左 66%（六到七成之间）
+     UI 迭代 R2：34% → 30% —— 874 宽下竖栏 297 → 262px，棋盘区
+     577 → 612px，岛随 fit-solve 同比放大。栏内 9b/9c 的紧凑排版
+     本就是按 ~190–250px 内容宽调的（见下方各条注释），262 栏宽
+     （内容 ~246px）仍在该区间内；safearea e2e 为验收门。 */
+  --rail-w: clamp(250px, 30%, 300px);
+}
+
+/* —— 竖屏提示层：手机慢慢转成横向的循环动画 —— */
+.rotate-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 100; /* 盖住一切（含弹窗/提示条） */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-5);
+  background: var(--gradient-page);
+}
+
+.rotate-svg {
+  width: min(52vw, 200px);
+  height: auto;
+  overflow: visible;
+}
+
+.rotate-phone {
+  transform-origin: 61px 56px;
+}
+
+.rotate-text {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rotate-phone {
+    /* 竖着 → 慢慢转成横向 → 停一停 → 淡出回到竖着再循环 */
+    animation: phone-turn 2.8s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* 不转：直接停在横向，孩子照做就行 */
+  .rotate-phone {
+    transform: rotate(90deg);
+  }
+}
+
+@keyframes phone-turn {
+  0% {
+    transform: rotate(0deg);
+    opacity: 1;
+  }
+  45% {
+    transform: rotate(90deg);
+    opacity: 1;
+  }
+  78% {
+    transform: rotate(90deg);
+    opacity: 1;
+  }
+  90% {
+    transform: rotate(90deg);
+    opacity: 0;
+  }
+  91% {
+    transform: rotate(0deg);
+    opacity: 0;
+  }
+  100% {
+    transform: rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* ==========================================================================
+   手机横屏（874×402）：右竖栏 + 左上头像排 + 左下圆钮
+   ========================================================================== */
+
+/* —— 主界面骨架：顶条/左右列/底栏全收起来，棋盘区铺满左 2/3 —— */
+.game-screen--phone-land .game-topbar,
+.game-screen--phone-land .game-left,
+.game-screen--phone-land .game-right,
+.game-screen--phone-land .game-bottom {
+  display: none;
+}
+
+.game-screen--phone-land .game-layout {
+  display: block;
+}
+
+.game-screen--phone-land .game-board-area {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: var(--rail-w);
+  z-index: 0;
+}
+
+/* 3D 画布只占左 2/3；右侧让给竖栏 */
+.game-screen--phone-land .board3d {
+  right: var(--rail-w);
+}
+
+/* 状态行并进右竖栏的「轮到你了」，这里不再重复显示 */
+.game-screen--phone-land .board3d-status {
+  display: none;
+}
+
+/* 「回默认视角」收成小岛右下角的小胶囊（左上头像排、左下圆钮
+   都占了，右下角是唯一空角） */
+.game-screen--phone-land .board3d-overlay {
+  position: fixed;
+  left: auto;
+  right: calc(var(--rail-w) + var(--space-2));
+  top: auto;
+  bottom: var(--space-2);
+  transform: none;
+  z-index: 6;
+  width: auto;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+/* 2D 兜底棋盘也限制在左区 */
+.game-screen--phone-land .board {
+  height: 100%;
+  padding: var(--space-2);
+  gap: var(--space-1);
+  grid-template-rows: auto 1fr 1fr auto;
+}
+
+.game-screen--phone-land .board-station {
+  min-height: 0;
+  padding: var(--space-1) var(--space-1);
+}
+
+/* —— 左上：小头像排（第几圈 + 3 个电脑人）—— */
+.phone-bots {
+  position: fixed;
+  top: var(--space-2);
+  left: var(--space-2);
+  right: calc(var(--rail-w) + 88px); /* 给「回默认视角」胶囊让位 */
+  z-index: 10;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.phone-lap {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min-size);
+  padding: 0 var(--space-3);
+  background: var(--color-surface);
+  border: 2px solid var(--color-line);
+  border-radius: var(--radius-button);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+.phone-bot-wrap {
+  position: relative;
+  flex: none;
+}
+
+.phone-bot {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--tap-min-size);
+  padding: 0 var(--space-2);
+  background: var(--color-surface);
+  border: 2px solid var(--color-line);
+  border-radius: var(--radius-button);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.phone-bot--on {
+  border-color: var(--color-primary);
+  border-width: 3px;
+}
+
+.phone-bot-avatar {
+  font-size: var(--font-size-md);
+}
+
+.phone-bot-coins {
+  font-weight: var(--font-weight-bold);
+}
+
+/* 点头像展开的详情卡（复用 BotCard） */
+.phone-bot-pop {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  left: 0;
+  z-index: 11;
+  width: 190px;
+}
+
+/* —— 右竖栏：轮到你了 + 当前要做的事 —— */
+.phone-rail {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: var(--rail-w);
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  background: color-mix(in srgb, var(--color-bg) 92%, var(--color-surface));
+  border-left: 2px solid var(--color-line);
+  overflow-y: auto;
+}
+
+.phone-turn {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface);
+  border: 2px solid var(--color-line-strong);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+}
+
+/* 竖栏里没有「小镇插画区」占位字 */
+.phone-turn .board-town {
+  display: none;
+}
+
+.phone-turn .board-status {
+  font-size: var(--font-size-md);
+}
+
+.phone-turn .board-log {
+  font-size: var(--font-size-xs);
+}
+
+.phone-turn .btn {
+  width: 100%;
+  min-height: var(--tap-min-size);
+  /* 「Go to this stop」在 ~185px 栏宽里折成两行时会顶出 48px 胶囊
+     （scrollHeight 52 > clientHeight 48，M4.5.9b 断言抓到）——
+     与栏内其它按钮同待遇：小一号字、收 padding、折行行高留足 */
+  min-width: 0;
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-md);
+  line-height: 1.25;
+}
+
+/* 触屏没有键盘：手机横屏下「Enter / 空格」一类按键提示不显示；
+   只藏带 --kbd 标记的真键盘提示，AI 家长规则说明等照显 */
+.game-screen--phone-land .btn-kbd-hint,
+.game-screen--phone-land .panel-keyhelp--kbd {
+  display: none;
+}
+
+/* 弹窗收进右竖栏：不再是盖住全屏的居中遮罩，而是栏内面板。
+   flex: 1 0 auto（可伸展不可收缩）：面板比栏高时背景框跟着内容
+   一起撑高——若允许收缩，弹窗会溢出到框外，栏尾 :last-child 的
+   安全区 margin 落在半空，底部按钮仍被屏下沿裁（M4.5.9） */
+.phone-rail .popup-backdrop {
+  position: static;
+  display: flex;
+  flex: 1 0 auto;
+  min-height: 0;
+  padding: 0;
+  background: none;
+}
+
+.phone-rail .popup {
+  width: 100%;
+  max-width: none;
+  max-height: none;
+  padding: var(--space-2) var(--space-3);
+  border: 2px solid var(--color-line-strong);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-md);
+  /* T0（M4.5.9 复验）：竖栏内不放 popup-rise 入场动画。hud.css 的
+     popup-rise 从 translateY(26px) 起步——浮动对话框无妨，但竖栏内
+     面板是流内布局，位移直接把底部按钮顶出安全区（实测：动画进行中
+     Done 下沿 390 > 383；动画结束回到 364）。慢设备/低帧率下这 0.3s
+     会被拉长到数秒，断言窗口内必现。桌面浮动弹窗的入场动画不受影响。 */
+  animation: none;
+}
+
+.phone-rail .popup-head {
+  margin-bottom: var(--space-2);
+}
+
+.phone-rail .popup-title {
+  font-size: var(--font-size-md);
+}
+
+/* 栏内面板内容收紧一档 */
+.game-screen--phone-land .panel-body {
+  gap: var(--space-2);
+}
+
+.game-screen--phone-land .panel-text,
+.game-screen--phone-land .panel-buysleft,
+.game-screen--phone-land .panel-selected {
+  font-size: var(--font-size-sm);
+}
+
+/* 菜市场 6 卡 / 小卖部材料卡：竖栏里排 2 行 3 列（小卖部照样 3 列紧凑），
+   图标、名称、价格完整可见，不再盖住整座岛 */
+.game-screen--phone-land .stall-grid,
+.game-screen--phone-land .store-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-1);
+}
+
+.game-screen--phone-land .stall-grid .card-view,
+.game-screen--phone-land .store-grid .card-view {
+  min-height: var(--tap-min-size);
+  padding: var(--space-1);
+  gap: var(--space-1);
+}
+
+.game-screen--phone-land .stall-grid .card-view-icon,
+.game-screen--phone-land .store-grid .card-view-icon {
+  font-size: var(--font-size-lg);
+}
+
+/* M4.5.9b：栏内卡名再小一档——6–7 字母的短名（Tomato/Carrot/Sticker）
+   整词一行放下；更长的名交给 &shy; 音节折行，不再靠硬断词塞下 */
+.game-screen--phone-land .stall-grid .card-view-name,
+.game-screen--phone-land .store-grid .card-view-name {
+  font-size: var(--font-size-xs);
+}
+
+.game-screen--phone-land .stall-grid .card-view-price,
+.game-screen--phone-land .stall-grid .card-view-tag,
+.game-screen--phone-land .store-grid .card-view-price,
+.game-screen--phone-land .store-grid .card-view-tag {
+  font-size: var(--font-size-xs);
+}
+
+/* 栏内按钮纵向排、全宽，拇指好够，≥48px */
+.game-screen--phone-land .panel-actions {
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.game-screen--phone-land .panel-actions .btn,
+.game-screen--phone-land .panel-actions .btn-speak-wrap {
+  width: 100%;
+  flex: none;
+  min-height: var(--tap-min-size);
+  white-space: normal;
+}
+
+/* M4.5.9c：栏内 panel-actions 按钮再收一档（默认 lg 24px + 0/32 padding，
+   「Use it now」在 ~189px 栏宽里折两行书顶出按钮边 sh>ch，9b 断言抓到）。
+   套在 .btn-speak-wrap 里的按钮必须能缩——上面 width:100% + flex:none
+   也命中 wrap 内的 .btn，把它顶满整行、把 🔊 挤出 wrap（wrap sw≈245>189）*/
+.game-screen--phone-land .panel-actions .btn {
+  min-width: 0;
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-md);
+  line-height: 1.25;
+}
+
+.game-screen--phone-land .panel-actions .btn-speak-wrap > .btn {
+  width: auto;
+  flex: 1 1 0;
+}
+
+/* 栏内 panel-body 的独立主按钮（「Draw a recipe card」「Pay bus fare」，
+   常带 🔊 套在 .btn-speak-wrap 里）——btn 默认 nowrap，长文案在 ~185px
+   栏宽里横向顶出按钮边界（sw>cw，M4.5.9b 断言抓到）。允许折行 +
+   收 padding/字号，与栏内其它按钮同待遇。只选直接子级，
+   不动 panel-body 里嵌套的 .panel-actions（ParentPanel 图卡行）。 */
+.game-screen--phone-land .panel-body > .btn,
+.game-screen--phone-land .panel-body > .btn-speak-wrap > .btn {
+  min-width: 0;
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-md);
+  line-height: 1.25;
+  white-space: normal;
+}
+
+/* M4.5.9c：AI 家长站图卡在 ~189px 栏宽里排 3 列只剩 ~51px/张，
+   48px 大图标直接横溢出卡面（sw>cw，M4.5.9b 断言抓到）——
+   同竖屏 @640px 方案：改单列横排卡（图标+名字一行、左对齐），
+   卡片自然堆高、栏内滚动即可 */
+.game-screen--phone-land .parent-options {
+  grid-template-columns: 1fr;
+  gap: var(--space-2);
+}
+
+.game-screen--phone-land .parent-options .card-view {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--tap-min-size);
+  padding: var(--space-1) var(--space-2);
+  text-align: left;
+}
+
+.game-screen--phone-land .parent-options .card-view-icon {
+  flex: none;
+  font-size: var(--font-size-md);
+  line-height: 1.2;
+}
+
+.game-screen--phone-land .parent-options .card-view-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--font-size-md);
+  line-height: 1.25;
+}
+
+/* 提议气泡收进栏宽 */
+.game-screen--phone-land .speech-bubble {
+  width: 100%;
+  min-width: 0;
+  align-self: stretch;
+}
+
+.game-screen--phone-land .speech-bubble::before {
+  display: none;
+}
+
+.game-screen--phone-land .speech-bubble-actions {
+  flex-direction: column;
+}
+
+/* —— 左下：钱包（常显币数）+ 求助牌 圆钮 —— */
+.phone-quick {
+  position: fixed;
+  left: var(--space-2);
+  bottom: var(--space-2);
+  z-index: 10;
+  display: flex;
+  gap: var(--space-2);
+}
+
+.phone-fab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-width: var(--button-height);
+  height: var(--button-height);
+  padding: 0 var(--space-3);
+  background: var(--color-surface);
+  border: 3px solid var(--color-primary);
+  border-radius: var(--radius-button);
+  box-shadow: var(--shadow-md);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.phone-fab--help {
+  border-color: var(--color-line-strong);
+  min-width: var(--button-height);
+  padding: 0;
+}
+
+.phone-fab-num {
+  font-size: var(--font-size-md);
+}
+
+/* 欠车费时钱包角上顶个黄色小圆点（钱是核心，不藏） */
+.phone-fab-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 var(--space-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-warning);
+  color: var(--color-warning-contrast);
+  border: 2px solid var(--color-line-strong);
+  border-radius: var(--radius-button);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+}
+
+/* —— 钱包/求助抽屉在手机横屏：从右侧整条拉出（盖住竖栏位）—— */
+.app-shell--phone-land > .popup-backdrop {
+  justify-content: flex-end;
+  padding: 0;
+}
+
+.app-shell--phone-land > .popup-backdrop > .popup {
+  width: var(--rail-w);
+  max-width: none;
+  max-height: none;
+  border-radius: var(--radius-card) 0 0 var(--radius-card);
+}
+
+.app-shell--phone-land .wallet-grid {
+  grid-template-columns: 1fr;
+}
+
+/* —— Toast：落在小岛区域中央偏下，不压圆钮也不进竖栏 —— */
+.app-shell--phone-land .toast-stack {
+  left: calc((100vw - var(--rail-w)) / 2);
+  top: auto;
+  bottom: calc(var(--button-height) + var(--space-5));
+  max-width: calc(100vw - var(--rail-w) - var(--space-6));
+}
+
+/* ==========================================================================
+   M4.5.6b：马教授横屏验收补丁（m45_6_extra.txt）
+   — 第 2 条：四周留白用 env(safe-area-inset-*)，不写死数值
+   — 第 4 条：触屏没有键盘，一切键盘提示不显示
+   — 第 5/7 条：长面板底部按钮不再吸住盖卡；小卖部卡 3 列紧凑
+   — 第 6/9 条：选角色 4 个一行全显示，不滑动
+   ========================================================================== */
+
+:root {
+  /* 真机读 env()；测试/截图用 addStyleTag 覆盖 --safe-* 模拟安全区
+     （如灵动岛左右 ~62px、上下 ~20px） */
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+}
+
+/* 竖屏转屏提示层：内容收进安全区 */
+.rotate-gate {
+  padding: calc(var(--space-4) + var(--safe-t))
+    calc(var(--space-4) + var(--safe-r))
+    calc(var(--space-4) + var(--safe-b))
+    calc(var(--space-4) + var(--safe-l));
+}
+
+/* 选人/开场等整页壳：横屏本来就矮，压缩 padding 并把安全区算进去 */
+.app-shell--phone-land {
+  padding: calc(var(--space-3) + var(--safe-t))
+    calc(var(--space-4) + var(--safe-r))
+    calc(var(--space-3) + var(--safe-b))
+    calc(var(--space-4) + var(--safe-l));
+}
+
+/* 左上头像排 / 左下圆钮 / 「回默认视角」胶囊：全部进安全区 */
+.phone-bots {
+  top: calc(var(--space-2) + var(--safe-t));
+  left: calc(var(--space-2) + var(--safe-l));
+}
+
+.phone-quick {
+  left: calc(var(--space-2) + var(--safe-l));
+  bottom: calc(var(--space-2) + var(--safe-b));
+}
+
+.game-screen--phone-land .board3d-overlay {
+  bottom: calc(var(--space-2) + var(--safe-b));
+}
+
+/* 右竖栏：外壳照样贴满右缘（背景到边），内容往安全区内收，
+   不被灵动岛、圆角或 Safari 地址栏挡。
+   M4.5.9（马教授验收不通过项）：底部安全区不能加在这条会滚动的
+   竖栏自身 padding 上——滚动区最末的 padding 不进滚动高度，
+   「走完这一站」仍会被屏下沿裁掉。改成栏内最后一块内容自带
+   下边距：弹窗、提议气泡、「轮到你了」谁收尾都留出 safe-b。 */
+.phone-rail {
+  padding: calc(var(--space-2) + var(--safe-t))
+    calc(var(--space-2) + var(--safe-r))
+    var(--space-2)
+    var(--space-2);
+}
+
+.phone-rail > :last-child {
+  margin-bottom: var(--safe-b);
+}
+
+/* 钱包/求助抽屉：右缘贴边，内容收进安全区 */
+.app-shell--phone-land > .popup-backdrop > .popup {
+  padding: calc(var(--space-5) + var(--safe-t))
+    calc(var(--space-5) + var(--safe-r))
+    calc(var(--space-5) + var(--safe-b))
+    var(--space-5);
+}
+
+/* Toast 在圆钮上方，再抬一个底部安全区 */
+.app-shell--phone-land .toast-stack {
+  bottom: calc(var(--button-height) + var(--space-5) + var(--safe-b));
+}
+
+/* 第 4 条：触屏没有键盘 ——「（Enter / 空格）」「←→ 选卡」提示和
+   选项上的数字键徽标一律不显示（选角色页同样没有键盘）；
+   只藏带 --kbd 标记的真键盘提示，AI 家长规则说明等照显 */
+.app-shell--phone-land .key-hint,
+.app-shell--phone-land .btn-kbd-hint,
+.app-shell--phone-land .panel-keyhelp--kbd {
+  display: none;
+}
+
+/* 第 5/7 条配套：面板随右竖栏整条滚动（popup-body 不单独开滚动区）。
+   M4.5.8b（ww 验收阻断项）：底部操作区仍在文档流（不吸底——吸底
+   会盖住图卡/选项的点击点，孩子按不到），靠 Game.tsx 的吸底滚动：
+   新决策出现时竖栏滚到底，foot 整颗落在 env(safe-area-inset-bottom)
+   之上的栏底（栏内末尾内容的 margin-bottom 带安全区，见上），
+   按钮完整露出、点击区 ≥48px；卡任何时候都不被按钮压住，可滚到看全。 */
+.game-screen--phone-land .popup-body {
+  overflow-y: visible;
+}
+
+.game-screen--phone-land .panel-foot {
+  position: static;
+  border-top: 2px solid var(--color-line);
+}
+
+/* 吸底区横排按钮里塞不下 🔊 朗读钮（会压住邻钮/探出栏缘），手机横屏
+   吸底区藏掉；按钮本身有 aria-label，桌面弹窗朗读钮照常 */
+.game-screen--phone-land .panel-foot .btn-speak {
+  display: none;
+}
+
+/* 吸底区要矮：栏内动作钮横排平分一行（≥48px 高、文字可折行），
+   不再纵向叠三层把滚动区吃掉；「走完这一站」仍独占一行全宽。
+   用 grid 等分（每钮一列 1fr），不用 flex —— 嵌套 .btn-speak-wrap
+   里再套 .btn 会让 flex 等分算出不均匀宽度 */
+.game-screen--phone-land .panel-foot .panel-actions {
+  display: grid;
+  grid-auto-flow: column;
+  /* minmax(0,1fr)：1fr 的 auto 下限会让事件站长文案把列撑出栏宽，
+     按钮溢出屏幕外按不到 */
+  grid-auto-columns: minmax(0, 1fr);
+}
+
+.game-screen--phone-land .panel-foot .panel-actions .btn,
+.game-screen--phone-land .panel-foot .panel-actions .btn-speak-wrap {
+  width: auto;
+  min-width: 0;
+}
+
+/* 等分后每格 ~80px：收 padding + 字号降一档，让「Maybe later」等文字
+   折行也呆在按钮边框内，不溢出。flex: 1 1 0 是给 .btn-speak-wrap 里的
+   .btn 用——栏内旧规则把它设成 flex:none 按内容撑开，长文案（事件站
+   选项）会顶穿 wrap 溢出屏幕。
+   M4.5.9c：再降一档到 sm（与旁边 .panel-foot > .btn 一致）——~87px
+   格子里「Done with this stop」在 20px 下折 4 行会顶出按钮下缘
+   （sh>ch，M4.5.9b 断言抓到）；16px 两行内放下，折行也给足行高。 */
+.game-screen--phone-land .panel-foot .panel-actions .btn {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-sm);
+  line-height: 1.25;
+}
+
+/* M4.5.9b：菜市场三个操作钮改两行（与小卖部一致）——
+   第一行整宽「Buy (N coins)」胶囊；第二行「Maybe later」「Skip」
+   左右并排，各 ≥48px。 --lead 只挂在菜市场那组按钮上 */
+.game-screen--phone-land .panel-foot .panel-actions--lead {
+  grid-auto-flow: row;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* 第一枚（Buy，可能套在 .btn-speak-wrap 里）独占整行 */
+.game-screen--phone-land .panel-foot .panel-actions--lead > :first-child {
+  grid-column: 1 / -1;
+}
+
+/* M4.5.9：不占 .panel-actions 格位的独立底钮（如「Done with this stop」
+   「走完这一站」是 .panel-foot 的直接子按钮）——btn 默认 nowrap +
+   flex item min-width:auto ≈ 300px min-content，在 ~190px 栏宽里
+   会被屏幕右缘整颗裁掉。允许折行 + 收 padding，宽度随面板收缩。 */
+.game-screen--phone-land .panel-foot > .btn {
+  min-width: 0;
+  padding: 0 var(--space-2);
+  font-size: var(--font-size-sm);
+  white-space: normal;
+}
+
+/* M4.5.9b：栏内卡名不从单词中间硬断（旧 break-word 断出「Carro t」
+   「Ginge r」，必须从验收里消失）。keep-all 不拆词、不自动断词；
+   只有 CardView 按音节插入的软连字符 &shy; 允许折行——放不下的
+   长名折成两行（Mush-room、Cucum-ber、Marsh-mallow），放得下时
+   &shy; 不可见、名字完整一行。 */
+.game-screen--phone-land .card-view-name {
+  align-self: stretch;
+  min-width: 0;
+  word-break: keep-all;
+  hyphens: manual;
+  overflow-wrap: normal;
+}
+
+.phone-rail {
+  scroll-padding-bottom: calc(var(--button-height) * 3 + var(--safe-b));
+  scroll-padding-top: calc(var(--button-height) * 2 + var(--safe-t));
+}
+
+/* 第 6/9 条：选角色 4 个一行全显示，不滑动不裁切（402px 高放得下） */
+.app-shell--phone-land .intro-shell {
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-2);
+}
+
+.app-shell--phone-land .intro-title {
+  font-size: var(--font-size-lg);
+}
+
+.app-shell--phone-land .intro-tagline {
+  font-size: var(--font-size-md);
+}
+
+.app-shell--phone-land .char-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  max-width: none;
+  gap: var(--space-2);
+}
+
+.app-shell--phone-land .char-grid .card-view {
+  padding: var(--space-2) var(--space-1);
+  gap: var(--space-1);
+}
+
+.app-shell--phone-land .char-grid .card-view-icon {
+  font-size: var(--font-size-xl);
+}
+
+/* ==========================================================================
+   M4.5.9 开饭页 / 感想页 横屏一屏显示（ww 已定 2026-11-13 16:12）
+   — 开饭页：4 个盘子排成一行、盘图约 72px，每卡三行（名字/菜名/结局）；
+     「Still missing after lap 3」这类小字手机上不显示；
+     底部按钮不滚动就能看到（app-shell padding 已含安全区）
+   — 感想页：6 个选项 2 列 × 3 行 + 标题一屏全显示，按钮 ≥48px
+   M4.5.9c（2026-11-13 17:09）：选完后感想改 2×2 卡片 + 小字 + Play again，
+     一屏全显示不与卡片重叠
+   ========================================================================== */
+
+/* 开饭页/感想页内容再紧一档：402px − 上下安全区 40px − 壳 padding
+   里要把 标题+内容+按钮 全放进一屏（按钮不滚动就要能看到） */
+.app-shell--phone-land .intro-shell[data-testid='screen-feast'],
+.app-shell--phone-land .intro-shell[data-testid='screen-reflection'] {
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
+}
+
+/* —— 开饭页 —— */
+.app-shell--phone-land .feast-table {
+  /* 盖过竖屏媒体查询的 2×2：横屏一行 4 个盘子 */
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+  padding: var(--space-2);
+}
+
+.app-shell--phone-land .plate-card {
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-1);
+}
+
+.app-shell--phone-land .plate-disc {
+  width: 72px;
+  height: 72px;
+}
+
+.app-shell--phone-land .plate-note {
+  /* 「Still missing after lap 3」这类小字手机上不显示 */
+  display: none;
+}
+
+.app-shell--phone-land .feast-actions {
+  /* 盖过竖屏媒体查询的纵向全宽：两个按钮并排一行 */
+  flex-direction: row;
+  max-width: 640px;
+}
+
+.app-shell--phone-land .feast-actions .btn,
+.app-shell--phone-land .feast-actions .btn-speak-wrap {
+  width: auto;
+  flex: 1 1 auto;
+  min-height: var(--tap-min-size);
+}
+
+/* —— 感想页 —— */
+/* M4.5.9c（ww 定，马教授提出）：选完后 4 个人的感想排成 2 列 2 行卡片
+   （头像 + 名字 + 一句话最多两行），下面一行小字「Everyone has shared」，
+   再往下「Play again」——874×402 一屏全显示。旧的 max-height:72px 把
+   伙伴感想锁在小框里、小字还超出屏底，去掉。 */
+.app-shell--phone-land .reflection-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  max-width: 640px;
+  max-height: none;
+  overflow: visible;
+}
+
+.app-shell--phone-land .reflection-card {
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+}
+
+.app-shell--phone-land .reflection-avatar {
+  font-size: var(--font-size-md);
+}
+
+.app-shell--phone-land .reflection-text {
+  font-size: var(--font-size-sm);
+  line-height: 1.25;
+}
+
+/* 「Waiting for friends…」等待行横跨两列，不占格子 */
+.app-shell--phone-land .reflection-line {
+  grid-column: 1 / -1;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+}
+
+.app-shell--phone-land .reflection-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  max-width: 640px;
+}
+
+.app-shell--phone-land .reflection-options .btn {
+  min-height: var(--tap-min-size);
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-md);
+  line-height: 1.25;
+}
+
+/* 「Write your own…」展开后的输入行占满两列 */
+.app-shell--phone-land .reflection-write {
+  grid-column: 1 / -1;
+  gap: var(--space-2);
+}
+
+.app-shell--phone-land .reflection-write .parent-input {
+  min-height: var(--tap-min-size);
+}

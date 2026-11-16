@@ -1,0 +1,130 @@
+/* base.css —— 全局基础样式，只用 tokens.css 的变量 */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height);
+  color: var(--color-text);
+  background: var(--color-bg); /* 不支持 color-mix 的旧浏览器回退纯色奶油 */
+  background: var(--gradient-page) fixed;
+  -webkit-font-smoothing: antialiased;
+  /* 触屏防双击缩放误触 */
+  touch-action: manipulation;
+}
+
+h1, h2, h3, p {
+  margin: 0;
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  min-width: var(--tap-min-size);
+  min-height: var(--tap-min-size);
+}
+
+button:disabled {
+  cursor: default;
+  color: var(--color-disabled);
+}
+
+/* 键盘焦点：粗描边、清晰可见 */
+:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* 悬停效果只在「可悬停 + 精细指针」设备上启用，避免触屏粘滞 */
+@media (hover: hover) and (pointer: fine) {
+  button:not(:disabled):hover {
+    filter: brightness(0.94);
+  }
+}
+
+/* 尊重减少动效偏好 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* —— 可复用按钮（ww 线框 §10.0.1：全圆角、56px 高、选项左侧数字键徽标）—— */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  min-height: var(--button-height);
+  /* 短按钮文字不折行；长文案的容器（auto-panel / reflection-options）单独放开 */
+  white-space: nowrap;
+  padding: 0 var(--space-6);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  border: 2px solid transparent;
+  border-radius: var(--radius-button);
+}
+
+.btn--primary {
+  color: var(--button-primary-fg);
+  background: var(--button-primary-bg);
+  box-shadow: var(--shadow-md);
+}
+
+.btn--secondary {
+  color: var(--button-secondary-fg);
+  background: var(--button-secondary-bg);
+  border-color: var(--button-secondary-border);
+}
+
+.btn:disabled {
+  color: var(--color-disabled);
+  background: var(--color-surface-dim);
+  border-color: var(--color-line);
+  box-shadow: none;
+}
+
+/* 选项左侧的数字键徽标：提示可按 1/2/3 直接选（G2/G4 线框） */
+.key-hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: var(--key-hint-size);
+  height: var(--key-hint-size);
+  border-radius: var(--radius-button);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  background: var(--key-hint-bg);
+  color: var(--key-hint-fg);
+}
+
+/* 主按钮内徽标反色（白底深灰字） */
+.btn--primary .key-hint {
+  background: var(--key-hint-bg-on-primary);
+  color: var(--key-hint-fg-on-primary);
+}

@@ -1,0 +1,352 @@
+export default function Component8() {
+  return (
+    <div className="bg-white relative size-full" data-node-id="493:2" data-name="游戏流程｜《一起去买菜》8站环路">
+      <div className="absolute bg-[#46a171] h-[64px] left-[100px] rounded-[4px] top-[88px] w-[8px]" data-node-id="493:3" data-name="Rectangle" />
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[128px] text-[#1c1c1c] text-[40px] top-[82px] w-[2200px]" data-node-id="493:4">
+        《一起去买菜》｜多人财商桌游流程
+      </p>
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Regular'] font-normal leading-[normal] left-[128px] text-[#6b6b6b] text-[18px] top-[152px] w-[2300px]" data-node-id="493:5">
+        4 人一桌 · 一至三年级 · 约 40 分钟 · 每人起始 12 币，钱一样多 · 最后一起做成一桌饭
+      </p>
+      <p className="-translate-x-full [word-break:break-word] absolute font-['Noto_Sans_SC:Regular'] font-normal leading-[normal] left-[3100px] text-[#6b6b6b] text-[14px] text-right top-[96px] w-[1000px]" data-node-id="493:6">
+        第一版试玩原型 · 数字待验证
+      </p>
+      <div className="absolute bg-[#dee0db] h-[2px] left-[100px] top-[214px] w-[3000px]" data-node-id="493:7" data-name="Rectangle" />
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[100px] text-[#46a171] text-[16px] top-[248px] w-[1600px]" data-node-id="493:8">
+        01 / 开局：所有人拿一样多的钱，规则全部公开
+      </p>
+      <div className="absolute bg-[#f1f7f0] h-[110px] left-[100px] rounded-[18px] top-[286px] w-[700px]" data-node-id="493:9" data-name="Rectangle" />
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[126px] text-[#46a171] text-[34px] top-[304px] w-[180px]" data-node-id="493:10">
+        12 币
+      </p>
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Medium'] font-medium leading-[normal] left-[270px] text-[#1c1c1c] text-[15px] top-[312px] w-[500px]" data-node-id="493:11">
+        每人起始代币
+      </p>
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Regular'] font-normal leading-[normal] left-[270px] text-[#6b6b6b] text-[13px] top-[340px] w-[500px]" data-node-id="493:12">
+        四个人完全一样
+      </p>
+      <div className="absolute bg-[#f1f7f0] h-[110px] left-[840px] rounded-[18px] top-[286px] w-[700px]" data-node-id="493:13" data-name="Rectangle" />
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[866px] text-[#46a171] text-[34px] top-[304px] w-[180px]" data-node-id="493:14">
+        6 币
+      </p>
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Medium'] font-medium leading-[normal] left-[1010px] text-[#1c1c1c] text-[15px] top-[312px] w-[500px]" data-node-id="493:15">
+        每张菜谱总价
+      </p>
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Regular'] font-normal leading-[normal] left-[1010px] text-[#6b6b6b] text-[13px] top-[340px] w-[500px]" data-node-id="493:16">
+        四道菜价格相同，保证公平
+      </p>
+      <div className="absolute bg-[#f1f7f0] h-[110px] left-[1580px] rounded-[18px] top-[286px] w-[700px]" data-node-id="493:17" data-name="Rectangle" />
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[1606px] text-[#46a171] text-[34px] top-[304px] w-[180px]" data-node-id="493:18">
+        2 币
+      </p>
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Medium'] font-medium leading-[normal] left-[1750px] text-[#1c1c1c] text-[15px] top-[312px] w-[500px]" data-node-id="493:19">
+        公交费（开局公布）
+      </p>
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Regular'] font-normal leading-[normal] left-[1750px] text-[#6b6b6b] text-[13px] top-[340px] w-[500px]" data-node-id="493:20">
+        统一在公交站扣
+      </p>
+      <div className="absolute bg-[#f1f7f0] h-[110px] left-[2320px] rounded-[18px] top-[286px] w-[700px]" data-node-id="493:21" data-name="Rectangle" />
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[2346px] text-[#46a171] text-[34px] top-[304px] w-[180px]" data-node-id="493:22">
+        4 币
+      </p>
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Medium'] font-medium leading-[normal] left-[2490px] text-[#1c1c1c] text-[15px] top-[312px] w-[500px]" data-node-id="493:23">
+        自由安排的钱
+      </p>
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Regular'] font-normal leading-[normal] left-[2490px] text-[#6b6b6b] text-[13px] top-[340px] w-[500px]" data-node-id="493:24">
+        买诱惑品，或应对意外
+      </p>
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[100px] text-[#46a171] text-[16px] top-[442px] w-[2000px]" data-node-id="493:25">
+        02 / 一局的 8 个站点（每到一站，从不同的孩子开始）
+      </p>
+      <div className="absolute bg-white border border-[#d6d9d4] border-solid h-[290px] left-[100px] overflow-clip rounded-[22px] top-[482px] w-[340px]" data-node-id="493:26" data-name="Frame">
+        <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[23px] text-[#46a171] text-[13px] top-[19px] w-[120px]" data-node-id="493:27">
+          01
+        </p>
+        <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[23px] text-[#1c1c1c] text-[19px] top-[41px] w-[292px]" data-node-id="493:28">
+          抽任务卡
+        </p>
+        <div className="absolute bg-[#46a171] h-[3px] left-[23px] rounded-[2px] top-[81px] w-[40px]" data-node-id="493:29" data-name="Rectangle" />
+        <div className="[word-break:break-word] absolute font-['Noto_Sans_SC:Regular'] font-normal leading-[0] left-[23px] text-[#3d3d3d] text-[13px] top-[101px] w-[292px]" data-node-id="493:30">
+          <p className="leading-[22px] mb-0">· 抽一张菜谱卡，如番茄炒蛋</p>
+          <p className="leading-[22px] mb-0">· 卡上列出要买的材料</p>
+          <p className="leading-[22px] mb-0">· 每张菜谱总价都是 6 币</p>
+          <p className="leading-[22px]">· 买到一样就插进卡里</p>
+        </div>
+        <div className="absolute bg-[#f1f7f0] content-stretch flex items-start left-[23px] overflow-clip px-[14px] py-[5px] rounded-[14px] top-[223px]" data-node-id="493:31" data-name="Frame">
+          <p className="[word-break:break-word] font-['Noto_Sans_SC:Medium'] font-medium leading-[normal] relative shrink-0 text-[#46a171] text-[12px] whitespace-nowrap" data-node-id="493:32">
+            练 · 记住目标
+          </p>
+        </div>
+      </div>
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[449px] text-[#46a171] text-[18px] top-[540px] w-[22px]" data-node-id="493:33">
+        →
+      </p>
+      <div className="absolute bg-white border border-[#d6d9d4] border-solid h-[290px] left-[480px] overflow-clip rounded-[22px] top-[482px] w-[340px]" data-node-id="493:34" data-name="Frame">
+        <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[23px] text-[#46a171] text-[13px] top-[19px] w-[120px]" data-node-id="493:35">
+          02
+        </p>
+        <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[23px] text-[#1c1c1c] text-[19px] top-[41px] w-[292px]" data-node-id="493:36">
+          菜市场摊位
+        </p>
+        <div className="absolute bg-[#46a171] h-[3px] left-[23px] rounded-[2px] top-[81px] w-[40px]" data-node-id="493:37" data-name="Rectangle" />
+        <div className="[word-break:break-word] absolute font-['Noto_Sans_SC:Regular'] font-normal leading-[0] left-[23px] text-[#3d3d3d] text-[13px] top-[101px] w-[292px]" data-node-id="493:38">
+          <p className="leading-[22px] mb-0">· 翻开 6 张卡：材料＋诱惑品混在一起</p>
+          <p className="leading-[22px] mb-0">· 贴纸 2 币、棉花糖 1 币、冰棍 1 币</p>
+          <p className="leading-[22px] mb-0">· 买、放进「先等等」夹，或不买</p>
+          <p className="leading-[22px]">· 不找 AI，也不用解释原因</p>
+        </div>
+        <div className="absolute bg-[#f1f7f0] content-stretch flex items-start left-[23px] overflow-clip px-[14px] py-[5px] rounded-[14px] top-[223px]" data-node-id="493:39" data-name="Frame">
+          <p className="[word-break:break-word] font-['Noto_Sans_SC:Medium'] font-medium leading-[normal] relative shrink-0 text-[#46a171] text-[12px] whitespace-nowrap" data-node-id="493:40">
+            练 · 觉察消费冲动
+          </p>
+        </div>
+      </div>
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[829px] text-[#46a171] text-[18px] top-[540px] w-[22px]" data-node-id="493:41">
+        →
+      </p>
+      <div className="absolute bg-white border border-[#d6d9d4] border-solid h-[290px] left-[860px] overflow-clip rounded-[22px] top-[482px] w-[340px]" data-node-id="493:42" data-name="Frame">
+        <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[23px] text-[#46a171] text-[13px] top-[19px] w-[120px]" data-node-id="493:43">
+          03
+        </p>
+        <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[23px] text-[#1c1c1c] text-[19px] top-[41px] w-[292px]" data-node-id="493:44">
+          伙伴站
+        </p>
+        <div className="absolute bg-[#46a171] h-[3px] left-[23px] rounded-[2px] top-[81px] w-[40px]" data-node-id="493:45" data-name="Rectangle" />
+        <div className="[word-break:break-word] absolute font-['Noto_Sans_SC:Regular'] font-normal leading-[0] left-[23px] text-[#3d3d3d] text-[13px] top-[101px] w-[292px]" data-node-id="493:46">
+          <p className="leading-[22px] mb-0">· 亮出多余的「赠品菜」，一换一</p>
+          <p className="leading-[22px] mb-0">· 翻邀请卡：2 人一起买冰棍每人 1 币</p>
+          <p className="leading-[22px] mb-0">· 别人都买时，判断自己要不要</p>
+          <p className="leading-[22px]">· 不能借钱，也不能送钱</p>
+        </div>
+        <div className="absolute bg-[#f1f7f0] content-stretch flex items-start left-[23px] overflow-clip px-[14px] py-[5px] rounded-[14px] top-[223px]" data-node-id="493:47" data-name="Frame">
+          <p className="[word-break:break-word] font-['Noto_Sans_SC:Medium'] font-medium leading-[normal] relative shrink-0 text-[#46a171] text-[12px] whitespace-nowrap" data-node-id="493:48">
+            练 · 交换与分享信息
+          </p>
+        </div>
+      </div>
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[1209px] text-[#46a171] text-[18px] top-[540px] w-[22px]" data-node-id="493:49">
+        →
+      </p>
+      <div className="absolute bg-white border border-[#d6d9d4] border-solid h-[290px] left-[1240px] overflow-clip rounded-[22px] top-[482px] w-[340px]" data-node-id="493:50" data-name="Frame">
+        <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[23px] text-[#46a171] text-[13px] top-[19px] w-[120px]" data-node-id="493:51">
+          04
+        </p>
+        <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[23px] text-[#1c1c1c] text-[19px] top-[41px] w-[292px]" data-node-id="493:52">
+          公交站
+        </p>
+        <div className="absolute bg-[#46a171] h-[3px] left-[23px] rounded-[2px] top-[81px] w-[40px]" data-node-id="493:53" data-name="Rectangle" />
+        <div className="[word-break:break-word] absolute font-['Noto_Sans_SC:Regular'] font-normal leading-[0] left-[23px] text-[#3d3d3d] text-[13px] top-[101px] w-[292px]" data-node-id="493:54">
+          <p className="leading-[22px] mb-0">· 每人投 2 币，翻开自己的车票卡</p>
+          <p className="leading-[22px] mb-0">· 钱不够就夹上黄色「待付夹」</p>
+          <p className="leading-[22px] mb-0">· 之后有钱，先付车费</p>
+          <p className="leading-[22px]">· 这笔钱开局就说过，不是惩罚</p>
+        </div>
+        <div className="absolute bg-[#f1f7f0] content-stretch flex items-start left-[23px] overflow-clip px-[14px] py-[5px] rounded-[14px] top-[223px]" data-node-id="493:55" data-name="Frame">
+          <p className="[word-break:break-word] font-['Noto_Sans_SC:Medium'] font-medium leading-[normal] relative shrink-0 text-[#46a171] text-[12px] whitespace-nowrap" data-node-id="493:56">
+            练 · 区分必要与可选
+          </p>
+        </div>
+      </div>
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[1589px] text-[#46a171] text-[18px] top-[540px] w-[22px]" data-node-id="493:57">
+        →
+      </p>
+      <div className="absolute bg-white border border-[#d6d9d4] border-solid h-[290px] left-[1620px] overflow-clip rounded-[22px] top-[482px] w-[340px]" data-node-id="493:58" data-name="Frame">
+        <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[23px] text-[#46a171] text-[13px] top-[19px] w-[120px]" data-node-id="493:59">
+          05
+        </p>
+        <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[23px] text-[#1c1c1c] text-[19px] top-[41px] w-[292px]" data-node-id="493:60">
+          随机事件站
+        </p>
+        <div className="absolute bg-[#46a171] h-[3px] left-[23px] rounded-[2px] top-[81px] w-[40px]" data-node-id="493:61" data-name="Rectangle" />
+        <div className="[word-break:break-word] absolute font-['Noto_Sans_SC:Regular'] font-normal leading-[0] left-[23px] text-[#3d3d3d] text-[13px] top-[101px] w-[292px]" data-node-id="493:62">
+          <p className="leading-[22px] mb-0">· 转天气转盘，抽对应事件卡</p>
+          <p className="leading-[22px] mb-0">· 每张卡都有花钱和不花钱两种方案</p>
+          <p className="leading-[22px] mb-0">· 好事约占三分之一</p>
+          <p className="leading-[22px]">· 每人最多遇到 2 次花钱事件</p>
+        </div>
+        <div className="absolute bg-[#f1f7f0] content-stretch flex items-start left-[23px] overflow-clip px-[14px] py-[5px] rounded-[14px] top-[223px]" data-node-id="493:63" data-name="Frame">
+          <p className="[word-break:break-word] font-['Noto_Sans_SC:Medium'] font-medium leading-[normal] relative shrink-0 text-[#46a171] text-[12px] whitespace-nowrap" data-node-id="493:64">
+            练 · 为不确定留余地
+          </p>
+        </div>
+      </div>
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[1969px] text-[#46a171] text-[18px] top-[540px] w-[22px]" data-node-id="493:65">
+        →
+      </p>
+      <div className="absolute bg-white border border-[#d6d9d4] border-solid h-[290px] left-[2000px] overflow-clip rounded-[22px] top-[482px] w-[340px]" data-node-id="493:66" data-name="Frame">
+        <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[23px] text-[#46a171] text-[13px] top-[19px] w-[120px]" data-node-id="493:67">
+          06
+        </p>
+        <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[23px] text-[#1c1c1c] text-[19px] top-[41px] w-[292px]" data-node-id="493:68">
+          AI 家长站
+        </p>
+        <div className="absolute bg-[#46a171] h-[3px] left-[23px] rounded-[2px] top-[81px] w-[40px]" data-node-id="493:69" data-name="Rectangle" />
+        <div className="[word-break:break-word] absolute font-['Noto_Sans_SC:Regular'] font-normal leading-[0] left-[23px] text-[#3d3d3d] text-[13px] top-[101px] w-[292px]" data-node-id="493:70">
+          <p className="leading-[22px] mb-0">· 说清「要多少、买什么」→ 1 币</p>
+          <p className="leading-[22px] mb-0">· 再说清「钱去哪了、下次怎么做」→ 2 币</p>
+          <p className="leading-[22px] mb-0">· AI 一次只问一个问题，答不上就给图选</p>
+          <p className="leading-[22px]">· 每人每局一次，最多 2 币</p>
+        </div>
+        <div className="absolute bg-[#f1f7f0] content-stretch flex items-start left-[23px] overflow-clip px-[14px] py-[5px] rounded-[14px] top-[223px]" data-node-id="493:71" data-name="Frame">
+          <p className="[word-break:break-word] font-['Noto_Sans_SC:Medium'] font-medium leading-[normal] relative shrink-0 text-[#46a171] text-[12px] whitespace-nowrap" data-node-id="493:72">
+            练 · 表达需求与反思
+          </p>
+        </div>
+      </div>
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[2349px] text-[#46a171] text-[18px] top-[540px] w-[22px]" data-node-id="493:73">
+        →
+      </p>
+      <div className="absolute bg-white border border-[#d6d9d4] border-solid h-[290px] left-[2380px] overflow-clip rounded-[22px] top-[482px] w-[340px]" data-node-id="493:74" data-name="Frame">
+        <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[23px] text-[#46a171] text-[13px] top-[19px] w-[120px]" data-node-id="493:75">
+          07
+        </p>
+        <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[23px] text-[#1c1c1c] text-[19px] top-[41px] w-[292px]" data-node-id="493:76">
+          小卖部补买
+        </p>
+        <div className="absolute bg-[#46a171] h-[3px] left-[23px] rounded-[2px] top-[81px] w-[40px]" data-node-id="493:77" data-name="Rectangle" />
+        <div className="[word-break:break-word] absolute font-['Noto_Sans_SC:Regular'] font-normal leading-[0] left-[23px] text-[#3d3d3d] text-[13px] top-[101px] w-[292px]" data-node-id="493:78">
+          <p className="leading-[22px] mb-0">· 所有材料都能买到，但贵 1 币</p>
+          <p className="leading-[22px] mb-0">· 用刚补到的钱，把缺的菜补上</p>
+          <p className="leading-[22px] mb-0">· 补不齐就做简化版</p>
+          <p className="leading-[22px]">· 说清楚了，真的能补上</p>
+        </div>
+        <div className="absolute bg-[#f1f7f0] content-stretch flex items-start left-[23px] overflow-clip px-[14px] py-[5px] rounded-[14px] top-[223px]" data-node-id="493:79" data-name="Frame">
+          <p className="[word-break:break-word] font-['Noto_Sans_SC:Medium'] font-medium leading-[normal] relative shrink-0 text-[#46a171] text-[12px] whitespace-nowrap" data-node-id="493:80">
+            练 · 体验计划不周的代价
+          </p>
+        </div>
+      </div>
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[2729px] text-[#46a171] text-[18px] top-[540px] w-[22px]" data-node-id="493:81">
+        →
+      </p>
+      <div className="absolute bg-white border border-[#d6d9d4] border-solid h-[290px] left-[2760px] overflow-clip rounded-[22px] top-[482px] w-[340px]" data-node-id="493:82" data-name="Frame">
+        <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[23px] text-[#46a171] text-[13px] top-[19px] w-[120px]" data-node-id="493:83">
+          08
+        </p>
+        <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[23px] text-[#1c1c1c] text-[19px] top-[41px] w-[292px]" data-node-id="493:84">
+          回家一起做饭
+        </p>
+        <div className="absolute bg-[#46a171] h-[3px] left-[23px] rounded-[2px] top-[81px] w-[40px]" data-node-id="493:85" data-name="Rectangle" />
+        <div className="[word-break:break-word] absolute font-['Noto_Sans_SC:Regular'] font-normal leading-[0] left-[23px] text-[#3d3d3d] text-[13px] top-[101px] w-[292px]" data-node-id="493:86">
+          <p className="leading-[22px] mb-0">· 材料卡放进自己的盘子位</p>
+          <p className="leading-[22px] mb-0">· 4 个盘子齐了，锅盖打开、灯亮起</p>
+          <p className="leading-[22px] mb-0">· 菜不齐也能做简化版，一桌饭照样成</p>
+          <p className="leading-[22px]">· 每人说一个最满意的决定</p>
+        </div>
+        <div className="absolute bg-[#f1f7f0] content-stretch flex items-start left-[23px] overflow-clip px-[14px] py-[5px] rounded-[14px] top-[223px]" data-node-id="493:87" data-name="Frame">
+          <p className="[word-break:break-word] font-['Noto_Sans_SC:Medium'] font-medium leading-[normal] relative shrink-0 text-[#46a171] text-[12px] whitespace-nowrap" data-node-id="493:88">
+            练 · 看见自己决定的结果
+          </p>
+        </div>
+      </div>
+      <p className="-translate-x-1/2 [word-break:break-word] absolute font-['Noto_Sans_SC:Medium'] font-medium leading-[normal] left-[1600px] text-[#46a171] text-[15px] text-center top-[814px] w-[3000px] whitespace-pre-wrap" data-node-id="493:90">{`↺  回到 ①，进入第 2 圈；整局走 3 圈，第 3 圈结束一起开饭`}</p>
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[100px] text-[#46a171] text-[16px] top-[886px] w-[2200px]" data-node-id="493:91">
+        03 / ⑥ AI 家长站：说清楚，才补钱（每人每局一次，最多 2 币）
+      </p>
+      <div className="absolute bg-[#f1f7f0] h-[345px] left-[100px] rounded-[24px] top-[926px] w-[1000px]" data-node-id="493:92" data-name="Rectangle" />
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[132px] text-[#1c1c1c] text-[20px] top-[956px] w-[936px]" data-node-id="493:93">
+        两档补钱：看说清楚了什么
+      </p>
+      <div className="[word-break:break-word] absolute font-['Noto_Sans_SC:Regular'] font-normal leading-[0] left-[132px] text-[#3d3d3d] text-[14px] top-[1008px] w-[936px] whitespace-pre-wrap" data-node-id="493:94">
+        <p className="leading-[24px] mb-0">【1 币】</p>
+        <p className="leading-[24px] mb-0">① 要几个币　② 用来买什么</p>
+        <p className="leading-[24px] mb-0">​</p>
+        <p className="leading-[24px] mb-0">【2 币】</p>
+        <p className="leading-[24px] mb-0">① ② 之外，再说清：</p>
+        <p className="leading-[24px] mb-0">③ 之前的钱去了哪里　④ 下次想怎么做</p>
+        <p className="leading-[24px] mb-0">​</p>
+        <p className="leading-[24px] mb-0">看内容，不看口才：说话、指卡、举卡都算；</p>
+        <p className="leading-[24px]">AI 引导之后说出来的，同样算数。</p>
+      </div>
+      <div className="absolute bg-[#f1f7f0] h-[345px] left-[1140px] rounded-[24px] top-[926px] w-[1000px]" data-node-id="493:95" data-name="Rectangle" />
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[1172px] text-[#1c1c1c] text-[20px] top-[956px] w-[936px]" data-node-id="493:96">
+        AI 一次只问一个问题
+      </p>
+      <div className="[word-break:break-word] absolute font-['Noto_Sans_SC:Regular'] font-normal leading-[0] left-[1172px] text-[#3d3d3d] text-[14px] top-[1008px] w-[936px] whitespace-pre-wrap" data-node-id="493:97">
+        <p className="leading-[24px] mb-0">① 你想要几个币？</p>
+        <p className="leading-[24px] mb-0">{`　答不上 → 看菜谱卡：还差几样没买？`}</p>
+        <p className="leading-[24px] mb-0">​</p>
+        <p className="leading-[24px] mb-0">② 这些钱想买什么？</p>
+        <p className="leading-[24px] mb-0">{`　答不上 → 指一指卡片也可以`}</p>
+        <p className="leading-[24px] mb-0">​</p>
+        <p className="leading-[24px] mb-0">③ 刚才的钱用在哪里了？</p>
+        <p className="leading-[24px] mb-0">{`　答不上 → 展示他买过的卡`}</p>
+        <p className="leading-[24px] mb-0">​</p>
+        <p className="leading-[24px] mb-0">④ 下次去买菜想怎么安排？</p>
+        <p className="leading-[24px]">{`　答不上 → 三张图里选一张`}</p>
+      </div>
+      <div className="absolute bg-[#f1f7f0] h-[345px] left-[2180px] rounded-[24px] top-[926px] w-[1000px]" data-node-id="493:98" data-name="Rectangle" />
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[2212px] text-[#1c1c1c] text-[20px] top-[956px] w-[936px]" data-node-id="493:99">
+        示范对话与底线
+      </p>
+      <div className="[word-break:break-word] absolute font-['Noto_Sans_SC:Regular'] font-normal leading-[0] left-[2212px] text-[#3d3d3d] text-[14px] top-[1008px] w-[936px] whitespace-pre-wrap" data-node-id="493:100">
+        <p className="leading-[24px] mb-0">小禾：我要钱。</p>
+        <p className="leading-[24px] mb-0">AI：你想要几个币？</p>
+        <p className="leading-[24px] mb-0">小禾：差鸡蛋，要 3 个，我只有 1 个。</p>
+        <p className="leading-[24px] mb-0">AI：刚才的钱用在哪里了？</p>
+        <p className="leading-[24px] mb-0">小禾：买了贴纸，还一起买冰棍了。</p>
+        <p className="leading-[24px] mb-0">AI：下次想怎么安排？</p>
+        <p className="leading-[24px] mb-0">小禾：先买菜，再买贴纸。</p>
+        <p className="leading-[24px] mb-0">AI：好，给你 2 个币。</p>
+        <p className="leading-[24px] mb-0">​</p>
+        <p className="leading-[24px] mb-0">底线：不追问「为什么乱花钱」；不和别的孩子比；</p>
+        <p className="leading-[24px]">方案合规就必须同意。</p>
+      </div>
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[100px] text-[#46a171] text-[16px] top-[1386px] w-[2200px]" data-node-id="493:101">
+        04 / 失败与结算：有后果，但不淘汰
+      </p>
+      <div className="absolute bg-white border border-[#d6d9d4] border-solid h-[250px] left-[100px] rounded-[24px] top-[1426px] w-[1000px]" data-node-id="493:102" data-name="Rectangle" />
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[132px] text-[#1c1c1c] text-[20px] top-[1456px] w-[936px]" data-node-id="493:103">
+        三种结局，都会上桌
+      </p>
+      <div className="[word-break:break-word] absolute font-['Noto_Sans_SC:Regular'] font-normal leading-[0] left-[132px] text-[#3d3d3d] text-[14px] top-[1508px] w-[936px] whitespace-pre-wrap" data-node-id="493:104">
+        <p className="leading-[24px] mb-0">· 菜买齐 → 做完整版</p>
+        <p className="leading-[24px] mb-0">· 少一样材料 → 做简化版，照样能上桌</p>
+        <p className="leading-[24px] mb-0">· 第 3 圈还没买齐 → 放一块「下次补上」的剪影盘</p>
+        <p className="leading-[24px] mb-0">​</p>
+        <p className="leading-[24px] mb-0">锅盖照样打开，灯照样亮；区别只在孩子自己看得见：</p>
+        <p className="leading-[24px]">我这道菜是完整的、简单的，还是剪影。</p>
+      </div>
+      <div className="absolute bg-white border border-[#d6d9d4] border-solid h-[250px] left-[1140px] rounded-[24px] top-[1426px] w-[1000px]" data-node-id="493:105" data-name="Rectangle" />
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[1172px] text-[#1c1c1c] text-[20px] top-[1456px] w-[936px]" data-node-id="493:106">
+        三条不变的规则
+      </p>
+      <div className="[word-break:break-word] absolute font-['Noto_Sans_SC:Regular'] font-normal leading-[0] left-[1172px] text-[#3d3d3d] text-[14px] top-[1508px] w-[936px] whitespace-pre-wrap" data-node-id="493:107">
+        <p className="leading-[24px] mb-0">· 任何时候都不出局，每一站照常参加</p>
+        <p className="leading-[24px] mb-0">· 不能借别人的钱，老师也不直接补钱</p>
+        <p className="leading-[24px] mb-0">· 随时可以举「求助牌」，求助不扣分</p>
+        <p className="leading-[24px] mb-0">· 同伴能帮：给交换券、分享报价、陪着做小任务</p>
+        <p className="leading-[24px] mb-0">​</p>
+        <p className="leading-[24px]">但不能替别人付钱，也不能替别人做决定。</p>
+      </div>
+      <div className="absolute bg-white border border-[#d6d9d4] border-solid h-[250px] left-[2180px] rounded-[24px] top-[1426px] w-[1000px]" data-node-id="493:108" data-name="Rectangle" />
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Bold'] font-bold leading-[normal] left-[2212px] text-[#1c1c1c] text-[20px] top-[1456px] w-[936px]" data-node-id="493:109">
+        为什么失败要留余地
+      </p>
+      <div className="[word-break:break-word] absolute font-['Noto_Sans_SC:Regular'] font-normal leading-[0] left-[2212px] text-[#3d3d3d] text-[14px] top-[1508px] w-[936px] whitespace-pre-wrap" data-node-id="493:110">
+        <p className="leading-[24px] mb-0">· 一局的价值在第二局：看他有没有更早留出菜钱、</p>
+        <p className="leading-[24px] mb-0">{`　更早去找 AI`}</p>
+        <p className="leading-[24px] mb-0">· 不点名没买齐的孩子，分享只说「我自己的一个决定」</p>
+        <p className="leading-[24px]">· 带回家的只有一起做成一桌饭的照片，没有成绩单</p>
+      </div>
+      <p className="[word-break:break-word] absolute font-['Noto_Sans_SC:Regular'] font-normal leading-[normal] left-[100px] text-[#6b6b6b] text-[13px] top-[1720px] w-[1200px]" data-node-id="493:111">
+        《一起去买菜》｜实体桌游原型 v0
+      </p>
+      <p className="-translate-x-full [word-break:break-word] absolute font-['Noto_Sans_SC:Regular'] font-normal leading-[normal] left-[3100px] text-[#6b6b6b] text-[13px] text-right top-[1720px] w-[1000px]" data-node-id="493:112">
+        站点顺序、金额与 AI 分档均为待试玩参数
+      </p>
+    </div>
+  );
+}
+
+SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.
+1. Analyze the target codebase to identify: technology stack, styling approach, component patterns, and design tokens
+2. Convert React syntax to the target framework/library
+3. Transform all Tailwind classes to the target styling system while preserving exact visual design
+4. Follow the project's existing patterns and conventions
+DO NOT install any Tailwind as a dependency unless the user instructs you to do so.
+
+
+Node ids have been added to the code as data attributes, e.g. `data-node-id="1:2"`.
+
+The generated code contains image and SVG URL constants, e.g. const image = `${assetPathPrefix}/<asset file name>`, where assetPathPrefix is declared once at the top of the code and every asset URL interpolates it. These URLs are temporary download sources and expire after 7 days. Download each asset into the project with curl -L, then replace its URL in the generated code with a reference to the downloaded asset. Never use the temporary URLs as runtime image sources.

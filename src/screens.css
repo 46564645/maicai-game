@@ -1,0 +1,423 @@
+/* ==========================================================================
+   game.css —— M3 界面组件样式。只允许使用 tokens.css 的 CSS 变量；
+   禁止裸色值 / 裸字号 / 裸圆角（ww 正式 UI 来了一次换皮）。
+   ========================================================================== */
+
+
+/* —— 卡面（CardView）—— */
+.card-view {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-3);
+  background: var(--color-surface);
+  border: 2px solid var(--color-line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+}
+
+button.card-view--selected,
+.card-view--selected {
+  border-color: var(--color-primary);
+  border-width: 3px;
+  /* 「抬起」：选中的卡浮起来一点（ww M4.5.6b：菜市场/小卖部选中态一致） */
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .card-view {
+    transition:
+      transform var(--motion-fast) var(--motion-ease),
+      box-shadow var(--motion-fast) var(--motion-ease);
+  }
+}
+
+.card-view-icon {
+  font-size: var(--font-size-xxl);
+}
+
+.card-view-name {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+}
+
+.card-view-price {
+  font-size: var(--font-size-sm);
+  color: var(--color-muted);
+}
+
+.card-view-tag {
+  font-size: var(--font-size-xs);
+  color: var(--color-muted);
+  text-align: center;
+}
+
+/* 标签按「·」分段渲染：折行只发生在段间，
+   不会再出现「菜谱」/「里有」被拆开的尴尬断行 */
+.card-view-tag-part {
+  white-space: nowrap;
+}
+
+/* 「On my list」卡角小 ✓（ww M4.5.7a）：窄卡放不下长标签，
+   改成角上一个圆徽标 + 一行短词 */
+.card-view-mark {
+  position: absolute;
+  top: var(--space-1);
+  right: var(--space-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--key-hint-size);
+  height: var(--key-hint-size);
+  border-radius: var(--radius-button);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  background: var(--color-mint);
+  color: var(--color-text);
+  border: 2px solid var(--color-line-strong);
+}
+
+/* —— 角色选择 —— */
+.char-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 720px;
+}
+
+.intro-title--sm {
+  font-size: var(--font-size-xl);
+}
+
+/* —— 开饭长桌（G6：浅色桌面上 4 张盘子卡并排，竖屏 2×2）—— */
+.feast-table {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 900px;
+  padding: var(--space-4);
+  background: var(--color-surface-dim);
+  border-radius: var(--radius-modal);
+}
+
+.plate-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-3);
+  background: var(--color-surface);
+  border: 2px solid var(--color-line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
+}
+
+.plate-disc {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  border-radius: var(--radius-button);
+  font-size: var(--font-size-xl);
+}
+
+.plate-disc--full {
+  background: var(--color-mint);
+  border: 3px solid var(--color-line-strong);
+}
+
+.plate-disc--simple {
+  background: var(--color-surface-dim);
+  border: 3px solid var(--color-line-strong);
+}
+
+.plate-disc--shadow {
+  background: transparent;
+  border: 3px dashed var(--color-line-strong);
+  color: var(--color-muted);
+}
+
+.plate-name {
+  font-weight: var(--font-weight-bold);
+}
+
+.plate-dish {
+  font-size: var(--font-size-sm);
+}
+
+.plate-kind {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.plate-note {
+  font-size: var(--font-size-xs);
+  color: var(--color-muted);
+}
+
+.feast-actions {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+  max-width: 640px;
+}
+
+.feast-actions .btn,
+.feast-actions .btn-speak-wrap {
+  flex: 1 1 auto;
+}
+
+/* —— 「看看钱花到哪了」流水 —— */
+.ledger {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 560px;
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 2px solid var(--color-line);
+  border-radius: var(--radius-card);
+  text-align: left;
+}
+
+/* 不分内部滚动：所有分组逐条可见，明细才加得起来对上「最后还剩」
+   （马教授试玩反馈 B：尾部分组折在 55vh 滚动区外，看起来像对不上账） */
+.ledger-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.ledger-line {
+  font-size: var(--font-size-sm);
+}
+
+/* 这笔发生在第几圈：小字灰，同名两笔（如第 1、2 圈各买一次）一眼能分开 */
+.ledger-line-lap {
+  color: var(--color-muted);
+}
+
+.ledger-line--start,
+.ledger-line--left {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+}
+
+.ledger-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.ledger-group-title {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+}
+
+.ledger-group-total {
+  color: var(--color-muted);
+  font-weight: var(--font-weight-regular);
+}
+
+/* —— 我的篮子（圈末）—— */
+.basket-self {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 560px;
+}
+
+.basket-lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+  text-align: left;
+}
+
+.mini-chips {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.mini-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  background: var(--color-surface-dim);
+  border-radius: var(--radius-card);
+  font-size: var(--font-size-sm);
+}
+
+/* —— 其它屏幕 —— */
+.screen-note {
+  font-size: var(--font-size-sm);
+  color: var(--color-muted);
+}
+
+.basket-others {
+  width: 100%;
+  max-width: 480px;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  text-align: left;
+}
+
+.basket-others-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-muted);
+  margin-bottom: var(--space-2);
+}
+
+.basket-other-line {
+  font-size: var(--font-size-sm);
+}
+
+.reflection-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+  max-width: 560px;
+  max-height: 40vh;
+  overflow-y: auto;
+  text-align: left;
+}
+
+.reflection-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 560px;
+}
+
+.reflection-options .btn {
+  width: 100%;
+  justify-content: flex-start;
+  /* 预设感想文案较长，允许折行 */
+  white-space: normal;
+  text-align: left;
+}
+
+.reflection-write {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.reflection-line {
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+}
+
+.reflection-line--muted {
+  color: var(--color-muted);
+  border-style: dashed;
+}
+
+/* —— 感想卡（M4.5.9c）：角色小头像 + 名字 + 一句话（最多两行）—— */
+.reflection-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  text-align: left;
+}
+
+.reflection-avatar {
+  flex: none;
+  font-size: var(--font-size-lg);
+  line-height: 1;
+}
+
+.reflection-text {
+  min-width: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.reflection-name {
+  font-weight: var(--font-weight-bold);
+}
+
+/* 「Everyone has shared」：卡片下面一行小字（不再塞进列表滚动区） */
+.reflection-note {
+  font-size: var(--font-size-sm);
+  color: var(--color-muted);
+}
+
+.wallet-lines,
+.help-lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.wallet-line,
+.help-line {
+  font-size: var(--font-size-md);
+}
+
+.wallet-line--hint,
+.help-line--tip {
+  font-size: var(--font-size-sm);
+  color: var(--color-muted);
+}
+
+/* —— 竖屏补充 —— */
+@media (max-width: 900px) {
+  .char-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .feast-table {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .feast-actions {
+    flex-direction: column;
+  }
+
+  .feast-actions .btn,
+  .feast-actions .btn-speak-wrap {
+    width: 100%;
+    flex: none;
+  }
+
+  .game-bottom {
+    align-items: stretch;
+  }
+
+  .clip-chip {
+    flex: 1 1 0;
+  }
+}

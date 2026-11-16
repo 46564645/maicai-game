@@ -1,0 +1,257 @@
+{
+  "version": 1,
+  "status": "待确认",
+  "note": "全部卡牌内容均为占位，需 Thong / ww 确认。引擎只依赖结构化字段（id/type/价格/effect/keywords），不依赖文案。M4.5.8：显示用 name/text 已英文化（译名见 m45_en_names.txt），id 不变。",
+
+  "ingredients": [
+    { "id": "ing-tomato", "type": "ingredient", "name": "Tomato", "icon": "🍅", "marketPrice": 2, "status": "待确认" },
+    { "id": "ing-egg", "type": "ingredient", "name": "Egg", "icon": "🥚", "marketPrice": 3, "status": "待确认" },
+    { "id": "ing-scallion", "type": "ingredient", "name": "Green Onion", "icon": "🌿", "marketPrice": 1, "status": "待确认" },
+    { "id": "ing-greens", "type": "ingredient", "name": "Greens", "icon": "🥬", "marketPrice": 2, "status": "待确认" },
+    { "id": "ing-cucumber", "type": "ingredient", "name": "Cucumber", "icon": "🥒", "marketPrice": 2, "status": "待确认" },
+    { "id": "ing-potato", "type": "ingredient", "name": "Potato", "icon": "🥔", "marketPrice": 3, "status": "待确认" },
+    { "id": "ing-carrot", "type": "ingredient", "name": "Carrot", "icon": "🥕", "marketPrice": 1, "status": "待确认" },
+    { "id": "ing-tofu", "type": "ingredient", "name": "Tofu", "icon": "svg:tofu", "marketPrice": 2, "status": "待确认" },
+    { "id": "ing-mushroom", "type": "ingredient", "name": "Mushroom", "icon": "🍄", "marketPrice": 2, "status": "待确认" },
+    { "id": "ing-pork", "type": "ingredient", "name": "Pork", "icon": "🥩", "marketPrice": 3, "status": "待确认" },
+    { "id": "ing-fish", "type": "ingredient", "name": "Fish", "icon": "🐟", "marketPrice": 3, "status": "待确认" },
+    { "id": "ing-ginger", "type": "ingredient", "name": "Ginger", "icon": "🫚", "marketPrice": 1, "status": "待确认" },
+    { "id": "ing-garlic", "type": "ingredient", "name": "Garlic", "icon": "🧄", "marketPrice": 1, "status": "待确认" }
+  ],
+
+  "recipes": [
+    {
+      "id": "rec-tomato-egg", "type": "recipe", "name": "Tomato & Egg", "icon": "🍳",
+      "ingredientIds": ["ing-tomato", "ing-egg", "ing-scallion"],
+      "status": "待确认"
+    },
+    {
+      "id": "rec-veggie-stirfry", "type": "recipe", "name": "Veggie Stir-Fry", "icon": "🥗",
+      "ingredientIds": ["ing-greens", "ing-mushroom", "ing-carrot", "ing-garlic"],
+      "status": "待确认"
+    },
+    {
+      "id": "rec-potato-pork", "type": "recipe", "name": "Pork & Potatoes", "icon": "🍲",
+      "ingredientIds": ["ing-potato", "ing-pork"],
+      "status": "待确认"
+    },
+    {
+      "id": "rec-tofu-soup", "type": "recipe", "name": "Tofu & Greens Soup", "icon": "🍜",
+      "ingredientIds": ["ing-tofu", "ing-greens", "ing-scallion", "ing-ginger"],
+      "status": "待确认"
+    },
+    {
+      "id": "rec-braised-fish", "type": "recipe", "name": "Braised Fish", "icon": "🐠",
+      "ingredientIds": ["ing-fish", "ing-scallion", "ing-ginger", "ing-garlic"],
+      "status": "待确认"
+    },
+    {
+      "id": "rec-tomato-egg-2", "type": "recipe", "name": "Tomato & Egg", "icon": "🍅",
+      "ingredientIds": ["ing-tomato", "ing-egg", "ing-scallion"],
+      "status": "待确认"
+    }
+  ],
+
+  "temptations": [
+    { "id": "tmp-sticker", "type": "temptation", "name": "Sticker", "icon": "✨", "price": 2, "status": "待确认" },
+    { "id": "tmp-marshmallow", "type": "temptation", "name": "Marshmallow", "icon": "🍬", "price": 1, "status": "待确认" },
+    { "id": "tmp-popsicle", "type": "temptation", "name": "Popsicle", "icon": "🍦", "price": 1, "status": "待确认" },
+    { "id": "tmp-toy", "type": "temptation", "name": "Toy", "icon": "🧸", "price": 2, "status": "待确认" }
+  ],
+
+  "weather": [
+    { "id": "wth-sunny", "type": "weather", "name": "Sunny", "icon": "☀️", "status": "待确认" },
+    { "id": "wth-rainy", "type": "weather", "name": "Rainy", "icon": "🌧️", "status": "待确认" },
+    { "id": "wth-windy", "type": "weather", "name": "Windy", "icon": "🌬️", "status": "待确认" }
+  ],
+
+  "events": [
+    {
+      "id": "evt-neighbor-greens", "type": "event", "name": "Grandma shares greens", "icon": "👵",
+      "weatherIds": ["wth-sunny"], "isGood": true,
+      "text": "Grandma next door knows you. She gives you some greens.",
+      "spendOption": { "label": "Spend 1 coin on a popsicle for Grandma", "coins": 1, "effect": { "gainIngredientId": "ing-greens" } },
+      "freeOption": { "label": "Take the greens and say thank you", "effect": { "gainIngredientId": "ing-greens" } },
+      "status": "待确认"
+    },
+    {
+      "id": "evt-help-vendor", "type": "event", "name": "Helping at the stall", "icon": "🧺",
+      "weatherIds": ["wth-sunny"], "isGood": true,
+      "text": "The market is busy. The seller drops some bags and you help pick them up. They give you a green onion.",
+      "spendOption": { "label": "Take the onion and spend 1 coin on greens", "coins": 1, "effect": { "gainIngredientId": "ing-greens" } },
+      "freeOption": { "label": "Take the onion and wave thanks", "effect": { "gainIngredientId": "ing-scallion" } },
+      "status": "待确认"
+    },
+    {
+      "id": "evt-extra-egg", "type": "event", "name": "An extra egg", "icon": "🥚",
+      "weatherIds": ["wth-sunny"], "isGood": true,
+      "text": "The sun is going down. The seller gives you one extra egg.",
+      "spendOption": { "label": "Spend 1 coin on warm soup", "coins": 1, "effect": { "gainIngredientId": "ing-egg" } },
+      "freeOption": { "label": "Take the egg and say bye", "effect": { "gainIngredientId": "ing-egg" } },
+      "status": "待确认"
+    },
+    {
+      "id": "evt-thirsty", "type": "event", "name": "Wet clothes", "icon": "🌧️",
+      "weatherIds": ["wth-rainy"], "isGood": false,
+      "text": "Rain falls on you. Your clothes are wet and a bit cold.",
+      "spendOption": { "label": "Spend 1 coin on a warm drink", "coins": 1, "effect": {} },
+      "freeOption": { "label": "Run fast to warm up", "effect": {} },
+      "status": "待确认"
+    },
+    {
+      "id": "evt-bag-broken", "type": "event", "name": "A torn bag", "icon": "👜",
+      "weatherIds": ["wth-windy"], "isGood": false,
+      "text": "A big wind comes. Your bag gets a hole.",
+      "spendOption": { "label": "Spend 1 coin on a new bag", "coins": 1, "effect": {} },
+      "freeOption": { "label": "Carry the food in your arms", "effect": {} },
+      "status": "待确认"
+    },
+    {
+      "id": "evt-rain-umbrella", "type": "event", "name": "Heavy rain", "icon": "⛈️",
+      "weatherIds": ["wth-rainy"], "isGood": false,
+      "text": "The rain gets bigger. Your clothes are getting wet.",
+      "spendOption": { "label": "Spend 2 coins on an umbrella", "coins": 2, "effect": {} },
+      "freeOption": { "label": "Wait under a roof until it stops", "effect": {} },
+      "status": "待确认"
+    },
+    {
+      "id": "evt-muddy-shoes", "type": "event", "name": "Muddy shoes", "icon": "👟",
+      "weatherIds": ["wth-rainy"], "isGood": false,
+      "text": "A puddle makes your shoes muddy.",
+      "spendOption": { "label": "Spend 1 coin on tissues to wipe them", "coins": 1, "effect": {} },
+      "freeOption": { "label": "Wash them at home later", "effect": {} },
+      "status": "待确认"
+    },
+    {
+      "id": "evt-windy-hat", "type": "event", "name": "Wind takes the hat", "icon": "🧢",
+      "weatherIds": ["wth-windy"], "isGood": false,
+      "text": "The wind blows your hat up a tree.",
+      "spendOption": { "label": "Spend 1 coin to ask for help", "coins": 1, "effect": {} },
+      "freeOption": { "label": "Wait for the wind to shake it down", "effect": {} },
+      "status": "待确认"
+    },
+    {
+      "id": "evt-hungry", "type": "event", "name": "Tummy rumbles", "icon": "🍞",
+      "weatherIds": ["wth-windy"], "isGood": false,
+      "text": "You have walked a long way. Your tummy rumbles.",
+      "spendOption": { "label": "Spend 1 coin on a bun", "coins": 1, "effect": {} },
+      "freeOption": { "label": "Wait. Dinner is at home", "effect": {} },
+      "status": "待确认"
+    }
+  ],
+
+  "invites": [
+    {
+      "id": "inv-popsicle", "type": "invite", "name": "Buy a Popsicle together", "icon": "🍦",
+      "text": "2 kids buy popsicles — 1 coin each",
+      "splitNote": "Buy together — everyone pays their own",
+      "minPlayers": 2, "eachCost": 1, "giveCardId": "tmp-popsicle",
+      "status": "待确认"
+    },
+    {
+      "id": "inv-sticker", "type": "invite", "name": "Buy a Sticker together", "icon": "✨",
+      "text": "2 kids buy stickers — 2 coins each",
+      "splitNote": "Buy together — everyone pays their own",
+      "minPlayers": 2, "eachCost": 2, "giveCardId": "tmp-sticker",
+      "status": "待确认"
+    }
+  ],
+
+  "parentStation": {
+    "status": "待确认",
+    "intro": "I can help if you need more coins.",
+    "voiceHint": "Voice is not ready yet — tap a picture card.",
+    "settleLabel": "That's all (get 1 coin)",
+    "approveLine": "OK, that is clear. Here are {n} coins.",
+    "fallbackLine": "That's OK. Let's pick a picture together.",
+    "questions": [
+      {
+        "id": "pq-1",
+        "text": "How many coins do you want?",
+        "keywords": ["1", "2", "3", "4", "一", "二", "两", "三", "四", "个", "币", "块", "coin", "coins", "one", "two", "three", "four"],
+        "options": [
+          { "id": "pq1-opt-1", "icon": "🪙", "label": "1 coin", "tags": ["amount", "one"], "status": "待确认" },
+          { "id": "pq1-opt-2", "icon": "🪙🪙", "label": "2 coins", "tags": ["amount", "two"], "status": "待确认" },
+          { "id": "pq1-opt-3", "icon": "🤔", "label": "I don't know yet", "tags": ["unclear"], "status": "待确认" }
+        ],
+        "status": "待确认"
+      },
+      {
+        "id": "pq-2",
+        "text": "What do you want to buy?",
+        "keywords": ["菜", "番茄", "鸡蛋", "葱", "青菜", "土豆", "胡萝卜", "豆腐", "蘑菇", "肉", "鱼", "姜", "蒜", "材料", "贴纸", "糖", "冰棍", "food", "veggie", "veggies", "tomato", "egg", "onion", "greens", "potato", "carrot", "tofu", "mushroom", "pork", "meat", "fish", "ginger", "garlic", "ingredient", "sticker", "candy", "popsicle", "snack", "buy"],
+        "options": [
+          { "id": "pq2-opt-1", "icon": "🥬", "label": "Food on my recipe", "tags": ["goal", "ingredient"], "status": "待确认" },
+          { "id": "pq2-opt-2", "icon": "✨", "label": "A sticker or a snack", "tags": ["goal", "temptation"], "status": "待确认" },
+          { "id": "pq2-opt-3", "icon": "🚌", "label": "Pay the bus fare", "tags": ["goal", "bus"], "status": "待确认" },
+          { "id": "pq2-opt-4", "icon": "🤔", "label": "Not sure yet", "tags": ["unclear"], "status": "待确认" }
+        ],
+        "status": "待确认"
+      },
+      {
+        "id": "pq-3",
+        "text": "Where did your coins go?",
+        "keywords": ["买", "菜", "贴纸", "糖", "冰棍", "车费", "公交", "花", "用了", "bought", "buy", "food", "sticker", "candy", "popsicle", "snack", "bus", "fare", "spent", "spend", "used"],
+        "options": [
+          { "id": "pq3-opt-1", "icon": "🥬", "label": "I bought food", "tags": ["spent", "ingredient"], "status": "待确认" },
+          { "id": "pq3-opt-2", "icon": "✨", "label": "I bought a sticker or snack", "tags": ["spent", "temptation"], "status": "待确认" },
+          { "id": "pq3-opt-3", "icon": "🚌", "label": "I paid the bus fare", "tags": ["spent", "bus"], "status": "待确认" },
+          { "id": "pq3-opt-4", "icon": "🤝", "label": "I bought something with a friend", "tags": ["spent", "invite"], "status": "待确认" }
+        ],
+        "status": "待确认"
+      },
+      {
+        "id": "pq-4",
+        "text": "What will you do next time?",
+        "keywords": ["先", "下次", "再", "计划", "清单", "菜", "攒钱", "存", "first", "next", "then", "plan", "list", "save", "food", "veggie"],
+        "options": [
+          { "id": "pq4-opt-1", "icon": "🥬➡️✨", "label": "Buy food first, then a sticker", "tags": ["plan", "needsFirst"], "status": "待确认" },
+          { "id": "pq4-opt-2", "icon": "📝", "label": "Make a little list first", "tags": ["plan", "list"], "status": "待确认" },
+          { "id": "pq4-opt-3", "icon": "💰", "label": "Keep some coins just in case", "tags": ["plan", "save"], "status": "待确认" },
+          { "id": "pq4-opt-4", "icon": "🤔", "label": "Not sure yet", "tags": ["unclear"], "status": "待确认" }
+        ],
+        "status": "待确认"
+      }
+    ]
+  },
+
+  "characters": [
+    { "id": "chr-xiaohe", "type": "character", "name": "Sprout", "icon": "🌾", "status": "待确认" },
+    { "id": "chr-xiaoan", "type": "character", "name": "Annie", "icon": "🐰", "status": "待确认" },
+    { "id": "chr-ale", "type": "character", "name": "Leo", "icon": "🐯", "status": "待确认" },
+    { "id": "chr-doudou", "type": "character", "name": "Bean", "icon": "🐻", "status": "待确认" }
+  ],
+
+  "bots": [
+    { "id": "bot-xiaowen", "type": "bot", "name": "Steady", "icon": "🛡️", "personality": "steady", "personalityLabel": "Careful", "status": "待确认" },
+    { "id": "bot-xiaochong", "type": "bot", "name": "Zip", "icon": "⚡", "personality": "impulsive", "personalityLabel": "Eager", "status": "待确认" },
+    { "id": "bot-xiaogen", "type": "bot", "name": "Tag", "icon": "🐾", "personality": "follower", "personalityLabel": "Goes along", "status": "待确认" }
+  ],
+
+  "reflections": {
+    "status": "待确认",
+    "prompt": "Tell us one choice you feel good about",
+    "botLines": {
+      "steady": [
+        { "id": "rfl-steady-1", "text": "I bought my recipe food first. My coins were just enough.", "status": "待确认" },
+        { "id": "rfl-steady-2", "text": "I skipped the sticker. I got all my food!", "status": "待确认" }
+      ],
+      "impulsive": [
+        { "id": "rfl-imp-1", "text": "I got the sticker and had fun. Next time I'll buy food first.", "status": "待确认" },
+        { "id": "rfl-imp-2", "text": "I ran out of coins, so I asked my parent for help.", "status": "待确认" }
+      ],
+      "follower": [
+        { "id": "rfl-fol-1", "text": "I shopped with friends and traded for food I needed.", "status": "待确认" },
+        { "id": "rfl-fol-2", "text": "We bought popsicles together. Only 1 coin each!", "status": "待确认" }
+      ]
+    },
+    "humanOptions": [
+      { "id": "rho-1", "label": "I bought all my recipe food", "status": "待确认" },
+      { "id": "rho-2", "label": "I skipped the sticker", "status": "待确认" },
+      { "id": "rho-3", "label": "I traded for food I needed", "status": "待确认" },
+      { "id": "rho-4", "label": "I paid the bus fare first", "status": "待确认" },
+      { "id": "rho-5", "label": "I told my parent my plan", "status": "待确认" },
+      { "id": "rho-6", "label": "Write your own…", "status": "待确认" }
+    ]
+  }
+}

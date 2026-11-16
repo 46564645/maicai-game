@@ -1,0 +1,897 @@
+/* ==========================================================================
+   game.css —— M3 界面组件样式。只允许使用 tokens.css 的 CSS 变量；
+   禁止裸色值 / 裸字号 / 裸圆角（ww 正式 UI 来了一次换皮）。
+   ========================================================================== */
+
+
+/* —— 底部真人区 —— */
+/* UI 迭代 R3：底栏瘦身 —— 栏在文档流里，但全屏画布的岛是按屏幕
+   居中取景的，栏带横穿岛的中段；栏高每降 1px，岛就多露 1px。
+   纵向 padding 收一档、头像字号 xl→lg、夹子钮纵向 padding 收一档，
+   栏高 100 → ~81px（实测），文字字号与 ≥48px 可点区不变。 */
+.game-bottom {
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-surface);
+  border: 2px solid var(--color-line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
+}
+
+.me-avatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: var(--font-size-lg);
+}
+
+.me-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.recipe-card {
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+}
+
+.recipe-card--empty {
+  color: var(--color-muted);
+  font-size: var(--font-size-sm);
+}
+
+.recipe-card-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-2);
+}
+
+.recipe-slots {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.recipe-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border: 2px dashed var(--color-line-strong);
+  border-radius: var(--radius-card);
+  font-size: var(--font-size-xs);
+  color: var(--color-muted);
+}
+
+.recipe-slot--got {
+  border-style: solid;
+  border-color: var(--color-mint);
+  color: var(--color-text);
+}
+
+.recipe-slot-icon {
+  font-size: var(--font-size-md);
+}
+
+.me-coins {
+  display: flex;
+  align-items: center;
+}
+
+.coins {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.coins-row {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  max-width: 180px;
+}
+
+.coin {
+  width: var(--coin-size);
+  height: var(--coin-size);
+  border-radius: var(--radius-button);
+  background: var(--color-accent-yellow);
+  border: 2px solid var(--color-line-strong);
+  display: inline-block;
+}
+
+.coins-count {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+}
+
+.clip-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-height: var(--button-height);
+  white-space: nowrap;
+  padding: var(--space-1) var(--space-4);
+  background: var(--color-surface);
+  border: 2px solid var(--color-line-strong);
+  border-radius: var(--radius-card);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.clip-chip-sub {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-muted);
+}
+
+.clip-chip--debt {
+  background: var(--color-warning);
+  color: var(--color-warning-contrast);
+  border-color: var(--color-line-strong);
+}
+
+.clip-chip--debt .clip-chip-sub {
+  color: var(--color-warning-contrast);
+}
+
+.clip-chip--help {
+  border-color: var(--color-primary);
+}
+
+/* —— 弹窗（StationPopup 壳）—— */
+.popup-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background: var(--color-backdrop);
+  /* 遮罩只压暗不拦截：钱包/求助牌在站点弹窗开着时也要能点开 */
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* ART_3D §8.7：面板从下往上滑出（背后是压暗的 3D 场景） */
+  .popup {
+    animation: popup-rise var(--motion-med) var(--motion-ease);
+  }
+  /* ART_3D §8.5：币数变化时数字跟着跳一下 */
+  .coins-bump {
+    animation: coin-bump var(--motion-med) var(--motion-ease);
+  }
+  /* ART_3D §8.8：任务卡翻面亮出 */
+  .card-reveal {
+    animation: card-flip 560ms var(--motion-ease);
+  }
+}
+
+@keyframes popup-rise {
+  from {
+    transform: translateY(26px);
+    opacity: 0.55;
+  }
+}
+
+@keyframes coin-bump {
+  40% {
+    transform: scale(1.3);
+  }
+}
+
+@keyframes card-flip {
+  from {
+    transform: perspective(720px) rotateY(75deg) translateY(-22px);
+    opacity: 0.25;
+  }
+}
+
+.popup {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 720px;
+  max-height: 86vh;
+  padding: var(--space-5);
+  background: var(--color-surface);
+  border-radius: var(--radius-modal);
+  box-shadow: var(--shadow-lg);
+}
+
+.popup:focus {
+  outline: none;
+}
+
+.popup-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.popup-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+.popup-tag {
+  padding: var(--space-1) var(--space-3);
+  background: var(--color-surface-dim);
+  border-radius: var(--radius-button);
+  font-size: var(--font-size-xs);
+  color: var(--color-muted);
+}
+
+.popup-aside {
+  margin-left: auto;
+  font-size: var(--font-size-sm);
+  color: var(--color-muted);
+}
+
+.popup-close {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-min-size);
+  height: var(--tap-min-size);
+  border-radius: var(--radius-button);
+  border: 2px solid var(--color-line);
+  font-size: var(--font-size-md);
+  color: var(--color-muted);
+}
+
+.popup-aside + .popup-close {
+  margin-left: 0;
+}
+
+.popup-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* —— AutoPanel —— */
+.auto-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.auto-panel .btn {
+  justify-content: flex-start;
+  width: 100%;
+  /* 兜底面板的命令文案较长（如「用我的 X 换 小稳 的 Y」），允许折行 */
+  white-space: normal;
+  text-align: left;
+}
+
+/* —— 站点面板通用（M3.2 正式面板）—— */
+.panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.panel-text {
+  font-size: var(--font-size-md);
+}
+
+.panel-subtitle {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-muted);
+}
+
+.panel-selected {
+  font-weight: var(--font-weight-bold);
+  text-align: center;
+}
+
+/* ww M4.5.7a：选中信息两行——「Picked: Fish (3 coins)」/「After you buy: 9 coins」 */
+.panel-selected-line {
+  display: block;
+}
+
+.panel-actions {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.panel-actions .btn,
+.panel-actions .btn-speak-wrap {
+  /* basis=auto：不低于内容宽，放不下时整枚换到下一行而不是折行文字 */
+  flex: 1 1 auto;
+}
+
+/* 弹窗底部操作区：抽屉内容超高时吸在弹窗可见区底缘，
+   买下/走完这一站等按钮永远够得着（马教授试玩反馈 A） */
+.panel-foot {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+  background: var(--color-surface);
+}
+
+/* 「这次还能买 N 张」：要看得见，不做灰字 */
+.panel-buysleft {
+  align-self: center;
+  padding: var(--space-1) var(--space-4);
+  background: var(--color-surface-dim);
+  border-radius: var(--radius-button);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+}
+
+.panel-keyhelp {
+  font-size: var(--font-size-xs);
+  color: var(--color-muted);
+  text-align: center;
+}
+
+/* 菜市场：6 卡横排（竖屏 3×2） */
+.stall-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.stall-slot {
+  min-height: 120px;
+  border: 2px dashed var(--color-line);
+  border-radius: var(--radius-card);
+}
+
+/* 「先等等」夹结算区（菜市场/小卖部共用） */
+.hold-resolve {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--color-surface-dim);
+  border-radius: var(--radius-card);
+}
+
+/* 公交站：车票卡 */
+.bus-ticket {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 2px dashed var(--color-line-strong);
+  border-radius: var(--radius-card);
+}
+
+.bus-ticket-icon {
+  font-size: var(--font-size-xxl);
+}
+
+.bus-ticket-name {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+.bus-ticket-note {
+  font-size: var(--font-size-sm);
+  color: var(--color-muted);
+}
+
+/* 小卖部 */
+.store-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.store-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--space-2);
+}
+
+/* —— 钱包抽屉（G3：左菜谱 / 右币数+流水）—— */
+.wallet-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.wallet-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* —— Toast 动作提示 —— */
+.toast-stack {
+  position: fixed;
+  top: var(--space-5);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  pointer-events: none;
+}
+
+.toast {
+  max-width: 90vw;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-text);
+  color: var(--color-bg);
+  border-radius: var(--radius-button);
+  font-size: var(--font-size-sm);
+  box-shadow: var(--shadow-md);
+}
+
+/* —— bot 提议气泡（G4）—— */
+.bot-slot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.speech-bubble {
+  position: relative;
+  z-index: 5; /* 气泡可能比 bot 列宽，盖在棋盘格上也要能点 */
+  align-self: flex-start;
+  /* 比 bot 小卡宽可以，但绝不能顶出视口（竖屏右列贴右缘向左长） */
+  width: min(320px, calc(100vw - var(--space-6)));
+  min-width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: 2px solid var(--color-line-strong);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-md);
+}
+
+.speech-bubble::before {
+  content: '';
+  position: absolute;
+  top: calc(-1 * var(--space-2));
+  left: var(--space-5);
+  width: var(--space-4);
+  height: var(--space-4);
+  background: var(--color-surface);
+  border-left: 2px solid var(--color-line-strong);
+  border-top: 2px solid var(--color-line-strong);
+  transform: rotate(45deg);
+}
+
+.speech-bubble-from {
+  font-size: var(--font-size-xs);
+  color: var(--color-muted);
+}
+
+.speech-bubble-text {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  margin: var(--space-1) 0;
+}
+
+.speech-bubble-note {
+  font-size: var(--font-size-xs);
+  color: var(--color-muted);
+}
+
+/* 右列 bot 的气泡贴右缘向左长，箭头也跟着挪到右侧 */
+.game-right .speech-bubble {
+  align-self: flex-end;
+}
+
+.game-right .speech-bubble::before {
+  left: auto;
+  right: var(--space-5);
+}
+
+.speech-bubble-actions {
+  display: flex;
+  flex-wrap: wrap; /* 放不下就整枚换行，绝不挤出气泡边缘 */
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.speech-bubble-actions .btn,
+.speech-bubble-actions .btn-speak-wrap {
+  /* 两按钮等分全宽，缩 padding 让「好呀 / 不用了」在 320px 内并排站下 */
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: var(--button-height); /* 56px ≥ 48px 触摸目标 */
+  padding: 0 var(--space-2);
+}
+
+/* —— 朗读按钮 —— */
+.btn-speak-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.btn-speak-wrap > .btn {
+  flex: 1 1 auto;
+}
+
+.btn-speak {
+  flex: none;
+  width: var(--tap-min-size);
+  height: var(--tap-min-size);
+  border: 2px solid var(--color-line);
+  border-radius: var(--radius-button);
+  font-size: var(--font-size-md);
+}
+
+/* —— 大功能卡（邀请卡 / 事件卡 / 通用大卡）—— */
+.feature-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 2px dashed var(--color-line-strong);
+  border-radius: var(--radius-card);
+  text-align: center;
+}
+
+.feature-card-icon {
+  font-size: var(--font-size-xxl);
+}
+
+.feature-card-name {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+.feature-card-text {
+  font-size: var(--font-size-md);
+}
+
+.feature-card-note {
+  font-size: var(--font-size-sm);
+  color: var(--color-muted);
+}
+
+/* 邀请卡「已加入的人」：头像 + 计数（👦👧 1/2）做成小胶囊，比一句话更好读 */
+.invite-count {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-4);
+  background: var(--color-surface-dim);
+  border-radius: var(--radius-button);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+}
+
+/* —— 伙伴站：可选 chip（赠品菜）—— */
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--tap-min-size);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-surface);
+  border: 2px solid var(--color-line);
+  border-radius: var(--radius-button);
+  font-size: var(--font-size-md);
+}
+
+.chip--selected {
+  border-color: var(--color-primary);
+  border-width: 3px;
+}
+
+.swap-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.swap-row-name {
+  font-weight: var(--font-weight-bold);
+  min-width: 3em;
+}
+
+/* —— 天气转盘（结果由引擎先定，这里只演出）—— */
+.weather-spin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.weather-dial {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.weather-pointer {
+  color: var(--color-primary);
+  font-size: var(--font-size-lg);
+  line-height: 1;
+}
+
+.weather-wheel {
+  position: relative;
+  width: var(--weather-wheel-size);
+  height: var(--weather-wheel-size);
+  border: 3px solid var(--color-line-strong);
+  border-radius: var(--radius-button);
+  background: var(--color-surface-dim);
+  transform: rotate(var(--spin-end));
+}
+
+.weather-wheel-item {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translate(-50%, -50%) rotate(var(--item-deg))
+    translateY(calc(-1 * var(--weather-wheel-r)));
+}
+
+.weather-wheel-icon {
+  font-size: var(--font-size-xl);
+  transform: rotate(var(--item-upright));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .weather-wheel {
+    animation: weather-spin var(--motion-slow) var(--motion-ease);
+  }
+}
+
+@keyframes weather-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(var(--spin-end));
+  }
+}
+
+.weather-result {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+}
+
+/* —— AI 家长站：聊天气泡（G5）—— */
+.chat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.chat-pair {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.chat-bubble {
+  max-width: 80%;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-card);
+  font-size: var(--font-size-md);
+}
+
+.chat-bubble--ai {
+  align-self: flex-start;
+  background: var(--color-surface-dim);
+}
+
+.chat-bubble--me {
+  align-self: flex-end;
+  background: var(--color-mint);
+}
+
+/* 系统提示行（如「小禾 去找 AI 家长聊了聊」）：居中小字灰，区别于对话气泡 */
+.chat-system {
+  align-self: center;
+  max-width: 100%;
+  font-size: var(--font-size-xs);
+  color: var(--color-muted);
+  text-align: center;
+}
+
+.parent-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.parent-input-row {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.parent-input {
+  flex: 1 1 200px;
+  min-height: var(--button-height);
+  padding: 0 var(--space-4);
+  font-size: var(--font-size-md);
+  font-family: var(--font-family);
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 2px solid var(--color-line-strong);
+  border-radius: var(--radius-button);
+}
+
+.parent-input:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 1px;
+}
+
+/* —— 竖屏补充 —— */
+@media (max-width: 640px) {
+  /* 底部抽屉打开时：Toast 锚在抽屉上方安全区，不压抽屉标题 */
+  .app-shell:has(.popup-backdrop) .toast-stack {
+    top: auto;
+    bottom: calc(var(--popup-sheet-height) + var(--space-3));
+  }
+
+  .stall-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .parent-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+
+  /* 竖屏 AI 家长站（马教授 M3.7 反馈 4）：图卡改两列横排（键位徽标 + 图标 + 文字），
+     聊天区限高，打字/语音入口吸在抽屉底部 —— 390×844 首屏就能看到全部图卡、
+     「我还不知道」和打字/语音入口，不用滚动。 */
+  .parent-options .card-view {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-2);
+    text-align: left;
+  }
+
+  .parent-options .card-view-icon {
+    flex: none;
+    font-size: var(--font-size-md);
+    line-height: 1.2;
+  }
+
+  .parent-options .card-view-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: var(--font-size-md);
+    line-height: 1.25;
+  }
+
+  .parent-options .key-hint {
+    flex: none;
+    width: var(--space-5);
+    height: var(--space-5);
+  }
+
+  /* 3 张图卡（如问题 1）时最后一张占满整行，「我还不知道」不再被挤成两行 */
+  .parent-options > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  .chat {
+    max-height: 22vh;
+  }
+
+  .parent-input-row {
+    flex-wrap: nowrap;
+    gap: var(--space-2);
+  }
+
+  .parent-input {
+    flex: 1 1 120px;
+    min-width: 0;
+    padding: 0 var(--space-3);
+    font-size: var(--font-size-md);
+  }
+
+  .parent-input-row .btn {
+    flex: none;
+    padding: 0 var(--space-3);
+    white-space: nowrap;
+  }
+
+  /* —— 竖屏事件站（马教授 M3.7 反馈 3）——
+     正文被卡片/吸底操作区挤掉、选项「…买把青菜」被截、🔊 伸出右缘。
+     转盘缩到 96px 并与结果并排；卡片收紧；选项折行、朗读钮留在行内。 */
+  .panel-body--event {
+    gap: var(--space-2);
+  }
+
+  .panel-body--event .weather-spin {
+    flex-direction: row;
+    justify-content: center;
+    gap: var(--space-4);
+  }
+
+  .panel-body--event .weather-wheel {
+    width: var(--weather-wheel-size-sm);
+    height: var(--weather-wheel-size-sm);
+  }
+
+  .panel-body--event .weather-wheel-item {
+    transform: translate(-50%, -50%) rotate(var(--item-deg))
+      translateY(calc(-1 * var(--weather-wheel-r-sm)));
+  }
+
+  .panel-body--event .feature-card {
+    gap: var(--space-1);
+    padding: var(--space-3);
+  }
+
+  .panel-body--event .feature-card-icon {
+    font-size: var(--font-size-xl);
+  }
+
+  /* 长选项文案折行显示，不再被 nowrap 撑出弹窗 */
+  .panel-actions .btn,
+  .panel-actions .btn-speak-wrap {
+    flex-basis: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .panel-actions .btn {
+    padding: var(--space-2) var(--space-4);
+    line-height: 1.25;
+    white-space: normal;
+  }
+
+  .panel-actions .btn-speak-wrap > .btn {
+    min-width: 0;
+  }
+
+  /* 提议气泡：竖屏小卡槽很窄——宽度收回槽内，按钮改纵向排列，
+     既不出视口也保证 ≥56px 高（ADAPTATION 第 12 条） */
+  .speech-bubble {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .speech-bubble-actions {
+    flex-direction: column;
+  }
+
+  .wallet-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
