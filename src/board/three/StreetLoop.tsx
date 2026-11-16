@@ -9,10 +9,12 @@ import type { BoardStation } from '../BoardView';
 import { LOOP, loopPoint, transitionTs } from './positions';
 import { roundedRectShape } from './Island';
 import { SCENE, TOY_MAT } from './materials';
+import { roadMaps } from './textures';
 import { StationTile } from './StationTile';
 
 /** 路面底带：沿环路的一条暖沙色环带（外圆角矩形 − 内圆角矩形），
- *  地砖垫在它上面，让「街道」一眼可读 */
+ *  地砖垫在它上面，让「街道」一眼可读；
+ *  R5：手绘砂砾贴图单幅覆盖（挤出 UV=形状坐标 ±7），不再是平涂 */
 function StreetBed() {
   const geo = useMemo(() => {
     const outer = roundedRectShape(
@@ -37,9 +39,15 @@ function StreetBed() {
     g.computeVertexNormals();
     return g;
   }, []);
+  const road = useMemo(() => {
+    const m = roadMaps();
+    m.map.repeat.set(1 / 14, 1 / 14);
+    m.map.offset.set(0.5, 0.5);
+    return m;
+  }, []);
   return (
     <mesh geometry={geo} rotation-x={Math.PI / 2} position-y={0.1} receiveShadow>
-      <meshStandardMaterial attach="material-0" color={SCENE.roadBed} {...TOY_MAT} />
+      <meshStandardMaterial attach="material-0" color="#FFFFFF" map={road.map} {...TOY_MAT} />
       <meshStandardMaterial attach="material-1" color={SCENE.roadBed} {...TOY_MAT} />
     </mesh>
   );

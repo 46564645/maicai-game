@@ -39,16 +39,52 @@ const FIT_RECT = {
   // 取 b 0.24）—— 整岛落在顶部条（72px → t 0.10，含间隙）与底部栈
   // 之间的自由带内，条/栏不再压岛。带日志行时条高 104、栈 217px，
   // 外廓（浅滩沿）底缘会与条顶轻碰约 25px，草地/路面核心仍在条上方
-  // （R4 实测核验）。离线复刻求解：距离 39.9 → 52.9（fog 60 起，
-  // 远沿约 62、起雾约 3%，可忽略）；b 0.29+ 时距离 67+ 撞雾，不可取。
-  // 左右仍 10%（bot 列之间）。
-  desktop: { l: 0.1, r: 0.1, t: 0.1, b: 0.24 },
+  // （R4 实测核验）。左右仍 10%（bot 列之间）。
+  // R5：配合 FIT_SHIFT.z 把岛在带内纵向摆正、FOLLOW_MIX 收小 → 岛在
+  // 默认取景几乎填满自由带（目标 60–70%，见 ART_R5.md）。
+  // R5 修正（PM，2026-11-17）：初版按 b 0.24 求解后实测 rim 填充
+  // 0.87（求解器 FIT_BOUNDS 投影 ÷ 自由带；截图沙沿 0.73、均超 0.70
+  // 上限），故把桌面 FIT_RECT 收至 {0.145, 0.145, 0.145, 0.285}——
+  // 仍由求解器二分求距（无经验倍率，F5 机制不变），求解器预测 rim
+  // 填充 0.66（740×419，自由带 868×539），落回 60–70% 带中部；
+  // 拟合框（x 179–1101、y 112–576）仍贴合自由带，求解后 rim
+  // （x 270–1010、y 132–551）与各面板留有余量，A4 0% 遮挡不受影响。
+  // 手机档（compact）实测 rim 0.665 已达标，不动。
+  desktop: { l: 0.145, r: 0.145, t: 0.145, b: 0.285 },
   // UI 迭代 R2：手机横屏让位收窄 —— 顶部头像排下沿实测在 56px
-  // （= 402 的 13.9%），t 0.16 → 0.14 正好贴合；左右 0.04 → 0.03。
-  // 底部 fabs 区（56px 高 + 8px 边距）仍由 b 0.14（56px）+ 画布外
-  // 的竖栏切分共同让位，不动。纵向可用画幅 70% → 72%。
-  compact: { l: 0.03, r: 0.03, t: 0.14, b: 0.14 },
+  // （= 402 的 13.9%），t 0.16 → 0.14 正好贴合；左 0.03。
+  // R5：实测画布其实是 874 全宽（.board3d 的 right:rail-w 被 width:100%
+  // 顶掉），右竖栏只是 DOM 浮层——r 0.03 → 0.30 把 262px 栏位建进取景，
+  // 岛不再往栏下长；b 0.14 → 0.16 对齐左下/右下圆钮区（y338）。
+  compact: { l: 0.03, r: 0.3, t: 0.14, b: 0.16 },
 } as const;
+
+/**
+ * R5 取景基线偏移（world units，加在 DEFAULT_TARGET 上）：
+ * - 桌面 z+1.5：镜头注视点向「镜头前」挪 → 岛在自由带内不再贴底，
+ *   垂直方向居中 → 求解机位更近、岛几乎撑满带高。
+ * - 手机 x+3.2：画布 874 全宽、右竖栏遮 x612+，注视点右移 → 岛像
+ *   在 0–612 自由区里居中（投影中心 ≈x306，而非画布中心 437）。
+ * 偏移同时作用于默认目标、全部跟随目标与回正目标，保持观感一致。
+ */
+const FIT_SHIFT = {
+  desktop: { x: 0, z: 1.5 },
+  compact: { x: 3.2, z: 0.4 },
+} as const;
+
+/**
+ * R5 跟随幅度（目标点向当前站锚点的混合比）：0.45/0.72 → 0.12/0.05。
+ * 取景目标是「小岛占自由带 60–70%」——跟随越多，所有跟随位都满足
+ * 约束所需的机位越远、岛越小；收小后镜头仍平滑移向当前棋子，
+ * 但岛几乎不滑出带（对小孩也稳）。配合 FIT_SHIFT 摆位。
+ */
+const FOLLOW_MIX = { desktop: 0.12, compact: 0.05 } as const;
+
+/** 取景基线（默认/跟随目标的公共原点） */
+function fitBase(compact: boolean): THREE.Vector3 {
+  const s = compact ? FIT_SHIFT.compact : FIT_SHIFT.desktop;
+  return new THREE.Vector3(s.x, DEFAULT_TARGET.y, DEFAULT_TARGET.z + s.z);
+}
 
 function fitDistance(aspect: number, compact: boolean): number {
   const rect = compact ? FIT_RECT.compact : FIT_RECT.desktop;
@@ -58,11 +94,12 @@ function fitDistance(aspect: number, compact: boolean): number {
   const maxY = 1 - 2 * rect.t;
   const dir = DEFAULT_POS.clone().normalize();
   const cam = new THREE.PerspectiveCamera(27, Math.max(0.5, aspect), 0.5, 400);
-  const mix = compact ? 0.72 : 0.45;
-  const goals: THREE.Vector3[] = [DEFAULT_TARGET.clone()];
+  const mix = compact ? FOLLOW_MIX.compact : FOLLOW_MIX.desktop;
+  const base = fitBase(compact);
+  const goals: THREE.Vector3[] = [base.clone()];
   for (let i = 0; i < 8; i++) {
     const a = stationAnchor(i);
-    goals.push(new THREE.Vector3(a.x * mix, 0, a.z * mix + 0.4));
+    goals.push(new THREE.Vector3(a.x * mix + base.x, 0, a.z * mix + base.z));
   }
   const corners: THREE.Vector3[] = [];
   for (const sx of [-1, 1])
@@ -72,7 +109,7 @@ function fitDistance(aspect: number, compact: boolean): number {
     }
   const v = new THREE.Vector3();
   const fits = (d: number): boolean => {
-    cam.position.copy(DEFAULT_TARGET).addScaledVector(dir, d);
+    cam.position.copy(base).addScaledVector(dir, d);
     for (const g of goals) {
       cam.lookAt(g);
       cam.updateMatrixWorld();
@@ -123,7 +160,8 @@ export function CameraRig({
   // 转盘推近距离按同一比例缩放，保持推近的相对幅度
   const aspect = size.width / Math.max(1, size.height);
   const fitD = fitDistance(aspect, compact);
-  const homePos = DEFAULT_TARGET.clone()
+  const base = fitBase(compact);
+  const homePos = base.clone()
     .addScaledVector(DEFAULT_POS.clone().normalize(), fitD);
   const spinnerPos = SPINNER_POS.clone().multiplyScalar(
     THREE.MathUtils.clamp(fitD / DEFAULT_POS.length(), 1, 1.7),
@@ -162,28 +200,28 @@ export function CameraRig({
     if (resetting.current) {
       // 回正：相机位置与注视点都缓动回默认，到位即停
       c.object.position.lerp(homePos, 0.09);
-      c.target.lerp(DEFAULT_TARGET, 0.12);
+      c.target.lerp(base, 0.12);
       c.update();
       invalidate();
       if (
         c.object.position.distanceTo(homePos) < 0.05 &&
-        c.target.distanceTo(DEFAULT_TARGET) < 0.05
+        c.target.distanceTo(base) < 0.05
       ) {
         resetting.current = false;
       }
       return;
     }
 
-    // 注视点：转盘特写 / 岛心与当前站的 45% 混合点（借 monopoly-3d 轻跟随）
+    // 注视点：转盘特写 / 取景基线与当前站的轻混合点（借 monopoly-3d 轻跟随）
     if (focus === 'spinner') {
       goal.current.copy(SPINNER_TARGET);
       returning.current = false;
     } else if (followStation !== null) {
       const a = stationAnchor(followStation);
-      const mix = compact ? 0.72 : 0.45;
-      goal.current.set(a.x * mix, 0, a.z * mix + 0.4);
+      const mix = compact ? FOLLOW_MIX.compact : FOLLOW_MIX.desktop;
+      goal.current.set(a.x * mix + base.x, 0, a.z * mix + base.z);
     } else {
-      goal.current.copy(DEFAULT_TARGET);
+      goal.current.copy(base);
     }
 
     const lerpK = focus === 'spinner' ? 0.1 : 0.05;

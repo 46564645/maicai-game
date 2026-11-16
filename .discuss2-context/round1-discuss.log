@@ -1,0 +1,69 @@
+I'll read the R5 docs and the accepted-state files first, then look at the actual code the plan touches (CameraRig, water, post chain) so the critique is grounded in reality.Now let me look at the actual code the plan touches — CameraRig's solver, water/sea, fog, sky, Effects, and the scene composition.warning: rejected a tool call that requires confirmation. Running in non-interactive mode. Use --permission-mode dangerous to auto-approve all tools.
+Now the supporting pieces — ambient ticker (for boat bobbing feasibility), positions (station swing radius for the follow-goal math), materials/SCENE colors, Board3D (canvas/background/frameloop), QualityProvider flags.Let me check the existing R5 screenshots — they suggest a session may have already attempted parts of this.The r5 shots are revealing — an implementation pass already ran, and it shows exactly the failure modes to critique. Let me see the boat and after shots too.Read the briefs, the accepted-state docs, and the actual code (`CameraRig.tsx`, `Island.tsx`, `Scene.tsx`, `Effects.tsx`, `QualityProvider.tsx`, `ambient.ts`, `positions.ts`, `materials.ts`, `tokens.css`, `board.css`) — plus the in-progress `shots/ui_board_*_r5*.png`, which already confirm two of the failure modes below. Direct critique follows.
+
+## Where the plan breaks
+
+### 1. The fill math doesn't close — and the plan never pins the metric
+
+This is the fatal flaw. Three documents define the metric differently, and the choice decides whether 60–70% is even *reachable*:
+
+- **ACCEPTANCE_R5 A2 literal**: "island core bbox 占**视口**比例" — viewport denominator. On phone this is impossible by construction: the rail eats 30% of the viewport and can't overlap the island, so even a 100%-canvas island tops out near ~49% of viewport area. Dead on arrival.
+- **Brief's pinned metric** (what PM's plan restates): island projected bbox ÷ **free band**. Sane — but "projected bbox" is undefined, and the two candidate definitions diverge hard:
+  - The solver fits the **rim** (`FIT_BOUNDS` ±8.55×±6.65 + height 1.7 — includes the pale shallows).
+  - `measure-ui`'s island core **excludes** the shallows → core ≈ 0.8× rim-bbox area.
+  - Band aspect is ~1.95 (desktop 1024×528; phone canvas 576×290) while the projected rim bbox aspect is ~1.5. The island is relatively *taller* than the band, so it's height-bound: **rim-bbox ceiling ≈ 77–79% of band; core ceiling ≈ 61–63%** — on *both* viewports, before any follow penalty.
+- Under the strict core reading, the entire attainable range is 60–63% — razor-thin, with ±5–25px slack that the documented SwiftShader follow-lerp jitter can eat (UI_ITERATION already recorded identical code producing different island sizes between sessions). Under the rim-bbox reading, 60–70% sits comfortably inside.
+
+C-3 explicitly says "需 PM 定口径后再判 pass/fail" — the plan skips this decision. It must be step 0, not an implementation detail. My recommendation: **pin fill = projected island bbox including shallows ÷ free-band area**, and *also* report core-px and viewport-share numbers in `ART_R5.md` so nothing looks hidden.
+
+### 2. "No cropping + distance/fov only" contradicts the solver's actual constraint
+
+`fitDistance()` doesn't fit the default frame — it fits **all 9 goals**: default target plus 8 follow goals (`stationAnchor × mix`, 0.45 desktop / 0.72 compact → swings of ±2.5/±4.0 x and ±1.76/±2.8 z). At 60–70% fill the band slack is ~±5–25px; the follow swing projects to ~60–115px. The all-goals constraint binds first and caps fill near today's ~30%. Three ways out:
+
+- **Drop the all-goals guarantee** → island edge slides under panels/off-frame during follows. Regresses the thing T5 was built to fix; A4/G6 measured mid-play could catch it.
+- **Cut `mix` until swing fits** → needs mix ≈0.15; follow becomes decorative. Guts C11 feel.
+- **Per-goal distance (my recommendation)** — the solver already iterates goals. Home distance solves the *fill target* at the default goal; each follow goal gets `d_g = max(home, fit(g))`, camera dollies out slightly tracking rim stations. Preserves no-crop-ever *and* hits 60–70% at default. ~30 lines of delta.
+
+Also: "increasing fov" is the wrong lever *and* the wrong direction — fov is pinned 25–30 by B2 (27 accepted), and increasing it shrinks the subject. Distance only; if a second lever is ever needed it's fov 27→25.
+
+### 3. The sea plan silently breaks the gradient — evidence already in `shots/`
+
+"Keep the accepted water material values" is right for `roughness 0.62 / envMapIntensity 0.3`, but `waterGradientTexture()` is a radial canvas normalized to the r=14.5 disc. Drop it on a big `PlaneGeometry` and "shallow" stretches to ~45+ world units — the near-shore look changes silently. And `ui_board_phone_r5cam.png` already shows the naive version's failure: cream background exposed at the top-left corner plus a second curved boundary where a bigger-but-finite disc's edge is still in frame → A1 fail.
+
+Cheapest correct form: **keep the r=14.5 disc untouched** (gradient stays glued to shore) and add a large flat plane at y≈−0.76 in flat `waterDeep` — the gradient already terminates in `waterDeep`, so the seam is invisible. Also bump `far` 140→300+ in `Board3D.tsx` (the solver's own camera already uses 400).
+
+### 4. Fog / post-chain / horizon interactions nobody listed
+
+- Camera pitch is ~49.4° with fov 27 → the frame never sees real sky; the CSS page gradient only shows where water *isn't*. A big plane + fog 60–120 means the far sea fades to `#E7F1F7` — a built-in "soft water-to-sky transition," free. But at the new closer distance, verify the top-of-frame wash doesn't read as a "sky band" under A1. If it does: push fog to ~90–180 (never *below* 60 — island-rim fog wash was the T5 lesson) or tint fog toward `waterDeep`.
+- **N8AO on the waterline**: the island's ~1.1-unit side wall may throw an AO ring onto the surrounding water — a dark halo around the whole shore. Needs the `?ao=0/1` pair judged, not assumed.
+- **Sun sheen**: 0.62 roughness kills the glint blob, but a huge plane shows a broad soft specular patch toward the sun. A6's metric only covers the island band — this needs eyeballing.
+- **TiltShift/PhoneLens blur zones**: anything at top/bottom of frame gets smeared. `ui_board_phone_r5after.png` already shows it — the object at top-right inside the CSS lens band is a blurry smudge. Boats and decoration belong at lateral mid-height, not in the blur bands or behind the bottom stack/rail.
+
+### 5. Boats: worth it, but not via raw `useFrame`
+
+The perf risk isn't polycount (3 low-poly boats are nothing) — it's `frameloop="demand"` (D4). A literal "useFrame sine + invalidate" renders every rAF forever. The scene already has the answer: `useAmbient(tickMs, fn)` — throttled ~15fps merged invalidates, honors `prefers-reduced-motion`, already powers trees/foam/ripples. Bob via `useAmbient(90–120)`. Placement is the real work: ≥1 visible in *both* default frames (A5), outside stop sightlines, out of blur bands, not under panels. Don't `castShadow` (they're outside the ±11 shadow frustum anyway).
+
+### 6. What the plan misses entirely
+
+- **Metric/measurement harness**: `measure-ui.mjs`/`analyze-ui.py` must learn the free-band rect per viewport and the chosen island measure; add a solver-side predicted-fill log — deterministic, immune to the lerp-convergence jitter that already confounded R4.
+- **Measurement protocol**: pin game state + wait time (the harness's 4.5s wait *defines* the camera state) or the numbers won't reproduce.
+- **Desktop capture reliability**: `r5boat`/`r5after` **desktop** shots came back as the 2D DOM board — the desktop 3D mount/watchdog path is flaky in the harness. Fix the pipeline or all desktop acceptance evidence is garbage.
+- **Branch collision**: G8 previously allowed UI work to touch `CameraRig.tsx` constants — this round the art branch owns that file. UI branch hands off.
+- **Font**: no rounded face in the stack (`Noto Sans SC`/PingFang/system-ui). Real chunky type = a new asset → brief routes external assets through you: bundled OFL woff2 (Nunito/Baloo 2, ~30–50KB + `THIRD_PARTY_NOTICES`) or weight/letter-spacing/`font-variant-numeric: tabular-nums` on the existing stack. Your call before the UI session starts.
+- **A1 means corners too, and after interaction**: check default framing *and* maxDistance zoom-out, both polar limits (0.62–1.05), a few azimuths — orbit is unlocked.
+
+What PM got right: keeping 0.62/0.3, foam ring separate, procedural boats, UI-by-direction on a parallel branch, sea→boats→polish ordering.
+
+## Revised plan — implementation-ready
+
+0. **PM rulings first (blocking, no code)**: pin fill = projected island bbox (rim extent, FIT_BOUNDS) ÷ free-band area, target 0.62–0.66 (mid-band absorbs jitter); amend A2's "视口" wording to free-band or record the override; define free band per viewport (desktop: top-bar bottom → bottom-stack top, between side-column inner edges; phone: canvas minus chip row and fabs); pin capture protocol (fresh load, post-`resetKey`, fixed 4.5s wait); decide the font question; rule that `CameraRig.tsx` is art-branch-only this round.
+1. **Update `measure-ui.mjs`/`analyze-ui.py`**: extract the free-band rect from live DOM rects; measure rim-bbox + core + viewport shares; log solver-predicted fill. Produce the baseline numbers before any scene change.
+2. **CameraRig solver rework**: keep fov 27. `d_home = max(d_fill(0.64), d_fit(default goal))`; per-goal `d_g = max(d_home, d_fit(g))`; while `!interacted`, position lerps toward `DEFAULT_TARGET + dir·d_g` (same view direction), target lerp unchanged; after first gesture, position frozen as today; Reset returns to `d_home`. Keep ≥8px slack inside the band for measurement jitter. Compact: evaluate `mix` 0.72→0.5 if the follow pull-back jumps too far. Offline-replicate first (the R4 solver replica exists), log predicted fill both viewports.
+3. **Sea**: keep r=14.5 disc + gradient + foam + ripples exactly; add `planeGeometry 300×300` at y=−0.76, `meshStandardMaterial` flat `waterDeep`, roughness 0.62, envMapIntensity 0.3. Camera `far` → 400, `near` → 1.0. Fog stays 60–120 pending screenshots; fallback knobs: 90–180 or fog color toward `waterDeep`.
+4. **Boats**: `Boats.tsx`, 2–3 procedural hulls (box/lathe + triangle `ShapeGeometry` sail), `SCENE`-palette materials; placement solved by projecting candidates at both framings — lateral mid-band, outside stop sightlines; bob via `useAmbient(100, …)` (pitch ±0.03 rad, y ±0.05); reduced-motion static for free; no shadows.
+5. **Screenshot-verify the interactions**: sea corners/edges at default + zoom-out + polar extremes + 4 azimuths (all water); disc/plane seam at zoom; AO on/off pair at the waterline; sun-sheen patch not clipping; boats inside blur bands? (re-place if smudged); clouds still sensible or repositioned; spinner push-in unaffected.
+6. **Polish round** (one idea at a time, revert losers): far-field ripple spread, horizon softness, grading — *do not* reopen exposure/saturation (A6/F2 frozen).
+7. **UI branch in parallel**: tokens-first in `UI_TOKENS.md` → `tokens.css` (new role vars, no renames); layout metrics and copy frozen; pressed/active ≤300ms; re-run wrap/overflow checks (G4/H4) after type changes; before/after shots per screen.
+8. **Report**: `ART_R5.md` — fill before/after in all three口径 per viewport, panel-cover at default *and* one forced-follow mid-play shot (proves per-goal distance), exposure metrics, bundle size, tests 85/85, honest e2e status; update `ACCEPTANCE_R5.md` A2/F5 wording to match the pinned metric.
+
+**Bottom line for Muse:** items 1, 3, 4, 5 are workable as directed. Item 2 as written cannot reach its own target — the all-goals fit constraint caps fill near half the requirement, and the metric it would be judged against is still unpinned. Solve the metric first, then per-goal distance, then the sea — the rest is execution.

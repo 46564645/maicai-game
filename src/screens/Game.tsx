@@ -323,7 +323,7 @@ export function Game({
         {!phoneLand && (
           <footer className="game-bottom">
             <div className="me-avatar" aria-hidden="true">
-              {playerIcon(human.characterId)}
+              <span className="me-avatar-icon">{playerIcon(human.characterId)}</span>
               <span className="me-name">{human.name}</span>
             </div>
             <RecipeCard recipeId={human.recipeId} collected={human.collected} />
@@ -384,6 +384,7 @@ export function Game({
                   className={
                     'phone-bot' + (board.activePlayerId === b.id ? ' phone-bot--on' : '')
                   }
+                  data-bot={b.characterId ?? undefined}
                   aria-expanded={openBot === b.id}
                   aria-label={fmt(strings.hud.botChip, { name: b.name, n: b.coins })}
                   onClick={() => setOpenBot(openBot === b.id ? null : b.id)}

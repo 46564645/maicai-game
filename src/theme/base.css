@@ -54,11 +54,20 @@ button:disabled {
   outline-offset: 2px;
 }
 
-/* 悬停效果只在「可悬停 + 精细指针」设备上启用，避免触屏粘滞 */
+/* 悬停效果只在「可悬停 + 精细指针」设备上启用，避免触屏粘滞
+   R5：玩具感——悬停=轻轻抬起 + 微微受光变亮（不再是压暗） */
 @media (hover: hover) and (pointer: fine) {
   button:not(:disabled):hover {
-    filter: brightness(0.94);
+    filter: brightness(1.03);
+    transform: translateY(-1px);
   }
+}
+
+/* R5 按压感：所有可点元素按下时轻轻下沉（transform 不改布局；
+   各组件的唇边阴影在各自 CSS 里同步压平） */
+button:not(:disabled):active {
+  transform: translateY(var(--press-shift));
+  filter: brightness(0.98);
 }
 
 /* 尊重减少动效偏好 */
@@ -72,7 +81,9 @@ button:disabled {
   }
 }
 
-/* —— 可复用按钮（ww 线框 §10.0.1：全圆角、56px 高、选项左侧数字键徽标）—— */
+/* —— 可复用按钮（ww 线框 §10.0.1：全圆角、56px 高、选项左侧数字键徽标）
+   R5：实体玩具键——主钮橙渐变+唇边+柔光，次钮纸白暖边+浅唇；
+   按下唇边压平、整钮下沉 --press-shift —— */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -83,22 +94,37 @@ button:disabled {
   white-space: nowrap;
   padding: 0 var(--space-6);
   font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-heavy);
   line-height: 1;
   border: 2px solid transparent;
   border-radius: var(--radius-button);
+  transition:
+    transform var(--motion-fast) var(--ease-spring),
+    box-shadow var(--motion-fast) var(--motion-ease),
+    filter var(--motion-fast) var(--motion-ease),
+    background-color var(--motion-fast) var(--motion-ease),
+    border-color var(--motion-fast) var(--motion-ease);
 }
 
 .btn--primary {
   color: var(--button-primary-fg);
   background: var(--button-primary-bg);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-btn);
+}
+
+.btn--primary:not(:disabled):active {
+  box-shadow: var(--shadow-btn-press);
 }
 
 .btn--secondary {
   color: var(--button-secondary-fg);
   background: var(--button-secondary-bg);
   border-color: var(--button-secondary-border);
+  box-shadow: var(--shadow-btn-quiet);
+}
+
+.btn--secondary:not(:disabled):active {
+  box-shadow: var(--shadow-btn-quiet-press);
 }
 
 .btn:disabled {

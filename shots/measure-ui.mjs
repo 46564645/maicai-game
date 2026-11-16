@@ -14,7 +14,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const BASE = 'http://localhost:4173';
+const BASE = process.env.BASE ?? 'http://localhost:4173';
 const OUT = path.dirname(fileURLToPath(import.meta.url));
 const TAG = process.argv[2] ?? 'before';
 const ONLY = process.argv[3] ?? '';
@@ -90,6 +90,22 @@ async function enterChar(page) {
   await page.locator('canvas').waitFor({ timeout: 20_000 }).catch(() => null);
 }
 
+// The desktop 3D mount can time out under SwiftShader (lazy chunk + shader
+// compile racing the first-frame watchdog) and fall back to Board2D.
+// Detect it and retry once on a warm reload so a 2D shot never lands in the
+// measurement set.
+async function ensure3d(page) {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    if (attempt > 0) {
+      await page.reload();
+      await enterGame(page);
+      await enterChar(page);
+    }
+    if ((await page.locator('[data-testid="board3d"] canvas').count()) > 0) return true;
+  }
+  return false;
+}
+
 async function jumpStation(page, station, panelTestid, timeout = 40_000) {
   await page.keyboard.press('d');
   await page.locator(`[data-testid="demo-station-${station}"]`).dispatchEvent('click');
@@ -126,7 +142,13 @@ async function capBoard(browser, phone) {
   const { ctx, page } = await newPage(browser, phone);
   await enterGame(page);
   await enterChar(page);
+  if (!(await ensure3d(page))) console.log(`  WARN ${name}: 3D fell back to 2D after retry`);
   await page.keyboard.press('d');
+  // R5 protocol: pin the camera at the design default framing (post-resetKey),
+  // then a fixed 4.5s settle. The follow target lerps back to base while the
+  // position is already home, so the shot is the default view regardless of
+  // which station was active on entry.
+  await page.locator('.board3d-reset').click().catch(() => null);
   // NOTE: keep this at 4500ms — the baseline matrix was captured with it.
   // The camera follow-lerp is frame-based, so the wait defines the camera
   // state in the shot (at 20s the follow has converged to the station-0
@@ -150,6 +172,7 @@ async function capMarket(browser, phone) {
   const { ctx, page } = await newPage(browser, phone);
   await enterGame(page);
   await enterChar(page);
+  if (!(await ensure3d(page))) console.log(`  WARN ${name}: 3D fell back to 2D after retry`);
   await page.keyboard.press('d');
   await page.waitForTimeout(3000);
   await jumpStation(page, 2, 'panel-market');
@@ -165,6 +188,7 @@ async function capSpinner(browser, phone) {
   const { ctx, page } = await newPage(browser, phone);
   await enterGame(page);
   await enterChar(page);
+  if (!(await ensure3d(page))) console.log(`  WARN ${name}: 3D fell back to 2D after retry`);
   await page.keyboard.press('d');
   await page.waitForTimeout(3000);
   await page.keyboard.press('d');

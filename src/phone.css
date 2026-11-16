@@ -172,8 +172,10 @@
   background: var(--color-surface);
   border: 2px solid var(--color-line);
   border-radius: var(--radius-button);
+  box-shadow: var(--shadow-sm);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
   color: var(--color-muted);
   white-space: nowrap;
 }
@@ -192,23 +194,51 @@
   background: var(--color-surface);
   border: 2px solid var(--color-line);
   border-radius: var(--radius-button);
+  box-shadow: var(--shadow-sm);
   font-size: var(--font-size-sm);
   color: var(--color-text);
   cursor: pointer;
   touch-action: manipulation;
+  transition:
+    transform var(--motion-fast) var(--ease-spring),
+    box-shadow var(--motion-fast) var(--motion-ease),
+    border-color var(--motion-fast) var(--motion-ease),
+    background-color var(--motion-fast) var(--motion-ease);
 }
 
 .phone-bot--on {
   border-color: var(--color-primary);
   border-width: 3px;
+  background: var(--color-primary-soft);
 }
 
 .phone-bot-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-size);
+  height: var(--icon-size);
+  border-radius: var(--radius-button);
   font-size: var(--font-size-md);
+  line-height: 1;
+}
+
+/* R5：头像圆片按玩家色上淡彩（与桌面 bot-card 同一套类别色编码） */
+.phone-bot[data-bot='bot-xiaowen'] .phone-bot-avatar {
+  background: var(--tint-steady);
+}
+
+.phone-bot[data-bot='bot-xiaochong'] .phone-bot-avatar {
+  background: var(--tint-impulsive);
+}
+
+.phone-bot[data-bot='bot-xiaogen'] .phone-bot-avatar {
+  background: var(--tint-follower);
 }
 
 .phone-bot-coins {
   font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
 }
 
 /* 点头像展开的详情卡（复用 BotCard） */
@@ -244,10 +274,10 @@
   align-items: center;
   gap: var(--space-1);
   padding: var(--space-2) var(--space-3);
-  background: var(--color-surface);
+  background: var(--gradient-card);
   border: 2px solid var(--color-line-strong);
   border-radius: var(--radius-card);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-sm), var(--inset-light);
   text-align: center;
 }
 
@@ -474,15 +504,19 @@
   min-width: var(--button-height);
   height: var(--button-height);
   padding: 0 var(--space-3);
-  background: var(--color-surface);
+  background: var(--gradient-card);
   border: 3px solid var(--color-primary);
   border-radius: var(--radius-button);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-md), var(--inset-light);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
   color: var(--color-text);
   cursor: pointer;
   touch-action: manipulation;
+  transition:
+    transform var(--motion-fast) var(--ease-spring),
+    box-shadow var(--motion-fast) var(--motion-ease),
+    filter var(--motion-fast) var(--motion-ease);
 }
 
 .phone-fab--help {
@@ -493,6 +527,9 @@
 
 .phone-fab-num {
   font-size: var(--font-size-md);
+  font-weight: var(--font-weight-heavy);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
 }
 
 /* 欠车费时钱包角上顶个黄色小圆点（钱是核心，不藏） */

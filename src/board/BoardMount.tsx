@@ -42,7 +42,11 @@ export function BoardMount(props: Props) {
   const readyRef = useRef(false);
   const use3d = webglOk && !failed;
 
-  // 首帧看门狗：Canvas 超时未创建（WebGL 慢/卡死）→ 回退 2D
+  // 首帧看门狗：Canvas 超时未创建（WebGL 慢/卡死）→ 回退 2D。
+  // 4s → 10s（R5）：桌面 high 档懒加载 Effects 子分包 + 首次着色器编译
+  // 在软件渲染/低端机上可超过 4s，看门狗误杀把能用的 3D 打回 2D。
+  // 等待期间 Suspense 已在渲染 Board2D，用户观感与立即回退相同；
+  // 真无 WebGL 由 detectWebGL 前置拦截，不走到这里。
   useEffect(() => {
     if (!use3d || readyRef.current) return;
     const t = window.setTimeout(() => {
@@ -50,7 +54,7 @@ export function BoardMount(props: Props) {
         console.warn('Board3D 首帧超时，回退 2D');
         setFailed(true);
       }
-    }, 4000);
+    }, 10_000);
     return () => clearTimeout(t);
   }, [use3d]);
 

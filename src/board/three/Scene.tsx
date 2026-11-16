@@ -177,7 +177,7 @@ export function Scene({
         shadow-camera-bottom={-11}
         shadow-bias={-0.0004}
         shadow-normalBias={0.02}
-        shadow-radius={2}
+        shadow-radius={4}
       />
       <directionalLight position={[-6, 7, -5]} intensity={0.25} color="#CFE0FF" />
 
@@ -185,8 +185,13 @@ export function Scene({
       {flags.env && <EnvironmentLite url="./env/spruit_sunrise_512.hdr" />}
 
       {/* fog 只做地平线柔化：起点必须在 T5 fit 距离（≈40–52）之外，
-          否则整岛被雾洗白（首版 fit 实拍教训） */}
-      <fog attach="fog" args={['#E7F1F7', 60, 120]} />
+          否则整岛被雾洗白（首版 fit 实拍教训）。
+          R5 修正：FIT_RECT 收紧后机位拉远到 ≈43，画角处水面距相机
+          70–90，已进 60–120 雾程 → 帧角水面被雾洗成底色、渐变盘边
+          缘露出（A1 不达标）。按 DISCUSSION_R5 round-1 预案改 90–180：
+          画角水面几乎无雾、深水平面铺满全屏；岛体距相机 ≈40 不受影响；
+          绝不低于 60（T5 教训）。 */}
+      <fog attach="fog" args={['#E7F1F7', 90, 180]} />
 
       <Island shadows={shadows} />
       <StreetLoop stations={board.stations} shadows={shadows} />

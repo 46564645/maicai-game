@@ -37,14 +37,41 @@
   --color-surface: #ffffff;        /* 卡片/面板 */
   --color-surface-dim: #f7ede0;    /* 凹陷/槽位（奶油底上的浅暖灰） */
   --color-text: #1E1E2A;           /* 墨色 */
+  --color-ink: #1E1E2A;            /* 墨蓝别名：正文/次动作/数字键徽标（同值，语义区分） */
   --color-muted: #6b6572;          /* 次要文字 */
   --color-line: #e8ddd0;           /* 分隔线 */
+  --color-line-soft: color-mix(in srgb, var(--color-line) 55%, var(--color-surface)); /* 更柔暖发丝线 */
   --color-line-strong: #cbbfae;    /* 强调描边 */
   --color-warning: var(--color-accent-yellow); /* 待付夹=黄底墨字 */
   --color-warning-contrast: var(--color-text);
-  --color-backdrop: rgba(30, 30, 42, 0.45); /* 弹窗遮罩 */
+  --color-backdrop: rgba(46, 34, 20, 0.42); /* 弹窗遮罩（R5：调暖的墨棕） */
   --color-focus: var(--color-text);           /* 焦点描边 */
   --color-disabled: #c9c2b8;
+  --color-shadow: #6b3f14;         /* 阴影统一暖棕（混入透明度使用） */
+
+  /* —— R5 美化派生（全部 color-mix 自色板，换主色即整体跟随）—— */
+  --color-primary-hi: color-mix(in srgb, var(--color-primary) 82%, #ffffff);  /* 主色亮端 */
+  --color-primary-lo: color-mix(in srgb, var(--color-primary) 78%, #a63c00);  /* 主色暗端/唇边 */
+  --color-primary-soft: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface)); /* 选中淡橙底 */
+  --color-primary-ghost: color-mix(in srgb, var(--color-primary) 30%, transparent); /* 主按钮柔光 */
+  --color-primary-ghost-press: color-mix(in srgb, var(--color-primary) 18%, transparent);
+  --gradient-primary: linear-gradient(
+    180deg,
+    var(--color-primary-hi) 0%,
+    var(--color-primary) 58%,
+    var(--color-primary-lo) 100%
+  );
+  /* 卡面纸白 → 底缘一丝奶油：与 3D 软塑料同材质的「受光面」 */
+  --gradient-card: linear-gradient(
+    180deg,
+    var(--color-surface) 0%,
+    color-mix(in srgb, var(--color-bg) 45%, var(--color-surface)) 100%
+  );
+  /* 玩家淡彩底（玩家色 22% + 纸白）：bot 头像圆底/选中态 */
+  --tint-you: color-mix(in srgb, var(--color-primary) 20%, var(--color-surface));
+  --tint-steady: color-mix(in srgb, var(--color-blue) 22%, var(--color-surface));
+  --tint-impulsive: color-mix(in srgb, var(--color-accent-yellow) 30%, var(--color-surface));
+  --tint-follower: color-mix(in srgb, var(--color-mint) 34%, var(--color-surface));
 
   /* —— 页面背景【ww M4.5.5】：奶油 → 浅蓝渐变（只派生现有色板，不改色板值）—— */
   --gradient-page: linear-gradient(
@@ -59,8 +86,11 @@
   --player-impulsive: #FFC93C;
   --player-follower: #7ED9B5;
 
-  /* —— 字体 —— */
-  --font-family: "Noto Sans SC", "PingFang SC", system-ui, sans-serif;
+  /* —— 字体（R5：圆体优先栈——设备上有 ui-rounded/SF Rounded/Nunito 等即启用，
+     无则回退原栈；仓库不内嵌字体文件，正式授权圆体由 PM 另行采购）—— */
+  --font-family: ui-rounded, "SF Pro Rounded", "Nunito", "Baloo 2",
+    "Arial Rounded MT Bold", "Quicksand", "Noto Sans SC", "PingFang SC",
+    system-ui, sans-serif;
   --font-size-xs: 0.875rem;   /* 14px，仅辅助说明 */
   --font-size-sm: 1rem;       /* 16px */
   --font-size-md: 1.25rem;    /* 20px，正文 ≥20px */
@@ -69,6 +99,7 @@
   --font-size-xxl: 3rem;      /* 48px，主标题 */
   --font-weight-regular: 400;
   --font-weight-bold: 700;
+  --font-weight-heavy: 800;   /* 英雄层：按钮/标题/钱的数字 */
   --line-height: 1.5;
 
   /* —— 圆角（ww §10.0.1：卡片 16px、弹窗 28px、按钮全圆角）—— */
@@ -90,27 +121,50 @@
   --space-6: 32px;
   --space-7: 48px;
 
-  /* —— 阴影 —— */
-  --shadow-sm: 0 1px 3px rgba(28, 28, 28, 0.12);
-  --shadow-md: 0 4px 12px rgba(28, 28, 28, 0.14);
-  --shadow-lg: 0 8px 28px rgba(28, 28, 28, 0.2);
+  /* —— 阴影（R5：暖棕调、接触影+环境影分层；不用灰黑）—— */
+  --shadow-sm: 0 1px 2px
+      color-mix(in srgb, var(--color-shadow) 10%, transparent),
+    0 3px 8px color-mix(in srgb, var(--color-shadow) 8%, transparent);
+  --shadow-md: 0 1px 3px
+      color-mix(in srgb, var(--color-shadow) 12%, transparent),
+    0 8px 20px color-mix(in srgb, var(--color-shadow) 11%, transparent);
+  --shadow-lg: 0 2px 6px
+      color-mix(in srgb, var(--color-shadow) 14%, transparent),
+    0 16px 44px color-mix(in srgb, var(--color-shadow) 16%, transparent);
+  /* 大弹窗最深的弥散 */
+  --shadow-pop: 0 2px 8px
+      color-mix(in srgb, var(--color-shadow) 16%, transparent),
+    0 24px 64px color-mix(in srgb, var(--color-shadow) 22%, transparent);
+  /* 纸面「受光顶缘」：面板/横条/底栏的内嵌高光 */
+  --inset-light: inset 0 1px 0
+    color-mix(in srgb, var(--color-surface) 75%, transparent);
+  /* 实体按钮：唇边（按下压平）+ 主色柔光 */
+  --shadow-btn: 0 3px 0 var(--color-primary-lo),
+    0 8px 16px var(--color-primary-ghost);
+  --shadow-btn-press: 0 1px 0 var(--color-primary-lo),
+    0 2px 6px var(--color-primary-ghost-press);
+  --shadow-btn-quiet: 0 2px 0 var(--color-line),
+    0 4px 10px color-mix(in srgb, var(--color-shadow) 10%, transparent);
+  --shadow-btn-quiet-press: 0 0 0 var(--color-line),
+    0 2px 6px color-mix(in srgb, var(--color-shadow) 8%, transparent);
 
-  /* —— 按钮（主按钮=主色底白字；次按钮白底主色描边）—— */
-  --button-primary-bg: var(--color-primary);
+  /* —— 按钮（R5：主按钮=橙渐变底白字；次按钮=纸白暖发丝边墨蓝字，
+     橙只留给一屏唯一主动作）—— */
+  --button-primary-bg: var(--gradient-primary);
   --button-primary-fg: var(--color-primary-contrast);
-  --button-secondary-bg: var(--color-surface);
-  --button-secondary-fg: var(--color-text);
-  --button-secondary-border: var(--color-primary);
+  --button-secondary-bg: var(--gradient-card);
+  --button-secondary-fg: var(--color-ink);
+  --button-secondary-border: var(--color-line);
   --button-height: 56px;                     /* 按钮高（最小 48px 见 --tap-min-size） */
   --button-min-height: var(--button-height); /* 旧名兼容 */
   --tap-min-size: 48px;                      /* 一切可点目标 ≥48×48px */
 
   /* —— 选项数字键徽标（G2/G4 线框：按钮左侧圆形 1/2/3）—— */
   --key-hint-size: 28px;
-  --key-hint-bg: var(--color-primary);       /* 次按钮内：深灰底 */
+  --key-hint-bg: var(--color-ink);           /* 次按钮内：墨蓝底（次动作色） */
   --key-hint-fg: var(--color-surface);       /* 次按钮内：白字 */
   --key-hint-bg-on-primary: var(--color-surface); /* 主按钮内反色：白底 */
-  --key-hint-fg-on-primary: var(--color-primary); /* 主按钮内反色：深灰字 */
+  --key-hint-fg-on-primary: var(--color-ink);     /* 主按钮内反色：墨蓝字 */
 
   /* —— 尺寸 —— */
   --popup-sheet-height: 80vh; /* 竖屏底部抽屉最大高（上方留给 Toast 的安全区） */
@@ -126,4 +180,7 @@
   --motion-med: 300ms;
   --motion-slow: 900ms; /* 天气转盘转到位 */
   --motion-ease: ease-out;
+  /* R5 按压感：轻回弹 + 下沉位移（一切 tap/press ≤150ms） */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --press-shift: 2px;
 }

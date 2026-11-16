@@ -27,7 +27,7 @@ function makeCanvas(size: number) {
   return { c, g: c.getContext('2d')! };
 }
 
-/** 柔边椭圆斑（斑驳的主力笔触） */
+/** 柔边椭圆斑（斑驳的主力笔触）。3×3 环绕绘制 → 贴图可无缝平铺 */
 function blotch(
   g: CanvasRenderingContext2D,
   rng: () => number,
@@ -40,15 +40,20 @@ function blotch(
   const x = rng() * size;
   const y = rng() * size;
   const r = rMin + rng() * (rMax - rMin);
+  const ry = r * (0.55 + rng() * 0.5);
+  const rot = rng() * Math.PI;
   g.globalAlpha = alpha;
   g.fillStyle = color;
-  g.beginPath();
-  g.ellipse(x, y, r, r * (0.55 + rng() * 0.5), rng() * Math.PI, 0, Math.PI * 2);
-  g.fill();
+  for (const dx of [-size, 0, size])
+    for (const dy of [-size, 0, size]) {
+      g.beginPath();
+      g.ellipse(x + dx, y + dy, r, ry, rot, 0, Math.PI * 2);
+      g.fill();
+    }
   g.globalAlpha = 1;
 }
 
-/** 细砂砾点 */
+/** 细砂砾点（同样 3×3 环绕 → 无缝平铺） */
 function speckle(
   g: CanvasRenderingContext2D,
   rng: () => number,
@@ -62,9 +67,12 @@ function speckle(
   const r = 0.6 + rng() * rMax;
   g.globalAlpha = alpha;
   g.fillStyle = color;
-  g.beginPath();
-  g.arc(x, y, r, 0, Math.PI * 2);
-  g.fill();
+  for (const dx of [-size, 0, size])
+    for (const dy of [-size, 0, size]) {
+      g.beginPath();
+      g.arc(x + dx, y + dy, r, 0, Math.PI * 2);
+      g.fill();
+    }
   g.globalAlpha = 1;
 }
 
@@ -74,6 +82,7 @@ function toTexture(c: HTMLCanvasElement, srgb: boolean): THREE.CanvasTexture {
   tex.wrapS = THREE.RepeatWrapping;
   tex.wrapT = THREE.RepeatWrapping;
   tex.anisotropy = 4;
+  tex.needsUpdate = true;
   return tex;
 }
 

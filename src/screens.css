@@ -12,10 +12,10 @@
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-4) var(--space-3);
-  background: var(--color-surface);
+  background: var(--gradient-card);
   border: 2px solid var(--color-line);
   border-radius: var(--radius-card);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-sm), var(--inset-light);
   text-align: center;
 }
 
@@ -23,16 +23,25 @@ button.card-view--selected,
 .card-view--selected {
   border-color: var(--color-primary);
   border-width: 3px;
-  /* 「抬起」：选中的卡浮起来一点（ww M4.5.6b：菜市场/小卖部选中态一致） */
+  /* 「抬起」：选中的卡浮起来一点（ww M4.5.6b：菜市场/小卖部选中态一致）
+     R5：再垫一层淡橙底——像被选中的玩具片 */
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  background: var(--color-primary-soft);
+  box-shadow: var(--shadow-md), var(--inset-light);
+}
+
+/* R5：选中卡已抬 -2px，按下回到 0（未选中卡走全局 +2px 下沉） */
+button.card-view--selected:not(:disabled):active {
+  transform: translateY(0);
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .card-view {
     transition:
-      transform var(--motion-fast) var(--motion-ease),
-      box-shadow var(--motion-fast) var(--motion-ease);
+      transform var(--motion-fast) var(--ease-spring),
+      box-shadow var(--motion-fast) var(--motion-ease),
+      border-color var(--motion-fast) var(--motion-ease),
+      background-color var(--motion-fast) var(--motion-ease);
   }
 }
 
@@ -43,10 +52,13 @@ button.card-view--selected,
 .card-view-name {
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
 }
 
 .card-view-price {
   font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
   color: var(--color-muted);
 }
 
@@ -104,6 +116,9 @@ button.card-view--selected,
   padding: var(--space-4);
   background: var(--color-surface-dim);
   border-radius: var(--radius-modal);
+  /* R5：桌面浅凹感——内嵌微光，像木盘里的凹槽 */
+  box-shadow: inset 0 2px 8px
+    color-mix(in srgb, var(--color-shadow) 10%, transparent);
 }
 
 .plate-card {
@@ -112,10 +127,10 @@ button.card-view--selected,
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-4) var(--space-3);
-  background: var(--color-surface);
+  background: var(--gradient-card);
   border: 2px solid var(--color-line);
   border-radius: var(--radius-card);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-sm), var(--inset-light);
 }
 
 .plate-disc {
@@ -126,11 +141,15 @@ button.card-view--selected,
   height: 96px;
   border-radius: var(--radius-button);
   font-size: var(--font-size-xl);
+  /* R5：盘子是微凹的瓷片——内嵌一点影 */
+  box-shadow: inset 0 -3px 6px
+      color-mix(in srgb, var(--color-shadow) 10%, transparent),
+    inset 0 2px 3px color-mix(in srgb, var(--color-surface) 60%, transparent);
 }
 
 .plate-disc--full {
-  background: var(--color-mint);
-  border: 3px solid var(--color-line-strong);
+  background: var(--tint-follower);
+  border: 3px solid var(--color-mint);
 }
 
 .plate-disc--simple {
@@ -184,9 +203,11 @@ button.card-view--selected,
   width: 100%;
   max-width: 560px;
   padding: var(--space-4);
-  background: var(--color-surface);
+  background: var(--gradient-card);
   border: 2px solid var(--color-line);
   border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm), var(--inset-light);
+  font-variant-numeric: tabular-nums; /* 流水金额对齐才数得清 */
   text-align: left;
 }
 
@@ -277,9 +298,10 @@ button.card-view--selected,
   width: 100%;
   max-width: 480px;
   padding: var(--space-3) var(--space-4);
-  background: var(--color-surface);
+  background: var(--gradient-card);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm), var(--inset-light);
   text-align: left;
 }
 
@@ -329,9 +351,10 @@ button.card-view--selected,
 
 .reflection-line {
   padding: var(--space-3) var(--space-4);
-  background: var(--color-surface);
+  background: var(--gradient-card);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
 }
 
 .reflection-line--muted {
@@ -345,9 +368,10 @@ button.card-view--selected,
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
-  background: var(--color-surface);
+  background: var(--gradient-card);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm), var(--inset-light);
   text-align: left;
 }
 

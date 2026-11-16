@@ -7,8 +7,8 @@
 /* —— 顶条 —— */
 .game-title {
   font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text);
+  font-weight: var(--font-weight-heavy);
+  color: var(--color-ink);
 }
 
 .game-topbar-actions .btn {
@@ -26,10 +26,10 @@
   justify-content: center;
   gap: var(--space-1);
   padding: var(--space-3) var(--space-2);
-  background: var(--color-surface);
+  background: var(--gradient-card);
   border: 2px solid var(--color-line);
   border-radius: var(--radius-card);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-sm), var(--inset-light);
   text-align: center;
   min-height: 72px;
 }
@@ -221,13 +221,17 @@
   padding: 0 var(--space-4);
   border: 2px solid var(--color-line-strong);
   border-radius: var(--radius-button);
-  background: var(--color-surface);
+  background: var(--gradient-card);
   color: var(--color-muted);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-md), var(--inset-light);
   cursor: pointer;
   touch-action: manipulation;
+  transition:
+    transform var(--motion-fast) var(--ease-spring),
+    box-shadow var(--motion-fast) var(--motion-ease),
+    filter var(--motion-fast) var(--motion-ease);
 }
 
 /* 中央偏下 overlay：复用 board-center 的样式气质，半透明奶油底不挡岛。
@@ -260,7 +264,8 @@
   background: color-mix(in srgb, var(--color-bg) 82%, var(--color-surface));
   border: 2px solid var(--color-line-strong);
   border-radius: var(--radius-card);
-  box-shadow: var(--shadow-md);
+  /* R5：提示条=软托盘——暖分层影 + 顶缘受光（宽高/边框不动） */
+  box-shadow: var(--shadow-md), var(--inset-light);
   text-align: center;
   pointer-events: none; /* 空处不挡相机拖拽，只有按钮可点 */
 }
@@ -281,6 +286,10 @@
   /* 整条放得下时主按钮文案不折行（折行会把矮条又撑高）；
      ≤900px 媒体查询里恢复 normal 折行 */
   white-space: nowrap;
+  /* G1 锁值：字重保持 700——800 会把按钮撑宽 ~5px，与加粗后的
+     状态行合计超出整排宽度而折行（条高 76→114、底部栈 189→227）。
+     条外其它主按钮沿用 --font-weight-heavy。 */
+  font-weight: var(--font-weight-bold);
 }
 
 .board3d-overlay :is(button, a) {
@@ -300,9 +309,12 @@
   width: fit-content;
   margin: var(--space-2) auto 0;
   padding: var(--space-1) var(--space-4);
-  background: color-mix(in srgb, var(--color-surface) 80%, transparent);
+  background: color-mix(in srgb, var(--color-bg) 82%, var(--color-surface));
+  border: 1px solid var(--color-line-soft);
   border-radius: var(--radius-button);
+  box-shadow: var(--shadow-sm);
   font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
   color: var(--color-muted);
   text-align: center;
 }
@@ -315,6 +327,24 @@
    CameraRig FIT_RECT.desktop 的 b=0.24 配套。回正钮右移一档，
    避开拟合后岛核心的右下角，整颗落在浅滩水面上。 */
 @media (min-width: 901px) {
+  /* R5 fix (PM, 2026-11-17)：R5 把状态行改 heavy 字重后，状态文案
+     （如 Your turn: at "Home for Dinner"）+ 主按钮塞不进 46rem 一排，
+     状态折行把条高 76 → 114、底部栈 189 → 227，违反 R4 锁定的单行条 /
+     189px 栈。条宽放宽到 52rem（仍在左右 bot 卡之间、仍贴底不碰拟合
+     带），容器 nowrap + 状态行省略号兜底，条高结构上恒为单行。 */
+  .board3d-overlay {
+    flex-wrap: nowrap;
+    width: min(96%, 52rem);
+  }
+
+  .board3d-overlay .board-status {
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .board3d-overlay .board-log {
     flex: 1 1 0;
     order: 0;
@@ -377,15 +407,38 @@
   gap: var(--space-3);
   align-items: flex-start;
   padding: var(--space-3);
-  background: var(--color-surface);
-  border: 2px solid var(--color-line);
+  background: var(--gradient-card);
+  border: 2px solid var(--color-line-soft);
   border-radius: var(--radius-card);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-sm), var(--inset-light);
   text-align: left;
+  transition:
+    border-color var(--motion-fast) var(--motion-ease),
+    box-shadow var(--motion-fast) var(--motion-ease);
 }
 
 .bot-card--thinking {
   border-color: var(--color-primary);
+  /* 轮到它想：一圈柔柔的橙光呼吸（paint-only，减动效时被全局关掉） */
+  box-shadow: var(--shadow-sm), var(--inset-light),
+    0 0 0 3px var(--color-primary-soft);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .bot-card--thinking {
+    animation: think-glow 1.4s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes think-glow {
+  from {
+    box-shadow: var(--shadow-sm), var(--inset-light),
+      0 0 0 2px var(--color-primary-soft);
+  }
+  to {
+    box-shadow: var(--shadow-sm), var(--inset-light),
+      0 0 0 4px var(--color-primary-soft);
+  }
 }
 
 .bot-card-avatar {
@@ -398,6 +451,22 @@
   border-radius: var(--radius-button);
   background: var(--color-surface-dim);
   font-size: var(--font-size-lg);
+}
+
+/* R5：头像圆片按玩家色上淡彩（类别色编码，与 3D 棋子同色系） */
+.bot-card[data-bot='bot-xiaowen'] .bot-card-avatar {
+  background: var(--tint-steady);
+  border: 2px solid color-mix(in srgb, var(--player-steady) 55%, var(--color-surface));
+}
+
+.bot-card[data-bot='bot-xiaochong'] .bot-card-avatar {
+  background: var(--tint-impulsive);
+  border: 2px solid color-mix(in srgb, var(--player-impulsive) 70%, var(--color-surface));
+}
+
+.bot-card[data-bot='bot-xiaogen'] .bot-card-avatar {
+  background: var(--tint-follower);
+  border: 2px solid color-mix(in srgb, var(--player-follower) 70%, var(--color-surface));
 }
 
 .bot-card-info {
@@ -428,9 +497,10 @@
 
 .lap-card {
   padding: var(--space-3);
-  background: var(--color-surface);
-  border: 2px solid var(--color-line);
+  background: var(--gradient-card);
+  border: 2px solid var(--color-line-soft);
   border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm), var(--inset-light);
   font-size: var(--font-size-sm);
 }
 

@@ -4,10 +4,15 @@
  * 底部垫一圈更宽的浅滩沿 + 一片大水面。程序化几何，玩具积木感。
  * M4.5.7（ART_3D §9.9）：水面径向渐变（近岸浅蓝透亮→外缘深一档）+
  * 岸白沫线（贴岛沿的白色泡沫双环，呼吸微动）。
+ * R5：海铺满全屏 —— 渐变圆盘只保留近岸浅水环，底下垫一块超大深水
+ * 平面延到雾程外（径向渐变外缘色 = 深水色，接缝不可见）；水面有
+ * 细噪声凹凸；外海点缀玩具小船/浮标，不遮岛。
  */
 import { useMemo, useRef } from 'react';
 import * as THREE from 'three';
-import { SCENE, TOY_MAT } from './materials';
+import { RoundedBox } from '@react-three/drei';
+import { PALETTE, PLASTIC, SCENE, TOY_MAT } from './materials';
+import { foamNoiseTexture, grassMaps, waterNoiseTexture } from './textures';
 import { useAmbient } from './ambient';
 
 const ISLAND_W = 15.2; // 岛宽（x）
@@ -102,7 +107,8 @@ function waterGradientTexture(): THREE.CanvasTexture {
   return tex;
 }
 
-/** 岸白沫线：贴岛沿的白色泡沫环（扁平环 ×2，透明度/缩放呼吸微动，ART §9.9） */
+/** 岸白沫线：贴岛沿的白色泡沫环（扁平环 ×2，透明度/缩放呼吸微动，ART §9.9）。
+ *  R5：alphaMap 泡沫噪声 —— 泡沫断成一串泡泡团，不再是完美几何环。 */
 function FoamRing() {
   // 泡沫环 = 圆角矩形外轮廓 − 略小于浅滩沿的内孔（内缘藏进滩沿下）
   const geoNear = useMemo(() => {
@@ -119,6 +125,12 @@ function FoamRing() {
     );
     return new THREE.ShapeGeometry(s, 10);
   }, []);
+  const foamAlpha = useMemo(() => {
+    const t = foamNoiseTexture();
+    // ShapeGeometry 的 UV = 形状坐标（约 ±9），repeat 让噪声团大小适中
+    t.repeat.set(0.22, 0.22);
+    return t;
+  }, []);
   const nearMat = useMemo(
     () =>
       new THREE.MeshBasicMaterial({
@@ -126,8 +138,9 @@ function FoamRing() {
         transparent: true,
         opacity: 0.55,
         depthWrite: false,
+        alphaMap: foamAlpha,
       }),
-    [],
+    [foamAlpha],
   );
   const farMat = useMemo(
     () =>
@@ -136,8 +149,9 @@ function FoamRing() {
         transparent: true,
         opacity: 0.3,
         depthWrite: false,
+        alphaMap: foamAlpha,
       }),
-    [],
+    [foamAlpha],
   );
   const near = useRef<THREE.Mesh>(null);
   const far = useRef<THREE.Mesh>(null);
@@ -152,6 +166,95 @@ function FoamRing() {
     <group rotation-x={-Math.PI / 2} position-y={-0.68}>
       <mesh ref={near} geometry={geoNear} material={nearMat} renderOrder={1} />
       <mesh ref={far} geometry={geoFar} material={farMat} renderOrder={1} />
+    </group>
+  );
+}
+
+/** 玩具小帆船：胡桃壳船体 + 三角帆 + 小旗，轻轻起伏（外海点缀，R5） */
+function ToyBoat({
+  x,
+  z,
+  ry,
+  hull,
+  sail,
+  flag,
+}: {
+  x: number;
+  z: number;
+  ry: number;
+  hull: string;
+  sail: string;
+  flag: string;
+}) {
+  const g = useRef<THREE.Group>(null);
+  const phase = x * 0.9 + z * 1.4;
+  useAmbient(110, (t) => {
+    if (!g.current) return;
+    g.current.position.y = -0.66 + Math.sin(t * 1.05 + phase) * 0.045;
+    g.current.rotation.z = Math.sin(t * 0.8 + phase * 1.3) * 0.05;
+    g.current.rotation.x = Math.sin(t * 0.62 + phase) * 0.03;
+  });
+  return (
+    <group ref={g} position={[x, -0.66, z]} rotation-y={ry}>
+      {/* 胡桃壳船体：压扁的圆球，上半露出水面 */}
+      <mesh scale={[1.35, 0.5, 0.62]} castShadow={false}>
+        <sphereGeometry args={[0.62, 16, 12]} />
+        <meshPhysicalMaterial color={hull} {...PLASTIC} />
+      </mesh>
+      {/* 船舷上沿一圈浅色 */}
+      <RoundedBox
+        args={[1.5, 0.1, 0.7]}
+        radius={0.05}
+        smoothness={3}
+        position-y={0.16}
+        castShadow={false}
+      >
+        <meshPhysicalMaterial color={PALETTE.cream} {...PLASTIC} />
+      </RoundedBox>
+      {/* 桅杆 + 三角帆 + 小旗 */}
+      <mesh position-y={0.62} castShadow={false}>
+        <cylinderGeometry args={[0.035, 0.045, 0.95, 8]} />
+        <meshPhysicalMaterial color={PALETTE.cream} {...PLASTIC} />
+      </mesh>
+      <mesh position={[0.02, 0.62, 0.03]} rotation-y={Math.PI / 2} castShadow={false}>
+        <circleGeometry args={[0.42, 3]} />
+        <meshPhysicalMaterial color={sail} {...PLASTIC} side={THREE.DoubleSide} />
+      </mesh>
+      <mesh position={[0.34, 0.42, 0.03]} rotation-y={Math.PI / 2} rotation-z={Math.PI}>
+        <circleGeometry args={[0.34, 3]} />
+        <meshPhysicalMaterial color={sail} {...PLASTIC} side={THREE.DoubleSide} />
+      </mesh>
+      <mesh position={[0.1, 1.08, 0.03]} rotation-y={Math.PI / 2}>
+        <circleGeometry args={[0.09, 3]} />
+        <meshBasicMaterial color={flag} side={THREE.DoubleSide} />
+      </mesh>
+    </group>
+  );
+}
+
+/** 小浮标：圆球 + 白条 + 小尖顶，轻轻漂 */
+function Buoy({ x, z, c }: { x: number; z: number; c: string }) {
+  const g = useRef<THREE.Group>(null);
+  const phase = x * 1.1 + z * 0.7;
+  useAmbient(130, (t) => {
+    if (!g.current) return;
+    g.current.position.y = -0.68 + Math.sin(t * 1.2 + phase) * 0.04;
+    g.current.rotation.z = Math.sin(t * 0.95 + phase) * 0.07;
+  });
+  return (
+    <group ref={g} position={[x, -0.68, z]}>
+      <mesh scale={[1, 0.82, 1]} castShadow={false}>
+        <sphereGeometry args={[0.22, 12, 10]} />
+        <meshPhysicalMaterial color={c} {...PLASTIC} />
+      </mesh>
+      <mesh position-y={0.02} castShadow={false}>
+        <cylinderGeometry args={[0.225, 0.225, 0.07, 12]} />
+        <meshPhysicalMaterial color="#FFF6EC" {...PLASTIC} />
+      </mesh>
+      <mesh position-y={0.24} castShadow={false}>
+        <coneGeometry args={[0.08, 0.2, 10]} />
+        <meshPhysicalMaterial color={c} {...PLASTIC} />
+      </mesh>
     </group>
   );
 }
@@ -181,6 +284,24 @@ export function Island({ shadows }: { shadows: boolean }) {
     return g;
   }, []);
 
+  // 草皮手绘斑驳（R5）：贴图单幅覆盖整座岛顶（挤出 UV = 形状坐标 ±8；
+  // offset 0.5 把接缝移出岛面），map 给斑驳色、bump 给细微起伏；map 自带基色 → 材质白底
+  const grass = useMemo(() => {
+    const m = grassMaps();
+    m.map.repeat.set(1 / 15.6, 1 / 15.6);
+    m.map.offset.set(0.5, 0.5);
+    m.bump.repeat.set(1 / 15.6, 1 / 15.6);
+    m.bump.offset.set(0.5, 0.5);
+    return m;
+  }, []);
+
+  // 深水噪声凹凸（R5）：大平面重复平铺，微幅波光
+  const waterBump = useMemo(() => {
+    const t = waterNoiseTexture();
+    t.repeat.set(14, 14);
+    return t;
+  }, []);
+
   return (
     <group>
       {/* 岛体（盖=草地色顶面，壁=奶油侧面）；旋转后厚度向下，顶面在 TOP_Y */}
@@ -191,7 +312,14 @@ export function Island({ shadows }: { shadows: boolean }) {
         receiveShadow={shadows}
         castShadow={false}
       >
-        <meshStandardMaterial attach="material-0" color={SCENE.islandTop} {...TOY_MAT} />
+        <meshStandardMaterial
+          attach="material-0"
+          color="#FFFFFF"
+          map={grass.map}
+          bumpMap={grass.bump}
+          bumpScale={0.06}
+          {...TOY_MAT}
+        />
         <meshStandardMaterial attach="material-1" color={SCENE.islandSide} {...TOY_MAT} />
       </mesh>
 
@@ -201,9 +329,23 @@ export function Island({ shadows }: { shadows: boolean }) {
         <meshStandardMaterial attach="material-1" color={SCENE.islandRim} {...TOY_MAT} />
       </mesh>
 
-      {/* 大水面：一块大圆盘，托住整座岛（径向渐变：近岸浅→外缘深） */}
+      {/* 深水底面：超大平面延到雾程外，海水铺满全屏（R5 A1）。
+          比渐变盘低 0.02 防 z-fight；与渐变外缘同深 → 无缝 */}
+      <mesh position-y={-0.74} rotation-x={-Math.PI / 2}>
+        <planeGeometry args={[420, 420, 1, 1]} />
+        <meshStandardMaterial
+          color={SCENE.waterDeep}
+          roughness={0.62}
+          metalness={0}
+          envMapIntensity={0.3}
+          bumpMap={waterBump}
+          bumpScale={0.1}
+        />
+      </mesh>
+
+      {/* 近岸浅水：渐变圆盘（近岸浅→外缘深），外缘与深水同色 → 无缝过渡 */}
       <mesh position-y={-0.72} rotation-x={-Math.PI / 2}>
-        <circleGeometry args={[14.5, 48]} />
+        <circleGeometry args={[16, 48]} />
         <meshStandardMaterial
           map={waterGradientTexture()}
           roughness={0.62}
@@ -215,6 +357,15 @@ export function Island({ shadows }: { shadows: boolean }) {
       {/* 岸白沫线 + 涟漪环（水面波光） */}
       <FoamRing />
       <Ripples />
+
+      {/* 外海玩具点缀：船与浮标都在浅滩沿之外的水面上，不遮岛与站点。
+          配色只用蓝/紫/奶油白——避免绿/暖色被岛屿像素分割误算进岛体
+          （测量口径 green/tan），白壳船在蓝海上反而更跳 */}
+      <ToyBoat x={-13.5} z={-8.5} ry={0.7} hull={PALETTE.cream} sail={PALETTE.cream} flag={PALETTE.blue} />
+      <ToyBoat x={15.5} z={-4} ry={-1.1} hull={PALETTE.blue} sail={PALETTE.cream} flag={PALETTE.purple} />
+      <ToyBoat x={-15} z={3.5} ry={1.35} hull={PALETTE.purple} sail={PALETTE.cream} flag={PALETTE.blue} />
+      <Buoy x={13.5} z={-9.5} c={PALETTE.blue} />
+      <Buoy x={-12.5} z={9.5} c={PALETTE.purple} />
     </group>
   );
 }

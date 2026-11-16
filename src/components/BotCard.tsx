@@ -22,6 +22,7 @@ export function BotCard({ player, thinking }: { player: Player; thinking: boolea
     <div
       className={'bot-card' + (thinking ? ' bot-card--thinking' : '')}
       data-testid={`bot-${player.id}`}
+      data-bot={player.characterId ?? undefined}
     >
       <span className="bot-card-avatar" aria-hidden="true">
         {bot?.icon ?? '●'}
