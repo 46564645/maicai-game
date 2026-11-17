@@ -364,6 +364,23 @@
   }
 }
 
+/* —— R8 窄桌面（901–1240px）：状态行改折行、不再省略号 ——
+   条宽在 1024 级只剩 ~600px，状态行 nowrap + 省略号会把
+   「Your turn: at "Recipe Stop"」截成「Your turn: a…」，孩子
+   读不到自己在哪一站。改回可折行：两行高 ~54px ≤ 主按钮 56px，
+   条高仍 ~76、底部栈不变；CameraRig 按实测自由矩形取景，
+   条高真有变化也会自动跟随。≥1241px 保持 R5 的单行省略号兜底
+   （日志行 .board-log 的省略号是 R5 既定设计，全文在 aria-live
+   语义里，本轮不动）。 */
+@media (min-width: 901px) and (max-width: 1240px) {
+  .board3d-overlay .board-status {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: break-word;
+  }
+}
+
 @media (max-width: 900px) {
   /* ≤900px 单列：overlay 回文档流——竖排布局顶条/bot 卡/底栏从上到下都可能
      压满高度，吸底会被盖住「进入这一站」；排在状态行下、
@@ -475,10 +492,19 @@
 
 .bot-card-name {
   font-weight: var(--font-weight-bold);
+  /* R8：名字文本节点与性格 span 之间没有空格（JSX 相邻渲染），
+     「Steady Careful」连成一个不可断的长词，在 190px（窄桌面
+     168px）列里最后一字母溢出卡外（1280×800 与 1600×1000
+     实测均有）。改 flex 可折行：放得下同排、放不下性格整词
+     折到下一行——不从词中断、不溢出，文案一字不改。 */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--space-2);
 }
 
 .bot-card-personality {
-  margin-left: var(--space-2);
+  /* 间距改由 .bot-card-name 的 flex column-gap 提供 */
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-regular);
   color: var(--color-muted);

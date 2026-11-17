@@ -1,0 +1,449 @@
+{
+  "desktop-1600x1000": {
+    "viewport": {
+      "w": 1600,
+      "h": 1000
+    },
+    "panels": [
+      {
+        "sel": ".game-topbar",
+        "x": 160,
+        "y": 24,
+        "w": 1280,
+        "h": 48
+      },
+      {
+        "sel": ".bot-card",
+        "x": 160,
+        "y": 88,
+        "w": 190,
+        "h": 106
+      },
+      {
+        "sel": ".bot-card",
+        "x": 160,
+        "y": 789,
+        "w": 190,
+        "h": 106
+      },
+      {
+        "sel": ".bot-card",
+        "x": 1250,
+        "y": 88,
+        "w": 190,
+        "h": 136
+      },
+      {
+        "sel": ".lap-card",
+        "x": 1250,
+        "y": 771,
+        "w": 190,
+        "h": 124
+      },
+      {
+        "sel": ".game-bottom",
+        "x": 160,
+        "y": 903,
+        "w": 1280,
+        "h": 81
+      },
+      {
+        "sel": ".board3d-overlay",
+        "x": 384,
+        "y": 811,
+        "w": 832,
+        "h": 76
+      },
+      {
+        "sel": ".board3d-status",
+        "x": 678,
+        "y": 96,
+        "w": 244,
+        "h": 34
+      },
+      {
+        "sel": ".lang-toggle",
+        "x": 1324,
+        "y": 24,
+        "w": 116,
+        "h": 48
+      }
+    ],
+    "canvas": {
+      "x": 0,
+      "y": 0,
+      "w": 1600,
+      "h": 1000
+    },
+    "screen": {
+      "x": 160,
+      "y": 24,
+      "w": 1280,
+      "h": 960
+    },
+    "layout": {
+      "x": 160,
+      "y": 88,
+      "w": 1280,
+      "h": 896
+    },
+    "primary": {
+      "x": 781,
+      "y": 821,
+      "w": 421,
+      "h": 56
+    },
+    "buttons": [
+      {
+        "id": "btn",
+        "x": 986,
+        "y": 24,
+        "w": 143,
+        "h": 48
+      },
+      {
+        "id": "btn",
+        "x": 1141,
+        "y": 24,
+        "w": 171,
+        "h": 48
+      },
+      {
+        "id": "lang-toggle-seg",
+        "x": 1324,
+        "y": 24,
+        "w": 64,
+        "h": 48
+      },
+      {
+        "id": "lang-toggle-seg",
+        "x": 1388,
+        "y": 24,
+        "w": 52,
+        "h": 48
+      },
+      {
+        "id": "action-primary",
+        "x": 781,
+        "y": 821,
+        "w": 421,
+        "h": 56
+      },
+      {
+        "id": "board3d-reset",
+        "x": 1117,
+        "y": 756,
+        "w": 121,
+        "h": 48
+      },
+      {
+        "id": "btn-wallet",
+        "x": 728,
+        "y": 916,
+        "w": 114,
+        "h": 56
+      },
+      {
+        "id": "btn-help",
+        "x": 1139,
+        "y": 915,
+        "w": 89,
+        "h": 57
+      }
+    ],
+    "free": {
+      "x": 350,
+      "y": 72,
+      "w": 900,
+      "h": 739
+    },
+    "topbarActionsRight": 1440,
+    "topbarRight": 1440,
+    "overlayStyle": {
+      "position": "absolute",
+      "flexDirection": "row",
+      "flexWrap": "nowrap"
+    },
+    "docOverflowX": 0
+  },
+  "desktop-1024x768": {
+    "viewport": {
+      "w": 1024,
+      "h": 768
+    },
+    "panels": [
+      {
+        "sel": ".game-topbar",
+        "x": 16,
+        "y": 24,
+        "w": 992,
+        "h": 48
+      },
+      {
+        "sel": ".bot-card",
+        "x": 16,
+        "y": 88,
+        "w": 190,
+        "h": 106
+      },
+      {
+        "sel": ".bot-card",
+        "x": 16,
+        "y": 504,
+        "w": 190,
+        "h": 106
+      },
+      {
+        "sel": ".bot-card",
+        "x": 818,
+        "y": 88,
+        "w": 190,
+        "h": 136
+      },
+      {
+        "sel": ".lap-card",
+        "x": 818,
+        "y": 486,
+        "w": 190,
+        "h": 124
+      },
+      {
+        "sel": ".game-bottom",
+        "x": 16,
+        "y": 618,
+        "w": 992,
+        "h": 150
+      },
+      {
+        "sel": ".lang-toggle",
+        "x": 892,
+        "y": 24,
+        "w": 116,
+        "h": 48
+      }
+    ],
+    "canvas": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0
+    },
+    "screen": {
+      "x": 16,
+      "y": 24,
+      "w": 992,
+      "h": 744
+    },
+    "layout": {
+      "x": 16,
+      "y": 88,
+      "w": 992,
+      "h": 680
+    },
+    "buttons": [
+      {
+        "id": "btn",
+        "x": 554,
+        "y": 24,
+        "w": 143,
+        "h": 48
+      },
+      {
+        "id": "btn",
+        "x": 709,
+        "y": 24,
+        "w": 171,
+        "h": 48
+      },
+      {
+        "id": "lang-toggle-seg",
+        "x": 892,
+        "y": 24,
+        "w": 64,
+        "h": 48
+      },
+      {
+        "id": "lang-toggle-seg",
+        "x": 956,
+        "y": 24,
+        "w": 52,
+        "h": 48
+      },
+      {
+        "id": "action-primary",
+        "x": 388,
+        "y": 420,
+        "w": 248,
+        "h": 56
+      },
+      {
+        "id": "btn-wallet",
+        "x": 584,
+        "y": 631,
+        "w": 114,
+        "h": 56
+      },
+      {
+        "id": "btn-help",
+        "x": 34,
+        "y": 701,
+        "w": 89,
+        "h": 57
+      }
+    ],
+    "free": {
+      "x": 206,
+      "y": 72,
+      "w": 612,
+      "h": -72
+    },
+    "topbarActionsRight": 1008,
+    "topbarRight": 1008,
+    "overlayStyle": {
+      "position": "absolute",
+      "flexDirection": "row",
+      "flexWrap": "nowrap"
+    },
+    "docOverflowX": 0
+  },
+  "desktop-1280x800": {
+    "viewport": {
+      "w": 1280,
+      "h": 800
+    },
+    "panels": [
+      {
+        "sel": ".game-topbar",
+        "x": 16,
+        "y": 24,
+        "w": 1248,
+        "h": 48
+      },
+      {
+        "sel": ".bot-card",
+        "x": 16,
+        "y": 88,
+        "w": 190,
+        "h": 106
+      },
+      {
+        "sel": ".bot-card",
+        "x": 16,
+        "y": 589,
+        "w": 190,
+        "h": 106
+      },
+      {
+        "sel": ".bot-card",
+        "x": 1074,
+        "y": 88,
+        "w": 190,
+        "h": 136
+      },
+      {
+        "sel": ".lap-card",
+        "x": 1074,
+        "y": 571,
+        "w": 190,
+        "h": 124
+      },
+      {
+        "sel": ".game-bottom",
+        "x": 16,
+        "y": 703,
+        "w": 1248,
+        "h": 81
+      },
+      {
+        "sel": ".lang-toggle",
+        "x": 1148,
+        "y": 24,
+        "w": 116,
+        "h": 48
+      }
+    ],
+    "canvas": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0
+    },
+    "screen": {
+      "x": 16,
+      "y": 24,
+      "w": 1248,
+      "h": 760
+    },
+    "layout": {
+      "x": 16,
+      "y": 88,
+      "w": 1248,
+      "h": 696
+    },
+    "buttons": [
+      {
+        "id": "btn",
+        "x": 810,
+        "y": 24,
+        "w": 143,
+        "h": 48
+      },
+      {
+        "id": "btn",
+        "x": 965,
+        "y": 24,
+        "w": 171,
+        "h": 48
+      },
+      {
+        "id": "lang-toggle-seg",
+        "x": 1148,
+        "y": 24,
+        "w": 64,
+        "h": 48
+      },
+      {
+        "id": "lang-toggle-seg",
+        "x": 1212,
+        "y": 24,
+        "w": 52,
+        "h": 48
+      },
+      {
+        "id": "action-primary",
+        "x": 452,
+        "y": 427,
+        "w": 376,
+        "h": 56
+      },
+      {
+        "id": "btn-wallet",
+        "x": 584,
+        "y": 716,
+        "w": 114,
+        "h": 56
+      },
+      {
+        "id": "btn-help",
+        "x": 995,
+        "y": 715,
+        "w": 89,
+        "h": 57
+      }
+    ],
+    "free": {
+      "x": 206,
+      "y": 72,
+      "w": 868,
+      "h": -72
+    },
+    "topbarActionsRight": 1264,
+    "topbarRight": 1264,
+    "overlayStyle": {
+      "position": "absolute",
+      "flexDirection": "row",
+      "flexWrap": "nowrap"
+    },
+    "docOverflowX": 0
+  }
+}

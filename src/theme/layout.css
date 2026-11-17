@@ -148,6 +148,17 @@
   }
 }
 
+/* —— R8 窄桌面（901–1240px）：左右 bot 列收窄一档 ——
+   1024 级宽度里两列各 190px 只剩 612px 自由带，填充被跟随约束
+   压到 0.613；列收到 168 后自由带 656px、求解填充 0.654
+   （RESPONSIVE_R8.md）。卡内文字靠 .bot-card-name 的可折行
+   排版兜底（见 board.css），不溢出。参照尺寸 1280 不受影响。 */
+@media (min-width: 901px) and (max-width: 1240px) {
+  .game-layout {
+    grid-template-columns: minmax(136px, 168px) 1fr minmax(136px, 168px);
+  }
+}
+
 /* —— 竖屏（≤900px）：单列 —— 棋盘在上 → bot 横排 → 底部真人区 —— */
 @media (max-width: 900px) {
   .game-layout {

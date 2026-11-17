@@ -5,12 +5,13 @@
  * 落定后缓回俯视）；resetKey 变化时平滑回默认视角（DOM「回默认视角」按钮）。
  * 孩子一上手拖动（onStart）就打断回位/推近，相机永远归孩子管。
  */
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { stationAnchor } from './positions';
+import { solveFit, type FreeRect } from './fitSolver';
 
 export type CameraFocus = 'auto' | 'spinner';
 
@@ -24,111 +25,92 @@ const SPINNER_TARGET = new THREE.Vector3(0, 0.5, -0.4);
 const SPINNER_POS = new THREE.Vector3(0, 9.4, 8.3);
 
 /**
- * T5 fit-solved 取景（ART_3D §8.1「整座岛都在画面里」，借参考桌游的
- * fit-solve 做法）：不再用经验倍率猜距离，而是把小岛包围盒的 8 个角
- * （浅滩沿外廓 ±8.55×±6.65、含 rim 树高 1.7）投影到 NDC，沿默认机位
- * 方向二分求出「任一跟随目标下、所有角都落进可用画幅」的最小距离。
- * 可用画幅按 DOM 浮层内缩：桌面左右 bot 列 + 顶条 + 底栏；手机横屏
- * 画布已被竖栏切走，只再让顶部头像排与底部圆钮。
+ * 取景沿革：T5 起用 fit-solve（外廓 8 角投影 + 二分求距，无经验倍率）；
+ * R5 用 FIT_RECT/FIT_SHIFT 两档常量把填充调到 60–70%——但分数常量与
+ * 尺寸无关：窗口越大岛按像素同比放大，大屏（1600×1000 / 1920×1080）
+ * 填充冲到 0.73 / 0.78、rim 宽于自由带；窄屏又靠档位猜。
+ * R8 改为连续求解（fitSolver.ts）：自由矩形由下方 measureFreeRect
+ * 实测真实 DOM chrome 得到，求解器直接解出「rim 在自由矩形内居中、
+ * 面积 = 0.66 × 自由矩形、且全部跟随目标下不越界」的基点与距离，
+ * 任意视口同一套机制（见 RESPONSIVE_R8.md）。
  */
-const FIT_BOUNDS = { x: 8.55, z: 6.65, top: 1.7 };
-const FIT_RECT = {
-  // 桌面：UI 迭代 R4 起布局撑满整屏高（layout.css min-width:901px），
-  // 底部是「提示条 + 底栏」固定高度的底部栈：壳下 padding 16 + 底栏 81
-  // + 行间隙 8 + 条下偏移 8 + 条高 76 ≈ 189px（800px 高折算 0.236，
-  // 取 b 0.24）—— 整岛落在顶部条（72px → t 0.10，含间隙）与底部栈
-  // 之间的自由带内，条/栏不再压岛。带日志行时条高 104、栈 217px，
-  // 外廓（浅滩沿）底缘会与条顶轻碰约 25px，草地/路面核心仍在条上方
-  // （R4 实测核验）。左右仍 10%（bot 列之间）。
-  // R5：配合 FIT_SHIFT.z 把岛在带内纵向摆正、FOLLOW_MIX 收小 → 岛在
-  // 默认取景几乎填满自由带（目标 60–70%，见 ART_R5.md）。
-  // R5 修正（PM，2026-11-17）：初版按 b 0.24 求解后实测 rim 填充
-  // 0.87（求解器 FIT_BOUNDS 投影 ÷ 自由带；截图沙沿 0.73、均超 0.70
-  // 上限），故把桌面 FIT_RECT 收至 {0.145, 0.145, 0.145, 0.285}——
-  // 仍由求解器二分求距（无经验倍率，F5 机制不变），求解器预测 rim
-  // 填充 0.66（740×419，自由带 868×539），落回 60–70% 带中部；
-  // 拟合框（x 179–1101、y 112–576）仍贴合自由带，求解后 rim
-  // （x 270–1010、y 132–551）与各面板留有余量，A4 0% 遮挡不受影响。
-  // 手机档（compact）实测 rim 0.665 已达标，不动。
-  desktop: { l: 0.145, r: 0.145, t: 0.145, b: 0.285 },
-  // UI 迭代 R2：手机横屏让位收窄 —— 顶部头像排下沿实测在 56px
-  // （= 402 的 13.9%），t 0.16 → 0.14 正好贴合；左 0.03。
-  // R5：实测画布其实是 874 全宽（.board3d 的 right:rail-w 被 width:100%
-  // 顶掉），右竖栏只是 DOM 浮层——r 0.03 → 0.30 把 262px 栏位建进取景，
-  // 岛不再往栏下长；b 0.14 → 0.16 对齐左下/右下圆钮区（y338）。
-  compact: { l: 0.03, r: 0.3, t: 0.14, b: 0.16 },
-} as const;
-
-/**
- * R5 取景基线偏移（world units，加在 DEFAULT_TARGET 上）：
- * - 桌面 z+1.5：镜头注视点向「镜头前」挪 → 岛在自由带内不再贴底，
- *   垂直方向居中 → 求解机位更近、岛几乎撑满带高。
- * - 手机 x+3.2：画布 874 全宽、右竖栏遮 x612+，注视点右移 → 岛像
- *   在 0–612 自由区里居中（投影中心 ≈x306，而非画布中心 437）。
- * 偏移同时作用于默认目标、全部跟随目标与回正目标，保持观感一致。
- */
-const FIT_SHIFT = {
-  desktop: { x: 0, z: 1.5 },
-  compact: { x: 3.2, z: 0.4 },
-} as const;
 
 /**
  * R5 跟随幅度（目标点向当前站锚点的混合比）：0.45/0.72 → 0.12/0.05。
  * 取景目标是「小岛占自由带 60–70%」——跟随越多，所有跟随位都满足
  * 约束所需的机位越远、岛越小；收小后镜头仍平滑移向当前棋子，
- * 但岛几乎不滑出带（对小孩也稳）。配合 FIT_SHIFT 摆位。
+ * 但岛几乎不滑出带（对小孩也稳）。R8 保留：它不是尺寸常量，
+ * 是已验收的跟随手感（MERGE_R5 跟随量化：桌面棋子移 15.6px、
+ * 手机 3.7px，PM 裁决接受）。
  */
 const FOLLOW_MIX = { desktop: 0.12, compact: 0.05 } as const;
 
-/** 取景基线（默认/跟随目标的公共原点） */
-function fitBase(compact: boolean): THREE.Vector3 {
-  const s = compact ? FIT_SHIFT.compact : FIT_SHIFT.desktop;
-  return new THREE.Vector3(s.x, DEFAULT_TARGET.y, DEFAULT_TARGET.z + s.z);
+const CHROME_SELECTORS = [
+  '.game-topbar',
+  '.game-left',
+  '.game-right',
+  '.board3d-overlay',
+  '.game-bottom',
+  '.phone-rail',
+  '.phone-bots',
+  '.phone-quick',
+];
+
+/**
+ * 实测自由矩形（画布像素 = 视口坐标，画布 fixed 铺满全屏）：
+ * 桌面 = 左右 bot 列内缘 × 顶条下沿 → 底部栈顶（提示条顶，无条时
+ * 底栏顶）；手机 = 头像排下沿 → 圆钮区顶、右到竖栏左缘（头像排
+ * 左缘 −8 还原安全区左距）。与 R5 自由带定义一致（1280×800 实测
+ * 868×539、874×402 实测 612×282，RESPONSIVE_R8.md 复核）。
+ * chrome 缺失（尚未布局/2D 回退瞬间）返回 null，用兜底分数。
+ */
+function measureFreeRect(compact: boolean): FreeRect | null {
+  if (typeof document === 'undefined') return null;
+  const rect = (sel: string): DOMRect | null => {
+    const el = document.querySelector(sel);
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    return r.width > 0 && r.height > 0 ? r : null;
+  };
+  if (compact) {
+    const rail = rect('.phone-rail');
+    if (!rail) return null;
+    const bots = rect('.phone-bots');
+    const quick = rect('.phone-quick');
+    const left = bots ? Math.max(0, bots.left - 8) : 0;
+    const top = bots ? bots.bottom : 0;
+    const bottom = quick ? quick.top : window.innerHeight;
+    return { x: left, y: top, w: rail.left - left, h: bottom - top };
+  }
+  const left = rect('.game-left');
+  const right = rect('.game-right');
+  const topbar = rect('.game-topbar');
+  if (!left || !right || !topbar) return null;
+  const overlay = rect('.board3d-overlay');
+  const bottomBar = rect('.game-bottom');
+  const bottom = overlay ? overlay.top : bottomBar ? bottomBar.top : window.innerHeight;
+  return {
+    x: left.right,
+    y: topbar.bottom,
+    w: right.left - left.right,
+    h: bottom - topbar.bottom,
+  };
 }
 
-function fitDistance(aspect: number, compact: boolean): number {
-  const rect = compact ? FIT_RECT.compact : FIT_RECT.desktop;
-  const minX = -1 + 2 * rect.l;
-  const maxX = 1 - 2 * rect.r;
-  const minY = -1 + 2 * rect.b;
-  const maxY = 1 - 2 * rect.t;
-  const dir = DEFAULT_POS.clone().normalize();
-  const cam = new THREE.PerspectiveCamera(27, Math.max(0.5, aspect), 0.5, 400);
-  const mix = compact ? FOLLOW_MIX.compact : FOLLOW_MIX.desktop;
-  const base = fitBase(compact);
-  const goals: THREE.Vector3[] = [base.clone()];
-  for (let i = 0; i < 8; i++) {
-    const a = stationAnchor(i);
-    goals.push(new THREE.Vector3(a.x * mix + base.x, 0, a.z * mix + base.z));
-  }
-  const corners: THREE.Vector3[] = [];
-  for (const sx of [-1, 1])
-    for (const sz of [-1, 1]) {
-      corners.push(new THREE.Vector3(sx * FIT_BOUNDS.x, 0, sz * FIT_BOUNDS.z));
-      corners.push(new THREE.Vector3(sx * FIT_BOUNDS.x, FIT_BOUNDS.top, sz * FIT_BOUNDS.z));
-    }
-  const v = new THREE.Vector3();
-  const fits = (d: number): boolean => {
-    cam.position.copy(base).addScaledVector(dir, d);
-    for (const g of goals) {
-      cam.lookAt(g);
-      cam.updateMatrixWorld();
-      for (const c of corners) {
-        v.copy(c).project(cam);
-        if (v.x < minX || v.x > maxX || v.y < minY || v.y > maxY) return false;
-      }
-    }
-    return true;
-  };
-  let lo = 14;
-  let hi = 90;
-  if (!fits(hi)) return hi;
-  for (let i = 0; i < 24; i++) {
-    const mid = (lo + hi) / 2;
-    if (fits(mid)) hi = mid;
-    else lo = mid;
-  }
-  return hi;
+/** 兜底自由矩形（参考视口实测值的分数形式，仅 chrome 未就绪时用） */
+function fallbackFreeRect(compact: boolean, w: number, h: number): FreeRect {
+  return compact
+    ? { x: 0, y: 0.139 * h, w: 0.7 * w, h: 0.701 * h }
+    : { x: 0.161 * w, y: 0.09 * h, w: 0.678 * w, h: 0.674 * h };
+}
+
+function sameRect(a: FreeRect, b: FreeRect): boolean {
+  return (
+    Math.abs(a.x - b.x) < 1 &&
+    Math.abs(a.y - b.y) < 1 &&
+    Math.abs(a.w - b.w) < 1 &&
+    Math.abs(a.h - b.h) < 1
+  );
 }
 
 export function CameraRig({
@@ -156,11 +138,47 @@ export function CameraRig({
   const camera = useThree((s) => s.camera);
   const size = useThree((s) => s.size);
 
-  // T5：home 距离由 fit-solve 按当前画幅/档位求出（见 fitDistance）；
-  // 转盘推近距离按同一比例缩放，保持推近的相对幅度
-  const aspect = size.width / Math.max(1, size.height);
-  const fitD = fitDistance(aspect, compact);
-  const base = fitBase(compact);
+  // R8：自由矩形实测（chrome 布局变化时经 ResizeObserver 刷新；
+  // window resize 亦触发）。首帧 chrome 可能未就绪 → 先用兜底分数，
+  // effect 挂载后立即以实测值替换并重解（孩子未上手前 home 会跟随）。
+  const [freeRect, setFreeRect] = useState<FreeRect>(() =>
+    fallbackFreeRect(compact, size.width, size.height),
+  );
+  useEffect(() => {
+    const update = () => {
+      const r = measureFreeRect(compact);
+      if (r) setFreeRect((prev) => (sameRect(prev, r) ? prev : r));
+    };
+    update();
+    window.addEventListener('resize', update);
+    const ro =
+      typeof ResizeObserver !== 'undefined' ? new ResizeObserver(update) : null;
+    if (ro) {
+      for (const sel of CHROME_SELECTORS) {
+        document.querySelectorAll(sel).forEach((el) => ro.observe(el));
+      }
+    }
+    return () => {
+      window.removeEventListener('resize', update);
+      ro?.disconnect();
+    };
+  }, [compact]);
+
+  // R8：home 取景由 solveFit 按实测自由矩形连续求解（居中 + 填充
+  // 0.66 + 跟随不越界）；转盘推近距离按同一比例缩放，保持相对幅度
+  const fit = useMemo(
+    () =>
+      solveFit({
+        width: size.width,
+        height: size.height,
+        free: freeRect,
+        mix: compact ? FOLLOW_MIX.compact : FOLLOW_MIX.desktop,
+        dir: DEFAULT_POS.clone().normalize(),
+      }),
+    [size.width, size.height, freeRect, compact],
+  );
+  const fitD = fit.distance;
+  const base = fit.base;
   const homePos = base.clone()
     .addScaledVector(DEFAULT_POS.clone().normalize(), fitD);
   const spinnerPos = SPINNER_POS.clone().multiplyScalar(
