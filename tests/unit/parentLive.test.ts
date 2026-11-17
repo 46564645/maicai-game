@@ -9,10 +9,10 @@
  */
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
-  DEEPSEEK_CHAT_URL,
+  DEFAULT_LLM_BASE_URL,
+  DEFAULT_PARENT_MODEL,
   PARENT_CHILD_TURN_CAP,
   PARENT_MAX_TOKENS,
-  PARENT_MODEL,
   PARENT_QUESTION_COUNT,
   PARENT_SYSTEM_PROMPT_EN,
   PARENT_SYSTEM_PROMPT_ZH,
@@ -21,6 +21,9 @@ import {
   buildParentRequestBody,
   fetchParentReply,
   getParentApiKey,
+  getParentBaseUrl,
+  getParentChatUrl,
+  getParentModel,
   isGoodbyeTurn,
   parentLiveAvailable,
   parentSystemPrompt,
@@ -75,10 +78,11 @@ describe('系统提示词（业主定稿，约束一条不少）', () => {
 });
 
 describe('请求形状', () => {
-  it('model / temperature / max_tokens 按业主参数', () => {
+  it('model / temperature / max_tokens 按业主参数（默认 qwen-turbo）', () => {
     const body = buildParentRequestBody('en', history, 1);
-    expect(body.model).toBe('deepseek-chat');
-    expect(body.model).toBe(PARENT_MODEL);
+    expect(body.model).toBe('qwen-turbo');
+    expect(body.model).toBe(DEFAULT_PARENT_MODEL);
+    expect(body.model).toBe(getParentModel());
     expect(body.temperature).toBe(0.7);
     expect(body.temperature).toBe(PARENT_TEMPERATURE);
     expect(body.max_tokens).toBe(150);
@@ -122,8 +126,38 @@ describe('轮次上限（孩子发言上限 → 结束对话）', () => {
   });
 });
 
+describe('服务商配置（VITE_LLM_*，切换只改 .env.local、不改代码）', () => {
+  it('默认：DashScope 兼容端点 + qwen-turbo', () => {
+    expect(getParentBaseUrl()).toBe('https://dashscope.aliyuncs.com/compatible-mode/v1');
+    expect(getParentBaseUrl()).toBe(DEFAULT_LLM_BASE_URL);
+    expect(getParentChatUrl()).toBe(
+      'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
+    );
+    expect(getParentModel()).toBe('qwen-turbo');
+    expect(getParentModel()).toBe(DEFAULT_PARENT_MODEL);
+  });
+
+  it('备选 DeepSeek：只改环境变量即可切过去，请求形状不变', () => {
+    vi.stubEnv('VITE_LLM_BASE_URL', 'https://api.deepseek.com');
+    vi.stubEnv('VITE_LLM_MODEL', 'deepseek-chat');
+    expect(getParentChatUrl()).toBe('https://api.deepseek.com/chat/completions');
+    expect(getParentModel()).toBe('deepseek-chat');
+    const body = buildParentRequestBody('en', history, 1);
+    expect(body.model).toBe('deepseek-chat');
+    expect(body.temperature).toBe(0.7);
+    expect(body.max_tokens).toBe(150);
+  });
+
+  it('base 末尾多余斜杠会被去掉', () => {
+    vi.stubEnv('VITE_LLM_BASE_URL', 'https://dashscope.aliyuncs.com/compatible-mode/v1/');
+    expect(getParentChatUrl()).toBe(
+      'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
+    );
+  });
+});
+
 describe('fetchParentReply（mock fetch）', () => {
-  it('成功：打到 DeepSeek 端点，带 Bearer key，返回清洗后的回复', async () => {
+  it('成功：打到默认端点（DashScope 兼容模式），带 Bearer key，返回清洗后的回复', async () => {
     const fetchFn = vi.fn(async () => okResponse('  "That sounds yummy!"  '));
     const reply = await fetchParentReply({
       lang: 'en',
@@ -134,12 +168,12 @@ describe('fetchParentReply（mock fetch）', () => {
     });
     expect(reply).toBe('That sounds yummy!');
     const [url, init] = fetchFn.mock.calls[0] as unknown as [string, RequestInit];
-    expect(url).toBe(DEEPSEEK_CHAT_URL);
-    expect(url).toBe('https://api.deepseek.com/chat/completions');
+    expect(url).toBe(getParentChatUrl());
+    expect(url).toBe('https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions');
     const headers = init.headers as Record<string, string>;
     expect(headers.Authorization).toBe('Bearer test-key-not-real');
     const body = JSON.parse(init.body as string);
-    expect(body.model).toBe('deepseek-chat');
+    expect(body.model).toBe('qwen-turbo');
     expect(body.temperature).toBe(0.7);
     expect(body.max_tokens).toBe(150);
     expect(body.messages[0].content).toBe(PARENT_SYSTEM_PROMPT_EN);
@@ -248,7 +282,7 @@ describe('key 配置', () => {
   });
 
   it('注入 key 后 → 可用（stubEnv，不用真 key）', () => {
-    vi.stubEnv('VITE_DEEPSEEK_API_KEY', 'stubbed-test-key');
+    vi.stubEnv('VITE_LLM_API_KEY', 'stubbed-test-key');
     expect(getParentApiKey()).toBe('stubbed-test-key');
     expect(parentLiveAvailable()).toBe(true);
   });

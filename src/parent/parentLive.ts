@@ -1,13 +1,18 @@
 /**
- * parentLive.ts —— R7：AI 家长站（第 6 站）真对话，浏览器直连 DeepSeek。
+ * parentLive.ts —— R7：AI 家长站（第 6 站）真对话，浏览器直连 LLM 服务商。
  *
  * 业主决定（2026-11-17，主聊天原话「用api 不怕被人搞 你里面写好提示词」）：
- * 明确接受 key 放在客户端的风险，浏览器直连 DeepSeek chat completions，
+ * 明确接受 key 放在客户端的风险，浏览器直连 chat completions，
  * 不加中转。此决定**覆盖**仓库 AGENTS.md 的「不要引入…真实 AI/LLM 调用」
  * 与 docs/AI_PARENT_PROMPT.md（导出文档）的「浏览器里不能出现 API key」
  * 两条旧规——是业主本人亲自下令，不是实现者擅自放宽。
  *
- * key 红线：只许经 Vite 环境变量 VITE_DEEPSEEK_API_KEY 注入（本地
+ * 服务商（2026-11-17 业主后续拍板）：默认通义千问（阿里云百炼 DashScope
+ * OpenAI 兼容模式，qwen-turbo 最便宜且 CORS 已实测放行）；DeepSeek 为备选。
+ * 服务商经 Vite 环境变量 VITE_LLM_BASE_URL / VITE_LLM_MODEL 配置，
+ * 切换只改 .env.local、不改代码（见 PARENT_API_R7.md）。
+ *
+ * key 红线：只许经 Vite 环境变量 VITE_LLM_API_KEY 注入（本地
  * gitignored 的 .env.local，见 .gitignore 的 `*.local`），**绝不进源码、
  * 绝不进 GitHub**。没有 key 时本站自动走离线脚本版，行为与 R6/R8 完全一致。
  *
@@ -34,8 +39,34 @@ export interface ParentTurn {
   content: string;
 }
 
-export const DEEPSEEK_CHAT_URL = 'https://api.deepseek.com/chat/completions';
-export const PARENT_MODEL = 'deepseek-chat';
+/** 服务商默认值：通义千问（阿里云百炼 DashScope OpenAI 兼容模式）。
+ *  备选 DeepSeek：.env.local 里设 VITE_LLM_BASE_URL=https://api.deepseek.com、
+ *  VITE_LLM_MODEL=deepseek-chat 即可，无需改代码。 */
+export const DEFAULT_LLM_BASE_URL = 'https://dashscope.aliyuncs.com/compatible-mode/v1';
+export const DEFAULT_PARENT_MODEL = 'qwen-turbo';
+
+function envTrimmed(
+  name: 'VITE_LLM_API_KEY' | 'VITE_LLM_BASE_URL' | 'VITE_LLM_MODEL',
+): string | undefined {
+  const raw = import.meta.env[name] as string | undefined;
+  const v = raw?.trim();
+  return v ? v : undefined;
+}
+
+/** API 基地址（构建时由 .env.local 的 VITE_LLM_BASE_URL 注入，缺省用默认值） */
+export function getParentBaseUrl(): string {
+  return (envTrimmed('VITE_LLM_BASE_URL') ?? DEFAULT_LLM_BASE_URL).replace(/\/+$/, '');
+}
+
+/** 完整的 chat completions 端点：`${base}/chat/completions` */
+export function getParentChatUrl(): string {
+  return `${getParentBaseUrl()}/chat/completions`;
+}
+
+/** 模型名（构建时由 .env.local 的 VITE_LLM_MODEL 注入，缺省 qwen-turbo） */
+export function getParentModel(): string {
+  return envTrimmed('VITE_LLM_MODEL') ?? DEFAULT_PARENT_MODEL;
+}
 export const PARENT_TEMPERATURE = 0.7;
 export const PARENT_MAX_TOKENS = 150;
 /** 单次请求超时（业主定 ~10s）：超时即回退离线版，演示永不卡死 */
@@ -78,19 +109,17 @@ export function isGoodbyeTurn(childTurns: number): boolean {
   return childTurns >= PARENT_QUESTION_COUNT || childTurns >= PARENT_CHILD_TURN_CAP;
 }
 
-/** 读取注入的 key（构建时由 .env.local 的 VITE_DEEPSEEK_API_KEY 注入；
+/** 读取注入的 key（构建时由 .env.local 的 VITE_LLM_API_KEY 注入；
  *  未配置 → undefined，本站走离线版）。绝不把 key 写进任何日志/界面。 */
 export function getParentApiKey(): string | undefined {
-  const raw = import.meta.env.VITE_DEEPSEEK_API_KEY as string | undefined;
-  const k = raw?.trim();
-  return k ? k : undefined;
+  return envTrimmed('VITE_LLM_API_KEY');
 }
 
 export function parentLiveAvailable(): boolean {
   return getParentApiKey() !== undefined;
 }
 
-/** 组装发给 DeepSeek 的 messages：[业主系统提示, 节奏 system, ...对话历史] */
+/** 组装发给 LLM 的 messages：[业主系统提示, 节奏 system, ...对话历史] */
 export function buildParentMessages(
   lang: Lang,
   history: ParentTurn[],
@@ -116,7 +145,7 @@ export function buildParentRequestBody(
   childTurns: number,
 ): ParentRequestBody {
   return {
-    model: PARENT_MODEL,
+    model: getParentModel(),
     messages: buildParentMessages(lang, history, childTurns),
     temperature: PARENT_TEMPERATURE,
     max_tokens: PARENT_MAX_TOKENS,
@@ -145,7 +174,7 @@ export interface FetchParentReplyArgs {
 }
 
 /**
- * 向 DeepSeek 要一句家长回复。成功 → 返回清洗后的文本；
+ * 向 LLM 服务商要一句家长回复。成功 → 返回清洗后的文本；
  * 任何失败（无 key、超时、非 200、格式不对、空回复）都 throw，
  * 调用方（面板）捕获后切回离线脚本流程。
  */
@@ -159,7 +188,7 @@ export async function fetchParentReply(args: FetchParentReplyArgs): Promise<stri
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
-    const res = await fetchFn(DEEPSEEK_CHAT_URL, {
+    const res = await fetchFn(getParentChatUrl(), {
       method: 'POST',
       signal: ctrl.signal,
       headers: {

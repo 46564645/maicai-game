@@ -1,10 +1,12 @@
-# R7 —— AI 家长站直连 DeepSeek（真对话）
+# R7 —— AI 家长站真对话（浏览器直连 LLM，默认通义千问）
 
 日期：2026-11-17。前置：R6 语言切换（ca4da3e）、R8 自适应（e4ee6d4）。
 本轮只动第 6 站 AI 家长站的对话来源：`src/parent/parentLive.ts`（新增）、
 `src/components/ParentPanel.tsx`（问答区加真对话分支）、
 `tests/unit/parentLive.test.ts`（新增）。引擎 `src/game/`、`cards.json`、
 14 条规则、面板布局与视觉均未改。
+R7b（同日晚，业主拍板）：主服务商由 DeepSeek 改为通义千问（见 §0），
+服务商配置化为 `VITE_LLM_*` 三个环境变量，除配置外行为不变。
 
 ## 0. 业主决定与旧规覆盖（必须先读）
 
@@ -21,14 +23,35 @@
 以上三处均按业主本次决定让路；其余约束（发币归引擎、禁忌话题、回退
 离线版）全部保留，见下。
 
+**服务商决定（2026-11-17 后续，业主拍板）**：主服务商改为**通义千问**
+（阿里云百炼 DashScope OpenAI 兼容模式，模型 `qwen-turbo`）——理由：
+qwen-turbo 是能直连的选项里最便宜的（约 ¥0.3/百万输入 token）、
+DashScope 的浏览器 CORS 已实测放行（见 §1）、业主将提供百炼 API key。
+DeepSeek 降为备选配置：只改 `.env.local` 的 `VITE_LLM_*` 三个变量即可
+切回，不改代码。原 DeepSeek key 经全盘核查始终不在本机可达之处
+（见 §4），这也是换商的现实原因之一。
+
 ## 1. 设计
 
-- 端点：`POST https://api.deepseek.com/chat/completions`，模型
-  `deepseek-chat`，`temperature 0.7`，`max_tokens 150`，非流式。
-- CORS 实测（2026-11-17，本机 curl 预检）：DeepSeek 接口对浏览器
-  跨域友好——OPTIONS 预检返回 `access-control-allow-origin`（回显请求
-  Origin）、`access-control-allow-headers: authorization, content-type`、
-  `access-control-allow-methods: POST`。即浏览器直连**不会被 CORS 拦**。
+- 端点：`POST ${VITE_LLM_BASE_URL}/chat/completions`（OpenAI 兼容形状）。
+  默认 base `https://dashscope.aliyuncs.com/compatible-mode/v1`、默认模型
+  `qwen-turbo`（通义千问，阿里云百炼）；`temperature 0.7`、
+  `max_tokens 150`，非流式。价格参考：qwen-turbo 约 ¥0.3/百万输入
+  token；百炼新账号带免费额度（具体额度以百炼控制台为准）。
+- 备选 DeepSeek：`.env.local` 设
+  `VITE_LLM_BASE_URL=https://api.deepseek.com`、
+  `VITE_LLM_MODEL=deepseek-chat`（端点即旧版写死的
+  `https://api.deepseek.com/chat/completions`）。切换只改 `.env.local`，
+  不改代码（`parentLive.ts` 的 `getParentBaseUrl/getParentModel` 读取）。
+- CORS 实测（2026-11-17，curl 预检，Origin: http://localhost:8000）：
+  - DashScope（主）：返回 `access-control-allow-origin: *`、
+    `access-control-allow-headers: authorization, content-type`、
+    `access-control-allow-methods: POST,GET`——浏览器直连放行（PM 实测）。
+  - DeepSeek（备选）：同样友好——OPTIONS 预检返回
+    `access-control-allow-origin`（回显请求 Origin）、
+    `access-control-allow-headers: authorization, content-type`、
+    `access-control-allow-methods: POST`。
+  两家浏览器直连都**不会被 CORS 拦**，不需要中转。
 - 对话结构（面板本地状态，不进引擎）：
   - 开场白与第 1 问用既有文案（`parentIntro()` + 脚本第 1 问，当前语言），
     保证开场与离线版观感一致；
@@ -77,7 +100,7 @@ CN: 「你是在外地打工的爸爸妈妈，正在给孩子打电话。语气�
 
 | 情形 | 行为 |
 |---|---|
-| 构建未注入 key（`VITE_DEEPSEEK_API_KEY` 缺失/为空） | 本站全程离线脚本版，与 R6/R8 一致 |
+| 构建未注入 key（`VITE_LLM_API_KEY` 缺失/为空） | 本站全程离线脚本版，与 R6/R8 一致 |
 | 请求超时（10s，AbortController） | 当前轮抛错 → 关真对话层，离线脚本从引擎当前步继续 |
 | 断网 / fetch 抛错 | 同上 |
 | HTTP 非 200 | 同上 |
@@ -97,26 +120,34 @@ CN: 「你是在外地打工的爸爸妈妈，正在给孩子打电话。语气�
   侧助手、只存在 Grok 侧（「DeepSeek 的 key 我已经安全存好了」）；
   ③ Muse 记忆明确记「value not recorded here」；④ 本机文件系统与
   会话记录全文扫 `sk-` 模式，无 DeepSeek 格式的 key。
-  结论：**真 key 实测本轮无法执行**，缺的只是 key 本身。补救只需一步：
-  把 key 写进 `~/workspace/maicai-work/.env.local`
-  （`VITE_DEEPSEEK_API_KEY=<key>`）后 `npm run build` 重新打包即可
-  点亮真对话，**零代码改动**；CORS 已实测放行（§1），不需要中转。
-- 注入方式（代码已就绪）：key 只放本地 `.env.local`；`.gitignore`
-  第 5 行 `*.local` 已覆盖（`git check-ignore -v .env.local` →
-  `.gitignore:5:*.local`），且 `git ls-files` 中无 `.env.local`。
-  代码经 `import.meta.env` 读取，源码、日志、界面均不出现 key。
+  结论：DeepSeek 的**真 key 实测无法执行**，缺的只是 key 本身。
+  业主据此在 R7b 改拍通义千问（见 §0），将另行提供百炼 API key。
+  点亮真对话只需一步：把百炼 key 写进 `~/workspace/maicai-work/.env.local`
+  （`VITE_LLM_API_KEY=<key>`）后 `npm run build` 重新打包即可，
+  **零代码改动**；CORS 已实测放行（§1），不需要中转。
+- 注入方式（代码已就绪）：key 与服务商配置只放本地 `.env.local`
+  （`VITE_LLM_API_KEY` / `VITE_LLM_BASE_URL` / `VITE_LLM_MODEL`）；
+  `.gitignore` 第 5 行 `*.local` 已覆盖（R7b 复核
+  `git check-ignore -v .env.local` → `.gitignore:5:*.local`），
+  且 `git ls-files` 中无 `.env.local`。代码经 `import.meta.env` 读取，
+  源码、日志、界面均不出现 key。
 - 推送前 secret-scan：对推送清单（git ls-files 的 UTF-8 文本集）逐个
   文件扫 `sk-[A-Za-z0-9_-]{16,}` 模式与 `.env*` 文件是否混入清单，
   结果见 §5。
 - 可玩 zip：本轮 zip 由无 key 的构建打包（原因见上），家长站为离线版；
   按上法注入 key 重构建后重打包即为真对话版。zip 校验见 §5。
+  R7b 未重打 zip（尚无 key）；百炼 key 到位后按上法重构建、重打包。
 
 ## 5. 验收与实测
 
 - `npm run build`：干净（仅有既有的 chunk 体积警告）。
-- `npm test`：**124/124 通过**（基线 105 + 新增 `parentLive.test.ts` 19 条：
+- `npm test`：**127/127 通过**（基线 105 + `parentLive.test.ts` 22 条：
   双语提示词约束、请求形状、节奏/道别判定、mock fetch 成功与
-  网络错误/500/格式错误/超时四种回退、无 key 离线判定）。
+  网络错误/500/格式错误/超时四种回退、无 key 离线判定；R7b 新增
+  服务商配置 3 条——默认请求打到 DashScope 兼容端点且模型
+  `qwen-turbo`、备选 DeepSeek 只改 env 即可切、base 末尾斜杠处理；
+  fetch 成功用例同步改断言默认端点/模型，temperature/max_tokens 不变）。
+  R7b 复跑 `npm run build` 干净。
 - 浏览器实测（`shots/r7-live-test.mjs`，vite preview + CDP 截图）：
   因无 key（§4），实测走的是**回退路径**——这正是演示保底路径，
   中英各完整跑完一轮家长站：
@@ -126,5 +157,7 @@ CN: 「你是在外地打工的爸爸妈妈，正在给孩子打电话。语气�
   - 截图：`shots/r7_parent_{en,zh}_{1_open,2_mid,3_goodbye,4_after}.png`。
   - 结论：R7 改动对离线路径零回退、零报错；真对话路径已由单测
     （mock fetch）覆盖请求/回退/道别逻辑，只差真 key 的临门一测。
+  - R7b 仅换服务商配置、行为不变，未重跑浏览器实测；真 key 实测
+    仍待百炼 key 到位。
 - secret-scan（推送前）：见随附提交记录；清单内 `sk-` 模式命中 0，
   `.env.local` 不在 `git ls-files` 中。
