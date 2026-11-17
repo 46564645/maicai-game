@@ -1,0 +1,265 @@
+/**
+ * parentLive.test.ts —— R7 AI 家长站真对话（src/parent/parentLive.ts）。
+ * 全部用 mock fetch，不打真接口、不需要真 key：
+ * - 系统提示词按语言选用且业主定的约束一条不少；
+ * - 请求形状（model / temperature / max_tokens / messages 结构）；
+ * - 节奏：未满 4 问继续提问，满 4 问（或触上限）道别 → isGoodbyeTurn；
+ * - 任一失败（网络错误 / 非 200 / 格式不对 / 超时）都抛错，面板据此回退离线版；
+ * - 无 key 配置时 parentLiveAvailable() = false（本站走离线版）。
+ */
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import {
+  DEEPSEEK_CHAT_URL,
+  PARENT_CHILD_TURN_CAP,
+  PARENT_MAX_TOKENS,
+  PARENT_MODEL,
+  PARENT_QUESTION_COUNT,
+  PARENT_SYSTEM_PROMPT_EN,
+  PARENT_SYSTEM_PROMPT_ZH,
+  PARENT_TEMPERATURE,
+  buildParentMessages,
+  buildParentRequestBody,
+  fetchParentReply,
+  getParentApiKey,
+  isGoodbyeTurn,
+  parentLiveAvailable,
+  parentSystemPrompt,
+  sanitizeParentReply,
+} from '../../src/parent/parentLive';
+import type { ParentTurn } from '../../src/parent/parentLive';
+
+const history: ParentTurn[] = [
+  { role: 'assistant', content: 'I can help if you need more coins.' },
+  { role: 'user', content: 'I want 2 coins.' },
+];
+
+function okResponse(content: string) {
+  return {
+    ok: true,
+    status: 200,
+    json: async () => ({ choices: [{ message: { content } }] }),
+  } as Response;
+}
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.restoreAllMocks();
+});
+
+describe('系统提示词（业主定稿，约束一条不少）', () => {
+  it('按语言选用', () => {
+    expect(parentSystemPrompt('en')).toBe(PARENT_SYSTEM_PROMPT_EN);
+    expect(parentSystemPrompt('zh')).toBe(PARENT_SYSTEM_PROMPT_ZH);
+  });
+
+  it('英文版含全部禁忌与要求', () => {
+    const p = PARENT_SYSTEM_PROMPT_EN;
+    expect(p).toContain('Never talk about winning, losing, scores or rankings');
+    expect(p).toContain('Never offer money, gifts or prizes');
+    expect(p).toContain('never ask for personal information');
+    expect(p).toContain('Do not say you are an AI');
+    expect(p).toContain('one question at a time');
+    expect(p).toContain('about 4 questions in total');
+    expect(p).toContain('shopping trip');
+  });
+
+  it('中文版含全部禁忌与要求', () => {
+    const p = PARENT_SYSTEM_PROMPT_ZH;
+    expect(p).toContain('绝不提输赢、分数、排名');
+    expect(p).toContain('绝不许诺给钱、礼物或奖励');
+    expect(p).toContain('绝不索取任何个人信息');
+    expect(p).toContain('不要说自己是 AI');
+    expect(p).toContain('一次只问一个问题');
+    expect(p).toContain('买菜');
+  });
+});
+
+describe('请求形状', () => {
+  it('model / temperature / max_tokens 按业主参数', () => {
+    const body = buildParentRequestBody('en', history, 1);
+    expect(body.model).toBe('deepseek-chat');
+    expect(body.model).toBe(PARENT_MODEL);
+    expect(body.temperature).toBe(0.7);
+    expect(body.temperature).toBe(PARENT_TEMPERATURE);
+    expect(body.max_tokens).toBe(150);
+    expect(body.max_tokens).toBe(PARENT_MAX_TOKENS);
+  });
+
+  it('messages[0] 是当前语言的系统提示词，且系统提示不进 user/assistant', () => {
+    const msgs = buildParentMessages('zh', history, 1);
+    expect(msgs[0]).toEqual({ role: 'system', content: PARENT_SYSTEM_PROMPT_ZH });
+    const nonSystem = msgs.filter((m) => m.role !== 'system');
+    expect(nonSystem).toEqual(history);
+    for (const m of nonSystem) {
+      expect(m.content).not.toContain('系统提示');
+      expect(m.content).not.toBe(PARENT_SYSTEM_PROMPT_ZH);
+    }
+  });
+
+  it('节奏：未满 4 问 → 继续提问的 system 提示', () => {
+    const msgs = buildParentMessages('en', history, 2);
+    expect(msgs[1].role).toBe('system');
+    expect(msgs[1].content).toContain('ask exactly one new question');
+  });
+
+  it('节奏：满 4 问 → 道别 system 提示，不再提问', () => {
+    const msgs = buildParentMessages('en', history, PARENT_QUESTION_COUNT);
+    expect(msgs[1].content).toContain('do not ask another question');
+    expect(msgs[1].content.toLowerCase()).toContain('goodbye');
+    const msgsZh = buildParentMessages('zh', history, PARENT_QUESTION_COUNT);
+    expect(msgsZh[1].content).toContain('不要再提问');
+    expect(msgsZh[1].content).toContain('道别');
+  });
+});
+
+describe('轮次上限（孩子发言上限 → 结束对话）', () => {
+  it('isGoodbyeTurn：<4 继续，>=4 或 >=上限 道别', () => {
+    expect(isGoodbyeTurn(0)).toBe(false);
+    expect(isGoodbyeTurn(3)).toBe(false);
+    expect(isGoodbyeTurn(4)).toBe(true);
+    expect(isGoodbyeTurn(PARENT_CHILD_TURN_CAP)).toBe(true);
+    expect(PARENT_CHILD_TURN_CAP).toBe(5);
+  });
+});
+
+describe('fetchParentReply（mock fetch）', () => {
+  it('成功：打到 DeepSeek 端点，带 Bearer key，返回清洗后的回复', async () => {
+    const fetchFn = vi.fn(async () => okResponse('  "That sounds yummy!"  '));
+    const reply = await fetchParentReply({
+      lang: 'en',
+      history,
+      childTurns: 1,
+      apiKey: 'test-key-not-real',
+      fetchFn: fetchFn as unknown as typeof fetch,
+    });
+    expect(reply).toBe('That sounds yummy!');
+    const [url, init] = fetchFn.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe(DEEPSEEK_CHAT_URL);
+    expect(url).toBe('https://api.deepseek.com/chat/completions');
+    const headers = init.headers as Record<string, string>;
+    expect(headers.Authorization).toBe('Bearer test-key-not-real');
+    const body = JSON.parse(init.body as string);
+    expect(body.model).toBe('deepseek-chat');
+    expect(body.temperature).toBe(0.7);
+    expect(body.max_tokens).toBe(150);
+    expect(body.messages[0].content).toBe(PARENT_SYSTEM_PROMPT_EN);
+  });
+
+  it('中文：messages[0] 用中文系统提示词', async () => {
+    const fetchFn = vi.fn(async () => okResponse('真乖，妈妈很开心。'));
+    await fetchParentReply({
+      lang: 'zh',
+      history,
+      childTurns: 1,
+      apiKey: 'test-key-not-real',
+      fetchFn: fetchFn as unknown as typeof fetch,
+    });
+    const body = JSON.parse(
+      (fetchFn.mock.calls[0] as unknown as [string, RequestInit])[1].body as string,
+    );
+    expect(body.messages[0].content).toBe(PARENT_SYSTEM_PROMPT_ZH);
+  });
+
+  it('失败回退：网络抛错 → throw（面板切离线版）', async () => {
+    const fetchFn = vi.fn(async () => {
+      throw new Error('network down');
+    });
+    await expect(
+      fetchParentReply({
+        lang: 'en',
+        history,
+        childTurns: 1,
+        apiKey: 'test-key-not-real',
+        fetchFn: fetchFn as unknown as typeof fetch,
+      }),
+    ).rejects.toThrow();
+  });
+
+  it('失败回退：HTTP 500 → throw', async () => {
+    const fetchFn = vi.fn(
+      async () => ({ ok: false, status: 500, json: async () => ({}) }) as Response,
+    );
+    await expect(
+      fetchParentReply({
+        lang: 'en',
+        history,
+        childTurns: 1,
+        apiKey: 'test-key-not-real',
+        fetchFn: fetchFn as unknown as typeof fetch,
+      }),
+    ).rejects.toThrow('500');
+  });
+
+  it('失败回退：返回格式不对（无 choices） → throw', async () => {
+    const fetchFn = vi.fn(
+      async () => ({ ok: true, status: 200, json: async () => ({ nope: 1 }) }) as Response,
+    );
+    await expect(
+      fetchParentReply({
+        lang: 'en',
+        history,
+        childTurns: 1,
+        apiKey: 'test-key-not-real',
+        fetchFn: fetchFn as unknown as typeof fetch,
+      }),
+    ).rejects.toThrow();
+  });
+
+  it('失败回退：超时（AbortController 中止） → throw', async () => {
+    const fetchFn = vi.fn(
+      (_url: string, init: RequestInit) =>
+        new Promise((_resolve, reject) => {
+          init.signal?.addEventListener('abort', () =>
+            reject(new DOMException('aborted', 'AbortError')),
+          );
+        }),
+    );
+    await expect(
+      fetchParentReply({
+        lang: 'en',
+        history,
+        childTurns: 1,
+        apiKey: 'test-key-not-real',
+        fetchFn: fetchFn as unknown as typeof fetch,
+        timeoutMs: 20,
+      }),
+    ).rejects.toThrow();
+  });
+
+  it('无 key：直接 throw，且不发出请求', async () => {
+    const fetchFn = vi.fn(async () => okResponse('hi'));
+    await expect(
+      fetchParentReply({
+        lang: 'en',
+        history,
+        childTurns: 1,
+        apiKey: '',
+        fetchFn: fetchFn as unknown as typeof fetch,
+      }),
+    ).rejects.toThrow();
+    expect(fetchFn).not.toHaveBeenCalled();
+  });
+});
+
+describe('key 配置', () => {
+  it('测试环境未注入 key → 离线模式', () => {
+    expect(getParentApiKey()).toBeUndefined();
+    expect(parentLiveAvailable()).toBe(false);
+  });
+
+  it('注入 key 后 → 可用（stubEnv，不用真 key）', () => {
+    vi.stubEnv('VITE_DEEPSEEK_API_KEY', 'stubbed-test-key');
+    expect(getParentApiKey()).toBe('stubbed-test-key');
+    expect(parentLiveAvailable()).toBe(true);
+  });
+});
+
+describe('sanitizeParentReply', () => {
+  it('去空白与包裹引号', () => {
+    expect(sanitizeParentReply('  “真乖。”  ')).toBe('真乖。');
+    expect(sanitizeParentReply('"Hello!"')).toBe('Hello!');
+  });
+  it('空回复视为失败', () => {
+    expect(() => sanitizeParentReply('   ')).toThrow();
+  });
+});
