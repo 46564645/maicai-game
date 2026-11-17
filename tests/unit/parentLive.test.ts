@@ -7,7 +7,7 @@
  * - 任一失败（网络错误 / 非 200 / 格式不对 / 超时）都抛错，面板据此回退离线版；
  * - 无 key 配置时 parentLiveAvailable() = false（本站走离线版）。
  */
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   DEFAULT_LLM_BASE_URL,
   DEFAULT_PARENT_MODEL,
@@ -43,6 +43,14 @@ function okResponse(content: string) {
     json: async () => ({ choices: [{ message: { content } }] }),
   } as Response;
 }
+
+beforeEach(() => {
+  // 屏蔽开发者本地 .env.local 的 VITE_LLM_* 注入（vitest 会加载 .env.local）：
+  // 先把三个变量 stub 成空（= 未配置），各用例再按需 stubEnv 具体值。
+  vi.stubEnv('VITE_LLM_API_KEY', '');
+  vi.stubEnv('VITE_LLM_BASE_URL', '');
+  vi.stubEnv('VITE_LLM_MODEL', '');
+});
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -276,7 +284,8 @@ describe('fetchParentReply（mock fetch）', () => {
 });
 
 describe('key 配置', () => {
-  it('测试环境未注入 key → 离线模式', () => {
+  it('未注入 key → 离线模式（显式 stub 空值，不依赖本地 .env.local）', () => {
+    vi.stubEnv('VITE_LLM_API_KEY', '');
     expect(getParentApiKey()).toBeUndefined();
     expect(parentLiveAvailable()).toBe(false);
   });

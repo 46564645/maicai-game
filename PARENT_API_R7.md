@@ -31,6 +31,14 @@ DeepSeek 降为备选配置：只改 `.env.local` 的 `VITE_LLM_*` 三个变量�
 切回，不改代码。原 DeepSeek key 经全盘核查始终不在本机可达之处
 （见 §4），这也是换商的现实原因之一。
 
+**模型修正（2026-11-17 收尾实测，百炼 key 到位后）**：业主提供的百炼
+key 实测可正常认证，但 `qwen-turbo` 在业主百炼工作空间内每调必回
+HTTP 429（`Throttling.RateQuota`，限流不计费）；同一 key 下
+`qwen-flash`、`qwen-plus` 均回 200。qwen-flash 比 turbo 更便宜，故
+可玩版配置改用 **qwen-flash**——纯配置修正：`.env.local` 加一行
+`VITE_LLM_MODEL=qwen-flash`，代码默认仍为 `qwen-turbo`，零代码改动。
+日后 turbo 限流解除，删该行即回默认。
+
 ## 1. 设计
 
 - 端点：`POST ${VITE_LLM_BASE_URL}/chat/completions`（OpenAI 兼容形状）。
@@ -121,9 +129,11 @@ CN: 「你是在外地打工的爸爸妈妈，正在给孩子打电话。语气�
   ③ Muse 记忆明确记「value not recorded here」；④ 本机文件系统与
   会话记录全文扫 `sk-` 模式，无 DeepSeek 格式的 key。
   结论：DeepSeek 的**真 key 实测无法执行**，缺的只是 key 本身。
-  业主据此在 R7b 改拍通义千问（见 §0），将另行提供百炼 API key。
-  点亮真对话只需一步：把百炼 key 写进 `~/workspace/maicai-work/.env.local`
-  （`VITE_LLM_API_KEY=<key>`）后 `npm run build` 重新打包即可，
+  业主据此在 R7b 改拍通义千问（见 §0）。百炼 key 已于 2026-11-17
+  由业主提供，只写入 `~/workspace/maicai-work/.env.local`
+  （`VITE_LLM_API_KEY=<key>`，另加 `VITE_LLM_MODEL=qwen-flash`，
+  见 §0 模型修正）；key 值不进本文档、不进日志、不进截图。
+  已按「写 .env.local → npm run build → 打包」点亮真对话，
   **零代码改动**；CORS 已实测放行（§1），不需要中转。
 - 注入方式（代码已就绪）：key 与服务商配置只放本地 `.env.local`
   （`VITE_LLM_API_KEY` / `VITE_LLM_BASE_URL` / `VITE_LLM_MODEL`）；
@@ -134,9 +144,14 @@ CN: 「你是在外地打工的爸爸妈妈，正在给孩子打电话。语气�
 - 推送前 secret-scan：对推送清单（git ls-files 的 UTF-8 文本集）逐个
   文件扫 `sk-[A-Za-z0-9_-]{16,}` 模式与 `.env*` 文件是否混入清单，
   结果见 §5。
-- 可玩 zip：本轮 zip 由无 key 的构建打包（原因见上），家长站为离线版；
-  按上法注入 key 重构建后重打包即为真对话版。zip 校验见 §5。
-  R7b 未重打 zip（尚无 key）；百炼 key 到位后按上法重构建、重打包。
+- 可玩 zip（真对话版）：`~/workspace/maicai-r7-live-play.zip`
+  （1,698,333 B，sha256
+  `fff0b2f07ad7fbc5a74df85c501932f68442fe8af3fd1c875b537bdcc2342824`），
+  由带 key 的构建打包（`.env.local` 在位、模型 qwen-flash）；
+  从全新解压验活：index 200、Board3D JS 200、构建产物含
+  `dashscope.aliyuncs.com` 端点与 `qwen-flash` 字样。实测见 §5。
+  注意：此 zip 内嵌 key（业主已接受，见 §0），**只供业主本地试玩，
+  不得上传任何公开托管**（GitHub 推送清单经 secret-scan，见 §5）。
 
 ## 5. 验收与实测
 
@@ -148,16 +163,77 @@ CN: 「你是在外地打工的爸爸妈妈，正在给孩子打电话。语气�
   `qwen-turbo`、备选 DeepSeek 只改 env 即可切、base 末尾斜杠处理；
   fetch 成功用例同步改断言默认端点/模型，temperature/max_tokens 不变）。
   R7b 复跑 `npm run build` 干净。
-- 浏览器实测（`shots/r7-live-test.mjs`，vite preview + CDP 截图）：
-  因无 key（§4），实测走的是**回退路径**——这正是演示保底路径，
-  中英各完整跑完一轮家长站：
-  - EN：4 问全说清（中途「就这样吧」选「继续回答」），站点正常关闭，
-    引擎发 2 币（My coins 12 → 14），无 pageerror。
-  - ZH：同上（你想要几个币？… 4 问全清），引擎发 2 币（我的钱 12 → 14）。
-  - 截图：`shots/r7_parent_{en,zh}_{1_open,2_mid,3_goodbye,4_after}.png`。
-  - 结论：R7 改动对离线路径零回退、零报错；真对话路径已由单测
-    （mock fetch）覆盖请求/回退/道别逻辑，只差真 key 的临门一测。
-  - R7b 仅换服务商配置、行为不变，未重跑浏览器实测；真 key 实测
-    仍待百炼 key 到位。
-- secret-scan（推送前）：见随附提交记录；清单内 `sk-` 模式命中 0，
-  `.env.local` 不在 `git ls-files` 中。
+  收尾补记：vitest 会加载 `.env.local`，工作区有真 key 时环境变量会漏进
+  断言（曾致 4 条失败）；已在 `parentLive.test.ts` 用 `beforeEach` 把
+  三个 `VITE_LLM_*` stub 为空串隔离，`.env.local` 在位时复跑仍 127/127。
+- 浏览器实测（离线回退路径，R7 首测，无 key 时）：中英各完整跑完
+  一轮家长站——EN 4 问全清、站点关闭、引擎发 2 币（12 → 14）；
+  ZH 同上（我的钱 12 → 14）；无 pageerror。证明回退路径零回退、零报错。
+- **真对话实测（2026-11-17 收尾，百炼 key + qwen-flash）**：
+  - 方法（重要）：本 VM 的 headless Chromium 无法穿过沙箱出口代理
+    （直连 DashScope 时 CONNECT 隧道失败
+    `ERR_TUNNEL_CONNECTION_FAILED`，四种代理配置皆同；同机 curl/Node
+    经同一代理正常）。故实测用**测试专用构建**：仅把
+    `VITE_LLM_BASE_URL` 指到本机中继（127.0.0.1:8123，Node 转发至真
+    DashScope、透传 Authorization、不落日志），其余与可玩版逐字相同
+    （同 key、同模型、同提示词、同一代码路径），API 回复均为真
+    qwen-flash 响应。可玩版在正常网络下直连 DashScope（CORS 见 §1），
+    不经中继。
+  - 尝试日志（UTC）：
+    - 直连尝试（可玩版原构建）：EN/ZH 各一次，浏览器 POST DashScope
+      均 `ERR_TUNNEL_CONNECTION_FAILED`，约 2s 内无感回退离线版
+      ——环境问题，非 API/应用问题。
+    - 中继 sanity：假 key 两次均回 401（转发与认证路径通，不计费）。
+    - ZH（07:26–07:28Z）：4 次 POST 全 200（07:26:55 / 07:26:57 /
+      07:28:21 / 07:28:29Z）→ **完整成功**（见下）。
+    - EN 第 1 次（07:01–07:07Z）：前 3 问 200，第 4 问未完成 →
+      回退离线版继续。
+    - EN 第 2 次（07:35–07:37Z）：4 次 POST 服务端全 200（07:35:38 /
+      07:35:41 / 07:36:52 / 07:37:11Z），但第 4 问回复经中继+代理
+      耗时约 11s，超过应用 10s 超时被 AbortController 中止（页面记
+      `ERR_ABORTED`）→ 按 §3 设计无感回退离线版（站点停在第 1 问，
+      可继续玩）。即 10s 超时在中继双跳 + VM 负载下会误伤慢回复；
+      正常直连时本轮实测回复为 0.3–3.7s，余量充足。
+    - EN 第 3 次（07:42–07:45Z）：4 次 POST 全 200（07:42:54 /
+      07:43:00 / 07:44:20 / 07:44:29Z）→ **完整成功**（见下）。
+    - 用量：成功计费调用合计 15 次（429/401 不计费），按每场约
+      2,000 token 估算总花费 <¥0.05，业主 ¥15 余额无感。
+  - ZH 对话实录（脚本开场「需要更多币的时候，我可以帮忙。/
+    你想要几个币？」后，家长回复原文）：
+    1. 孩子「我想要2个币」→「好呀，等会儿妈妈给你买菜的时候，
+       顺手帮你拿两个币哦。」
+    2. 孩子「我想买番茄和鸡蛋」→「真好，番茄红红的，鸡蛋白白的，
+       明天我们一起做番茄炒蛋，香喷喷的！」
+    3. 孩子「我买了贴纸和菜」→「贴纸是给你的小惊喜，菜是我们一起
+       做的美味食材，明天就能吃到香喷喷的番茄炒蛋啦！」
+    4. 孩子「下次我先买菜，再看贴纸」→「好呀，下次你先挑菜，妈妈
+       帮你记着，贴纸等你挑完菜再看，真棒！」
+    禁忌判定：**PASS**——无输赢/分数/排名、无个人信息索取、未自称
+    AI、全程买菜话题、短句温暖。小注：第 2 条是温暖回应未带问句
+    （应用侧节奏不受影响）；第 1 条「拿两个币」呼应本站脚本前提
+    （开场白即 coin 帮助），实际发币仍由引擎按 4 问全清判 2 币。
+  - EN 对话实录（脚本开场 "I can help if you need more coins. /
+    How many coins do you want?" 后，家长回复原文）：
+    1. "I want 2 coins" → "You can have 2 coins. What did you buy
+       at the store today?"
+    2. "I want to buy tomatoes and eggs" → "Great! We bought
+       tomatoes and eggs. What will we cook with them?"
+    3. "I bought a sticker and some food" → "Nice! What food did
+       you buy?"
+    4. "Next time I will buy food first" → "That's a good plan!
+       Did you get tomatoes and eggs today?"
+    禁忌判定：**PASS**——同上各项全过；一次只问一个问题；第 4 条以
+    肯定计划收尾（带一句回顾问句，应用按节奏关闭对话，不受影响）。
+    跨次方差注：EN 第 2 次的首回复为 "I can't give coins, but we
+    can talk about the fun things we bought today! ..."——模型对
+    「不许诺钱」的理解在「呼应前提」与「婉拒」之间摆动，两端均未
+    越界（币始终引擎决定，模型的话不产生任何发放）。
+  - 结算验证：ZH 我的钱 12 → 14、EN My coins 12 → 14，均为道别后
+    回放 4 答全清 → 引擎发 2 币；两场面板均在道别后自动关闭，
+    游戏继续推进。
+  - 截图：`shots/r7_parent_{en,zh}_{1_open,2_mid,3_goodbye,4_after}.png`
+    （已更新为真对话版，随本文档一并提交）。
+- secret-scan（推送前，本次收尾复核）：`git ls-files` 全集逐个文件扫
+  `sk-[A-Za-z0-9_-]{16,}` 模式，命中 **0**；`.env.local` 不在
+  `git ls-files` 中（`git check-ignore -v .env.local` →
+  `.gitignore:5:*.local`）。
