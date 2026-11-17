@@ -1,7 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, afterEach } from 'vitest';
 import { applyCommand } from '../../src/game/engine';
 import { gameConfig } from '../../src/config/gameConfig';
 import { cards, getIngredient } from '../../src/data/cards';
+import { setLang } from '../../src/i18n/store';
 import { boot, jumpTo, patchPlayer, actorOf, run } from './helpers';
 import type { GameState } from '../../src/game/types';
 
@@ -164,6 +165,45 @@ describe('AI 家长站', () => {
     expect(actorOf(s)).not.toBe('p0');
     const r = applyCommand(s, { type: 'PARENT_BEGIN' });
     expect(r.error).toBeUndefined(); // 是下一位的合法命令
+  });
+});
+
+describe('AI 家长站 · R9 写进日志的 AI 台词随界面语言', () => {
+  afterEach(() => setLang('en'));
+
+  it('判不出的兜底台词：中文模式进中文行，英文模式进 cards.json 英文原文', () => {
+    setLang('zh');
+    let s = jumpTo(boot(), 1, 5, 'p0');
+    s = run(s, { type: 'PARENT_BEGIN' });
+    s = run(s, { type: 'PARENT_ANSWER', answer: { mode: 'text', text: 'umm…' } });
+    const zhLast = s.log[s.log.length - 1];
+    expect(zhLast.text).toBe('没关系。我们一起选一张图卡。');
+    expect(zhLast.asAi).toBe(true);
+
+    setLang('en');
+    let s2 = jumpTo(boot(), 1, 5, 'p0');
+    s2 = run(s2, { type: 'PARENT_BEGIN' });
+    s2 = run(s2, { type: 'PARENT_ANSWER', answer: { mode: 'text', text: 'umm…' } });
+    const enLast = s2.log[s2.log.length - 1];
+    expect(enLast.text).toBe(cards.parentStation.fallbackLine);
+    expect(enLast.asAi).toBe(true);
+  });
+
+  it('中文模式：语音占位提示与批准台词也走中文（判定与币数不变）', () => {
+    setLang('zh');
+    let s = jumpTo(boot(), 1, 5, 'p0');
+    s = run(s, { type: 'PARENT_BEGIN' });
+    s = run(s, { type: 'PARENT_ANSWER', answer: { mode: 'voice' } });
+    const voiceLast = s.log[s.log.length - 1];
+    expect(voiceLast.text).toBe('语音还没准备好 — 点一张图卡吧。');
+    expect(voiceLast.asAi).toBe(true);
+    for (const opt of ['pq1-opt-2', 'pq2-opt-1', 'pq3-opt-1', 'pq4-opt-1']) {
+      s = run(s, { type: 'PARENT_ANSWER', answer: { mode: 'card', optionId: opt } });
+    }
+    const approveLast = s.log[s.log.length - 1];
+    expect(approveLast.text).toBe('好，说清楚了，给你 2 个币。');
+    expect(approveLast.asAi).toBe(true);
+    expect(player(s, 'p0').coins).toBe(gameConfig.startCoins + 2);
   });
 });
 

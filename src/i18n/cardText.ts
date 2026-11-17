@@ -6,9 +6,10 @@
  * 英文模式逐字返回数据源原文，中文模式查下面的 zh 表（来源见 I18N_R6.md：
  * ww 定名表 / REQUIREMENTS / Figma 流程原文，无出处者为 PM 直译并已列明）。
  *
- * 注意：引擎在行动时写进 state.log / state.reflections 的文本（含家长站
- * approveLine 等）是引擎侧按数据源原文生成的，不经本模块 —— 见
- * I18N_R6.md「已知边界」。
+ * 注意：引擎在行动时写进 state.log / state.reflections 的文本大多按数据源
+ * 原文生成、不经本模块（见 I18N_R6.md「已知边界」）；R9 起家长站三条
+ * AI 台词（approveLine / fallbackLine / voiceHint）改经本模块
+ * parentApproveLine / parentFallbackLine / parentVoiceHint 随语言走。
  */
 import { cards } from '../data/cards';
 import type {
@@ -300,6 +301,13 @@ export function parentVoiceHint(): string {
 }
 export function parentSettleLabel(): string {
   return zh() ? zhParent.settleLabel : cards.parentStation.settleLabel;
+}
+/** R9：以下两条也被引擎（stations/parent.ts）写进 state.log 的 AI 台词使用 */
+export function parentApproveLine(): string {
+  return zh() ? zhParent.approveLine : cards.parentStation.approveLine;
+}
+export function parentFallbackLine(): string {
+  return zh() ? zhParent.fallbackLine : cards.parentStation.fallbackLine;
 }
 export function parentQuestionText(q: ParentQuestion): string {
   return zh() && zhParent.questions[q.id] ? zhParent.questions[q.id] : q.text;

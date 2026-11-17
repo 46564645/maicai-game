@@ -238,6 +238,8 @@ export const enStrings = {
     voiceBtn: 'Voice',
     clearedMark: '✓ Clear!',
     settleGo: 'Keep answering',
+    statusLive: 'Live chat',
+    statusOffline: 'Offline script',
     ruleNote:
       'Say how many coins and what for → get 1 coin. Also say where coins went and your plan → get 2 coins',
   },

@@ -7,6 +7,7 @@
 import { cards } from '../../data/cards';
 import { gameConfig } from '../../config/gameConfig';
 import { strings } from '../../data/strings';
+import { parentApproveLine, parentFallbackLine, parentVoiceHint } from '../../i18n/cardText';
 import type { GameState, ParentAnswer } from '../types';
 import * as S from './shared';
 import type { Outcome } from './shared';
@@ -36,7 +37,7 @@ function finishDialog(state: GameState, coins: number): Outcome {
   let s: GameState = { ...state, parentDialog: null };
   if (coins > 0) {
     s = S.gainCoins(s, d.playerId, coins); // 得币先补车费
-    s = S.logWith(s, cards.parentStation.approveLine, { n: coins }, d.playerId, {
+    s = S.logWith(s, parentApproveLine(), { n: coins }, d.playerId, {
       kind: 'gain',
       coins,
     },
@@ -50,7 +51,7 @@ export function parentAnswer(state: GameState, answer: ParentAnswer): Outcome {
   if (!d) return S.bad('ERR_INVALID');
   // 语音是占位按钮：提示一下，不推进、不算回答
   if (answer.mode === 'voice') {
-    return S.ok(S.pushLog(state, cards.parentStation.voiceHint, d.playerId, undefined, true));
+    return S.ok(S.pushLog(state, parentVoiceHint(), d.playerId, undefined, true));
   }
   const q = cards.parentStation.questions[d.step];
   if (!q) return S.bad('ERR_INVALID');
@@ -63,7 +64,7 @@ export function parentAnswer(state: GameState, answer: ParentAnswer): Outcome {
     cleared = q.keywords.some((k) => answer.text.includes(k));
   }
   if (!cleared) {
-    return S.ok(S.pushLog(state, cards.parentStation.fallbackLine, d.playerId, undefined, true)); // AI 给图卡兜底，重答本问
+    return S.ok(S.pushLog(state, parentFallbackLine(), d.playerId, undefined, true)); // AI 给图卡兜底，重答本问
   }
 
   const flags = [...d.cleared];

@@ -5,6 +5,7 @@
  * - 请求形状（model / temperature / max_tokens / messages 结构）；
  * - 节奏：未满 4 问继续提问，满 4 问（或触上限）道别 → isGoodbyeTurn；
  * - 任一失败（网络错误 / 非 200 / 格式不对 / 超时）都抛错，面板据此回退离线版；
+ * - R9：非超时失败自动重试一次（retryDelayMs 传 0 免等待），超时/中止不重试；
  * - 无 key 配置时 parentLiveAvailable() = false（本站走离线版）。
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -280,6 +281,82 @@ describe('fetchParentReply（mock fetch）', () => {
       }),
     ).rejects.toThrow();
     expect(fetchFn).not.toHaveBeenCalled();
+  });
+});
+
+describe('R9 自动重试（非超时失败重试一次 ~800ms，超时/中止不重试）', () => {
+  it('网络错误后重试成功 → 返回重试的回复，会话继续（共 2 次请求）', async () => {
+    const fetchFn = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('network down'))
+      .mockResolvedValueOnce(okResponse('second try works'));
+    const reply = await fetchParentReply({
+      lang: 'en',
+      history,
+      childTurns: 1,
+      apiKey: 'test-key-not-real',
+      fetchFn: fetchFn as unknown as typeof fetch,
+      retryDelayMs: 0,
+    });
+    expect(reply).toBe('second try works');
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+  });
+
+  it('HTTP 500 后重试成功 → 返回重试的回复（HTTP 错误同样进重试）', async () => {
+    const fetchFn = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: false, status: 500, json: async () => ({}) })
+      .mockResolvedValueOnce(okResponse('recovered'));
+    const reply = await fetchParentReply({
+      lang: 'en',
+      history,
+      childTurns: 1,
+      apiKey: 'test-key-not-real',
+      fetchFn: fetchFn as unknown as typeof fetch,
+      retryDelayMs: 0,
+    });
+    expect(reply).toBe('recovered');
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+  });
+
+  it('两次都失败 → throw 回退离线版（共 2 次请求，无第三次）', async () => {
+    const fetchFn = vi.fn(async () => {
+      throw new Error('network down');
+    });
+    await expect(
+      fetchParentReply({
+        lang: 'en',
+        history,
+        childTurns: 1,
+        apiKey: 'test-key-not-real',
+        fetchFn: fetchFn as unknown as typeof fetch,
+        retryDelayMs: 0,
+      }),
+    ).rejects.toThrow('network down');
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+  });
+
+  it('第一次就是超时/中止 → 不 retry，立即 throw（只 1 次请求）', async () => {
+    const fetchFn = vi.fn(
+      (_url: string, init: RequestInit) =>
+        new Promise((_resolve, reject) => {
+          init.signal?.addEventListener('abort', () =>
+            reject(new DOMException('aborted', 'AbortError')),
+          );
+        }),
+    );
+    await expect(
+      fetchParentReply({
+        lang: 'en',
+        history,
+        childTurns: 1,
+        apiKey: 'test-key-not-real',
+        fetchFn: fetchFn as unknown as typeof fetch,
+        timeoutMs: 20,
+        retryDelayMs: 0,
+      }),
+    ).rejects.toThrow();
+    expect(fetchFn).toHaveBeenCalledTimes(1);
   });
 });
 

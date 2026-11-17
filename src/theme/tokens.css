@@ -47,6 +47,7 @@
   --color-backdrop: rgba(46, 34, 20, 0.42); /* 弹窗遮罩（R5：调暖的墨棕） */
   --color-focus: var(--color-text);           /* 焦点描边 */
   --color-disabled: #c9c2b8;
+  --color-status-live: #2e9e63;        /* 状态点·真对话绿（R9 家长站指示；离线灰用 --color-muted） */
   --color-shadow: #6b3f14;         /* 阴影统一暖棕（混入透明度使用） */
 
   /* —— R5 美化派生（全部 color-mix 自色板，换主色即整体跟随）—— */

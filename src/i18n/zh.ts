@@ -227,6 +227,8 @@ export const zhStrings: StringsDict = {
     voiceBtn: '语音',
     clearedMark: '✓ 说清楚了',
     settleGo: '继续回答',
+    statusLive: '真对话',
+    statusOffline: '离线脚本',
     ruleNote: '说清多少、做什么 → 得 1 币；再说清花到哪、下次怎么做 → 得 2 币',
   },
 

@@ -24,6 +24,8 @@
  * - 系统提示词只进 API 请求，永不出现在聊天气泡里。
  * - 任一失败（无 key / 超时 / 断网 / 非 200 / 返回格式不对）都抛错，
  *   面板捕获后无缝切回离线脚本流程，孩子端不报错、不卡住。
+ *   R9：超时/中止以外的失败先自动重试一次（~800ms 后再发一次），
+ *   重试也失败才真正抛错回退——瞬断不再秒杀整场真对话。
  */
 import { getLang } from '../i18n/store';
 import type { Lang } from '../i18n/store';
@@ -71,6 +73,8 @@ export const PARENT_TEMPERATURE = 0.7;
 export const PARENT_MAX_TOKENS = 150;
 /** 单次请求超时（业主定 ~10s）：超时即回退离线版，演示永不卡死 */
 export const PARENT_TIMEOUT_MS = 10_000;
+/** R9：非超时失败自动重试一次前的等待（业主定 ~800ms） */
+export const PARENT_RETRY_DELAY_MS = 800;
 /** 孩子发言轮次上限（业主定 5） */
 export const PARENT_CHILD_TURN_CAP = 5;
 /** 一场对话约 4 个问题（与离线脚本的 4 问对齐） */
@@ -171,16 +175,24 @@ export interface FetchParentReplyArgs {
   apiKey?: string;
   fetchFn?: typeof fetch;
   timeoutMs?: number;
+  /** 失败重试前的等待毫秒（默认 PARENT_RETRY_DELAY_MS；单测可传 0） */
+  retryDelayMs?: number;
 }
 
-/**
- * 向 LLM 服务商要一句家长回复。成功 → 返回清洗后的文本；
- * 任何失败（无 key、超时、非 200、格式不对、空回复）都 throw，
- * 调用方（面板）捕获后切回离线脚本流程。
- */
-export async function fetchParentReply(args: FetchParentReplyArgs): Promise<string> {
-  const key = args.apiKey ?? getParentApiKey();
-  if (!key) throw new Error('parent-live: no api key configured');
+/** 中止/超时判定：fetch 被 AbortController 掐断时以 err.name === 'AbortError' 拒绝 */
+function isAbortError(err: unknown): boolean {
+  return (
+    typeof err === 'object' && err !== null && (err as { name?: unknown }).name === 'AbortError'
+  );
+}
+
+const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+/** 单次尝试：自带独立 AbortController + 计时器；成功 → 清洗后文本，失败 → throw */
+async function fetchParentReplyOnce(
+  key: string,
+  args: FetchParentReplyArgs,
+): Promise<string> {
   const lang = args.lang ?? getLang();
   const fetchFn = args.fetchFn ?? fetch;
   const timeoutMs = args.timeoutMs ?? PARENT_TIMEOUT_MS;
@@ -206,5 +218,24 @@ export async function fetchParentReply(args: FetchParentReplyArgs): Promise<stri
     return sanitizeParentReply(content);
   } finally {
     clearTimeout(timer);
+  }
+}
+
+/**
+ * 向 LLM 服务商要一句家长回复。成功 → 返回清洗后的文本；
+ * 任何失败（无 key、超时、非 200、格式不对、空回复）都 throw，
+ * 调用方（面板）捕获后切回离线脚本流程。
+ * R9：超时/中止以外的失败先等 ~800ms 自动重试一次（期间面板仍显示
+ * 「正在想…」，孩子无感）；重试也失败、或第一次就是超时，才 throw 回退。
+ */
+export async function fetchParentReply(args: FetchParentReplyArgs): Promise<string> {
+  const key = args.apiKey ?? getParentApiKey();
+  if (!key) throw new Error('parent-live: no api key configured');
+  try {
+    return await fetchParentReplyOnce(key, args);
+  } catch (err) {
+    if (isAbortError(err)) throw err;
+    await wait(args.retryDelayMs ?? PARENT_RETRY_DELAY_MS);
+    return fetchParentReplyOnce(key, args);
   }
 }

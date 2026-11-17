@@ -237,3 +237,64 @@ CN: 「你是在外地打工的爸爸妈妈，正在给孩子打电话。语气�
   `sk-[A-Za-z0-9_-]{16,}` 模式，命中 **0**；`.env.local` 不在
   `git ls-files` 中（`git check-ignore -v .env.local` →
   `.gitignore:5:*.local`）。
+
+## 6. R9 补丁轮（2026-11-17 晚，业主现场测试后拍板三项）
+
+背景：业主在真机上试玩，第一次 live fetch 在他浏览器里失败后，整场
+静默走了离线脚本——界面上与真对话**无法区分**。本轮三个修复，
+引擎判定/币数/cards.json 均未动，未打真 API（全部 mock fetch 单测）。
+
+### 修 1 —— 真/离线状态点（家长站每个渲染分支都有）
+- `ParentPanel.tsx` 新增 `ParentStatus` 展示件（非按钮），挂在
+  parentUse / 真对话 / parentSettle / 离线问答**四个分支**的面板顶部：
+  真对话进行中（含尚未启动但已注入 key 的预判）= 绿点
+  「Live chat / 真对话」；离线脚本（无 key 或失败回退后）= 灰点
+  「Offline script / 离线脚本」。
+- 文案走 `strings.parent.statusLive / statusOffline`（en.ts + zh.ts 同构，
+  i18n 同构测试照过）；颜色只引 token——新增
+  `--color-status-live: #2e9e63`（tokens.css），灰点用既有 `--color-muted`。
+- 面板外层布局未动（只在 panel-body 内加一行小字，R8 自适应不受影响）。
+
+### 修 2 —— fallbackLine 等 AI 台词随界面语言
+- `stations/parent.ts` 三处写进 log 的 AI 台词从裸读
+  `cards.parentStation.*` 改经 `i18n/cardText` 语言感知函数：
+  `fallbackLine`（判不出兜底）、`voiceHint`（语音占位）、`approveLine`
+  （批准发币）。命令发生时按当时语言成文，与 strings 日志模板同一
+  机制、同一时机；中文=「没关系。我们一起选一张图卡。」等，
+  英文=cards.json 原文。intro/settleLabel 引擎本就不读，questions
+  只作判定数据，均无需动。
+- 单测（stations.test.ts 新增 describe）：zh 模式不可判定文本 → log
+  末条为中文兜底行且 asAi；en 模式为 cards.json 英文；zh 的
+  voice/approve 两条也覆盖，币数断言不变（+2 币）。
+
+### 修 3 —— 失败自动重试一次（~800ms）
+- `parentLive.ts` `fetchParentReply` 拆出单次尝试
+  `fetchParentReplyOnce`（每次独立 AbortController+计时）：非
+  超时/中止失败 → 等 `PARENT_RETRY_DELAY_MS`（800ms，可用
+  `retryDelayMs` 覆盖）重试一次；重试仍败、或第一次就是
+  超时（AbortError）→ 与之前一样 throw。无 key 仍在 fetch 前直接
+  throw、不进重试。面板 await 期间 busy 保持，「正在想…」气泡全程
+  不撤，孩子看不到任何报错。
+- 单测（parentLive.test.ts 新增 describe，全 mock fetch +
+  retryDelayMs:0）：网络错误→重试成功（2 次请求，返回重试回复）；
+  HTTP 500→重试成功；两次皆败→throw（恰好 2 次请求）；第一次即
+  超时→不重试、立即 throw（只 1 次请求）。
+
+### R9 验证
+- `npm run build` 干净；`npm test` **133/133**（127 基线 + 新增 6：
+  重试 4 + 台词语言 2）。
+- 截图（CDP 截法，SwiftShader-safe，见 `shots/r9-shots.mjs`）：
+  - 真构建（.env.local 在位，key 已注入）状态点绿：
+    `shots/r9_parent_{en,zh}_live_{desktop,phone}.png`
+    （EN「Live chat」/ ZH「真对话」，desktop 1280×800 + phone 874×402
+    hasTouch 真手机横屏布局）；
+  - 离线构建（临时挪走 .env.local 构建，已复原并重打）状态点灰：
+    `shots/r9_parent_{en,zh}_offline_{desktop,phone}.png`
+    （EN「Offline script」/ ZH「离线脚本」）；
+  - 回落实证：真构建答 1 题 → fetch 失败（本 VM 隧道不通）→ 自动
+    重试 → 再败 → 静默切离线脚本，状态点同步变灰：
+    `shots/r9_parent_en_fallback_desktop.png`。
+  - 手机竖栏为吸底滚动，截图前滚到顶以显示面板顶部状态点
+    （纯截屏动作，不改交互）。
+- 未验证项：真 API 端的重试路径（业主 ¥15 余额红线，本轮零真实
+  调用；重试逻辑全部经 mock fetch 断言）。

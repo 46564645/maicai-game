@@ -11,8 +11,11 @@
  * 图卡仍是快捷回复、打字照旧；孩子在真对话里给出的答案先记在面板里，
  * 道别后**原样回放给引擎**（PARENT_ANSWER 序列），说清判定与发币仍
  * 100% 由引擎按既有规则决定，LLM 碰不到币。对话任一步失败（超时/断网/
- * 接口错误）立即无缝切回下面的离线脚本流程（引擎对话还停在原地，
+ * 接口错误）先由 parentLive 自动重试一次（~800ms，非超时失败才重试），
+ * 仍失败则无缝切回下面的离线脚本流程（引擎对话还停在原地，
  * 孩子不会看到报错、不会卡住）。没有 key 时本文件行为与 R6/R8 完全一致。
+ * R9：每个分支顶部有状态点——真对话绿「Live chat」/离线脚本灰
+ * 「Offline script」，不再分不清当前走的是哪条路。
  */
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
@@ -48,6 +51,22 @@ interface LiveSession {
   done: boolean;
 }
 
+/** R9 状态点（仅展示）：真对话进行中绿点「Live chat/真对话」，
+ *  离线脚本（未注入 key / 失败回退后）灰点「Offline script/离线脚本」。
+ *  家长站每个渲染分支都挂在面板顶部，方便一眼分辨当前走的是哪条路。 */
+function ParentStatus({ live }: { live: boolean }) {
+  return (
+    <p
+      className={'parent-status' + (live ? ' parent-status--live' : '')}
+      data-testid="parent-status"
+      data-live={live ? 'on' : 'off'}
+    >
+      <span className="parent-status-dot" aria-hidden="true" />
+      {live ? strings.parent.statusLive : strings.parent.statusOffline}
+    </p>
+  );
+}
+
 export function ParentPanel({
   state,
   send,
@@ -66,6 +85,11 @@ export function ParentPanel({
   const liveCtl = useRef({ started: false, completing: false, settleWatch: false });
   const liveChatRef = useRef<HTMLDivElement>(null);
   const dialogOpen = !!d && d.playerId === me.id;
+
+  /* R9 状态点取色：live 会话在 = 绿；还没启动过（parentUse 阶段或
+     开场瞬间）按 key 预判——有 key 即将会话真对话 = 绿；一旦启动过
+     而 live 落空（任一失败回退）= 灰；无 key 永远 = 灰。 */
+  const statusLive = live !== null || (parentLiveAvailable() && !liveCtl.current.started);
 
   // 对话打开且本地有 key → 开一场真对话（每场只开一次；失败后 started
   // 保持 true，本局内不再重试，面板回退到离线脚本）。对话关闭 → 复位。
@@ -110,6 +134,7 @@ export function ParentPanel({
   if (pd.kind === 'parentUse') {
     return (
       <div className="panel-body">
+        <ParentStatus live={statusLive} />
         <div className="chat">
           <p className="chat-bubble chat-bubble--ai">{parentIntro()}</p>
         </div>
@@ -209,6 +234,7 @@ export function ParentPanel({
 
     return (
       <div className="panel-body">
+        <ParentStatus live={statusLive} />
         <div className="chat" data-testid="parent-chat" ref={liveChatRef}>
           <p className="chat-bubble chat-bubble--ai">{parentIntro()}</p>
           <p className="chat-bubble chat-bubble--ai">{parentQuestionText(questions[0])}</p>
@@ -314,6 +340,7 @@ export function ParentPanel({
   if (pd.kind === 'parentSettle') {
     return (
       <div className="panel-body">
+        <ParentStatus live={statusLive} />
         <ChatHistory d={d} aiText={lastAi} systemText={lastSystem} />
         <div className="panel-actions">
           <Button
@@ -345,6 +372,7 @@ export function ParentPanel({
   /* —— 问答（图卡 + 打字 + 语音占位）—— */
   return (
     <div className="panel-body">
+      <ParentStatus live={statusLive} />
       <ChatHistory d={d} aiText={lastAi} systemText={lastSystem} />
       <p className="panel-subtitle">
         {fmt(strings.parent.questionOf, { a: step + 1, b: questions.length })} ·{' '}
