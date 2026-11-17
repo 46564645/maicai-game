@@ -1,0 +1,736 @@
+/* ==========================================================================
+   cards.css —— R10 卡片化样式（Slice A）。只用 tokens.css 变量；本文件是
+   R10_DESIGN §3/§4 的全部视觉落点：卡面解剖、扇形手牌、拖拽层、
+   可打出柔光、投放区、牌堆、价格宝石、金币滚动器、CSS foil。
+   加载顺序在 screens.css 之后（同优先级下这里的规则生效）。
+   ========================================================================== */
+
+/* —— 读屏专用文本（.cc-live 用；也通用） —— */
+.sr-only,
+.cc-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ==========================================================================
+   卡面解剖（CardView §3.1）：卡框 / 美术区 / 名称横幅 / 价格宝石
+   ========================================================================== */
+
+/* 美术区：约 55% 卡高；emoji 回退时圆形奶油衬底，插画时 object-fit 满铺 */
+.card-view-art {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  min-height: 44px;
+  align-self: stretch;
+  border-radius: var(--radius-button);
+  overflow: hidden;
+  background: var(--color-surface-dim);
+}
+
+.card-view-art-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* emoji 回退时的小圆衬（插画态下 icon 不渲染） */
+.card-view-art .card-view-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72%;
+  max-width: 76px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--color-bg);
+  box-shadow: inset 0 2px 4px color-mix(in srgb, var(--color-shadow) 10%, transparent);
+}
+
+/* 名称横幅：奶油底圆角长条，单行不换行，超长交给 &shy;/字号缩小 */
+.card-view-banner {
+  align-self: stretch;
+  flex: none;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-button);
+  background: var(--color-bg);
+  text-align: center;
+  overflow: hidden;
+}
+
+.card-view-banner .card-view-name {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* 价格宝石（炉石「形」）：橙渐变圆 + 白字 + 内嵌小金币点，卡左上出框 */
+.card-view-gem {
+  position: absolute;
+  top: calc(var(--gem-size) / -3);
+  left: calc(var(--gem-size) / -3);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--gem-size);
+  height: var(--gem-size);
+  border-radius: 50%;
+  background: var(--gem-gem-grad);
+  color: var(--color-surface);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-heavy);
+  font-variant-numeric: tabular-nums;
+  border: 2px solid var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* 内嵌小金币（左下小圆点） */
+.card-view-gem::after {
+  content: '';
+  position: absolute;
+  left: -3px;
+  bottom: -3px;
+  width: var(--gem-coin-size);
+  height: var(--gem-coin-size);
+  border-radius: 50%;
+  background: var(--color-accent-yellow);
+  border: 1px solid var(--color-surface);
+}
+
+/* 无价卡的类别小标签（tag 首段）：与宝石同位同形的小片 */
+.card-view-kind {
+  position: absolute;
+  top: calc(var(--gem-size) / -3);
+  left: calc(var(--gem-size) / -3);
+  z-index: 2;
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-card);
+  background: var(--color-purple-soft);
+  color: var(--color-ink);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  border: 1px solid var(--color-line);
+  pointer-events: none;
+}
+
+/* —— 卡面四态（§3.2）：playable 走 .pglow；这里补其余三态 —— */
+
+/* 买不起/不可打：美术区灰化 + 宝石转灰 + 整卡 65%（.pglow--dim 挂在
+   PlayableGlow 包裹层上，透进内层卡面；卡不 disabled——仍可点选看价） */
+.pglow--dim {
+  opacity: 0.65;
+}
+.pglow--dim .card-view-art {
+  filter: grayscale(0.72) brightness(0.94);
+}
+.pglow--dim .card-view-gem {
+  background: var(--gem-disabled);
+  color: var(--color-muted);
+}
+
+/* 刚打出：短暂薄荷绿闪（命令落地后 600ms 内挂该类） */
+.card-view--just-played {
+  animation: card-played-flash var(--motion-slow) var(--motion-ease) 1;
+}
+@keyframes card-played-flash {
+  0% {
+    box-shadow: var(--shadow-md), 0 0 0 4px var(--color-mint), var(--inset-light);
+  }
+  100% {
+    box-shadow: var(--shadow-sm), var(--inset-light);
+  }
+}
+
+/* ==========================================================================
+   TiltCard（TiltedCard 改造）：指针倾斜 + 高光 + rotateY 翻牌 + foil
+   ========================================================================== */
+
+.tc {
+  perspective: 800px;
+  width: 100%;
+  height: 100%;
+}
+.tc-tilt {
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--tc-rx, 0deg)) rotateY(var(--tc-ry, 0deg));
+  transition: transform var(--motion-med) var(--motion-ease);
+}
+.tc-flip {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform var(--flip-ms) var(--ease-spring);
+}
+.tc--flipped .tc-flip {
+  transform: rotateY(180deg);
+}
+.tc-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: inherit;
+  overflow: hidden;
+}
+/* 面内卡面撑满 */
+.tc-face > .card-view {
+  width: 100%;
+  height: 100%;
+}
+.tc-face--back {
+  transform: rotateY(180deg);
+}
+.tc-glare {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at var(--tc-gx, 50%) var(--tc-gy, 50%),
+    var(--glow-sweep),
+    transparent 62%
+  );
+}
+/* CSS foil：token 色双彩虹斜纹 4s 缓慢漂移（只给完成菜谱/盛宴盘卡） */
+.tc-foil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--foil-opacity);
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    var(--color-mint) 42%,
+    var(--color-accent-yellow) 50%,
+    var(--color-primary) 58%,
+    transparent 70%
+  );
+  background-size: 260% 260%;
+  animation: foil-drift 4s linear infinite;
+}
+@keyframes foil-drift {
+  from {
+    background-position: 0% 0%;
+  }
+  to {
+    background-position: 100% 100%;
+  }
+}
+
+/* ==========================================================================
+   Hand（BounceCards 改造）：扇形手牌
+   ========================================================================== */
+
+.hand {
+  --hand-card-w: var(--card-w);
+  --hand-card-h: var(--card-h);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: var(--hand-card-h);
+  padding-top: var(--hand-lift); /* 上抬不裁切 */
+}
+
+.hand-item {
+  position: relative;
+  flex: 0 0 auto;
+  border-radius: var(--radius-card);
+  transform-origin: 50% 110%; /* 扇形像从掌心转出来 */
+  transform: rotate(var(--fan-rot)) translateY(var(--fan-drop));
+  transition:
+    transform var(--motion-med) var(--ease-spring),
+    opacity var(--motion-med) var(--motion-ease);
+  animation-delay: calc(var(--fan-i) * 40ms);
+}
+.hand--fan .hand-item {
+  width: var(--hand-card-w);
+  height: var(--hand-card-h);
+}
+.hand--fan .hand-item + .hand-item {
+  margin-left: calc(var(--fan-expose) - var(--hand-card-w));
+}
+.hand--free .hand-item + .hand-item {
+  margin-left: var(--space-2);
+}
+
+/* 卡面撑满手牌位（drag 层 / glow 层 / Tilt 链条一路 100%） */
+.hand-item > .hand-drag,
+.hand-item > .pglow,
+.hand-item > .card-view {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.hand-drag > .pglow {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.hand-item .stall-slot {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+/* 悬停/聚焦：立直 + 上浮 + 放大 6%；相邻两卡让位 */
+.hand-item:hover,
+.hand-item:focus-within,
+.hand-item--sel {
+  transform: rotate(0deg) translateY(calc(var(--hand-lift) * -1)) scale(1.06);
+  z-index: 10;
+}
+.hand-item:hover + .hand-item,
+.hand-item:focus-within + .hand-item,
+.hand-item--sel + .hand-item {
+  transform: rotate(var(--fan-rot)) translateY(var(--fan-drop))
+    translateX(var(--fan-push));
+}
+.hand-item:has(+ .hand-item:hover),
+.hand-item:has(+ .hand-item:focus-within),
+.hand-item:has(+ .hand-item--sel) {
+  transform: rotate(var(--fan-rot)) translateY(var(--fan-drop))
+    translateX(calc(var(--fan-push) * -1));
+}
+
+/* 拖拽中的卡抬到所有兄弟之上（hand-item 才有层叠上下文话语权） */
+.hand-item:has(> .hand-drag--up) {
+  z-index: 30;
+}
+
+/* 新卡入场弹入（scale 0.6→1 带回弹；逐卡错 40ms 由 animation-delay 给） */
+.hand-item--in {
+  animation: hand-pop var(--motion-med) var(--ease-spring) backwards;
+}
+@keyframes hand-pop {
+  from {
+    opacity: 0;
+    transform: rotate(var(--fan-rot)) translateY(24px) scale(0.6);
+  }
+}
+
+/* 任务卡（菜谱）入场：从上方翻转落入手牌位（§1.5 落位感） */
+.hand-item--quest.hand-item--in {
+  animation-name: quest-land;
+  animation-duration: var(--motion-slow);
+}
+@keyframes quest-land {
+  from {
+    opacity: 0;
+    transform: rotateX(70deg) translateY(-28px);
+  }
+}
+
+/* 非本玩家回合 idle：整手压暗，仍可 hover 查看 */
+.hand--dim .hand-item {
+  opacity: 0.55;
+}
+.hand--dim .hand-item:hover,
+.hand--dim .hand-item:focus-within {
+  opacity: 1;
+}
+
+/* 手牌拖拽层：包在卡面外的一层 div，位移写它的 transform（不动 hand-item） */
+.hand-drag {
+  position: relative;
+  touch-action: none; /* 触屏拖拽不被页面滚动抢 */
+  border-radius: var(--radius-card);
+}
+@media (hover: hover) and (pointer: fine) {
+  .hand-drag {
+    cursor: grab;
+  }
+}
+.hand-drag--shake {
+  animation: drag-shake 180ms ease-out;
+}
+.hand-drag--up {
+  cursor: grabbing;
+}
+@keyframes drag-shake {
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+/* ==========================================================================
+   PlayableGlow（BorderGlow 令牌化）：可打出柔光呼吸 + 扫光带
+   ========================================================================== */
+
+.pglow {
+  position: relative;
+  display: block;
+  border-radius: var(--radius-card);
+}
+.pglow--on {
+  box-shadow:
+    0 0 0 3px var(--glow-ring),
+    0 0 20px var(--glow-amber);
+  animation: pglow-breathe 2.6s ease-in-out infinite;
+}
+@keyframes pglow-breathe {
+  50% {
+    box-shadow:
+      0 0 0 4px var(--glow-ring),
+      0 0 30px var(--glow-amber);
+  }
+}
+.pglow-sweep {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+}
+.pglow-sweep::after {
+  content: '';
+  position: absolute;
+  inset: -10% -70%;
+  background: linear-gradient(
+    105deg,
+    transparent 44%,
+    var(--glow-sweep) 50%,
+    transparent 56%
+  );
+  transform: translateX(-120%);
+  animation: pglow-sweep 700ms var(--motion-ease) 1 forwards;
+}
+@keyframes pglow-sweep {
+  to {
+    transform: translateX(120%);
+  }
+}
+
+/* ==========================================================================
+   投放区：篮子（买）+ 留菜夹（先等等）——也是 tap-tap 的原生按钮
+   ========================================================================== */
+
+.drop-row {
+  display: flex;
+  gap: var(--space-3);
+  align-items: stretch;
+}
+.drop-zone {
+  position: relative;
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--button-height);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-button);
+  border: 3px dashed transparent;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+  transition:
+    transform var(--motion-fast) var(--ease-spring),
+    background-color var(--motion-fast) var(--motion-ease),
+    border-color var(--motion-fast) var(--motion-ease);
+}
+.drop-zone--basket {
+  background: var(--drop-basket-bg);
+}
+.drop-zone--hold {
+  background: var(--drop-hold-bg);
+}
+.drop-zone:disabled {
+  opacity: 0.45;
+}
+/* 有卡被选中/正拖拽 → 区亮边框「能收了」 */
+.drop-zone--armed:not(:disabled) {
+  border-color: var(--color-primary);
+}
+/* 拖拽命中可接受区 → 薄荷高亮 + 微放大（Magnet 视觉端） */
+.drop-zone--hot:not(:disabled) {
+  border-style: solid;
+  border-color: var(--color-mint);
+  background: var(--drop-hot);
+  transform: translateY(-3px) scale(1.04);
+}
+/* 命中但拒收（卡买不起/不可留）→ 灰虚线提示 */
+.drop-zone--rejecting {
+  border-color: var(--color-line-strong);
+}
+.drop-zone .dz-icon {
+  font-size: var(--font-size-lg);
+  line-height: 1;
+}
+/* 打出成功：区轻弹确认（300ms 内摘除） */
+.drop-zone--pop:not(:disabled) {
+  animation: dz-pop var(--motion-med) var(--ease-spring) 1;
+}
+@keyframes dz-pop {
+  30% {
+    transform: scale(1.07);
+    border-color: var(--color-mint);
+  }
+}
+
+/* ==========================================================================
+   Deck：3 张牌背错位小摞 + 顶卡翻开
+   ========================================================================== */
+
+.deck-stage {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-4) 0;
+}
+
+.deck {
+  position: relative;
+  width: var(--card-w);
+  height: var(--card-h);
+  margin: 0 auto;
+}
+.deck-under,
+.deck-top {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-card);
+}
+.deck-under {
+  background: var(--card-back-ink) url('../../assets/cards/card-back.webp')
+    center / cover no-repeat;
+  box-shadow: var(--shadow-sm);
+  transform-origin: 50% 100%;
+}
+.deck-under--a {
+  transform: rotate(-5deg) translate(-4px, 2px);
+}
+.deck-under--b {
+  transform: rotate(4deg) translate(4px, 3px);
+}
+/* 顶卡：原生按钮（点按 = 抽牌），包 TiltCard 翻牌层 */
+.deck-top {
+  padding: 0;
+  border: 2px solid var(--color-line);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+}
+.deck-top:disabled {
+  cursor: default;
+  opacity: 0.9;
+}
+.deck-back-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+/* 顶卡翻开瞬间整体轻弹一下（边翻边「离摞」） */
+.deck--flipping .deck-top {
+  animation: deck-lift var(--flip-ms) var(--ease-spring) 1;
+}
+@keyframes deck-lift {
+  30% {
+    transform: translateY(-14px) scale(1.04);
+  }
+}
+/* 无图回退卡背：藏青底 + 橙同心星纹（纯 CSS，§3.1 备用） */
+.card-back-css {
+  background: var(--card-back-ink);
+  background-image:
+    radial-gradient(
+      circle at 50% 50%,
+      var(--card-back-star) 0 3px,
+      transparent 3px 16px,
+      var(--card-back-star) 16px 17px,
+      transparent 17px 30px,
+      var(--card-back-star) 30px 31px,
+      transparent 31px 44px,
+      var(--card-back-star) 44px 45px,
+      transparent 45px
+    ),
+    repeating-radial-gradient(
+      circle at 50% 50%,
+      transparent 0 11px,
+      color-mix(in srgb, var(--card-back-star) 40%, transparent) 11px 12px
+    );
+}
+
+/* ==========================================================================
+   CoinCounter（Counter 改造）：0–99 滚动数字 + aria-live
+   ========================================================================== */
+
+.coin-counter {
+  display: inline-flex;
+  align-items: center;
+  font-variant-numeric: tabular-nums;
+}
+.cc-vis {
+  display: inline-flex;
+  height: 1em;
+  overflow: hidden;
+  line-height: 1;
+}
+.cc-col {
+  display: inline-block;
+  height: 1em;
+  overflow: hidden;
+}
+.cc-strip {
+  display: flex;
+  flex-direction: column;
+  transform: translateY(0);
+  transition: transform var(--coin-roll-ms) var(--ease-spring);
+}
+.cc-digit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 1em;
+}
+
+/* ==========================================================================
+   Game 底栏手牌区（§5：菜谱任务卡 + 留菜夹卡在这里扇着）
+   ========================================================================== */
+
+.me-hand {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.me-hand .hand {
+  min-height: 0;
+}
+/* 底栏手牌不放大 6%（地方小），上浮保留 */
+.me-hand .hand-item:hover,
+.me-hand .hand-item:focus-within,
+.me-hand .hand-item--sel {
+  transform: rotate(0deg) translateY(calc(var(--hand-lift) * -0.5));
+}
+
+/* 手机横屏选中卡名浮条（窄卡横幅藏掉时替补，§6.1 可读性兜底） */
+.hand-tag {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  transform: translateX(-50%);
+  display: none;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-card);
+  background: var(--color-ink);
+  color: var(--color-surface);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 40;
+}
+
+/* ==========================================================================
+   手机横屏紧凑档：扇形压小、横幅收掉、选中浮名、露出带收窄
+   ========================================================================== */
+
+.game-screen--phone-land .stall-hand {
+  --hand-card-w: var(--card-w-sm);
+  --hand-card-h: var(--card-h-sm);
+  --fan-expose: var(--fan-expose-sm);
+  --fan-push: 18px;
+}
+.game-screen--phone-land .stall-hand .card-view-banner {
+  display: none;
+}
+.game-screen--phone-land .stall-hand .card-view {
+  padding: var(--space-1);
+}
+.game-screen--phone-land .stall-hand .card-view-art {
+  min-height: 0;
+}
+.game-screen--phone-land .stall-hand .card-view-gem {
+  width: 22px;
+  height: 22px;
+  font-size: var(--font-size-xs);
+}
+.game-screen--phone-land .stall-hand .hand-item--sel .hand-tag,
+.game-screen--phone-land .stall-hand .hand-item:hover .hand-tag {
+  display: block;
+}
+/* 牌堆在窄栏里也小一号 */
+.game-screen--phone-land .deck {
+  width: var(--card-w-sm);
+  height: var(--card-h-sm);
+}
+/* 栏内容器窄：投放区两枚并排 + 跳过折行独占一行 */
+.game-screen--phone-land .drop-row {
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.game-screen--phone-land .drop-zone {
+  flex: 1 1 42%;
+  min-height: var(--tap-min-size);
+  font-size: var(--font-size-md);
+  white-space: normal;
+  line-height: 1.25;
+}
+.game-screen--phone-land .drop-row > .btn,
+.game-screen--phone-land .drop-row > .btn-speak-wrap {
+  flex: 1 1 100%;
+  min-height: var(--tap-min-size);
+}
+
+/* 窄栏行式卡（家长站）：美术区收成小方块，横幅吃满余宽 */
+.game-screen--phone-land .parent-options .card-view .card-view-art {
+  flex: none;
+  width: 34px;
+  min-height: 34px;
+}
+@media (max-width: 640px) {
+  .parent-options .card-view .card-view-art {
+    flex: none;
+    width: 34px;
+    min-height: 34px;
+  }
+}
+
+/* ==========================================================================
+   reduced-motion：R10 专属时长全部归零/缩 120ms（base.css 全局规则兜底，
+   这里只处理「不能用全局压平」的结构性动效——翻牌保留快速翻面以传意）
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .tc-flip {
+    transition-duration: 120ms;
+  }
+  .deck--flipping .deck-top {
+    animation: none;
+  }
+  .cc-strip {
+    transition-duration: 120ms;
+  }
+  .pglow--on {
+    animation: none;
+  }
+  .tc-foil {
+    animation: none;
+  }
+  .hand-item,
+  .hand-item--in,
+  .hand-item--quest-in {
+    animation: none;
+  }
+}

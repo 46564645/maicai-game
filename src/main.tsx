@@ -8,6 +8,7 @@ import './board.css';
 import './hud.css';
 import './phone.css';
 import './screens.css';
+import './components/cards/cards.css';
 import './demo/demo.css';
 import './App.css';
 

@@ -1,12 +1,21 @@
 /**
- * CardView.tsx —— 通用卡面（icon + 名称 + 价格 + 标签）。
+ * CardView.tsx —— 通用卡面，R10 §3.1 卡面解剖：卡框 → 美术区（约 55%）→
+ * 名称横幅；价格渲染成左上角「法力宝石」（橙渐变圆 + 白字 + 内嵌小金币），
+ * 无价卡改在角上放类别小标签（tag 首个分段）。
+ *
+ * 美术区：cards/cardArt.ts 里登过 cardId → 渲染插画 <img>；没登 →
+ * 回退原有 emoji/CardIcon 圆形衬底（13 张食材等 PM 后续补图）。
+ * cardId 是 R10 新增的可选 prop——原有调用方不传则行为与旧版一致。
+ *
  * 可点时渲染为原生 <button>（角色卡、市场卡、图卡共用）；纯展示时渲染 div。
+ * 旧类名全保留（.card-view/-icon/-name/-tag/-mark + --selected），
+ * phone.css / hud.css 的窄栏、行式覆写不破。
  */
 import { Fragment } from 'react';
 import type { ReactNode } from 'react';
-import { coinWord } from '../data/strings';
 import { CardIcon } from './CardIcon';
 import { KeyHint } from './KeyHint';
+import { cardArtFor } from './cards/cardArt';
 
 export interface CardViewProps {
   icon: string;
@@ -22,6 +31,8 @@ export interface CardViewProps {
   disabled?: boolean;
   /** 渲染 data-primary（Enter/空格 主动作），同时加粗描边 */
   primary?: boolean;
+  /** R10：卡牌 id——cardArt.ts 有登记则在美术区显示插画 */
+  cardId?: string;
   onClick?: () => void;
   /** 键盘焦点落入即回调（市场「←→ 选卡」焦点=选中用） */
   onFocus?: () => void;
@@ -55,6 +66,12 @@ export function CardView(props: CardViewProps) {
   const cls = ['card-view', props.selected ? 'card-view--selected' : '']
     .filter(Boolean)
     .join(' ');
+  const art = props.cardId ? cardArtFor(props.cardId) : undefined;
+  // 无价格卡 → 角上类别小标签取 tag 首段（「菜谱」/「想要的」）
+  const kindChip =
+    props.price === undefined && props.tag
+      ? props.tag.split('·')[0]?.trim()
+      : undefined;
   const body = (
     <>
       {props.mark && (
@@ -63,30 +80,43 @@ export function CardView(props: CardViewProps) {
         </span>
       )}
       {props.keyHint !== undefined && <KeyHint value={props.keyHint} />}
-      <span className="card-view-icon" aria-hidden="true">
-        <CardIcon icon={props.icon} />
-      </span>
-      <span className="card-view-name">
-        {/* nameBreak：cards.json 标的音节断点，放 &shy; 软连字符——
-            放得下时不可见，放不下时按音节折两行（Mush-room、
-            Marsh-mallow），不会像 break-word 那样断出「Carro t」 */}
-        {props.nameBreak !== undefined &&
-        props.nameBreak > 0 &&
-        props.nameBreak < props.name.length ? (
-          <>
-            {props.name.slice(0, props.nameBreak)}
-            {'\u00AD'}
-            {props.name.slice(props.nameBreak)}
-          </>
-        ) : (
-          nameWithBreaks(props.name)
-        )}
-      </span>
       {props.price !== undefined && (
-        <span className="card-view-price">
-          {props.price} {coinWord(props.price)}
+        <span className="card-view-gem" aria-hidden="true">
+          {props.price}
         </span>
       )}
+      {props.price === undefined && kindChip && (
+        <span className="card-view-kind" aria-hidden="true">
+          {kindChip}
+        </span>
+      )}
+      <span className="card-view-art" aria-hidden="true">
+        {art ? (
+          <img className="card-view-art-img" src={art} alt="" draggable={false} />
+        ) : (
+          <span className="card-view-icon">
+            <CardIcon icon={props.icon} />
+          </span>
+        )}
+      </span>
+      <span className="card-view-banner">
+        <span className="card-view-name">
+          {/* nameBreak：cards.json 标的音节断点，放 &shy; 软连字符——
+              放得下时不可见，放不下时按音节折两行（Mush-room、
+              Marsh-mallow），不会像 break-word 那样断出「Carro t」 */}
+          {props.nameBreak !== undefined &&
+          props.nameBreak > 0 &&
+          props.nameBreak < props.name.length ? (
+            <>
+              {props.name.slice(0, props.nameBreak)}
+              {'\u00AD'}
+              {props.name.slice(props.nameBreak)}
+            </>
+          ) : (
+            nameWithBreaks(props.name)
+          )}
+        </span>
+      </span>
       {props.tag && (
         <span className="card-view-tag">
           {props.tag

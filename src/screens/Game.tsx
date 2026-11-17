@@ -5,20 +5,21 @@
  * 未做面板的站回退 AutoPanel；bot→真人提议用 SpeechBubble 锚在对应小卡下。
  */
 import { useEffect, useRef, useState } from 'react';
-import { cards } from '../data/cards';
+import { cards, getIngredient } from '../data/cards';
 import { gameConfig } from '../config/gameConfig';
 import { coinWord, strings } from '../data/strings';
-import { fmt } from '../game/stations/shared';
+import { fmt, marketPriceOf } from '../game/stations/shared';
 import type { Command, GameState, PlayerId } from '../game/types';
 import { BoardMount } from '../board/BoardMount';
 import { toBoardView } from '../board/boardModel';
 import { LangToggle } from '../i18n/LangToggle';
-import { playerDisplayName, stationName } from '../i18n/cardText';
+import { cardName, playerDisplayName, stationName } from '../i18n/cardText';
 import { usePhoneMode } from '../ui/usePhoneMode';
 import { AutoPanel } from '../components/AutoPanel';
 import { BotCard } from '../components/BotCard';
 import { BusPanel } from '../components/BusPanel';
 import { Button } from '../components/Button';
+import { CardView } from '../components/CardView';
 import { Coins } from '../components/Coins';
 import { CookPanel } from '../components/CookPanel';
 import { DrawTaskPanel } from '../components/DrawTaskPanel';
@@ -31,6 +32,8 @@ import { SpeechBubble } from '../components/SpeechBubble';
 import { StationPopup } from '../components/StationPopup';
 import { StorePanel } from '../components/StorePanel';
 import { Toast } from '../components/Toast';
+import { CoinCounter } from '../components/cards/CoinCounter';
+import { Hand } from '../components/cards/Hand';
 
 function playerIcon(characterId: string | null): string {
   return cards.characters.find((c) => c.id === characterId)?.icon ?? '🙂';
@@ -279,6 +282,46 @@ export function Game({
   const botIcon = (b: (typeof bots)[number]) =>
     cards.bots.find((x) => x.id === b.characterId)?.icon ?? '●';
 
+  // —— R10：底栏常驻手牌（菜谱任务卡 + 留菜夹卡）——
+  // 非真人回合整手压暗（§3.2 dimmed）；手机横屏无底栏，常驻卡不进右栏
+  // （与本栏旧表现一致，见 R10_DESIGN Slice A 记录）。
+  const myCoinsLabel = fmt(strings.game.myCoins, { n: human.coins });
+  const holdClipInfo =
+    human.holdClip !== null
+      ? (getIngredient(human.holdClip) ??
+        cards.temptations.find((t) => t.id === human.holdClip) ??
+        null)
+      : null;
+  const meHandItems = [
+    ...(human.recipeId
+      ? [
+          {
+            key: `recipe-${human.recipeId}`,
+            className: 'hand-item--quest',
+            node: (
+              <RecipeCard recipeId={human.recipeId} collected={human.collected} />
+            ),
+          },
+        ]
+      : []),
+    ...(human.holdClip && holdClipInfo
+      ? [
+          {
+            key: `hold-${human.holdClip}`,
+            node: (
+              <CardView
+                cardId={human.holdClip}
+                icon={holdClipInfo.icon}
+                name={cardName(human.holdClip)}
+                price={marketPriceOf(human.holdClip) ?? undefined}
+                tag={strings.buttons.hold}
+              />
+            ),
+          },
+        ]
+      : []),
+  ];
+
   return (
     <div
       className={'game-screen' + (phoneLand ? ' game-screen--phone-land' : '')}
@@ -334,11 +377,21 @@ export function Game({
               <span className="me-avatar-icon">{playerIcon(human.characterId)}</span>
               <span className="me-name">{playerDisplayName(human)}</span>
             </div>
-            <RecipeCard recipeId={human.recipeId} collected={human.collected} />
+            {/* R10：常驻卡进手牌扇——菜谱任务卡 + 留菜夹卡（抽到菜谱时
+                新卡以 quest-land 翻落入手；free 档各卡自然宽） */}
+            <div className="me-hand">
+              <Hand
+                layout="free"
+                dimmed={!humanPending}
+                items={meHandItems}
+                ariaLabel={strings.hud.basket}
+              />
+            </div>
             <div className="me-coins">
               <Coins
                 count={human.coins}
-                label={fmt(strings.game.myCoins, { n: human.coins })}
+                label={myCoinsLabel}
+                counter={<CoinCounter value={human.coins} label={myCoinsLabel} />}
               />
             </div>
             <button
@@ -440,7 +493,12 @@ export function Game({
               aria-label={fmt(strings.hud.walletWithCoins, { n: human.coins })}
             >
               <span aria-hidden="true">🪙</span>
-              <span className="phone-fab-num">{human.coins}</span>
+              <span className="phone-fab-num">
+                <CoinCounter
+                  value={human.coins}
+                  label={fmt(strings.hud.walletWithCoins, { n: human.coins })}
+                />
+              </span>
               {human.busDebt > 0 && (
                 <span className="phone-fab-badge" aria-label={strings.hud.busDebt}>
                   {human.busDebt}

@@ -184,6 +184,44 @@
   /* R5 按压感：轻回弹 + 下沉位移（一切 tap/press ≤150ms） */
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --press-shift: 2px;
+
+  /* —— R10 卡片化（R10_DESIGN §3/§4；全部派生自现有色板，未改旧值）—— */
+  /* 手牌卡尺寸：桌面 104×144 起；手机横屏紧凑档 ≥56×80（扇形露出带约 34px，
+     §6.1 小屏可读性留待 Slice A 验收定夺） */
+  --card-w: 104px;
+  --card-h: 144px;
+  --card-w-sm: 64px;
+  --card-h-sm: 92px;
+  /* 扇形：两侧递增转角上限、弧线下沉系数、悬停时邻卡让位距离、每卡露出带 */
+  --fan-deg: 10deg;
+  --fan-arc-drop: 4px;
+  --fan-push: 34px;
+  --fan-expose: 72px;    /* 桌面扇形每卡露出宽（>48px 可点带） */
+  --fan-expose-sm: 35px; /* 手机横屏紧凑档（窄栏约束，见 cards.css） */
+  --hand-lift: 16px;     /* 悬停/选中上抬 */
+  /* 可打出柔光：黄 55% 外晕 + 扫光带（BorderGlow 改造，令牌化） */
+  --glow-ring: color-mix(in srgb, var(--color-accent-yellow) 55%, transparent);
+  --glow-amber: color-mix(in srgb, var(--color-accent-yellow) 42%, transparent);
+  --glow-sweep: color-mix(in srgb, var(--color-surface) 88%, transparent);
+  /* 价格宝石（炉石法力水晶的「形」）：橙渐变底白字 + 内嵌小金币点 */
+  --gem-size: 26px;
+  --gem-coin-size: 8px;
+  --gem-gem-grad: var(--gradient-primary);
+  /* 买不起：美术区灰化 + 宝石转灰 */
+  --gem-disabled: color-mix(in srgb, var(--color-muted) 45%, var(--color-surface));
+  /* 卡背（无图回退）：藏青底 + 橙同心星纹 */
+  --card-back-ink: var(--color-ink);
+  --card-back-star: var(--color-primary);
+  /* CSS foil 膜（HoloCard 替代，只出现在完成菜谱/盛宴盘卡） */
+  --foil-opacity: 0.32;
+  /* 投放区：篮子=主橙软底、留菜夹=黄软底（与 clip-chip 同语义） */
+  --drop-basket-bg: var(--color-primary-soft);
+  --drop-hold-bg: color-mix(in srgb, var(--color-accent-yellow) 14%, var(--color-surface));
+  --drop-hot: color-mix(in srgb, var(--color-mint) 30%, var(--color-surface));
+  /* 动效时长：翻牌取 --motion-slow 的 2/3，弹回 420ms，金币滚动 700ms */
+  --flip-ms: 560ms;
+  --drag-return-ms: 420ms;
+  --coin-roll-ms: 700ms;
 }
 
 /* —— R8 大屏弹性：舞台宽是参照、不是硬顶 ——

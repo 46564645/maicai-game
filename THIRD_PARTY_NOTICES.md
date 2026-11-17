@@ -129,3 +129,14 @@ the following restrictions:
   虚线转弯弧 + 箭头，用于竖屏「把手机横过来」提示。
 
 两者均为本仓库手写 SVG，未使用任何外部图片/图标库，无新第三方登记项。
+
+## React Bits（R10 卡片交互，2026-11-17）
+
+以下组件改编自 **React Bits by David Haz**（https://github.com/DavidHDev/react-bits），
+许可证 **MIT + Commons Clause**（可用于本项目；不得将组件本身作为商品出售）：
+
+- BounceCards → `src/components/cards/Hand.tsx`（手牌扇：弹入/展开/悬停回正，改造为 ReactNode 卡面）
+- TiltedCard → `src/components/cards/TiltCard.tsx`（倾斜 + glare + 翻面引擎，裁剪版）
+- BorderGlow → `src/components/cards/PlayableGlow.tsx`（可打出扫光，配色改为项目令牌）
+- Magnet → `src/components/cards/useDragPlay.ts` 中的近目标吸附（弹簧参数借用其实现）
+- Counter → `src/components/cards/CoinCounter.tsx`（逐位滚动数字，裁剪为整数 0–99）
