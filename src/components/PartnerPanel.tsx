@@ -9,7 +9,8 @@
 import { useState } from 'react';
 import { cards } from '../data/cards';
 import { strings } from '../data/strings';
-import { cardName, fmt } from '../game/stations/shared';
+import { fmt } from '../game/stations/shared';
+import { cardName, inviteSplitNote, inviteText, playerDisplayName } from '../i18n/cardText';
 import type { CardId, Command, GameState, PlayerId } from '../game/types';
 import { Button } from './Button';
 import { CardIcon } from './CardIcon';
@@ -80,7 +81,7 @@ export function PartnerPanel({
           </span>
           {/* 只写买的是什么：图标 + 一个词（冰棍/贴纸），不再有「邀请卡 · …」那行 */}
           <span className="feature-card-name">{cardName(invite.giveCardId)}</span>
-          <span className="feature-card-text">{invite.splitNote}</span>
+          <span className="feature-card-text">{inviteSplitNote(invite)}</span>
           {/* 已加入的人：头像 + 计数「👦👧 1/2」；满 2 人就一起买（门槛【待确认】，不改） */}
           <span className="feature-card-note invite-count" data-testid="invite-count">
             <span aria-hidden="true">{strings.partner.inviteAvatars}</span>{' '}
@@ -96,7 +97,7 @@ export function PartnerPanel({
               data-primary="true"
               data-key={1}
               disabled={!canJoin}
-              speakText={`${strings.buttons.agree}, ${invite.text}`}
+              speakText={`${strings.buttons.agree}, ${inviteText(invite)}`}
               onClick={() =>
                 send({ type: 'RESPOND_INVITE', proposalId: pd.proposalId, accept: true })
               }
@@ -167,7 +168,7 @@ export function PartnerPanel({
       ) : (
         botsWithExtras.map((b) => (
           <div className="swap-row" key={b.id}>
-            <span className="swap-row-name">{b.name}</span>
+            <span className="swap-row-name">{playerDisplayName(b)}</span>
             <div className="chip-row">
               {b.extras.map((id, i) => (
                 <Chip
@@ -187,7 +188,7 @@ export function PartnerPanel({
         {ready
           ? fmt(strings.partner.swapPicked, {
               give: cardName(giveCard!),
-              name: target!.name,
+              name: playerDisplayName(target!),
               want: cardName(wantCard!),
             })
           : strings.partner.swapHint}

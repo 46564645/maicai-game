@@ -6,7 +6,8 @@
 import { useEffect, useRef } from 'react';
 import { cards } from '../data/cards';
 import { strings } from '../data/strings';
-import { cardName, fmt } from '../game/stations/shared';
+import { fmt } from '../game/stations/shared';
+import { cardName, inviteSplitNote, playerDisplayName } from '../i18n/cardText';
 import type { Player, Proposal } from '../game/types';
 import { Button } from './Button';
 
@@ -28,7 +29,7 @@ export function SpeechBubble({
     ? cards.invites.find((i) => i.id === proposal.inviteCardId)
     : null;
   const text = invite
-    ? fmt(strings.bubble.inviteAsk, { name: invite.name })
+    ? fmt(strings.bubble.inviteAsk, { name: cardName(invite.id) })
     : fmt(strings.bubble.swapAsk, {
         give: cardName(proposal.giveCardId ?? ''),
         want: cardName(proposal.wantCardId ?? ''),
@@ -36,11 +37,11 @@ export function SpeechBubble({
   return (
     <div ref={ref} className="speech-bubble" data-testid="bubble-proposal">
       <p className="speech-bubble-from">
-        {from.name}
+        {playerDisplayName(from)}
         {strings.bubble.fromSuffix}
       </p>
       <p className="speech-bubble-text">{text}</p>
-      <p className="speech-bubble-note">{invite?.splitNote ?? strings.bubble.note}</p>
+      <p className="speech-bubble-note">{invite ? inviteSplitNote(invite) : strings.bubble.note}</p>
       <div className="speech-bubble-actions">
         <Button
           variant="primary"

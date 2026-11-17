@@ -6,6 +6,8 @@
 import { strings } from '../data/strings';
 import { helpHints } from '../game/selectors';
 import { fmt } from '../game/stations/shared';
+import { gameConfig } from '../config/gameConfig';
+import { canDoLabel, cardName, stationName } from '../i18n/cardText';
 import type { GameState, PlayerId } from '../game/types';
 import { CardIcon } from './CardIcon';
 import { StationPopup } from './StationPopup';
@@ -31,7 +33,7 @@ export function HelpCard({
               : hints.missing.map((m) => (
                   <span key={m.id}>
                     <CardIcon icon={m.icon} />
-                    {m.name}{' '}
+                    {cardName(m.id)}{' '}
                   </span>
                 ))}
           </p>
@@ -40,11 +42,17 @@ export function HelpCard({
         {hints.busDebt > 0 && (
           <p className="help-line">{fmt(strings.actions.helpDebt, { n: hints.busDebt })}</p>
         )}
-        {hints.stationName && <p className="help-line">{hints.stationName}</p>}
+        {hints.stationName && (
+          <p className="help-line">
+            {state.phase === 'station'
+              ? stationName(gameConfig.stations[state.stationIndex].id)
+              : hints.stationName}
+          </p>
+        )}
         {hints.canDo.length > 0 && (
           <p className="help-line">
             {strings.actions.helpCanDo}
-            {hints.canDo.join(', ')}
+            {hints.canDo.map(canDoLabel).join(', ')}
           </p>
         )}
         <p className="help-line help-line--tip">{hints.tip}</p>

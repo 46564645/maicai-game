@@ -4,6 +4,7 @@
  */
 import { cards, getIngredient } from '../data/cards';
 import { strings } from '../data/strings';
+import { botPersonalityLabel, playerDisplayName } from '../i18n/cardText';
 import type { CardId, Player } from '../game/types';
 import { CardIcon } from './CardIcon';
 
@@ -29,8 +30,10 @@ export function BotCard({ player, thinking }: { player: Player; thinking: boolea
       </span>
       <div className="bot-card-info">
         <p className="bot-card-name">
-          {player.name}
-          <span className="bot-card-personality">{bot?.personalityLabel}</span>
+          {playerDisplayName(player)}
+          <span className="bot-card-personality">
+            {bot ? botPersonalityLabel(bot) : undefined}
+          </span>
         </p>
         <p className="bot-card-line">
           {strings.game.botCoins.replace('{n}', String(player.coins))}

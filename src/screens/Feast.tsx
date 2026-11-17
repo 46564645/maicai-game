@@ -11,15 +11,19 @@ import { getRecipe } from '../data/cards';
 import { coinWord, strings } from '../data/strings';
 import { moneyLedger } from '../game/selectors';
 import { fmt } from '../game/stations/shared';
+import { cardName, playerDisplayName } from '../i18n/cardText';
 import type { Command, GameState, PlateResult } from '../game/types';
 import { Button } from '../components/Button';
 import { CardIcon } from '../components/CardIcon';
 
-const KIND_LABEL: Record<PlateResult['kind'], string> = {
-  full: strings.feast.plateFull,
-  simple: strings.feast.plateSimple,
-  shadow: strings.feast.plateShadow,
-};
+/* R6：不能放模块级 —— 语言切换时要按当前语言现取（模块级会冻住英文） */
+function kindLabel(kind: PlateResult['kind']): string {
+  return {
+    full: strings.feast.plateFull,
+    simple: strings.feast.plateSimple,
+    shadow: strings.feast.plateShadow,
+  }[kind];
+}
 
 function plateNote(plate: PlateResult): string {
   if (plate.kind === 'full') return strings.feast.noteFull;
@@ -113,9 +117,9 @@ export function Feast({ state, send }: { state: GameState; send: (c: Command) =>
               <span className={`plate-disc plate-disc--${plate.kind}`} aria-hidden="true">
                 <CardIcon icon={recipe?.icon ?? '🍽️'} />
               </span>
-              <span className="plate-name">{p.name}</span>
-              <span className="plate-dish">{recipe?.name ?? '—'}</span>
-              <span className="plate-kind">{KIND_LABEL[plate.kind]}</span>
+              <span className="plate-name">{playerDisplayName(p)}</span>
+              <span className="plate-dish">{recipe ? cardName(recipe.id) : '—'}</span>
+              <span className="plate-kind">{kindLabel(plate.kind)}</span>
               <span className="plate-note">{plateNote(plate)}</span>
             </div>
           );

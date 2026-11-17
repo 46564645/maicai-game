@@ -5,7 +5,18 @@
 import { cards, getIngredient } from '../data/cards';
 import { gameConfig } from '../config/gameConfig';
 import { strings } from '../data/strings';
-import { fmt, cardName, marketPriceOf, getPlayer } from '../game/stations/shared';
+import { fmt, marketPriceOf, getPlayer } from '../game/stations/shared';
+import {
+  cardName,
+  eventFreeLabel,
+  eventSpendLabel,
+  parentOptionLabel,
+  parentSettleLabel,
+  parentVoiceHint,
+  playerDisplayName,
+  reflectionLineText,
+  reflectionOptionLabel,
+} from '../i18n/cardText';
 import type { Command, GameState } from '../game/types';
 
 const A = strings.actions;
@@ -14,16 +25,16 @@ function currentEventLabel(state: GameState, option: 'spend' | 'free'): string {
   const sub = state.turn?.sub;
   const card = sub?.kind === 'event' ? cards.events.find((e) => e.id === sub.eventCardId) : null;
   if (!card) return A.ok;
-  return option === 'spend' ? card.spendOption.label : card.freeOption.label;
+  return option === 'spend' ? eventSpendLabel(card) : eventFreeLabel(card);
 }
 
 function reflectionLabel(optionId: string): string {
-  const opt =
-    cards.reflections.humanOptions.find((o) => o.id === optionId) ??
-    Object.values(cards.reflections.botLines)
-      .flat()
-      .find((l) => l.id === optionId);
-  return opt ? ('label' in opt ? opt.label : opt.text) : optionId;
+  const opt = cards.reflections.humanOptions.find((o) => o.id === optionId);
+  if (opt) return reflectionOptionLabel(opt.id, opt.label);
+  const line = Object.values(cards.reflections.botLines)
+    .flat()
+    .find((l) => l.id === optionId);
+  return line ? reflectionLineText(line.id, line.text) : optionId;
 }
 
 export function describeCommand(state: GameState, c: Command): string {
@@ -36,7 +47,7 @@ export function describeCommand(state: GameState, c: Command): string {
       return strings.intro.startButton;
     case 'CHOOSE_CHARACTER': {
       const ch = cards.characters.find((x) => x.id === c.characterId);
-      return fmt(A.chooseChar, { name: ch?.name ?? c.characterId });
+      return fmt(A.chooseChar, { name: ch ? cardName(ch.id) : c.characterId });
     }
     case 'ACK':
       return state.turn?.turnPhase === 'intro' ? A.enter : A.ok;
@@ -55,7 +66,7 @@ export function describeCommand(state: GameState, c: Command): string {
     case 'PROPOSE_SWAP':
       return fmt(A.swap, {
         give: cardName(c.giveCardId),
-        name: getPlayer(state, c.to).name,
+        name: playerDisplayName(getPlayer(state, c.to)),
         want: cardName(c.wantCardId),
       });
     case 'RESPOND_SWAP':
@@ -74,18 +85,18 @@ export function describeCommand(state: GameState, c: Command): string {
       return strings.parent.useLater;
     case 'PARENT_ANSWER': {
       if (c.answer.mode === 'text') return A.sayIt;
-      if (c.answer.mode === 'voice') return cards.parentStation.voiceHint;
+      if (c.answer.mode === 'voice') return parentVoiceHint();
       const opt = cards.parentStation.questions
         .flatMap((q) => q.options)
         .find((o) => o.id === (c.answer as { optionId?: string }).optionId);
-      return opt ? `${opt.icon} ${opt.label}` : A.sayIt;
+      return opt ? `${opt.icon} ${parentOptionLabel(opt)}` : A.sayIt;
     }
     case 'PARENT_SETTLE':
-      return cards.parentStation.settleLabel;
+      return parentSettleLabel();
     case 'STORE_BUY': {
       const ing = getIngredient(c.ingredientId);
       return fmt(A.storeBuy, {
-        item: ing?.name ?? c.ingredientId,
+        item: ing ? cardName(ing.id) : c.ingredientId,
         n: (ing?.marketPrice ?? 0) + gameConfig.store.markup,
       });
     }

@@ -4,7 +4,8 @@
  */
 import { strings } from '../data/strings';
 import { missingIngredients } from '../game/selectors';
-import { cardName, fmt } from '../game/stations/shared';
+import { fmt } from '../game/stations/shared';
+import { cardName } from '../i18n/cardText';
 import type { Command, GameState } from '../game/types';
 import { Button } from './Button';
 import { RecipeCard } from './RecipeCard';

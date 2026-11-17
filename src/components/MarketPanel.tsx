@@ -8,7 +8,8 @@ import { useEffect, useRef, useState } from 'react';
 import { cards, getIngredient } from '../data/cards';
 import { coinWord, strings } from '../data/strings';
 import { availableCommands, missingIngredients } from '../game/selectors';
-import { cardName, fmt, isTemptation, marketPriceOf } from '../game/stations/shared';
+import { fmt, isTemptation, marketPriceOf } from '../game/stations/shared';
+import { cardName } from '../i18n/cardText';
 import type { CardId, Command, GameState } from '../game/types';
 import { Button } from './Button';
 import { CardIcon } from './CardIcon';
@@ -19,7 +20,7 @@ function cardInfo(id: CardId) {
   const tmp = cards.temptations.find((t) => t.id === id);
   return {
     icon: ing?.icon ?? tmp?.icon ?? '❔',
-    name: ing?.name ?? tmp?.name ?? id,
+    name: cardName(id),
     price: marketPriceOf(id) ?? 0,
   };
 }

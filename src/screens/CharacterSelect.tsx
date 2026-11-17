@@ -4,6 +4,7 @@
  */
 import { cards } from '../data/cards';
 import { strings } from '../data/strings';
+import { cardName } from '../i18n/cardText';
 import type { Command } from '../game/types';
 import { CardView } from '../components/CardView';
 
@@ -17,12 +18,12 @@ export function CharacterSelect({ send }: { send: (c: Command) => unknown }) {
           <CardView
             key={c.id}
             icon={c.icon}
-            name={c.name}
+            name={cardName(c.id)}
             keyHint={String(i + 1)}
             testid={`action-char-${c.id}`}
             dataKey={i + 1}
             onClick={() => send({ type: 'CHOOSE_CHARACTER', characterId: c.id })}
-            ariaLabel={c.name}
+            ariaLabel={cardName(c.id)}
           />
         ))}
       </div>

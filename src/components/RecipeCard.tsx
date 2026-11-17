@@ -3,6 +3,7 @@
  */
 import { getIngredient, getRecipe, recipeMarketTotal } from '../data/cards';
 import { coinWord, strings } from '../data/strings';
+import { cardName } from '../i18n/cardText';
 import type { CardId } from '../game/types';
 import { CardIcon } from './CardIcon';
 
@@ -21,7 +22,7 @@ export function RecipeCard({
   return (
     <div className="recipe-card">
       <p className="recipe-card-title">
-        {strings.hud.basket}: <CardIcon icon={recipe.icon} /> {recipe.name} (
+        {strings.hud.basket}: <CardIcon icon={recipe.icon} /> {cardName(recipe.id)} (
         {recipeMarketTotal(recipe)} {coinWord(recipeMarketTotal(recipe))})
       </p>
       <div className="recipe-slots">
@@ -34,7 +35,7 @@ export function RecipeCard({
                 {ing && <CardIcon icon={ing.icon} />}
               </span>
               <span className="recipe-slot-name">
-                {ing?.name} {ing?.marketPrice} {coinWord(ing?.marketPrice ?? 0)}
+                {ing ? cardName(ing.id) : ''} {ing?.marketPrice} {coinWord(ing?.marketPrice ?? 0)}
                 {got ? ' ✓' : ''}
               </span>
             </div>

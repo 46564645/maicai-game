@@ -5,6 +5,8 @@
  */
 import { useEffect, useRef } from 'react';
 import type { Command } from './game/types';
+import { LangToggle } from './i18n/LangToggle';
+import { useLang } from './i18n/store';
 import { HelpCard } from './components/HelpCard';
 import { RotatePhone } from './components/RotatePhone';
 import { WalletDrawer } from './components/WalletDrawer';
@@ -23,6 +25,13 @@ import { Reflection } from './screens/Reflection';
 
 export default function App() {
   const { state, send } = useGame();
+  // R6：根组件订阅语言 —— 切换时整棵树重渲染，全部文案立即换语言
+  // （游戏状态不动）；游戏屏的切换钮在 Game 的顶栏/竖栏里，其余屏
+  // 用固定右上角变体（见 LangToggle）。
+  const lang = useLang();
+  useEffect(() => {
+    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+  }, [lang]);
   useBotDriver(state, send);
   const layers = useLayerStack();
   // 手机判定只影响「小屏触屏设备」（M4.5.6）：竖屏 → 旋转提示层；
@@ -73,6 +82,8 @@ export default function App() {
       }
     >
       {demoOpen && <DemoBar state={state} send={send} onClose={toggleDemo} />}
+
+      {state.phase !== 'station' && <LangToggle corner />}
 
       {state.phase === 'intro' && <Intro send={sendCmd} />}
       {state.phase === 'chooseCharacter' && <CharacterSelect send={sendCmd} />}

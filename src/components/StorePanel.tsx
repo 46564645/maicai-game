@@ -12,7 +12,8 @@ import { cards, getIngredient } from '../data/cards';
 import { gameConfig } from '../config/gameConfig';
 import { coinWord, strings } from '../data/strings';
 import { availableCommands, missingIngredients } from '../game/selectors';
-import { cardName, fmt, marketPriceOf } from '../game/stations/shared';
+import { fmt, marketPriceOf } from '../game/stations/shared';
+import { cardName } from '../i18n/cardText';
 import type { CardId, Command, GameState } from '../game/types';
 import { Button } from './Button';
 import { CardIcon } from './CardIcon';
@@ -65,13 +66,13 @@ export function StorePanel({
       <CardView
         key={id}
         icon={ing.icon}
-        name={ing.name}
+        name={cardName(ing.id)}
         price={cost(id)}
         mark={missing.includes(id)}
         selected={selected === id}
         disabled={boughtHere.includes(id)}
         testid={`action-store-${id}`}
-        ariaLabel={`${ing.name}, ${cost(id)} ${coinWord(cost(id))}`}
+        ariaLabel={`${cardName(ing.id)}, ${cost(id)} ${coinWord(cost(id))}`}
         onClick={() => setSelected(selected === id ? null : id)}
         onFocus={() => setSelected(id)}
       />
@@ -99,7 +100,7 @@ export function StorePanel({
           <p className="panel-text panel-selected" aria-live="polite">
             <span className="panel-selected-line">
               {strings.panel.selectedMark}
-              <CardIcon icon={sel.icon} /> {sel.name} ({cost(selected!)}{' '}
+              <CardIcon icon={sel.icon} /> {cardName(sel.id)} ({cost(selected!)}{' '}
               {coinWord(cost(selected!))})
             </span>
             <span className="panel-selected-line">
@@ -118,7 +119,7 @@ export function StorePanel({
             data-key={kBuy}
             disabled={!buySel}
             speakText={
-              sel ? fmt(strings.actions.buy, { item: sel.name, n: cost(selected!) }) : undefined
+              sel ? fmt(strings.actions.buy, { item: cardName(sel.id), n: cost(selected!) }) : undefined
             }
             onClick={() => selected && send({ type: 'STORE_BUY', ingredientId: selected })}
           >

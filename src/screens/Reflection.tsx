@@ -8,6 +8,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { cards } from '../data/cards';
 import { strings } from '../data/strings';
+import { playerDisplayName, reflectionEntryText, reflectionOptionLabel, reflectionPrompt } from '../i18n/cardText';
 import type { Command, GameState, Player } from '../game/types';
 import { Button } from '../components/Button';
 
@@ -55,7 +56,7 @@ export function Reflection({
 
   return (
     <main className="intro-shell" data-testid="screen-reflection">
-      <h1 className="intro-title intro-title--sm">{cards.reflections.prompt}</h1>
+      <h1 className="intro-title intro-title--sm">{reflectionPrompt()}</h1>
 
       <section className="reflection-list" aria-live="polite">
         {state.players.map((p) => {
@@ -71,7 +72,7 @@ export function Reflection({
                 {avatarOf(p)}
               </span>
               <span className="reflection-text">
-                <span className="reflection-name">{p.name}:</span> {r.text}
+                <span className="reflection-name">{playerDisplayName(p)}:</span> {reflectionEntryText(r)}
               </span>
             </p>
           );
@@ -114,7 +115,7 @@ export function Reflection({
                   data-key={k}
                   onClick={() => send({ type: 'CHOOSE_REFLECTION', optionId: o.id })}
                 >
-                  {o.label}
+                  {reflectionOptionLabel(o.id, o.label)}
                 </Button>
               );
             })}
@@ -126,7 +127,7 @@ export function Reflection({
                 data-key={n}
                 onClick={() => setWriteOwn(true)}
               >
-                {free.label}
+                {reflectionOptionLabel(free.id, free.label)}
               </Button>
             )}
             {writeOwn && (

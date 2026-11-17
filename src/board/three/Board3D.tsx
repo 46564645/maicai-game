@@ -83,10 +83,10 @@ export default function Board3D(
         <button
           type="button"
           className="board3d-reset"
-          aria-label="Reset view"
+          aria-label={strings.board.resetView}
           onClick={() => setResetKey((k) => k + 1)}
         >
-          Reset view
+          {strings.board.resetView}
         </button>
       </div>
     </QualityProvider>

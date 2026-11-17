@@ -11,6 +11,7 @@ import type { FormEvent } from 'react';
 import { cards } from '../data/cards';
 import { strings } from '../data/strings';
 import { fmt } from '../game/stations/shared';
+import { parentIntro, parentOptionLabel, parentQuestionText, parentSettleLabel } from '../i18n/cardText';
 import type { Command, GameState, ParentDialog } from '../game/types';
 import { Button } from './Button';
 import { CardView } from './CardView';
@@ -33,7 +34,7 @@ export function ParentPanel({
     return (
       <div className="panel-body">
         <div className="chat">
-          <p className="chat-bubble chat-bubble--ai">{data.intro}</p>
+          <p className="chat-bubble chat-bubble--ai">{parentIntro()}</p>
         </div>
         <div className="panel-actions">
           <Button
@@ -92,10 +93,10 @@ export function ParentPanel({
             data-testid="action-primary"
             data-primary="true"
             data-key={1}
-            speakText={data.settleLabel}
+            speakText={parentSettleLabel()}
             onClick={() => send({ type: 'PARENT_SETTLE' })}
           >
-            {data.settleLabel}
+            {parentSettleLabel()}
           </Button>
           <Button
             variant="secondary"
@@ -125,12 +126,12 @@ export function ParentPanel({
           <CardView
             key={o.id}
             icon={o.icon}
-            name={o.label}
+            name={parentOptionLabel(o)}
             keyHint={String(i + 1)}
             dataKey={i + 1}
             primary={i === 0}
             testid={i === 0 ? 'action-primary' : `action-parent-${o.id}`}
-            ariaLabel={`${i + 1} ${o.label}`}
+            ariaLabel={`${i + 1} ${parentOptionLabel(o)}`}
             onClick={() => send({ type: 'PARENT_ANSWER', answer: { mode: 'card', optionId: o.id } })}
           />
         ))}
@@ -195,10 +196,10 @@ function ChatHistory({
           {systemText}
         </p>
       )}
-      <p className="chat-bubble chat-bubble--ai">{cards.parentStation.intro}</p>
+      <p className="chat-bubble chat-bubble--ai">{parentIntro()}</p>
       {questions.slice(0, upto + 1).map((qq, i) => (
         <span key={qq.id} className="chat-pair">
-          <p className="chat-bubble chat-bubble--ai">{qq.text}</p>
+          <p className="chat-bubble chat-bubble--ai">{parentQuestionText(qq)}</p>
           {(i < upto || (i === upto && d.offerSettle)) && (
             <p className="chat-bubble chat-bubble--me">{strings.parent.clearedMark}</p>
           )}

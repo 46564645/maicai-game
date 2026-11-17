@@ -6,7 +6,8 @@
 import { getIngredient, getRecipe, cards } from '../data/cards';
 import { coinWord, strings } from '../data/strings';
 import { missingIngredients } from '../game/selectors';
-import { cardName, fmt, marketPriceOf } from '../game/stations/shared';
+import { fmt, marketPriceOf } from '../game/stations/shared';
+import { cardName, playerDisplayName } from '../i18n/cardText';
 import type { CardId, Command, GameState } from '../game/types';
 import { Button } from '../components/Button';
 import { CardIcon } from '../components/CardIcon';
@@ -93,7 +94,7 @@ export function BasketReview({
             const r = p.recipeId ? getRecipe(p.recipeId) : null;
             return (
               <p key={p.id} className="basket-other-line">
-                {p.name}: {r ? `${r.name} ${p.collected.length}/${r.ingredientIds.length}` : '—'}
+                {playerDisplayName(p)}: {r ? `${cardName(r.id)} ${p.collected.length}/${r.ingredientIds.length}` : '—'}
               </p>
             );
           })}

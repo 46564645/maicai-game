@@ -14,12 +14,14 @@ import { cards } from '../data/cards';
 import { strings } from '../data/strings';
 import { chooseBotCommand } from '../game/bots';
 import { fmt, marketPriceOf } from '../game/stations/shared';
+import { botPersonalityLabel, cardName, stationName } from '../i18n/cardText';
 import type { BotPersonality, GameState } from '../game/types';
 import type { SendCommand } from '../ui/useGame';
 
-const PERSONALITIES: { id: BotPersonality; label: string }[] = cards.bots.map((b) => ({
+/* R6：label 在渲染时按当前语言解析（模块级捕获会冻住英文） */
+const PERSONALITIES: { id: BotPersonality; botId: string }[] = cards.bots.map((b) => ({
   id: b.personality,
-  label: b.personalityLabel,
+  botId: b.id,
 }));
 
 /** 「花光零钱」：只发合法命令，把真人币数压到第 1 圈车费以下，再跳公交站 */
@@ -112,7 +114,7 @@ export function DemoBar({
             type="button"
             className={'demo-chip' + (station === i + 1 ? ' demo-chip--on' : '')}
             aria-pressed={station === i + 1}
-            aria-label={`${i + 1} ${st.name}`}
+            aria-label={`${i + 1} ${stationName(st.id)}`}
             data-testid={`demo-station-${i + 1}`}
             onClick={() => setStation(i + 1)}
           >
@@ -133,7 +135,7 @@ export function DemoBar({
         <span className="demo-label">{strings.demo.personalityTitle}</span>
         {bots.map((b) => (
           <span key={b.id} className="demo-bot">
-            <span className="demo-label">{b.name}</span>
+            <span className="demo-label">{cardName(b.characterId ?? '')}</span>
             {PERSONALITIES.map((p) => (
               <button
                 key={p.id}
@@ -145,7 +147,7 @@ export function DemoBar({
                   send({ type: 'DEMO_SET_PERSONALITY', playerId: b.id, personality: p.id })
                 }
               >
-                {p.label}
+                {botPersonalityLabel(cards.bots.find((x) => x.id === p.botId)!)}
               </button>
             ))}
           </span>

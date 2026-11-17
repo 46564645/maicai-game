@@ -901,3 +901,12 @@
 .app-shell--phone-land .reflection-write .parent-input {
   min-height: var(--tap-min-size);
 }
+
+/* R6：手机横屏时语言钮钉在右竖栏顶部（既有 chrome，不占岛面；
+   竖栏滚动时 sticky 保持可见，方便中途切换） */
+.game-screen--phone-land .phone-rail .lang-toggle {
+  position: sticky;
+  top: 0;
+  align-self: flex-end;
+  z-index: 2;
+}

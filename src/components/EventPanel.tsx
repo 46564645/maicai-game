@@ -5,6 +5,7 @@
 import { cards } from '../data/cards';
 import { strings } from '../data/strings';
 import { availableCommands } from '../game/selectors';
+import { cardName, eventFreeLabel, eventSpendLabel, eventText } from '../i18n/cardText';
 import type { Command, GameState } from '../game/types';
 import { Button } from './Button';
 import { CardIcon } from './CardIcon';
@@ -33,8 +34,8 @@ export function EventPanel({
         <span className="feature-card-icon" aria-hidden="true">
           <CardIcon icon={card.icon} />
         </span>
-        <span className="feature-card-name">{card.name}</span>
-        <span className="feature-card-text">{card.text}</span>
+        <span className="feature-card-name">{cardName(card.id)}</span>
+        <span className="feature-card-text">{eventText(card)}</span>
       </div>
       <div className="panel-foot">
         <p className="panel-subtitle">{strings.event.choose}</p>
@@ -46,10 +47,10 @@ export function EventPanel({
             data-primary={canSpend ? 'true' : undefined}
             data-key={1}
             disabled={!canSpend}
-            speakText={card.spendOption.label}
+            speakText={eventSpendLabel(card)}
             onClick={() => send({ type: 'CHOOSE_EVENT_OPTION', option: 'spend' })}
           >
-            {card.spendOption.label}
+            {eventSpendLabel(card)}
           </Button>
           <Button
             variant={canSpend ? 'secondary' : 'primary'}
@@ -57,10 +58,10 @@ export function EventPanel({
             data-testid={canSpend ? 'action-2' : 'action-primary'}
             data-primary={canSpend ? undefined : 'true'}
             data-key={2}
-            speakText={card.freeOption.label}
+            speakText={eventFreeLabel(card)}
             onClick={() => send({ type: 'CHOOSE_EVENT_OPTION', option: 'free' })}
           >
-            {card.freeOption.label}
+            {eventFreeLabel(card)}
           </Button>
         </div>
       </div>

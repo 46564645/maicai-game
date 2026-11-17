@@ -3,6 +3,7 @@
  * 调用方据此隐藏 🔊（朗读是增强，不作必要路径，PLAN §5 歧义 20）。
  */
 import { useCallback } from 'react';
+import { getLang } from '../i18n/store';
 
 export function useSpeech() {
   const supported =
@@ -16,7 +17,7 @@ export function useSpeech() {
       try {
         window.speechSynthesis.cancel();
         const u = new SpeechSynthesisUtterance(text);
-        u.lang = 'zh-CN';
+        u.lang = getLang() === 'zh' ? 'zh-CN' : 'en-US';
         window.speechSynthesis.speak(u);
       } catch {
         /* 静默降级：朗读不可用不阻断游戏 */

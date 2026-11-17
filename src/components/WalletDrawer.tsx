@@ -7,7 +7,8 @@
 import { getRecipe } from '../data/cards';
 import { coinWord, strings } from '../data/strings';
 import { walletSummary } from '../game/selectors';
-import { cardName, fmt, marketPriceOf } from '../game/stations/shared';
+import { fmt, marketPriceOf } from '../game/stations/shared';
+import { cardName } from '../i18n/cardText';
 import type { GameState, PlayerId } from '../game/types';
 import { Coins } from './Coins';
 import { RecipeCard } from './RecipeCard';

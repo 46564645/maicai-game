@@ -4,6 +4,7 @@
  */
 import { cards, getRecipe } from '../data/cards';
 import { gameConfig } from '../config/gameConfig';
+import { playerDisplayName, stationGoal, stationName } from '../i18n/cardText';
 import * as S from '../game/stations/shared';
 import type { BotPersonality, GameState, Player } from '../game/types';
 import type { BoardViewProps } from './BoardView';
@@ -28,13 +29,13 @@ export function toBoardView(state: GameState): BoardViewProps {
     stations: gameConfig.stations.map((s, index) => ({
       index,
       id: s.id,
-      name: s.name,
-      goal: s.goal,
+      name: stationName(s.id),
+      goal: stationGoal(s.id),
       isCurrent: state.phase === 'station' && state.stationIndex === index,
     })),
     pawns: state.players.map((p) => ({
       playerId: p.id,
-      name: p.name,
+      name: playerDisplayName(p),
       icon: playerIcon(p),
       colorVar: p.isHuman ? 'var(--player-you)' : PERSONALITY_COLOR[p.personality ?? 'steady'],
       recipe: p.recipeId

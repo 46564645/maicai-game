@@ -7,6 +7,7 @@ import type { CSSProperties } from 'react';
 import { cards } from '../data/cards';
 import { strings } from '../data/strings';
 import { fmt } from '../game/stations/shared';
+import { cardName } from '../i18n/cardText';
 import type { CardId } from '../game/types';
 
 export function WeatherSpinner({ weatherId }: { weatherId: CardId | null }) {
@@ -23,7 +24,7 @@ export function WeatherSpinner({ weatherId }: { weatherId: CardId | null }) {
       className="weather-spin"
       data-testid="weather-spinner"
       role="img"
-      aria-label={fmt(strings.event.spunTo, { name: landed?.name ?? '' })}
+      aria-label={fmt(strings.event.spunTo, { name: landed ? cardName(landed.id) : '' })}
     >
       <div className="weather-dial">
         <span className="weather-pointer" aria-hidden="true">
@@ -49,7 +50,7 @@ export function WeatherSpinner({ weatherId }: { weatherId: CardId | null }) {
           ))}
         </div>
       </div>
-      <p className="weather-result">{fmt(strings.event.spunTo, { name: landed?.name ?? '' })}</p>
+      <p className="weather-result">{fmt(strings.event.spunTo, { name: landed ? cardName(landed.id) : '' })}</p>
     </div>
   );
 }

@@ -12,6 +12,8 @@ import { fmt } from '../game/stations/shared';
 import type { Command, GameState, PlayerId } from '../game/types';
 import { BoardMount } from '../board/BoardMount';
 import { toBoardView } from '../board/boardModel';
+import { LangToggle } from '../i18n/LangToggle';
+import { playerDisplayName, stationName } from '../i18n/cardText';
 import { usePhoneMode } from '../ui/usePhoneMode';
 import { AutoPanel } from '../components/AutoPanel';
 import { BotCard } from '../components/BotCard';
@@ -129,7 +131,10 @@ export function Game({
     ? state.players.find((p) => p.id === pendingPid)
     : null;
   const orderNames = (state.turn?.order ?? [])
-    .map((id) => state.players.find((p) => p.id === id)?.name ?? id)
+    .map((id) => {
+      const p = state.players.find((x) => x.id === id);
+      return p ? playerDisplayName(p) : id;
+    })
     .join('→');
 
   // 发给真人的提议（伙伴站换菜/一起买）：锚在发起者的小卡下
@@ -206,10 +211,12 @@ export function Game({
         {pendingPid === state.humanId ? (
           <>
             {strings.game.yourTurn}:{' '}
-            {fmt(strings.game.pawnAt, { name: station.name })}
+            {fmt(strings.game.pawnAt, { name: stationName(station.id) })}
           </>
         ) : (
-          fmt(strings.game.botTurn, { name: pendingPlayer?.name ?? '' })
+          fmt(strings.game.botTurn, {
+            name: pendingPlayer ? playerDisplayName(pendingPlayer) : '',
+          })
         )}
       </p>
       {pendingPid === state.humanId && (
@@ -235,8 +242,8 @@ export function Game({
         {activePlayer
           ? activePlayer.isHuman
             ? strings.game.yourTurn
-            : fmt(strings.game.botTurn, { name: activePlayer.name })
-          : fmt(strings.game.pawnAt, { name: station.name })}
+            : fmt(strings.game.botTurn, { name: playerDisplayName(activePlayer) })
+          : fmt(strings.game.pawnAt, { name: stationName(station.id) })}
       </p>
       {lastLog && (
         <p className="board-log" aria-live="polite">
@@ -262,7 +269,7 @@ export function Game({
 
   const popupEl = showPopup ? (
     <StationPopup
-      title={`${CIRCLED[state.stationIndex] ?? state.stationIndex + 1} ${station.name}`}
+      title={`${CIRCLED[state.stationIndex] ?? state.stationIndex + 1} ${stationName(station.id)}`}
       testid={`panel-${station.id}`}
     >
       {panel}
@@ -287,6 +294,7 @@ export function Game({
             <Button variant="secondary" onClick={onOpenHelp} aria-label={strings.hud.howTo}>
               {'? ' + strings.hud.howTo}
             </Button>
+            <LangToggle />
           </div>
         </header>
       )}
@@ -324,7 +332,7 @@ export function Game({
           <footer className="game-bottom">
             <div className="me-avatar" aria-hidden="true">
               <span className="me-avatar-icon">{playerIcon(human.characterId)}</span>
-              <span className="me-name">{human.name}</span>
+              <span className="me-name">{playerDisplayName(human)}</span>
             </div>
             <RecipeCard recipeId={human.recipeId} collected={human.collected} />
             <div className="me-coins">
@@ -386,13 +394,13 @@ export function Game({
                   }
                   data-bot={b.characterId ?? undefined}
                   aria-expanded={openBot === b.id}
-                  aria-label={fmt(strings.hud.botChip, { name: b.name, n: b.coins })}
+                  aria-label={fmt(strings.hud.botChip, { name: playerDisplayName(b), n: b.coins })}
                   onClick={() => setOpenBot(openBot === b.id ? null : b.id)}
                 >
                   <span className="phone-bot-avatar" aria-hidden="true">
                     {botIcon(b)}
                   </span>
-                  <span className="phone-bot-name">{b.name}</span>
+                  <span className="phone-bot-name">{playerDisplayName(b)}</span>
                   <span className="phone-bot-coins" aria-hidden="true">
                     🪙{b.coins}
                   </span>
@@ -416,6 +424,7 @@ export function Game({
                 el.scrollHeight - el.scrollTop - el.clientHeight < 16;
             }}
           >
+            <LangToggle />
             <div className="phone-turn">{boardOverlay}</div>
             {proposalEl}
             {popupEl}
