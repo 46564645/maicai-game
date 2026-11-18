@@ -33,7 +33,12 @@ import {
   parentSettleLabel,
 } from '../i18n/cardText';
 import type { Command, GameState, ParentAnswer, ParentDialog } from '../game/types';
-import { fetchParentReply, isGoodbyeTurn, parentLiveAvailable } from '../parent/parentLive';
+import {
+  fetchParentReply,
+  isGoodbyeTurn,
+  PARENT_MAX_ROUNDS,
+  parentLiveAvailable,
+} from '../parent/parentLive';
 import { useSpeech } from '../ui/useSpeech';
 import type { ParentTurn } from '../parent/parentLive';
 import { Button } from './Button';
@@ -380,7 +385,9 @@ export function ParentPanel({
       });
       try {
         const reply = await fetchParentReply({ history, childTurns: turns });
-        const doneNow = isGoodbyeTurn(turns);
+        // 20 轮硬顶（业主 2026-11-18）：与节奏判断并列的独立保险丝，
+        // 到顶必道别收尾，不依赖 isGoodbyeTurn 的其他条件。
+        const doneNow = isGoodbyeTurn(turns) || turns >= PARENT_MAX_ROUNDS;
         setLive((cur) =>
           cur
             ? {

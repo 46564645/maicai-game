@@ -13,6 +13,7 @@ import {
   DEFAULT_LLM_BASE_URL,
   DEFAULT_PARENT_MODEL,
   PARENT_CHILD_TURN_CAP,
+  PARENT_MAX_ROUNDS,
   PARENT_MAX_TOKENS,
   PARENT_QUESTION_COUNT,
   PARENT_SYSTEM_PROMPT_EN,
@@ -25,6 +26,7 @@ import {
   getParentBaseUrl,
   getParentChatUrl,
   getParentModel,
+  getParentProxyUrl,
   isGoodbyeTurn,
   parentLiveAvailable,
   parentSystemPrompt,
@@ -51,6 +53,7 @@ beforeEach(() => {
   vi.stubEnv('VITE_LLM_API_KEY', '');
   vi.stubEnv('VITE_LLM_BASE_URL', '');
   vi.stubEnv('VITE_LLM_MODEL', '');
+  vi.stubEnv('VITE_LLM_PROXY_URL', '');
 });
 
 afterEach(() => {
@@ -133,6 +136,33 @@ describe('轮次上限（孩子发言上限 → 结束对话）', () => {
     expect(isGoodbyeTurn(PARENT_CHILD_TURN_CAP)).toBe(true);
     expect(PARENT_CHILD_TURN_CAP).toBe(5);
   });
+
+  it('20 轮会话硬顶（业主 2026-11-18）：常量为 20，到顶必道别', () => {
+    expect(PARENT_MAX_ROUNDS).toBe(20);
+    expect(isGoodbyeTurn(PARENT_MAX_ROUNDS)).toBe(true);
+    expect(isGoodbyeTurn(PARENT_MAX_ROUNDS + 5)).toBe(true);
+  });
+
+  it('超过 20 轮：fetchParentReply 直接拒绝，不发请求（面板据此回退离线收尾）', async () => {
+    const fetchFn = vi.fn();
+    await expect(
+      fetchParentReply({
+        history,
+        childTurns: PARENT_MAX_ROUNDS + 1,
+        apiKey: 'test-key-not-real',
+        fetchFn: fetchFn as unknown as typeof fetch,
+        retryDelayMs: 0,
+      }),
+    ).rejects.toThrow('round limit');
+    expect(fetchFn).not.toHaveBeenCalled();
+  });
+
+  it('话题锁死（业主 2026-11-18）：双语系统提示词都明示其他话题不答、只拉回买菜', () => {
+    expect(PARENT_SYSTEM_PROMPT_EN).toContain('Topic lock');
+    expect(PARENT_SYSTEM_PROMPT_EN.toLowerCase()).toContain('homework');
+    expect(PARENT_SYSTEM_PROMPT_ZH).toContain('话题锁死');
+    expect(PARENT_SYSTEM_PROMPT_ZH).toContain('作业');
+  });
 });
 
 describe('服务商配置（VITE_LLM_*，切换只改 .env.local、不改代码）', () => {
@@ -162,6 +192,38 @@ describe('服务商配置（VITE_LLM_*，切换只改 .env.local、不改代码�
     expect(getParentChatUrl()).toBe(
       'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
     );
+  });
+});
+
+describe('代理模式（公开网页版：无 key 走自家代理，业主 2026-11-19）', () => {
+  it('配了代理：无 key 也判定真对话可用', () => {
+    vi.stubEnv('VITE_LLM_PROXY_URL', 'https://proxy.example.com/parent-chat/');
+    expect(getParentProxyUrl()).toBe('https://proxy.example.com/parent-chat');
+    expect(getParentApiKey()).toBeUndefined();
+    expect(parentLiveAvailable()).toBe(true);
+  });
+
+  it('未配代理且无 key：不可用（走离线版）', () => {
+    expect(getParentProxyUrl()).toBeUndefined();
+    expect(parentLiveAvailable()).toBe(false);
+  });
+
+  it('代理模式发请求：打到代理地址、不带 Authorization、请求体形状不变', async () => {
+    vi.stubEnv('VITE_LLM_PROXY_URL', 'https://proxy.example.com/parent-chat');
+    const fetchFn = vi.fn(async () => okResponse('That sounds yummy!'));
+    const reply = await fetchParentReply({
+      lang: 'en',
+      history,
+      childTurns: 1,
+      fetchFn: fetchFn as unknown as typeof fetch,
+    });
+    expect(reply).toBe('That sounds yummy!');
+    const [url, init] = fetchFn.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe('https://proxy.example.com/parent-chat');
+    const headers = init.headers as Record<string, string>;
+    expect(headers.Authorization).toBeUndefined();
+    const body = JSON.parse(init.body as string);
+    expect(body.messages[0].content).toBe(PARENT_SYSTEM_PROMPT_EN);
   });
 });
 

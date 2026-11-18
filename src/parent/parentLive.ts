@@ -48,7 +48,7 @@ export const DEFAULT_LLM_BASE_URL = 'https://dashscope.aliyuncs.com/compatible-m
 export const DEFAULT_PARENT_MODEL = 'qwen-turbo';
 
 function envTrimmed(
-  name: 'VITE_LLM_API_KEY' | 'VITE_LLM_BASE_URL' | 'VITE_LLM_MODEL',
+  name: 'VITE_LLM_API_KEY' | 'VITE_LLM_BASE_URL' | 'VITE_LLM_MODEL' | 'VITE_LLM_PROXY_URL',
 ): string | undefined {
   const raw = import.meta.env[name] as string | undefined;
   const v = raw?.trim();
@@ -77,6 +77,12 @@ export const PARENT_TIMEOUT_MS = 10_000;
 export const PARENT_RETRY_DELAY_MS = 800;
 /** 孩子发言轮次上限（业主定 5） */
 export const PARENT_CHILD_TURN_CAP = 5;
+/** 一场对话的硬顶轮次（业主 2026-11-18 定：AI 最多对话 20 轮）。
+ *  正常节奏（约 4 问 + 道别、孩子上限 5 轮）远在这条线以内；这条线是
+ *  独立于节奏的会话级保险丝——无论节奏逻辑日后怎么改，孩子发言到
+ *  20 轮必须道别收尾，fetchParentReply 超过此数直接拒绝（面板回退
+ *  离线脚本，脚本本身也是有限问数）。 */
+export const PARENT_MAX_ROUNDS = 20;
 /** 一场对话约 4 个问题（与离线脚本的 4 问对齐） */
 export const PARENT_QUESTION_COUNT = 4;
 /** 家长单条回复的本地长度上限（防御异常输出；提示词本身要求短句） */
@@ -86,10 +92,10 @@ export const PARENT_REPLY_MAX_CHARS = 300;
       措辞可微调，约束一条不能少：只聊买菜、一次一问、约 4 问后道别、
       不提输赢分数、不许诺钱/礼物、不索取个人信息、跑题拉回、不说自己是 AI） —— */
 export const PARENT_SYSTEM_PROMPT_EN =
-  "You are the child's parent, calling from far away where you work. Be warm and encouraging, and use very short, simple sentences a 6-9 year old can understand. Talk only about today's shopping trip: what they bought, what they plan to cook, and how they feel. Ask one question at a time, about 4 questions in total, then say a warm goodbye. Never talk about winning, losing, scores or rankings. Never offer money, gifts or prizes, and never ask for personal information (school, address, phone number). If the child goes off topic, gently bring the talk back to the shopping trip. Do not say you are an AI.";
+  "You are the child's parent, calling from far away where you work. Be warm and encouraging, and use very short, simple sentences a 6-9 year old can understand. Talk only about today's shopping trip: what they bought, what they plan to cook, and how they feel. Ask one question at a time, about 4 questions in total, then say a warm goodbye. Never talk about winning, losing, scores or rankings. Never offer money, gifts or prizes, and never ask for personal information (school, address, phone number). If the child goes off topic, gently bring the talk back to the shopping trip. Do not say you are an AI. Topic lock: you may ONLY talk about this shopping trip, cooking the meal, spending the coins and the child's feelings about them. For anything else the child brings up — homework, games, cartoons, news, other people, or any other question — never answer it or discuss it; only gently steer back to the shopping trip.";
 
 export const PARENT_SYSTEM_PROMPT_ZH =
-  '你是在外地打工的爸爸妈妈，正在给孩子打电话。语气要温暖、鼓励，用很短、很简单的句子，让 6 到 9 岁的孩子能听懂。只聊今天去买菜的事：买了什么、打算做什么菜、心情怎么样。一次只问一个问题，一共问大约 4 个问题，然后温柔地道别。绝不提输赢、分数、排名；绝不许诺给钱、礼物或奖励；绝不索取任何个人信息（学校、地址、电话）。孩子说到别的话题，就温和地把话题带回买菜。不要说自己是 AI。';
+  '你是在外地打工的爸爸妈妈，正在给孩子打电话。语气要温暖、鼓励，用很短、很简单的句子，让 6 到 9 岁的孩子能听懂。只聊今天去买菜的事：买了什么、打算做什么菜、心情怎么样。一次只问一个问题，一共问大约 4 个问题，然后温柔地道别。绝不提输赢、分数、排名；绝不许诺给钱、礼物或奖励；绝不索取任何个人信息（学校、地址、电话）。孩子说到别的话题，就温和地把话题带回买菜。不要说自己是 AI。话题锁死：你只能聊这次买菜、做这顿饭、花金币和孩子的心情。孩子说起任何别的事——作业、游戏、动画片、新闻、别人，或者问任何其他问题——都不要回答、不要展开，只温和地把话题带回买菜。';
 
 export function parentSystemPrompt(lang: Lang): string {
   return lang === 'zh' ? PARENT_SYSTEM_PROMPT_ZH : PARENT_SYSTEM_PROMPT_EN;
@@ -108,9 +114,14 @@ function pacingPrompt(lang: Lang, childTurns: number): string {
     : `The child has answered ${childTurns} of about 4 questions. First reply warmly to what the child just said, then ask exactly one new question about today's shopping trip. One or two short sentences only.`;
 }
 
-/** 这一轮回复是否应当是道别（已答满约 4 问，或触到孩子发言上限） */
+/** 这一轮回复是否应当是道别（已答满约 4 问、触到孩子发言上限，
+ *  或触到 20 轮会话硬顶——三条任一命中都必须收尾） */
 export function isGoodbyeTurn(childTurns: number): boolean {
-  return childTurns >= PARENT_QUESTION_COUNT || childTurns >= PARENT_CHILD_TURN_CAP;
+  return (
+    childTurns >= PARENT_QUESTION_COUNT ||
+    childTurns >= PARENT_CHILD_TURN_CAP ||
+    childTurns >= PARENT_MAX_ROUNDS
+  );
 }
 
 /** 读取注入的 key（构建时由 .env.local 的 VITE_LLM_API_KEY 注入；
@@ -119,8 +130,17 @@ export function getParentApiKey(): string | undefined {
   return envTrimmed('VITE_LLM_API_KEY');
 }
 
+/** 中转代理地址（业主 2026-11-19 拍板）：公开网页版专用——网页里不放
+ *  key，请求发给自家代理（阿里云函数计算），由代理加 key 转发百炼。
+ *  配置了代理即视为真对话可用（代理模式不带 Authorization，key 在
+ *  代理侧）；本地带 key 的构建仍走直连，互不影响。见 proxy/README.md。 */
+export function getParentProxyUrl(): string | undefined {
+  const v = envTrimmed('VITE_LLM_PROXY_URL');
+  return v ? v.replace(/\/+$/, '') : undefined;
+}
+
 export function parentLiveAvailable(): boolean {
-  return getParentApiKey() !== undefined;
+  return getParentApiKey() !== undefined || getParentProxyUrl() !== undefined;
 }
 
 /** 组装发给 LLM 的 messages：[业主系统提示, 节奏 system, ...对话历史] */
@@ -188,24 +208,27 @@ function isAbortError(err: unknown): boolean {
 
 const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
-/** 单次尝试：自带独立 AbortController + 计时器；成功 → 清洗后文本，失败 → throw */
+/** 单次尝试：自带独立 AbortController + 计时器；成功 → 清洗后文本，失败 → throw。
+ *  key 为 undefined 时走代理模式：URL 用代理地址、不带 Authorization
+ *  （代理侧会注入真 key；网页里永远不出现 key）。 */
 async function fetchParentReplyOnce(
-  key: string,
+  key: string | undefined,
   args: FetchParentReplyArgs,
 ): Promise<string> {
   const lang = args.lang ?? getLang();
   const fetchFn = args.fetchFn ?? fetch;
   const timeoutMs = args.timeoutMs ?? PARENT_TIMEOUT_MS;
+  const proxyUrl = key ? undefined : getParentProxyUrl();
 
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
-    const res = await fetchFn(getParentChatUrl(), {
+    const res = await fetchFn(proxyUrl ?? getParentChatUrl(), {
       method: 'POST',
       signal: ctrl.signal,
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${key}`,
+        ...(key ? { Authorization: `Bearer ${key}` } : {}),
       },
       body: JSON.stringify(buildParentRequestBody(lang, args.history, args.childTurns)),
     });
@@ -229,8 +252,15 @@ async function fetchParentReplyOnce(
  * 「正在想…」，孩子无感）；重试也失败、或第一次就是超时，才 throw 回退。
  */
 export async function fetchParentReply(args: FetchParentReplyArgs): Promise<string> {
+  // 20 轮硬顶（业主 2026-11-18）：超过直接拒绝，面板回退离线脚本收尾，
+  // 不让任何调用方把一场对话拖过上限。
+  if (args.childTurns > PARENT_MAX_ROUNDS) {
+    throw new Error('parent-live: session round limit reached');
+  }
   const key = args.apiKey ?? getParentApiKey();
-  if (!key) throw new Error('parent-live: no api key configured');
+  if (!key && !getParentProxyUrl()) {
+    throw new Error('parent-live: no api key configured');
+  }
   try {
     return await fetchParentReplyOnce(key, args);
   } catch (err) {
