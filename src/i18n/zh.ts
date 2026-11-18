@@ -68,6 +68,10 @@ export const zhStrings: StringsDict = {
     lapCompact: '第{lap}/{laps}圈',
     botChip: '{name}，{n} 币 — 点开看详情',
     walletWithCoins: '我的钱包，{n} 币',
+    /* R10D：HUD 图形进度簇（圈点 + 站点格）与「下一位」的无障碍名 */
+    progressLabel: '第 {lap} 圈，走到第 {n} 站',
+    nextUp: '下一位',
+    recipeStrip: '菜谱进度',
   },
 
   game: {
@@ -157,6 +161,8 @@ export const zhStrings: StringsDict = {
 
   panel: {
     stallIntro: '翻开 6 张卡：食材和诱惑混在一起。点一张，再选怎么做。',
+    /* R10D：第 2 圈起说明收成短句；第 3 圈整句撤掉 */
+    stallIntroShort: '点卡，再选怎么做',
     selected: '选中：{item} {n} 币',
     selectedMark: '选中：',
     afterBuy: '买完还剩 {n} 币',
@@ -177,6 +183,8 @@ export const zhStrings: StringsDict = {
     recipeDone: '菜谱买齐啦！',
     busTicket: '车票',
     storeIntro: '缺的菜这里都有，每样比菜市场贵 1 币。',
+    /* R10D：第 2 圈短句版 */
+    storeIntroShort: '缺的菜这都有，贵 1 币',
     storeMissing: '菜谱还缺的',
     storeAll: '全部食材',
     storeHoldLine: '先等等夹：{item}（{n} 币）',
@@ -238,6 +246,11 @@ export const zhStrings: StringsDict = {
     spunTo: '是{name}！',
     choose: '你想怎么做？',
     deckHint: '点一下，翻开看看',
+    /* R10D：花钱卡上的余款预告 + 打出后、弹窗关闭前的后果回声 */
+    spendPreview: '花 {p} 币 · 还剩 {n} 币',
+    echoSpendOk: '花了 {p} 币，买菜的钱还够',
+    echoSpendGap: '注意：买菜还差 {n} 币了',
+    echoFree: '1 个币也没花，留给后面的车费和买菜',
   },
 
   parent: {
@@ -249,7 +262,8 @@ export const zhStrings: StringsDict = {
     pickHint: '可以直接说，也可以点图选：',
     typePlaceholder: '写下你的回答',
     sendText: '说好了',
-    voiceBtn: '语音',
+    /* R10D：语音钮改诚实「听一听问题」——朗读当前问题并指向图卡 */
+    hearQ: '听一听问题',
     clearedMark: '✓ 说清楚了',
     settleGo: '继续回答',
     statusLive: '真对话',
@@ -323,6 +337,8 @@ export const zhStrings: StringsDict = {
     /* R10C：选项按她今天真做到的事排前 + 小标，提示句引导挑真的那件 */
     personalHint: '挑一件你今天真做过的事说',
     didIt: '做到了',
+    /* R10D：第 3 圈菜谱已买齐的孩子——问句换成向前看的一句 */
+    forwardPrompt: '下次去买菜，你会先做哪一步？',
   },
 
   log: {

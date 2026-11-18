@@ -194,9 +194,10 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  /* ART_3D §8.7：面板从下往上滑出（背后是压暗的 3D 场景） */
+  /* ART_3D §8.7：面板从下往上滑出（背后是压暗的 3D 场景）
+     R10D（interaction #8）：时长收进 --popup-in-ms + ease-out */
   .popup {
-    animation: popup-rise var(--motion-med) var(--motion-ease);
+    animation: popup-rise var(--popup-in-ms) var(--ease-out);
   }
   /* ART_3D §8.5：币数变化时数字跟着跳一下 */
   .coins-bump {
@@ -205,6 +206,33 @@
   /* ART_3D §8.8：任务卡翻面亮出 */
   .card-reveal {
     animation: card-flip 560ms var(--motion-ease);
+  }
+}
+
+/* R10D（interaction #8）：PopupOutlet 的 display:contents 壳——
+   不掺和布局（竖栏 flex / 桌面 fixed 都透视），只负责挂退场类 */
+.popup-shell {
+  display: contents;
+}
+/* 退场 ~160ms：弹窗下沉淡出 + 遮罩同步淡（transform/opacity only） */
+@media (prefers-reduced-motion: no-preference) {
+  .popup-out .popup {
+    animation: popup-out var(--popup-out-ms) var(--ease-in-out) forwards;
+  }
+  .popup-out .popup-backdrop {
+    animation: popup-backdrop-out var(--popup-out-ms) var(--ease-in-out)
+      forwards;
+  }
+}
+@keyframes popup-out {
+  to {
+    transform: translateY(18px);
+    opacity: 0;
+  }
+}
+@keyframes popup-backdrop-out {
+  to {
+    opacity: 0;
   }
 }
 
@@ -251,6 +279,77 @@
   align-items: center;
   gap: var(--space-3);
   margin-bottom: var(--space-4);
+}
+
+/* R10D（education #6）：标题 + 副行（目标小片/菜谱条）纵列在主区 */
+.popup-head-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.popup-sub {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* 「练 · …」学习目标小片：淡紫衬（与 AI 家长强调同一语义色） */
+.popup-goal {
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-button);
+  background: var(--color-purple-soft);
+  border: 1px solid var(--color-line);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+
+/* 迷你菜谱进度条：食材小圆片两态——买到=薄荷底+小✓，还缺=浅槽底半透明 */
+.popup-recipe {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.rcp-item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-surface-dim);
+  border: 1px solid var(--color-line);
+  font-size: var(--font-size-xs);
+  opacity: 0.55;
+}
+.rcp-item--got {
+  background: var(--color-mint);
+  border-color: var(--color-line-strong);
+  opacity: 1;
+}
+.rcp-check {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--color-mint);
+  border: 2px solid var(--color-surface);
+  color: var(--color-ink);
+  font-style: normal;
+  font-size: calc(var(--font-size-xs) * 0.66);
+  font-weight: var(--font-weight-heavy);
+  line-height: 1;
 }
 
 .popup-title {
@@ -453,6 +552,25 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: var(--space-2);
+}
+
+/* R10D（UI #7）：「全部食材」格子卡整幅可读——插画 contain 不裁中段，
+   美术区给足高度；名横幅 + 价格宝石就在卡上（CardView 自带），
+   网格与买下钮之间不再有任何游离的价签行 */
+.store-grid .card-view {
+  min-height: 152px;
+  padding: var(--space-2);
+  gap: var(--space-1);
+}
+.store-grid .card-view-art {
+  min-height: 84px;
+}
+.store-grid .card-view-art-img {
+  object-fit: contain;
+  padding: var(--space-1);
+}
+.store-grid .card-view-icon {
+  font-size: var(--font-size-xl);
 }
 
 /* —— 钱包抽屉（G3：左菜谱 / 右币数+流水）—— */

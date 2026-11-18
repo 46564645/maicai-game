@@ -15,6 +15,8 @@ import { coinWord, strings } from '../data/strings';
 import { availableCommands, missingIngredients, walletSummary } from '../game/selectors';
 import { fmt, isTemptation, marketPriceOf } from '../game/stations/shared';
 import { cardName } from '../i18n/cardText';
+import { adjacentDupCounts } from '../ui/dupBadges';
+import { panelHintFor } from '../ui/supportLevel';
 import type { CardId, Command, GameState } from '../game/types';
 import { Button } from './Button';
 import { CardIcon } from './CardIcon';
@@ -101,10 +103,6 @@ function StallCard({
           />
         </PlayableGlow>
       </div>
-      {/* 手机横屏窄卡藏横幅时的浮出名签（§6.1 可读性兜底） */}
-      <span className="hand-tag" aria-hidden="true">
-        {info.name}
-      </span>
     </>
   );
 }
@@ -198,6 +196,10 @@ export function MarketPanel({
   const kHoldDrop = me.holdClip !== null ? ++n : 0;
   const kEnd = ++n;
 
+  // R10D（education #6）：扇里相邻的同卡贴「×2」计数徽标——连号同名卡
+  // 孩子才分得清是「两张一样的」
+  const dupCounts = adjacentDupCounts(stall, (id) => id);
+
   const handItems = stall.map((id, i) => {
     if (id === null) {
       return {
@@ -212,9 +214,15 @@ export function MarketPanel({
         ? strings.panel.tagNeeded
         : strings.panel.tagIngredient;
     const playable = canBuy(id) || canHold(id);
+    const info = cardInfo(id);
+    const dup = dupCounts[i];
     return {
       key: `${id}-${i}`,
       className: selected === id ? 'hand-item--sel' : undefined,
+      // R10D：大浮签归口扇层（选中/聚焦/hover/长按检视都浮它）
+      name: info.name,
+      badge: dup !== null ? `×${dup}` : undefined,
+      speakText: `${info.name}, ${info.price} ${coinWord(info.price)}`,
       node: (
         <StallCard
           id={id}
@@ -237,10 +245,17 @@ export function MarketPanel({
     state.lap === 1 && missing.length > 0
       ? fmt(strings.panel.coachLine, { items: missing.map(cardName).join('、') })
       : null;
+  // R10D（education #5）：说明句随圈数退场——1 圈整句 / 2 圈图标+短句 / 3 圈撤
+  const hint = panelHintFor(state.lap);
 
   return (
     <div className="panel-body">
-      <p className="panel-text">{strings.panel.stallIntro}</p>
+      {hint === 'full' && <p className="panel-text">{strings.panel.stallIntro}</p>}
+      {hint === 'compact' && (
+        <p className="panel-text panel-text--compact">
+          <span aria-hidden="true">🧺</span> {strings.panel.stallIntroShort}
+        </p>
+      )}
       <p className="panel-buysleft">{fmt(strings.panel.buysLeft, { n: buysLeft })}</p>
       {coach && <p className="coach-line">{coach}</p>}
 

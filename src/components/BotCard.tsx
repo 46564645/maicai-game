@@ -5,6 +5,7 @@
 import { cards, getIngredient } from '../data/cards';
 import { strings } from '../data/strings';
 import { botPersonalityLabel, playerDisplayName } from '../i18n/cardText';
+import { botTrait } from '../ui/botTrait';
 import type { CardId, Player } from '../game/types';
 import { CardIcon } from './CardIcon';
 
@@ -19,6 +20,8 @@ function cardIcon(id: CardId): string {
 export function BotCard({ player, thinking }: { player: Player; thinking: boolean }) {
   const bot = cards.bots.find((b) => b.id === player.characterId);
   const bought = [...player.collected, ...player.extras, ...player.temptations];
+  // R10D（play #4 / UI #5）：常驻性格小徽章（图标 + 1–2 字，取自既有数据）
+  const trait = botTrait(player);
   return (
     <div
       className={'bot-card' + (thinking ? ' bot-card--thinking' : '')}
@@ -27,6 +30,9 @@ export function BotCard({ player, thinking }: { player: Player; thinking: boolea
     >
       <span className="bot-card-avatar" aria-hidden="true">
         {bot?.icon ?? '●'}
+        {trait && (
+          <i className={'bot-trait bot-trait--' + trait.key}>{trait.label}</i>
+        )}
       </span>
       <div className="bot-card-info">
         <p className="bot-card-name">

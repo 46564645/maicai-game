@@ -324,6 +324,12 @@
   min-height: 0;
   padding: 0;
   background: none;
+  /* R10D safearea（PM 回归修）：Slice D 的 .popup-shell 是 display:contents
+     （退场壳），栏内 :last-child 的 safe-b 下边距落在它身上直接蒸发——
+     实测 e2e：竖栏「走完这一站」下沿 384 > 安全区上限 383（基线 364）。
+     下边距改挂在真实盒子 .popup-backdrop 上，弹窗收尾时照样留出 safe-b；
+     :last-child 规则保留，覆盖弹窗之外的收尾内容。 */
+  margin-bottom: var(--safe-b);
 }
 
 .phone-rail .popup {
@@ -909,4 +915,65 @@
   top: 0;
   align-self: flex-end;
   z-index: 2;
+}
+
+/* ==========================================================================
+   R10 Slice D —— 手机横屏收尾：进度簇进小头像排 / 「下一位」高亮 /
+   性格徽标 / 「全部食材」标签挪进弹窗头
+   ========================================================================== */
+
+/* 进度簇在小头像排里收成竖列：3 圈点上、8 站点格下（与桌面 lap-card 同数据） */
+.phone-bots .prog {
+  flex: none;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  margin: 0;
+  padding: var(--space-1);
+}
+.phone-bots .lap-dot {
+  width: 9px;
+  height: 9px;
+}
+.phone-bots .stop-pip {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+}
+.phone-bots .stop-pip--here {
+  width: 9px;
+  height: 9px;
+  margin: -1px;
+}
+
+/* 「下一位」：与选中卡同语言——上抬 + 墨描边 + 淡橙底（phone-bot--on
+   是「正在想」的橙描边，next 是墨描边，两态同框不撞色） */
+.phone-bot {
+  position: relative;
+}
+.phone-bot--next {
+  transform: translateY(-3px);
+  border-color: var(--color-ink);
+  box-shadow: var(--shadow-md);
+  background: var(--color-primary-soft);
+}
+
+/* 性格小徽标别在小头像片左上角（图标+1–2字；色彩只是第三通道） */
+.phone-bot .bot-trait {
+  position: absolute;
+  top: -9px;
+  left: -5px;
+  padding: 0 3px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* 「全部食材」栏内标签撤掉——该词挪进弹窗头 aside 位（Game.tsx），
+   省出的竖直空间留给格子卡（UI #7） */
+.game-screen--phone-land .store-grid-label {
+  display: none;
+}
+
+/* 格子卡在窄栏里继承「整幅 contain + 美术区最小高」之外再收一档内距 */
+.game-screen--phone-land .store-grid .card-view-art {
+  min-height: 56px;
 }

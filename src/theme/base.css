@@ -104,8 +104,8 @@ button:not(:disabled):active {
   border: 2px solid transparent;
   border-radius: var(--radius-button);
   transition:
-    transform var(--motion-fast) var(--ease-spring),
-    box-shadow var(--motion-fast) var(--motion-ease),
+    transform var(--press-ms) var(--ease-out),
+    box-shadow var(--press-ms) var(--motion-ease),
     filter var(--motion-fast) var(--motion-ease),
     background-color var(--motion-fast) var(--motion-ease),
     border-color var(--motion-fast) var(--motion-ease);

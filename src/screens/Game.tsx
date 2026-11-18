@@ -5,16 +5,18 @@
  * 未做面板的站回退 AutoPanel；bot→真人提议用 SpeechBubble 锚在对应小卡下。
  */
 import { useEffect, useRef, useState } from 'react';
-import { cards, getIngredient } from '../data/cards';
+import { cards, getIngredient, getRecipe } from '../data/cards';
 import { gameConfig } from '../config/gameConfig';
 import { coinWord, strings } from '../data/strings';
 import { fmt, marketPriceOf } from '../game/stations/shared';
-import type { Command, GameState, PlayerId } from '../game/types';
+import type { Command, GameState, Player, PlayerId } from '../game/types';
 import { BoardMount } from '../board/BoardMount';
 import { toBoardView } from '../board/boardModel';
 import { LangToggle } from '../i18n/LangToggle';
-import { cardName, playerDisplayName, stationName } from '../i18n/cardText';
+import { cardName, playerDisplayName, stationGoal, stationName } from '../i18n/cardText';
 import { botThinkLine } from '../ui/botThink';
+import { botTrait } from '../ui/botTrait';
+import { nextActorId } from '../ui/nextActor';
 import { usePhoneMode } from '../ui/usePhoneMode';
 import { AutoPanel } from '../components/AutoPanel';
 import { BotCard } from '../components/BotCard';
@@ -30,7 +32,8 @@ import { ParentPanel } from '../components/ParentPanel';
 import { PartnerPanel } from '../components/PartnerPanel';
 import { RecipeCard } from '../components/RecipeCard';
 import { SpeechBubble } from '../components/SpeechBubble';
-import { StationPopup } from '../components/StationPopup';
+import { PopupOutlet, StationPopup } from '../components/StationPopup';
+import type { RecipeStripItem } from '../components/StationPopup';
 import { StorePanel } from '../components/StorePanel';
 import { Toast } from '../components/Toast';
 import { CoinCounter } from '../components/cards/CoinCounter';
@@ -38,6 +41,15 @@ import { Hand } from '../components/cards/Hand';
 
 function playerIcon(characterId: string | null): string {
   return cards.characters.find((c) => c.id === characterId)?.icon ?? '🙂';
+}
+
+/** 任意玩家（真人角色卡/bot 性格卡）的头像图标 */
+function avatarIcon(p: Player): string {
+  return (
+    cards.characters.find((c) => c.id === p.characterId)?.icon ??
+    cards.bots.find((b) => b.id === p.characterId)?.icon ??
+    '🙂'
+  );
 }
 
 /** 站点编号圈字（G2：「② 菜市场摊位」） */
@@ -155,12 +167,78 @@ export function Game({
   const pendingPlayer = pendingPid
     ? state.players.find((p) => p.id === pendingPid)
     : null;
-  const orderNames = (state.turn?.order ?? [])
-    .map((id) => {
-      const p = state.players.find((x) => x.id === id);
-      return p ? playerDisplayName(p) : id;
-    })
-    .join('→');
+  /* —— R10D（UI #8）图形化进度簇 ——
+     3 枚圈点（过完=实心，当前=描边圈）+ 8 格站点条（走完=实心，
+     脚下这枚带「我在这」环）。全部读既有 state，无新数据。 */
+  const nextId = nextActorId(state);
+  const progressCluster = (
+    <div
+      className="prog"
+      role="img"
+      aria-label={fmt(strings.hud.progressLabel, {
+        lap: state.lap,
+        n: state.stationIndex + 1,
+      })}
+    >
+      <span className="lap-dots" aria-hidden="true">
+        {Array.from({ length: gameConfig.laps }, (_, i) => i + 1).map((l) => (
+          <i
+            key={l}
+            className={
+              'lap-dot' +
+              (l < state.lap ? ' lap-dot--done' : l === state.lap ? ' lap-dot--now' : '')
+            }
+          />
+        ))}
+      </span>
+      <span className="stop-pips" aria-hidden="true">
+        {gameConfig.stations.map((s, i) => (
+          <i
+            key={s.id}
+            className={
+              'stop-pip' +
+              (i < state.stationIndex
+                ? ' stop-pip--done'
+                : i === state.stationIndex
+                  ? ' stop-pip--here'
+                  : '')
+            }
+          />
+        ))}
+      </span>
+    </div>
+  );
+
+  /* R10D（UI #8 / play #4）：回合条换成「下一位」高亮的小头像片——
+     与选中卡同语言的上抬+描边，不识字孩子也认得出该谁了；
+     bot 片上叠性格小徽（非色彩线索）。 */
+  const orderChips = (state.turn?.order ?? []).map((id) => {
+    const p = state.players.find((x) => x.id === id);
+    if (!p) return null;
+    const trait = botTrait(p);
+    const isNext = nextId === id;
+    return (
+      <span
+        key={id}
+        className={
+          'order-chip' + (isNext ? ' order-chip--next' : '')
+        }
+        title={isNext ? strings.hud.nextUp : undefined}
+      >
+        <span className="order-chip-ava" aria-hidden="true">
+          {avatarIcon(p)}
+        </span>
+        <span className="order-chip-name">{playerDisplayName(p)}</span>
+        {trait && (
+          <span className={'bot-trait bot-trait--' + trait.key} aria-hidden="true">
+            {trait.icon}
+            {trait.label}
+          </span>
+        )}
+        {isNext && <span className="sr-only">{strings.hud.nextUp}</span>}
+      </span>
+    );
+  });
 
   // 发给真人的提议（伙伴站换菜/一起买）：锚在发起者的小卡下
   const proposal =
@@ -174,12 +252,25 @@ export function Game({
   const renderBotSlot = (b: (typeof bots)[number]) => {
     // R10C（education #3）：bot 心里话气泡——最新一条日志归它时，
     // 用 spend.kind + 性格映成一句短理由（复用日志时序，不加事件）
-    const think = botThinkLine(b, lastLog);
+    // R10D（education #5）：第 2 圈起气泡只留「先等等」（botThink 内判）
+    const think = botThinkLine(b, lastLog, state.lap);
+    const trait = botTrait(b);
     return (
       <div className="bot-slot" key={b.id}>
         <BotCard player={b} thinking={board.activePlayerId === b.id} />
         {think && (
-          <p className="think-bubble" key={lastLog.id}>
+          <p
+            className={
+              'think-bubble' + (trait ? ` think-bubble--${trait.key}` : '')
+            }
+            key={lastLog.id}
+          >
+            {trait && (
+              <span className="think-trait" aria-hidden="true">
+                {trait.icon}
+                {trait.label}
+              </span>
+            )}
             {think}
           </p>
         )}
@@ -309,14 +400,32 @@ export function Game({
     />
   );
 
-  const popupEl = showPopup ? (
-    <StationPopup
-      title={`${CIRCLED[state.stationIndex] ?? state.stationIndex + 1} ${stationName(station.id)}`}
-      testid={`panel-${station.id}`}
-    >
-      {panel}
-    </StationPopup>
-  ) : null;
+  // R10D（education #6）：弹窗头部副行——学习目标小片 + 迷你菜谱进度条
+  const recipeStrip: RecipeStripItem[] | undefined = human.recipeId
+    ? getRecipe(human.recipeId)?.ingredientIds.map((id) => ({
+        id,
+        icon: getIngredient(id)?.icon ?? '❔',
+        got: human.collected.includes(id),
+      }))
+    : undefined;
+
+  // R10D（interaction #8）：PopupOutlet 统一给所有站点弹窗加进出场；
+  // 弹窗关掉时保留最后一帧 ~160ms 播淡出（一处实现，三处受益）
+  const popupEl = (
+    <PopupOutlet show={showPopup}>
+      <StationPopup
+        title={`${CIRCLED[state.stationIndex] ?? state.stationIndex + 1} ${stationName(station.id)}`}
+        testid={`panel-${station.id}`}
+        goal={stationGoal(station.id)}
+        recipe={recipeStrip}
+        aside={
+          phoneLand && station.id === 'store' ? strings.panel.storeAll : undefined
+        }
+      >
+        {panel}
+      </StationPopup>
+    </PopupOutlet>
+  );
 
   const botIcon = (b: (typeof bots)[number]) =>
     cards.bots.find((x) => x.id === b.characterId)?.icon ?? '●';
@@ -400,10 +509,14 @@ export function Game({
               <p className="lap-card-lap">
                 {fmt(strings.hud.lapOf, { lap: state.lap, laps: gameConfig.laps })}
               </p>
-              {orderNames && (
+              {/* R10D（UI #8）：图形化进度簇——3 圈点 + 8 站点格 */}
+              {progressCluster}
+              {orderChips.length > 0 && (
                 <p className="lap-card-order">
-                  {strings.hud.orderLabel}
-                  {orderNames}
+                  <span className="lap-card-order-label">
+                    {strings.hud.orderLabel}
+                  </span>
+                  <span className="order-strip">{orderChips}</span>
                 </p>
               )}
             </div>
@@ -477,42 +590,76 @@ export function Game({
             <span className="phone-lap">
               {fmt(strings.hud.lapCompact, { lap: state.lap, laps: gameConfig.laps })}
             </span>
-            {bots.map((b) => (
-              <span className="phone-bot-wrap" key={b.id}>
-                {/* R10C：心里话气泡也贴到手机小头像上 */}
-                {(() => {
-                  const t = botThinkLine(b, lastLog);
-                  return t ? (
-                    <span className="think-bubble think-bubble--phone" key={lastLog.id}>
-                      {t}
+            {/* R10D（UI #8）：圈点 + 站点格进度簇，贴在小头像排前 */}
+            {progressCluster}
+            {bots.map((b) => {
+              const trait = botTrait(b);
+              const isNext = nextId === b.id;
+              return (
+                <span className="phone-bot-wrap" key={b.id}>
+                  {/* R10C：心里话气泡也贴到手机小头像上；R10D 起按圈数撤
+                      （botThink 内部判 lap），气泡带性格徽 + 按人配色 */}
+                  {(() => {
+                    const t = botThinkLine(b, lastLog, state.lap);
+                    return t ? (
+                      <span
+                        className={
+                          'think-bubble think-bubble--phone' +
+                          (trait ? ` think-bubble--${trait.key}` : '')
+                        }
+                        key={lastLog.id}
+                      >
+                        {trait && (
+                          <span className="think-trait" aria-hidden="true">
+                            {trait.icon}
+                          </span>
+                        )}
+                        {t}
+                      </span>
+                    ) : null;
+                  })()}
+                  <button
+                    type="button"
+                    className={
+                      'phone-bot' +
+                      (board.activePlayerId === b.id ? ' phone-bot--on' : '') +
+                      (isNext ? ' phone-bot--next' : '')
+                    }
+                    data-bot={b.characterId ?? undefined}
+                    aria-expanded={openBot === b.id}
+                    aria-label={
+                      fmt(strings.hud.botChip, {
+                        name: playerDisplayName(b),
+                        n: b.coins,
+                      }) + (isNext ? ` · ${strings.hud.nextUp}` : '')
+                    }
+                    onClick={() => setOpenBot(openBot === b.id ? null : b.id)}
+                  >
+                    <span className="phone-bot-avatar" aria-hidden="true">
+                      {botIcon(b)}
                     </span>
-                  ) : null;
-                })()}
-                <button
-                  type="button"
-                  className={
-                    'phone-bot' + (board.activePlayerId === b.id ? ' phone-bot--on' : '')
-                  }
-                  data-bot={b.characterId ?? undefined}
-                  aria-expanded={openBot === b.id}
-                  aria-label={fmt(strings.hud.botChip, { name: playerDisplayName(b), n: b.coins })}
-                  onClick={() => setOpenBot(openBot === b.id ? null : b.id)}
-                >
-                  <span className="phone-bot-avatar" aria-hidden="true">
-                    {botIcon(b)}
-                  </span>
-                  <span className="phone-bot-name">{playerDisplayName(b)}</span>
-                  <span className="phone-bot-coins" aria-hidden="true">
-                    🪙{b.coins}
-                  </span>
-                </button>
-                {openBot === b.id && (
-                  <div className="phone-bot-pop">
-                    <BotCard player={b} thinking={board.activePlayerId === b.id} />
-                  </div>
-                )}
-              </span>
-            ))}
+                    {trait && (
+                      <span
+                        className={'bot-trait bot-trait--' + trait.key}
+                        aria-hidden="true"
+                      >
+                        {trait.icon}
+                        {trait.label}
+                      </span>
+                    )}
+                    <span className="phone-bot-name">{playerDisplayName(b)}</span>
+                    <span className="phone-bot-coins" aria-hidden="true">
+                      🪙{b.coins}
+                    </span>
+                  </button>
+                  {openBot === b.id && (
+                    <div className="phone-bot-pop">
+                      <BotCard player={b} thinking={board.activePlayerId === b.id} />
+                    </div>
+                  )}
+                </span>
+              );
+            })}
           </div>
 
           {/* 右竖栏：轮到你了 + 当前这一站要做的事（弹窗收进栏里） */}

@@ -9,7 +9,7 @@
  *
  * 纯展示组件：内部无按钮语义，交互由外层元素承担。
  */
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import type { CSSProperties, PointerEvent, ReactNode } from 'react';
 
 export interface TiltCardProps {
@@ -49,19 +49,36 @@ export function TiltCard({
   style,
 }: TiltCardProps) {
   const elRef = useRef<HTMLDivElement | null>(null);
+  // R10D（motion #8）：跟手倾斜 rAF 节流——pointermove 每帧只写一次
+  // CSS 变量（最新坐标赢），回位走 .tc--leaving 的 250ms 慢过渡
+  const posRef = useRef<{ x: number; y: number } | null>(null);
+  const rafRef = useRef(0);
+  useEffect(
+    () => () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    },
+    [],
+  );
 
   const onMove = useCallback(
     (e: PointerEvent<HTMLDivElement>) => {
       if (!tilt || reduced() || e.pointerType === 'touch') return;
-      const el = elRef.current;
-      if (!el) return;
-      const r = el.getBoundingClientRect();
-      const px = (e.clientX - r.left) / r.width - 0.5; // -0.5..0.5
-      const py = (e.clientY - r.top) / r.height - 0.5;
-      el.style.setProperty('--tc-rx', `${(-py * MAX_TILT * 2).toFixed(2)}deg`);
-      el.style.setProperty('--tc-ry', `${(px * MAX_TILT * 2).toFixed(2)}deg`);
-      el.style.setProperty('--tc-gx', `${((px + 0.5) * 100).toFixed(1)}%`);
-      el.style.setProperty('--tc-gy', `${((py + 0.5) * 100).toFixed(1)}%`);
+      posRef.current = { x: e.clientX, y: e.clientY };
+      elRef.current?.classList.remove('tc--leaving');
+      if (rafRef.current) return;
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = 0;
+        const el = elRef.current;
+        const p = posRef.current;
+        if (!el || !p) return;
+        const r = el.getBoundingClientRect();
+        const px = (p.x - r.left) / r.width - 0.5; // -0.5..0.5
+        const py = (p.y - r.top) / r.height - 0.5;
+        el.style.setProperty('--tc-rx', `${(-py * MAX_TILT * 2).toFixed(2)}deg`);
+        el.style.setProperty('--tc-ry', `${(px * MAX_TILT * 2).toFixed(2)}deg`);
+        el.style.setProperty('--tc-gx', `${((px + 0.5) * 100).toFixed(1)}%`);
+        el.style.setProperty('--tc-gy', `${((py + 0.5) * 100).toFixed(1)}%`);
+      });
     },
     [tilt],
   );
@@ -69,6 +86,7 @@ export function TiltCard({
   const onLeave = useCallback(() => {
     const el = elRef.current;
     if (!el) return;
+    el.classList.add('tc--leaving'); // 回位 250ms（CSS 覆写时长）
     el.style.setProperty('--tc-rx', '0deg');
     el.style.setProperty('--tc-ry', '0deg');
   }, []);

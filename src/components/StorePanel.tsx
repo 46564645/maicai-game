@@ -14,6 +14,8 @@ import { coinWord, strings } from '../data/strings';
 import { availableCommands, missingIngredients, walletSummary } from '../game/selectors';
 import { fmt, marketPriceOf } from '../game/stations/shared';
 import { cardName } from '../i18n/cardText';
+import { adjacentDupCounts } from '../ui/dupBadges';
+import { panelHintFor } from '../ui/supportLevel';
 import type { CardId, Command, GameState } from '../game/types';
 import { Button } from './Button';
 import { CardIcon } from './CardIcon';
@@ -88,10 +90,6 @@ function ShelfCard({
           />
         </PlayableGlow>
       </div>
-      {/* R10C：选中卡名大浮签（货架扇 >3 张时横幅被盖，靠它认卡） */}
-      <span className="hand-tag" aria-hidden="true">
-        {cardName(id)}
-      </span>
     </>
   );
 }
@@ -147,23 +145,31 @@ export function StorePanel({
     [{ id: 'basket', el: basketRef.current, accepts: canBuy(id) }];
 
   // 缺货组 = 货架扇（R10 §2.7）；拖拽进篮子区买下，tap-tap=选中→点区买下
-  const shelfItems: HandItem[] = missing.map((id) => ({
-    key: id,
-    className: selected === id ? 'hand-item--sel' : undefined,
-    node: (
-      <ShelfCard
-        id={id}
-        needed
-        cost={cost(id)}
-        selected={selected === id}
-        playable={canBuy(id)}
-        disabled={boughtHere.includes(id)}
-        zones={zonesFor(id)}
-        onDrop={(cid) => buy(cid)}
-        onSelect={(cid) => setSelected(selected === cid ? null : cid)}
-      />
-    ),
-  }));
+  // R10D：相邻同卡贴「×n」徽标（dupBadges）；大浮签归口扇层 name 字段
+  const shelfDups = adjacentDupCounts(missing, (id) => id);
+  const shelfItems: HandItem[] = missing.map((id, i) => {
+    const dup = shelfDups[i];
+    return {
+      key: id,
+      className: selected === id ? 'hand-item--sel' : undefined,
+      name: cardName(id),
+      badge: dup !== null ? `×${dup}` : undefined,
+      speakText: `${cardName(id)}, ${cost(id)} ${coinWord(cost(id))}`,
+      node: (
+        <ShelfCard
+          id={id}
+          needed
+          cost={cost(id)}
+          selected={selected === id}
+          playable={canBuy(id)}
+          disabled={boughtHere.includes(id)}
+          zones={zonesFor(id)}
+          onDrop={(cid) => buy(cid)}
+          onSelect={(cid) => setSelected(selected === cid ? null : cid)}
+        />
+      ),
+    };
+  });
 
   // 其他组 = 紧凑网格（§2.7），但卡面换成新剖面（cardId 直出美术）
   const storeCard = (id: CardId) => {
@@ -187,9 +193,17 @@ export function StorePanel({
     );
   };
 
+  // R10D（education #5）：说明句随圈数退场——1 圈整句 / 2 圈图标+短句 / 3 圈撤
+  const hint = panelHintFor(state.lap);
+
   return (
     <div className="panel-body">
-      <p className="panel-text">{strings.panel.storeIntro}</p>
+      {hint === 'full' && <p className="panel-text">{strings.panel.storeIntro}</p>}
+      {hint === 'compact' && (
+        <p className="panel-text panel-text--compact">
+          <span aria-hidden="true">🏪</span> {strings.panel.storeIntroShort}
+        </p>
+      )}
 
       {missing.length > 0 && (
         <section className="store-section">
@@ -199,7 +213,9 @@ export function StorePanel({
       )}
 
       <section className="store-section">
-        <p className="panel-subtitle">{strings.panel.storeAll}</p>
+        {/* R10D（UI #7）：手机横屏栏内高度紧，「全部食材」挪进弹窗头部
+            （Game.tsx 的 aside 位），栏内不再占一行 */}
+        <p className="panel-subtitle store-grid-label">{strings.panel.storeAll}</p>
         <div className="store-grid">{others.map((i) => storeCard(i.id))}</div>
       </section>
 

@@ -503,6 +503,7 @@
 }
 
 .bot-card-avatar {
+  position: relative; /* R10D：性格小徽标锚在头像角上 */
   flex: none;
   display: inline-flex;
   align-items: center;
@@ -584,5 +585,188 @@
      放不下会整行溢出卡外甚至顶出屏幕右缘（基线截图实测）——
      允许在任意位置折行，文案一字不改 */
   overflow-wrap: anywhere;
+}
+
+/* ==========================================================================
+   R10 Slice D —— 图形化进度簇 / 回合条下一位高亮 / bot 性格徽标与气泡配色
+   ========================================================================== */
+
+/* —— 进度簇（UI #8）：3 枚圈点 + 8 格站点条，全读既有 state —— */
+.prog {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-1) 0;
+}
+.lap-dots {
+  display: inline-flex;
+  gap: var(--space-1);
+}
+.lap-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--color-line-strong);
+  background: var(--color-surface);
+}
+.lap-dot--done {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.lap-dot--now {
+  border-color: var(--color-ink);
+  background: var(--color-accent-yellow);
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* 当前圈描边轻脉动（opacity-only，「你在这圈」的活信号） */
+  .lap-dot--now {
+    animation: lap-dot-pulse 1.6s var(--ease-in-out) infinite alternate;
+  }
+}
+@keyframes lap-dot-pulse {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.stop-pips {
+  display: inline-flex;
+  gap: 3px;
+}
+.stop-pip {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  border: 1.5px solid var(--color-line-strong);
+  background: var(--color-surface-dim);
+}
+.stop-pip--done {
+  background: var(--color-mint);
+  border-color: var(--color-mint);
+}
+/* 「我在这」：当前站方块亮橙 + 墨描边环（非色彩线索=形状更大+描边） */
+.stop-pip--here {
+  width: 14px;
+  height: 14px;
+  margin: -2px;
+  background: var(--color-accent-yellow);
+  border: 2px solid var(--color-ink);
+  border-radius: 4px;
+}
+
+/* —— 回合条小头像片（UI #8）：「下一位」上抬 + 墨描边——选中卡同语言 —— */
+.lap-card-order {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.order-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+.order-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px var(--space-2) 2px 2px;
+  border-radius: var(--radius-button);
+  background: var(--color-surface);
+  border: 2px solid var(--color-line);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+  transition:
+    transform var(--hand-raise-ms) var(--ease-out),
+    border-color var(--motion-fast) var(--motion-ease),
+    box-shadow var(--motion-fast) var(--motion-ease);
+}
+.order-chip-ava {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-surface-dim);
+  font-size: var(--font-size-xs);
+}
+.order-chip--next {
+  transform: translateY(-3px);
+  border-color: var(--color-ink);
+  box-shadow: var(--shadow-sm);
+  background: var(--color-primary-soft);
+}
+
+/* —— bot 性格徽标（play #4）：图标+1–2字小片，按性格色描边——
+   色彩只是第三通道，形状/文字才是线索（小徽本身即非色彩线索） —— */
+.bot-trait {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  padding: 0 4px;
+  border-radius: var(--radius-button);
+  border: 1.5px solid var(--color-line-strong);
+  background: var(--color-surface);
+  font-style: normal;
+  font-size: calc(var(--font-size-xs) * 0.86);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.bot-trait--steady {
+  border-color: var(--bot-accent-steady);
+}
+.bot-trait--impulsive {
+  border-color: var(--bot-accent-impulsive);
+}
+.bot-trait--follower {
+  border-color: var(--bot-accent-follower);
+}
+/* 头像角上的徽标只留 1–2 字（图标=头像本体） */
+.bot-card-avatar > .bot-trait {
+  position: absolute;
+  right: -7px;
+  bottom: -5px;
+  padding: 0 3px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* —— 心里话气泡按人配色（play #4）：描边色=该 bot 性格色；
+   气泡头的 .think-trait 小徽把「谁在说」摆成非色彩线索 —— */
+.think-bubble {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.think-bubble--steady {
+  border-color: var(--bot-accent-steady);
+}
+.think-bubble--impulsive {
+  border-color: var(--bot-accent-impulsive);
+}
+.think-bubble--follower {
+  border-color: var(--bot-accent-follower);
+}
+.think-trait {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-heavy);
+  color: var(--color-muted);
+}
+.think-bubble--steady .think-trait {
+  color: var(--bot-accent-steady);
+}
+.think-bubble--impulsive .think-trait {
+  color: var(--color-ink); /* 黄底深字对比才够——小冲片用墨字不用黄字 */
+}
+.think-bubble--follower .think-trait {
+  color: var(--bot-accent-follower);
 }
 

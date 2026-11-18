@@ -66,6 +66,10 @@ export const enStrings = {
     lapCompact: 'Lap {lap}/{laps}',
     botChip: '{name}, {n} coins — tap for details',
     walletWithCoins: 'My wallet, {n} coins',
+    /* R10D: a11y names for the pictorial progress cluster + "next up" */
+    progressLabel: 'Lap {lap}, at stop {n}',
+    nextUp: 'Next up',
+    recipeStrip: 'Recipe progress',
   },
 
   /* 棋盘与游戏主界面 */
@@ -162,6 +166,8 @@ export const enStrings = {
   /* 站点面板（M3.2 正式面板） */
   panel: {
     stallIntro: '6 cards: food and fun stuff mixed together. Tap one, then pick what to do.',
+    /* R10D: lap-2 short form; the line is gone entirely on lap 3 */
+    stallIntroShort: 'Tap a card, then pick',
     selected: 'Picked: {item} {n} coins',
     selectedMark: 'Picked: ',
     afterBuy: 'After you buy: {n} coins',
@@ -182,6 +188,8 @@ export const enStrings = {
     recipeDone: 'Your recipe is all set!',
     busTicket: 'Bus ticket',
     storeIntro: 'Missing food is all here. Each costs 1 more coin than the market.',
+    /* R10D: lap-2 short form */
+    storeIntroShort: 'Missing food is here — 1 coin more each',
     storeMissing: 'Recipe still needs',
     storeAll: 'All food',
     storeHoldLine: '"Maybe later" clip: {item} ({n} coins)',
@@ -248,6 +256,12 @@ export const enStrings = {
     spunTo: 'It is {name}!',
     choose: 'What will you do?',
     deckHint: 'Tap to flip it over',
+    /* R10D: remainder preview on the spend card + consequence echo
+       shown in the regret window before the panel closes */
+    spendPreview: 'Spend {p} · {n} left',
+    echoSpendOk: 'Spent {p} — food money is still enough',
+    echoSpendGap: 'Careful: food money is {n} coins short now',
+    echoFree: 'Not a coin spent — saved for the bus and food',
   },
 
   /* AI 家长站（06） */
@@ -260,7 +274,8 @@ export const enStrings = {
     pickHint: 'Say it, or tap a picture:',
     typePlaceholder: 'Type your answer',
     sendText: 'Done',
-    voiceBtn: 'Voice',
+    /* R10D: honest voice button — reads the question aloud, points at the cards */
+    hearQ: 'Hear the question',
     clearedMark: '✓ Clear!',
     settleGo: 'Keep answering',
     statusLive: 'Live chat',
@@ -340,6 +355,8 @@ export const enStrings = {
     /* R10C: options she actually did sort first + get a small badge */
     personalHint: 'Pick one thing you really did today',
     didIt: 'You did it',
+    /* R10D: lap-3 forward-looking stem — only for a child who finished the recipe */
+    forwardPrompt: 'Next time you shop, what will you do first?',
   },
 
   /* 动作日志（引擎写入 state.log，{name}/{item}/{n} 为占位符） */

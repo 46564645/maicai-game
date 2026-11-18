@@ -170,7 +170,12 @@
   height: 100%;
   transform-style: preserve-3d;
   transform: rotateX(var(--tc-rx, 0deg)) rotateY(var(--tc-ry, 0deg));
-  transition: transform var(--motion-med) var(--motion-ease);
+  /* R10D（motion #8）：跟手/回位双时长——跟手 140ms 贴指针，
+     指针离场挂 .tc--leaving 后 300ms 缓缓回正 */
+  transition: transform var(--press-ms) var(--ease-out);
+}
+.tc--leaving .tc-tilt {
+  transition-duration: var(--motion-med);
 }
 .tc-flip {
   position: relative;
@@ -254,8 +259,10 @@
   border-radius: var(--radius-card);
   transform-origin: 50% 110%; /* 扇形像从掌心转出来 */
   transform: rotate(var(--fan-rot)) translateY(var(--fan-drop));
+  /* R10D（motion）：上抬/邻卡让位 180ms + ease-out（不过冲）——
+     入场弹入仍走 hand-pop 的 ease-spring 动画，不受影响 */
   transition:
-    transform var(--motion-med) var(--ease-spring),
+    transform var(--hand-raise-ms) var(--ease-out),
     opacity var(--motion-med) var(--motion-ease);
   animation-delay: calc(var(--fan-i) * 40ms);
 }
@@ -1098,11 +1105,14 @@
   line-height: 1.5;
   color: var(--color-ink);
 }
-/* 花钱/免费二选一：两张卡——R10C 放大到名字整幅可读，允许换行 */
+/* 花钱/免费二选一：两张卡——R10C 放大到名字整幅可读，允许换行。
+   R10D（education #7）：花钱卡多了余款预告行（tag「花 p 币 · 还剩 n 币」），
+   内容实测 162px 顶出 140px 卡高（e2e safearea：主按钮文字溢出 26px，
+   桌面与手机同尺寸同溢出）；卡高 140px→170px，留 4px 裕量。 */
 .event-hand,
 .choice-hand {
   --hand-card-w: 136px;
-  --hand-card-h: 140px;
+  --hand-card-h: 170px;
   --fan-expose: 70px;
   margin: 0 auto;
 }
@@ -1491,6 +1501,108 @@
 }
 .mini-cards .card-view-name {
   font-size: var(--font-size-xs);
+}
+
+/* ==========================================================================
+   R10 Slice D —— 触屏长按检视 / 相邻同卡徽标 / 「可点不可打」拒付反馈 /
+   事件后果回声
+   ========================================================================== */
+
+/* —— 触屏长按检视（interaction #4）：按住 300ms 卡放大 1.15 直立 + 名签
+   浮出（复用 .hand-tag 大浮签）；松手还原，不选中不打令 —— */
+.hand-item--inspect {
+  transform: rotate(0deg) translateY(calc(var(--hand-lift) * -1)) scale(1.15);
+  z-index: 20;
+}
+.hand-item--inspect .hand-tag {
+  display: block;
+}
+
+/* —— 相邻同卡计数徽标（education #6）：角上「×2」小圆片 —— */
+.hand-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--key-hint-size);
+  height: 24px;
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-button);
+  background: var(--color-ink);
+  color: var(--color-surface);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-heavy);
+  border: 2px solid var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  pointer-events: none;
+}
+
+/* —— 「可点不可打」拒付反馈（interaction #6）：180ms 横摇 + 价格宝石
+   红闪（opacity-only 的红罩淡入即褪；HUD 币条跳是第三通道） —— */
+.card-deny {
+  animation: card-deny-shake var(--shake-ms) var(--ease-out);
+}
+@keyframes card-deny-shake {
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+.card-deny .card-view-gem::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: var(--color-deny);
+  pointer-events: none;
+  animation: gem-deny-flash var(--shake-ms) ease-out forwards;
+}
+@keyframes gem-deny-flash {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* —— 事件「后果回声」（education #7）：后悔窗口旁的短句——花钱后买菜
+   钱还够不够/一个币没花留给后面；缺口态换黄底提醒 —— */
+.panel-echo {
+  align-self: center;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-button);
+  background: var(--drop-hot);
+  border: 2px solid var(--color-mint);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+  text-align: center;
+}
+.panel-echo--warn {
+  background: var(--color-deny-soft);
+  border-color: var(--color-deny);
+}
+
+/* 第 2 圈说明句的「图标 + 短句」紧凑形态（education #5 脚手架退场） */
+.panel-text--compact {
+  font-size: var(--font-size-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-deny,
+  .card-deny .card-view-gem::before {
+    animation: none;
+  }
+  .hand-item--inspect {
+    /* 检视仍要看得出「放大了」——位移撤掉、保留缩放 */
+    transform: scale(1.15);
+  }
 }
 
 /* ==========================================================================

@@ -87,6 +87,15 @@
   --player-steady: #5B7CFA;
   --player-impulsive: #FFC93C;
   --player-follower: #7ED9B5;
+  /* R10D（play #4）：bot 性格徽章/心里话气泡的按人点缀色——
+     直接复用玩家色（token 单点换皮，性格色永远跟着角色色走） */
+  --bot-accent-steady: var(--player-steady);
+  --bot-accent-impulsive: var(--player-impulsive);
+  --bot-accent-follower: var(--player-follower);
+  /* R10D（interaction #4）：「买不起」警告闪红——色板无正红，
+     取一枚番茄红只作短暂反馈色（价格宝石红闪/错误轻提醒） */
+  --color-deny: #e5484d;
+  --color-deny-soft: color-mix(in srgb, var(--color-deny) 12%, var(--color-surface));
 
   /* —— 字体（R5：圆体优先栈——设备上有 ui-rounded/SF Rounded/Nunito 等即启用，
      无则回退原栈；仓库不内嵌字体文件，正式授权圆体由 PM 另行采购）—— */
@@ -188,6 +197,17 @@
   /* R5 按压感：轻回弹 + 下沉位移（一切 tap/press ≤150ms） */
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --press-shift: 2px;
+  /* R10D（motion）：命名缓动——ease-out 与 --ease-roll 同曲线
+     （不过冲、起步快收尾稳），ease-in-out 给对称往返（淡入淡出） */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  /* 按用途时长：按压回弹 140ms（无过冲）、手牌上抬/邻卡让位 180ms、
+     弹窗进 180ms / 出 160ms、轻晃 180ms */
+  --press-ms: 140ms;
+  --hand-raise-ms: 180ms;
+  --popup-in-ms: 180ms;
+  --popup-out-ms: 160ms;
+  --shake-ms: 180ms;
 
   /* —— R10 卡片化（R10_DESIGN §3/§4；全部派生自现有色板，未改旧值）—— */
   /* 手牌卡尺寸：桌面 104×144 起；手机横屏紧凑档 ≥56×80（扇形露出带约 34px，

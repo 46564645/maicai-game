@@ -326,3 +326,28 @@
 - Token 改动（红线要求列出）：`--color-muted`、`--font-size-xs`、`--button-primary-fg`、`--fan-expose-sm` 四处改值（见上）；其余为新增 token。无新依赖，无网络请求，`.env.local` 未动。
 - 截图 `shots/r10c_*` 共 4 张（PM 自拍，Devin 未及出图）：市场扇/选中 × 桌面 1280×800 与手机 874×402。PM 抽查通过：桌面选中（hero pill「豆腐」+ CoinBar「12 − 2 → 10」+ 唯一主钮「买下（2币）」）、手机选中（CoinBar + 买下主钮 + bot 气泡「我也要！」）。
 - 遗留（待负责人/后续）：① e2e 未跑完——本轮 e2e 在 8 项中 2 项失败后被运行环境重启打断（board3d canvas 渲染超时、fullgame 3.0m 超时；Devin C 日志中同类失败曾归因于并行 R8 截图抢占 CPU，另有一处真实 safearea 问题已由 Devin 修 scroll/pin 恢复逻辑——未及复跑验证）；② R8 fit 无测点未复跑（见上）；③ 事件揭示/做菜/家长入口等其余简报要求截图未拍（仅市场 4 张）；④ Slice A 遗留②③仍未定——扇形展开幅度、触屏拖拽真机手测。
+
+---
+
+## 附记：Slice D 落地记录（2026-11-18，PM 验收）
+
+- 实现由 Devin CLI（SWE-2 Max）完成主体，截图收尾阶段运行环境重启中断（进程已死，日志 `~/workspace/maicai-r10d.log` 止于截图改拍，未提交），PM 接手验收并代提交：build 干净、**213/213 测试全绿**（171 基线 + 42 新增：`tests/unit/r10d.test.ts`）、`git diff 7fb9d97..HEAD -- src/game src/data` 为空、package.json 与 `.env.local` 未动。
+- 逐项（简报 P0 9 项 + P1 3 项，Devin 落地内容；PM 按日志、代码抽查与截图核对）：
+  1. 脚手架随圈退场：新增 `supportLevel(lap)`；圈 2 市场/商店说明句缩为图标+短式、bot 理由气泡仅留「先等等」；圈 3 无说明句、反思改前瞻问句（仅完成菜谱的孩子，标准问句否则）。
+  2. 事件后果回声：新增 `eventEcho` 纯函数（三态：花钱仍够 / 花进缺口 / 免费）+ 花钱卡余数预览「花 {p} 币 · 还剩 {n} 币」，回声行在面板关闭前显示，仍走既有命令路径与 Slice C 后悔窗口。
+  3. 长按检视：新增 `pressInspect.ts`；触屏长按 300ms → 卡放大 1.15 + hero 名签浮出 + 既有朗读；松手复原，不选卡、不发命令；成拖即取消检视，轻点仍走 Slice C tap-rescue；鼠标 hover 检视不变。
+  4. 「钱不够」统一反馈：事件花钱卡去 `disabled`，改为「可点不可打」——点按 180ms 横摇 + 价格宝石红闪 + 币 HUD 轻跳，不发命令，「钱不够」文案保留为第二通道；BusPanel 对齐同款（车票仍可上车记待付夹，命令照发）。
+  5. 家长语音钮改诚实：新键 `hearQ`「听一听问题」/ "Hear the question"，点按走既有 TTS 朗读当前问题并展开图卡扇；删 live 气泡假输入与 offline `mode:'voice'` 代答提交（点按永不提交答案）；图卡与打字仍为真实输入路径。
+  6. 弹窗进出：`.popup` 入场 + 退场壳淡出，reduced-motion 120ms 纯淡入；一处实现，全部站点 + 求助牌 + 钱包抽屉受益。
+  7. TiltCard 跟指：跟随 120ms `--ease-out`、离开回正 250ms、pointermove 经 rAF 节流（≤1 写/帧）；触屏仍无倾斜。
+  8. 商店「全部食材」格：tile 改整幅图（contain）+ 名带 + 价格宝石落 tile 内；删格子与购买钮之间的重复浮动宝石行；tile 点按行为不变。
+  9. 图解进度：圈点 3（已完成实心/当前描边脉动）+ 8 格站点环「你在这里」+ 回合条下一位头像抬升描边（与选中卡同语言）。
+  10. 目标常驻：各站面板头迷你菜谱进度条（`missingIngredients` 同源数据）+ 标题下「练 · …」目标小片（`cardText.ts` 既有文案）；扇内相邻同名卡加「×2」徽标。
+  11. 弹簧退役：新增 `--ease-out` / `--ease-in-out` 命名缓动；按钮按压 140ms、手牌上抬/邻卡让位 180ms，无过冲；其余动效时长不动。
+  12. Bot 性格可见：回合条头像 + 气泡旁性格徽标（图标 + 1–2 字，取既有性格数据，未发明新 bot 数据），气泡按人点缀色。
+- Token 改动（红线要求列出）：新增 `--bot-accent-steady` / `--bot-accent-impulsive` / `--bot-accent-follower`（复用玩家色）、`--color-deny`（#e5484d，番茄红短暂反馈）与 `--color-deny-soft`、`--ease-out` / `--ease-in-out`、`--press-ms` / `--hand-raise-ms` / `--popup-in-ms` / `--popup-out-ms` / `--shake-ms`；旧 token 零改值。无新依赖，无网络请求。
+- 偏差（PM 接受，记入）：弹窗进出简报写 240ms 入场 / 150ms 淡出，Devin 落地 180ms / 160ms 并由 `r10d.test.ts` 断言锁死；PM 接受（仍在轻量区间，e2e 稳定性亦受益），`StationPopup.tsx` 头注释已由 PM 同步为实测值。
+- 截图 `shots/r10d_*` 桌面 1440×900 共 6 张：progress、popup_head、event_echo、bus_nocoins、market_lap2、market_lap3。PM 抽查 4 张通过：progress（圈点 + 站点环 + 目标小片 + 菜谱条 + 性格徽标 + 名签「鱼」+「9−3→6」）、market_lap3（第 3 圈无说明句、名签「鸡蛋」+「4−3→1」）、bus_nocoins（车票「币不够了」+ 待付夹选项；该帧演示条未关）、market_lap2（圈 2 短式说明句在位）。event_echo 一帧为事件后面板已关的棋盘，回声行未入镜——需重拍，见遗留。
+- e2e：PM 串行补跑一次（本轮验收时，`npx playwright test`，8.0 分钟）：**3 通过 / 5 失败**。通过：未逐项留名（见下失败项之外的 3 项）。失败：① board3d（canvas 渲染，`action-primary` 等待 60s 超时、元素持续不稳定——与 Slice C 同类失败）；② fullgame（整局 180s 超时，等主按钮稳定）；③ keyboard（整局 180s 超时，`page.evaluate`）；④ mobile（横屏局中转竖屏后 `rotate-gate` 未出现）；⑤ safearea（874×402 菜市场栏内按钮[3] 下沿 384，超安全区上限 383 仅 1px）。①②③为整局超时家族（SwiftShader 软渲染下旧有慢径，Slice C 亦同）；④经基线 worktree（7fb9d97）对照复跑，同样失败——既有问题，非 Slice D 回归。⑤经探针定位为 **Slice D 真回归（其一）**：PopupOutlet 的 `.popup-shell` 是 `display:contents`，栏内 `:last-child` 的 safe-b 下边距落在它身上直接蒸发，竖栏「走完这一站」失去 20px 底垫（基线 364 → 本轮 384）；PM 已修（`phone.css`：下边距改挂真实盒子 `.phone-rail .popup-backdrop`），探针复测回 364。safearea 单项定向复跑（第 1 次）后又在后程露出 **Slice D 真回归（其二）**：事件花钱卡多了余款预告行（tag「花 p 币 · 还剩 n 币」），卡高仍 140px，内容 162px 顶出 26px（主按钮文字溢出断言失败，桌面与手机同尺寸同溢出）；PM 已修（`cards.css`：`.event-hand` / `.choice-hand` 卡高 140px→170px，留 4px 裕量），PM 第 2 次定向复跑 safearea 整项（2026-11-18 10:52，含上述两处修复的构建）：已越过下沿断言与事件卡断言（两处回归确认修复），后程停在另一采样点的主按钮文字溢出断言——EN 模式棋盘主按钮文字高 76 > 按钮高 72（4px，874×402，Lap 1 第 3 站），失败点不在事件卡；该断言基线对照因 240s 超时未取得结论，是否既有问题未证实，记入遗留④。
+- R8 fit 未复跑：本构建无 `__fitD` 测点（package.json 无 fit 脚本；dist 亦无该钩子）；D 片未动 Board3D/相机/棋盘几何（`board.css` 仅改 bot 气泡/徽标样式，`Game.tsx` 无 3D 接线改动），fill 无回归路径。
+- 遗留（待负责人/后续）：① e2e 结果见上；② 截图缺口（PM 补拍后更新）：商店整幅格 ✓、家长「听一听问题」钮 ✓（耳形图标 + 图卡扇 + 句首片同框）、r10c 事件牌背+提示 ✓、事件翻开 ✓（大故事卡完整可读、花钱卡带「花 1 币」预览）；仍缺：手机横屏 844×390 整套、事件拒付态单帧、做菜飞锅/成品落位两张（驱动在软渲染下 8 分钟无进展被 PM 掐停；做菜场景 D 片未改动，B 片已有 r10b_cook 图）、event_echo 干净帧（既有帧为面板关闭后棋盘）；③ Slice A 遗留②③仍未定——扇形展开幅度、触屏拖拽真机手测。④ safearea EN 主按钮文字 4px 溢出（见上 e2e 段），待英文轮次或真机验证时一并处理。

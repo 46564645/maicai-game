@@ -1,9 +1,11 @@
 /**
  * ParentPanel.tsx —— 06 AI 家长站（G5）。
  * parentUse：「现在用」/「这次先不用」（每人每局 1 次）。
- * parentAnswer：聊天气泡 + 图卡选项（数字键 1..n）+ 打字提交 + 语音占位
- *   （点了只提示不推进）；判定在引擎（图卡 tags / 打字 keywords），
- *   判不出时 AI 给图卡兜底（fallbackLine 进 log，这里显示为 AI 气泡）。
+ * parentAnswer：聊天气泡 + 图卡选项（数字键 1..n）+ 打字提交 + 「听一听
+ *   问题」钮（R10D interaction #7：不再是假语音钮——点了用既有 TTS 把
+ *   当前问题读出来、把图卡扇滚进视野；绝不派发答案，两条真输入路是
+ *   图卡和打字）。判定在引擎（图卡 tags / 打字 keywords），判不出时
+ *   AI 给图卡兜底（fallbackLine 进 log，这里显示为 AI 气泡）。
  * parentSettle：①②说清后「就这样吧（拿 1 币）」或「继续回答」。
  *
  * R7 真对话（src/parent/parentLive.ts）：本地构建注入了 DeepSeek key 时，
@@ -29,10 +31,10 @@ import {
   parentOptionLabel,
   parentQuestionText,
   parentSettleLabel,
-  parentVoiceHint,
 } from '../i18n/cardText';
 import type { Command, GameState, ParentAnswer, ParentDialog } from '../game/types';
 import { fetchParentReply, isGoodbyeTurn, parentLiveAvailable } from '../parent/parentLive';
+import { useSpeech } from '../ui/useSpeech';
 import type { ParentTurn } from '../parent/parentLive';
 import { Button } from './Button';
 import { CardView } from './CardView';
@@ -46,7 +48,7 @@ import type { HandItem } from './cards/Hand';
 interface LiveBubble {
   who: 'ai' | 'me' | 'sys';
   text: string;
-  /** 本地提示（如语音占位）：只显示，不进 API 对话历史 */
+  /** 本地提示：只显示，不进 API 对话历史（R10D：假语音占位提示已撤） */
   local?: boolean;
 }
 
@@ -137,6 +139,14 @@ export function ParentPanel({
   const me = state.players.find((p) => p.isHuman)!;
   const [text, setText] = useState('');
   const data = cards.parentStation;
+  /* R10D（interaction #7）「听一听问题」：既有 TTS 通道把当前问题读出来，
+     并把图卡扇滚进视野——诚实动作，绝不派发答案（两条真输入路：图卡/打字） */
+  const { speak } = useSpeech();
+  const fanRef = useRef<HTMLDivElement | null>(null);
+  const hearQuestion = (questionText: string) => {
+    speak(questionText);
+    fanRef.current?.scrollIntoView({ block: 'nearest' });
+  };
 
   /* —— R7 真对话会话状态 —— */
   const [live, setLive] = useState<LiveSession | null>(null);
@@ -432,26 +442,28 @@ export function ParentPanel({
           })}{' '}
           · {strings.parent.pickHint}
         </p>
-        <OptionFan
-          options={liveQ.options}
-          locked={live.busy || live.done}
-          flyKey={fly?.key ?? null}
-          onPick={(o, el) =>
-            flyCard(
-              el,
-              o.id,
-              o.icon,
-              parentOptionLabel(o),
-              liveChatRef.current,
-              live.busy || live.done,
-              () =>
-                void liveAnswerRef.current?.(
-                  { mode: 'card', optionId: o.id },
-                  parentOptionLabel(o),
-                ),
-            )
-          }
-        />
+        <div ref={fanRef}>
+          <OptionFan
+            options={liveQ.options}
+            locked={live.busy || live.done}
+            flyKey={fly?.key ?? null}
+            onPick={(o, el) =>
+              flyCard(
+                el,
+                o.id,
+                o.icon,
+                parentOptionLabel(o),
+                liveChatRef.current,
+                live.busy || live.done,
+                () =>
+                  void liveAnswerRef.current?.(
+                    { mode: 'card', optionId: o.id },
+                    parentOptionLabel(o),
+                  ),
+              )
+            }
+          />
+        </div>
         {flyEl}
         <div className="panel-foot">
           {flyChip}
@@ -478,19 +490,10 @@ export function ParentPanel({
             <Button
               variant="secondary"
               data-testid="action-parent-voice"
-              aria-label={strings.parent.voiceBtn}
-              onClick={() =>
-                setLive((cur) =>
-                  cur
-                    ? {
-                        ...cur,
-                        bubbles: [...cur.bubbles, { who: 'ai', text: parentVoiceHint(), local: true }],
-                      }
-                    : cur,
-                )
-              }
+              aria-label={strings.parent.hearQ}
+              onClick={() => hearQuestion(parentQuestionText(liveQ))}
             >
-              🎤 {strings.parent.voiceBtn}
+              👂 {strings.parent.hearQ}
             </Button>
           </form>
         </div>
@@ -567,23 +570,25 @@ export function ParentPanel({
         {fmt(strings.parent.questionOf, { a: step + 1, b: questions.length })} ·{' '}
         {strings.parent.pickHint}
       </p>
-      <OptionFan
-        options={q.options}
-        locked={false}
-        flyKey={fly?.key ?? null}
-        onPick={(o, el) => {
-          setEchoes((m) => ({ ...m, [step]: parentOptionLabel(o) }));
-          flyCard(
-            el,
-            o.id,
-            o.icon,
-            parentOptionLabel(o),
-            offlineChatRef.current,
-            false,
-            () => send({ type: 'PARENT_ANSWER', answer: { mode: 'card', optionId: o.id } }),
-          );
-        }}
-      />
+      <div ref={fanRef}>
+        <OptionFan
+          options={q.options}
+          locked={false}
+          flyKey={fly?.key ?? null}
+          onPick={(o, el) => {
+            setEchoes((m) => ({ ...m, [step]: parentOptionLabel(o) }));
+            flyCard(
+              el,
+              o.id,
+              o.icon,
+              parentOptionLabel(o),
+              offlineChatRef.current,
+              false,
+              () => send({ type: 'PARENT_ANSWER', answer: { mode: 'card', optionId: o.id } }),
+            );
+          }}
+        />
+      </div>
       {flyEl}
       <div className="panel-foot">
         {flyChip}
@@ -609,10 +614,10 @@ export function ParentPanel({
           <Button
             variant="secondary"
             data-testid="action-parent-voice"
-            aria-label={strings.parent.voiceBtn}
-            onClick={() => send({ type: 'PARENT_ANSWER', answer: { mode: 'voice' } })}
+            aria-label={strings.parent.hearQ}
+            onClick={() => hearQuestion(parentQuestionText(q))}
           >
-            🎤 {strings.parent.voiceBtn}
+            👂 {strings.parent.hearQ}
           </Button>
         </form>
       </div>

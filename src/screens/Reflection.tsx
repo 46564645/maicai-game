@@ -8,8 +8,10 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { cards } from '../data/cards';
 import { strings } from '../data/strings';
+import { missingIngredients } from '../game/selectors';
 import { playerDisplayName, reflectionEntryText, reflectionOptionLabel, reflectionPrompt } from '../i18n/cardText';
 import { orderOptions, reflectionDone } from '../ui/reflectionPick';
+import { supportLevel } from '../ui/supportLevel';
 import type { Command, GameState, Player } from '../game/types';
 import { Button } from '../components/Button';
 import { CardView } from '../components/CardView';
@@ -58,6 +60,14 @@ export function Reflection({
      盖「做到了」小标，孩子挑真的那件说（education runner-up） */
   const me = state.players.find((p) => p.id === state.humanId);
   const done = me ? reflectionDone(state, me) : {};
+  /* R10D（education #5）：第 3 圈且菜谱买齐的孩子，反思导语换成前瞻句
+     「下次去买菜，你会先做哪一步？」；没买齐的孩子保留标准句（撤扶持
+     只奖励通关的那条路径，不给还在追的孩子换题） */
+  const recipeDone = me ? missingIngredients(me).length === 0 : false;
+  const prompt =
+    supportLevel(state.lap) === 3 && recipeDone
+      ? strings.reflection.forwardPrompt
+      : reflectionPrompt();
   const preset = orderOptions(
     options.filter((o) => o.id !== FREE_OPTION_ID),
     done,
@@ -83,6 +93,8 @@ export function Reflection({
     const label = reflectionOptionLabel(o.id, o.label);
     return {
       key: o.id,
+      name: label,
+      speakText: label,
       node: (
         <TiltCard
           glare
@@ -107,7 +119,7 @@ export function Reflection({
 
   return (
     <main className="intro-shell" data-testid="screen-reflection">
-      <h1 className="intro-title intro-title--sm">{reflectionPrompt()}</h1>
+      <h1 className="intro-title intro-title--sm">{prompt}</h1>
 
       <section className="reflection-list" aria-live="polite">
         {state.players.map((p) => {
@@ -160,7 +172,7 @@ export function Reflection({
             <Hand
               className="reflection-hand"
               items={optionItems}
-              ariaLabel={reflectionPrompt()}
+              ariaLabel={prompt}
             />
             {free && (
               <Button

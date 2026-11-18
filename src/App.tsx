@@ -8,6 +8,7 @@ import type { Command } from './game/types';
 import { LangToggle } from './i18n/LangToggle';
 import { useLang } from './i18n/store';
 import { HelpCard } from './components/HelpCard';
+import { PopupOutlet } from './components/StationPopup';
 import { RotatePhone } from './components/RotatePhone';
 import { WalletDrawer } from './components/WalletDrawer';
 import { DemoBar } from './demo/DemoBar';
@@ -101,21 +102,23 @@ export default function App() {
         <Reflection state={state} send={sendCmd} />
       )}
 
-      {layers.isOpen('wallet') && (
+      {/* R10D（interaction #8）：钱包/求助牌与站点弹窗同一壳，
+          同享 PopupOutlet 的进出场（关时 ~160ms 淡出） */}
+      <PopupOutlet show={layers.isOpen('wallet')}>
         <WalletDrawer
           state={state}
           playerId={human.id}
           onClose={() => layers.closeLayer('wallet')}
         />
-      )}
+      </PopupOutlet>
 
-      {layers.isOpen('help') && (
+      <PopupOutlet show={layers.isOpen('help')}>
         <HelpCard
           state={state}
           playerId={human.id}
           onClose={() => layers.closeLayer('help')}
         />
-      )}
+      </PopupOutlet>
 
       {/* 手机竖屏：全屏「把手机横过来」循环动画，转横后自动进入游戏 */}
       {phoneMode === 'phone-portrait' && <RotatePhone />}
