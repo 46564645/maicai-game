@@ -1,0 +1,1157 @@
+{
+  "phone-844x390": {
+    "viewport": {
+      "w": 844,
+      "h": 390
+    },
+    "panels": [
+      {
+        "sel": ".board3d-overlay",
+        "x": 461,
+        "y": 334,
+        "w": 121,
+        "h": 48
+      },
+      {
+        "sel": ".phone-rail",
+        "x": 591,
+        "y": 0,
+        "w": 253,
+        "h": 390
+      },
+      {
+        "sel": ".phone-turn",
+        "x": 601,
+        "y": 64,
+        "w": 235,
+        "h": 132
+      },
+      {
+        "sel": ".phone-bots",
+        "x": 8,
+        "y": 8,
+        "w": 495,
+        "h": 48
+      },
+      {
+        "sel": ".phone-quick",
+        "x": 8,
+        "y": 326,
+        "w": 151,
+        "h": 56
+      },
+      {
+        "sel": ".lang-toggle",
+        "x": 720,
+        "y": 8,
+        "w": 116,
+        "h": 48
+      }
+    ],
+    "canvas": {
+      "x": 0,
+      "y": 0,
+      "w": 844,
+      "h": 390
+    },
+    "screen": {
+      "x": 16,
+      "y": 12,
+      "w": 812,
+      "h": 0
+    },
+    "layout": {
+      "x": 16,
+      "y": 12,
+      "w": 812,
+      "h": 0
+    },
+    "primary": {
+      "x": 615,
+      "y": 138,
+      "w": 207,
+      "h": 48
+    },
+    "buttons": [
+      {
+        "id": "board3d-reset",
+        "x": 461,
+        "y": 334,
+        "w": 121,
+        "h": 48
+      },
+      {
+        "id": "phone-bot",
+        "x": 102,
+        "y": 8,
+        "w": 149,
+        "h": 48
+      },
+      {
+        "id": "phone-bot",
+        "x": 259,
+        "y": 8,
+        "w": 121,
+        "h": 48
+      },
+      {
+        "id": "phone-bot",
+        "x": 388,
+        "y": 8,
+        "w": 125,
+        "h": 48
+      },
+      {
+        "id": "lang-toggle-seg",
+        "x": 720,
+        "y": 8,
+        "w": 64,
+        "h": 48
+      },
+      {
+        "id": "lang-toggle-seg",
+        "x": 784,
+        "y": 8,
+        "w": 52,
+        "h": 48
+      },
+      {
+        "id": "action-primary",
+        "x": 615,
+        "y": 138,
+        "w": 207,
+        "h": 48
+      },
+      {
+        "id": "btn-wallet",
+        "x": 8,
+        "y": 326,
+        "w": 87,
+        "h": 56
+      },
+      {
+        "id": "btn-help",
+        "x": 103,
+        "y": 326,
+        "w": 56,
+        "h": 56
+      }
+    ],
+    "free": {
+      "x": 0,
+      "y": 56,
+      "w": 591,
+      "h": 270
+    },
+    "phoneBotsRight": 503,
+    "railLeft": 591,
+    "overlayStyle": {
+      "position": "fixed",
+      "flexDirection": "column",
+      "flexWrap": "wrap"
+    },
+    "docOverflowX": 0
+  },
+  "phone-874x402": {
+    "viewport": {
+      "w": 874,
+      "h": 402
+    },
+    "panels": [
+      {
+        "sel": ".board3d-overlay",
+        "x": 482,
+        "y": 346,
+        "w": 121,
+        "h": 48
+      },
+      {
+        "sel": ".phone-rail",
+        "x": 612,
+        "y": 0,
+        "w": 262,
+        "h": 402
+      },
+      {
+        "sel": ".phone-turn",
+        "x": 622,
+        "y": 64,
+        "w": 244,
+        "h": 132
+      },
+      {
+        "sel": ".phone-bots",
+        "x": 8,
+        "y": 8,
+        "w": 516,
+        "h": 48
+      },
+      {
+        "sel": ".phone-quick",
+        "x": 8,
+        "y": 338,
+        "w": 151,
+        "h": 56
+      },
+      {
+        "sel": ".lang-toggle",
+        "x": 750,
+        "y": 8,
+        "w": 116,
+        "h": 48
+      }
+    ],
+    "canvas": {
+      "x": 0,
+      "y": 0,
+      "w": 874,
+      "h": 402
+    },
+    "screen": {
+      "x": 16,
+      "y": 12,
+      "w": 842,
+      "h": 0
+    },
+    "layout": {
+      "x": 16,
+      "y": 12,
+      "w": 842,
+      "h": 0
+    },
+    "primary": {
+      "x": 636,
+      "y": 138,
+      "w": 216,
+      "h": 48
+    },
+    "buttons": [
+      {
+        "id": "board3d-reset",
+        "x": 482,
+        "y": 346,
+        "w": 121,
+        "h": 48
+      },
+      {
+        "id": "phone-bot",
+        "x": 102,
+        "y": 8,
+        "w": 149,
+        "h": 48
+      },
+      {
+        "id": "phone-bot",
+        "x": 259,
+        "y": 8,
+        "w": 121,
+        "h": 48
+      },
+      {
+        "id": "phone-bot",
+        "x": 388,
+        "y": 8,
+        "w": 125,
+        "h": 48
+      },
+      {
+        "id": "lang-toggle-seg",
+        "x": 750,
+        "y": 8,
+        "w": 64,
+        "h": 48
+      },
+      {
+        "id": "lang-toggle-seg",
+        "x": 814,
+        "y": 8,
+        "w": 52,
+        "h": 48
+      },
+      {
+        "id": "action-primary",
+        "x": 636,
+        "y": 138,
+        "w": 216,
+        "h": 48
+      },
+      {
+        "id": "btn-wallet",
+        "x": 8,
+        "y": 338,
+        "w": 87,
+        "h": 56
+      },
+      {
+        "id": "btn-help",
+        "x": 103,
+        "y": 338,
+        "w": 56,
+        "h": 56
+      }
+    ],
+    "free": {
+      "x": 0,
+      "y": 56,
+      "w": 612,
+      "h": 282
+    },
+    "phoneBotsRight": 524,
+    "railLeft": 612,
+    "overlayStyle": {
+      "position": "fixed",
+      "flexDirection": "column",
+      "flexWrap": "wrap"
+    },
+    "docOverflowX": 0
+  },
+  "phone-915x412": {
+    "viewport": {
+      "w": 915,
+      "h": 412
+    },
+    "panels": [
+      {
+        "sel": ".phone-rail",
+        "x": 641,
+        "y": 0,
+        "w": 275,
+        "h": 412
+      },
+      {
+        "sel": ".phone-turn",
+        "x": 651,
+        "y": 64,
+        "w": 257,
+        "h": 132
+      },
+      {
+        "sel": ".phone-bots",
+        "x": 8,
+        "y": 8,
+        "w": 545,
+        "h": 48
+      },
+      {
+        "sel": ".phone-quick",
+        "x": 8,
+        "y": 348,
+        "w": 151,
+        "h": 56
+      },
+      {
+        "sel": ".lang-toggle",
+        "x": 791,
+        "y": 8,
+        "w": 116,
+        "h": 48
+      }
+    ],
+    "canvas": {
+      "x": 0,
+      "y": 0,
+      "w": 915,
+      "h": 412
+    },
+    "screen": {
+      "x": 16,
+      "y": 12,
+      "w": 883,
+      "h": 0
+    },
+    "layout": {
+      "x": 16,
+      "y": 12,
+      "w": 883,
+      "h": 0
+    },
+    "primary": {
+      "x": 665,
+      "y": 138,
+      "w": 229,
+      "h": 48
+    },
+    "buttons": [
+      {
+        "id": "board3d-reset",
+        "x": 576,
+        "y": 348,
+        "w": 80,
+        "h": 48
+      },
+      {
+        "id": "phone-bot",
+        "x": 102,
+        "y": 8,
+        "w": 149,
+        "h": 48
+      },
+      {
+        "id": "phone-bot",
+        "x": 259,
+        "y": 8,
+        "w": 121,
+        "h": 48
+      },
+      {
+        "id": "phone-bot",
+        "x": 388,
+        "y": 8,
+        "w": 125,
+        "h": 48
+      },
+      {
+        "id": "lang-toggle-seg",
+        "x": 791,
+        "y": 8,
+        "w": 64,
+        "h": 48
+      },
+      {
+        "id": "lang-toggle-seg",
+        "x": 855,
+        "y": 8,
+        "w": 52,
+        "h": 48
+      },
+      {
+        "id": "action-primary",
+        "x": 665,
+        "y": 138,
+        "w": 229,
+        "h": 48
+      },
+      {
+        "id": "btn-wallet",
+        "x": 8,
+        "y": 348,
+        "w": 87,
+        "h": 56
+      },
+      {
+        "id": "btn-help",
+        "x": 103,
+        "y": 348,
+        "w": 56,
+        "h": 56
+      }
+    ],
+    "free": {
+      "x": 0,
+      "y": 56,
+      "w": 641,
+      "h": 292
+    },
+    "phoneBotsRight": 553,
+    "railLeft": 641,
+    "overlayStyle": {
+      "position": "fixed",
+      "flexDirection": "row",
+      "flexWrap": "nowrap"
+    },
+    "docOverflowX": 0
+  },
+  "phone-740x360": {
+    "viewport": {
+      "w": 740,
+      "h": 360
+    },
+    "panels": [
+      {
+        "sel": ".board3d-overlay",
+        "x": 361,
+        "y": 304,
+        "w": 121,
+        "h": 48
+      },
+      {
+        "sel": ".phone-rail",
+        "x": 490,
+        "y": 0,
+        "w": 250,
+        "h": 360
+      },
+      {
+        "sel": ".phone-turn",
+        "x": 500,
+        "y": 64,
+        "w": 232,
+        "h": 132
+      },
+      {
+        "sel": ".phone-bots",
+        "x": 8,
+        "y": 8,
+        "w": 394,
+        "h": 48
+      },
+      {
+        "sel": ".phone-quick",
+        "x": 8,
+        "y": 296,
+        "w": 151,
+        "h": 56
+      },
+      {
+        "sel": ".lang-toggle",
+        "x": 616,
+        "y": 8,
+        "w": 116,
+        "h": 48
+      }
+    ],
+    "canvas": {
+      "x": 0,
+      "y": 0,
+      "w": 740,
+      "h": 360
+    },
+    "screen": {
+      "x": 16,
+      "y": 12,
+      "w": 708,
+      "h": 0
+    },
+    "layout": {
+      "x": 16,
+      "y": 12,
+      "w": 708,
+      "h": 0
+    },
+    "primary": {
+      "x": 514,
+      "y": 138,
+      "w": 204,
+      "h": 48
+    },
+    "buttons": [
+      {
+        "id": "board3d-reset",
+        "x": 361,
+        "y": 304,
+        "w": 121,
+        "h": 48
+      },
+      {
+        "id": "phone-bot",
+        "x": 102,
+        "y": 8,
+        "w": 149,
+        "h": 48
+      },
+      {
+        "id": "phone-bot",
+        "x": 259,
+        "y": 8,
+        "w": 121,
+        "h": 48
+      },
+      {
+        "id": "phone-bot",
+        "x": 388,
+        "y": 8,
+        "w": 125,
+        "h": 48
+      },
+      {
+        "id": "lang-toggle-seg",
+        "x": 616,
+        "y": 8,
+        "w": 64,
+        "h": 48
+      },
+      {
+        "id": "lang-toggle-seg",
+        "x": 680,
+        "y": 8,
+        "w": 52,
+        "h": 48
+      },
+      {
+        "id": "action-primary",
+        "x": 514,
+        "y": 138,
+        "w": 204,
+        "h": 48
+      },
+      {
+        "id": "btn-wallet",
+        "x": 8,
+        "y": 296,
+        "w": 87,
+        "h": 56
+      },
+      {
+        "id": "btn-help",
+        "x": 103,
+        "y": 296,
+        "w": 56,
+        "h": 56
+      }
+    ],
+    "free": {
+      "x": 0,
+      "y": 56,
+      "w": 490,
+      "h": 240
+    },
+    "phoneBotsRight": 402,
+    "railLeft": 490,
+    "overlayStyle": {
+      "position": "fixed",
+      "flexDirection": "column",
+      "flexWrap": "wrap"
+    },
+    "docOverflowX": 0
+  },
+  "desktop-1024x768": {
+    "viewport": {
+      "w": 1024,
+      "h": 768
+    },
+    "panels": [
+      {
+        "sel": ".game-topbar",
+        "x": 16,
+        "y": 24,
+        "w": 992,
+        "h": 48
+      },
+      {
+        "sel": ".bot-card",
+        "x": 16,
+        "y": 88,
+        "w": 168,
+        "h": 127
+      },
+      {
+        "sel": ".bot-card",
+        "x": 16,
+        "y": 557,
+        "w": 168,
+        "h": 106
+      },
+      {
+        "sel": ".bot-card",
+        "x": 840,
+        "y": 88,
+        "w": 168,
+        "h": 127
+      },
+      {
+        "sel": ".lap-card",
+        "x": 840,
+        "y": 539,
+        "w": 168,
+        "h": 124
+      },
+      {
+        "sel": ".game-bottom",
+        "x": 16,
+        "y": 671,
+        "w": 992,
+        "h": 81
+      },
+      {
+        "sel": ".lang-toggle",
+        "x": 892,
+        "y": 24,
+        "w": 116,
+        "h": 48
+      }
+    ],
+    "canvas": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0
+    },
+    "screen": {
+      "x": 16,
+      "y": 24,
+      "w": 992,
+      "h": 728
+    },
+    "layout": {
+      "x": 16,
+      "y": 88,
+      "w": 992,
+      "h": 664
+    },
+    "buttons": [
+      {
+        "id": "btn",
+        "x": 554,
+        "y": 24,
+        "w": 143,
+        "h": 48
+      },
+      {
+        "id": "btn",
+        "x": 709,
+        "y": 24,
+        "w": 171,
+        "h": 48
+      },
+      {
+        "id": "lang-toggle-seg",
+        "x": 892,
+        "y": 24,
+        "w": 64,
+        "h": 48
+      },
+      {
+        "id": "lang-toggle-seg",
+        "x": 956,
+        "y": 24,
+        "w": 52,
+        "h": 48
+      },
+      {
+        "id": "action-primary",
+        "x": 377,
+        "y": 447,
+        "w": 270,
+        "h": 56
+      },
+      {
+        "id": "btn-wallet",
+        "x": 299,
+        "y": 684,
+        "w": 98,
+        "h": 56
+      },
+      {
+        "id": "btn-help",
+        "x": 650,
+        "y": 683,
+        "w": 73,
+        "h": 57
+      }
+    ],
+    "free": {
+      "x": 184,
+      "y": 72,
+      "w": 656,
+      "h": 503
+    },
+    "topbarActionsRight": 1008,
+    "topbarRight": 1008,
+    "overlayStyle": {
+      "position": "absolute",
+      "flexDirection": "row",
+      "flexWrap": "nowrap"
+    },
+    "docOverflowX": 0,
+    "bottomBar": {
+      "x": 16,
+      "y": 671,
+      "width": 992,
+      "height": 81,
+      "top": 671,
+      "right": 1008,
+      "bottom": 752,
+      "left": 16
+    },
+    "overlay": {
+      "x": 212.484375,
+      "y": 575,
+      "width": 599.03125,
+      "height": 80,
+      "top": 575,
+      "right": 811.515625,
+      "bottom": 655,
+      "left": 212.484375
+    }
+  },
+  "desktop-1280x800": {
+    "viewport": {
+      "w": 1280,
+      "h": 800
+    },
+    "panels": [
+      {
+        "sel": ".game-topbar",
+        "x": 16,
+        "y": 24,
+        "w": 1248,
+        "h": 48
+      },
+      {
+        "sel": ".bot-card",
+        "x": 16,
+        "y": 88,
+        "w": 190,
+        "h": 127
+      },
+      {
+        "sel": ".bot-card",
+        "x": 16,
+        "y": 589,
+        "w": 190,
+        "h": 106
+      },
+      {
+        "sel": ".bot-card",
+        "x": 1074,
+        "y": 88,
+        "w": 190,
+        "h": 127
+      },
+      {
+        "sel": ".lap-card",
+        "x": 1074,
+        "y": 571,
+        "w": 190,
+        "h": 124
+      },
+      {
+        "sel": ".game-bottom",
+        "x": 16,
+        "y": 703,
+        "w": 1248,
+        "h": 81
+      },
+      {
+        "sel": ".board3d-overlay",
+        "x": 239,
+        "y": 611,
+        "w": 803,
+        "h": 76
+      },
+      {
+        "sel": ".board3d-status",
+        "x": 518,
+        "y": 96,
+        "w": 244,
+        "h": 34
+      },
+      {
+        "sel": ".lang-toggle",
+        "x": 1148,
+        "y": 24,
+        "w": 116,
+        "h": 48
+      }
+    ],
+    "canvas": {
+      "x": 0,
+      "y": 0,
+      "w": 1280,
+      "h": 800
+    },
+    "screen": {
+      "x": 16,
+      "y": 24,
+      "w": 1248,
+      "h": 760
+    },
+    "layout": {
+      "x": 16,
+      "y": 88,
+      "w": 1248,
+      "h": 696
+    },
+    "primary": {
+      "x": 606,
+      "y": 621,
+      "w": 421,
+      "h": 56
+    },
+    "buttons": [
+      {
+        "id": "btn",
+        "x": 810,
+        "y": 24,
+        "w": 143,
+        "h": 48
+      },
+      {
+        "id": "btn",
+        "x": 965,
+        "y": 24,
+        "w": 171,
+        "h": 48
+      },
+      {
+        "id": "lang-toggle-seg",
+        "x": 1148,
+        "y": 24,
+        "w": 64,
+        "h": 48
+      },
+      {
+        "id": "lang-toggle-seg",
+        "x": 1212,
+        "y": 24,
+        "w": 52,
+        "h": 48
+      },
+      {
+        "id": "action-primary",
+        "x": 606,
+        "y": 621,
+        "w": 421,
+        "h": 56
+      },
+      {
+        "id": "board3d-reset",
+        "x": 942,
+        "y": 556,
+        "w": 121,
+        "h": 48
+      },
+      {
+        "id": "btn-wallet",
+        "x": 339,
+        "y": 716,
+        "w": 114,
+        "h": 56
+      },
+      {
+        "id": "btn-help",
+        "x": 750,
+        "y": 715,
+        "w": 89,
+        "h": 57
+      }
+    ],
+    "free": {
+      "x": 206,
+      "y": 72,
+      "w": 868,
+      "h": 539
+    },
+    "topbarActionsRight": 1264,
+    "topbarRight": 1264,
+    "overlayStyle": {
+      "position": "absolute",
+      "flexDirection": "row",
+      "flexWrap": "nowrap"
+    },
+    "docOverflowX": 0
+  },
+  "desktop-1440x900": {
+    "viewport": {
+      "w": 1440,
+      "h": 900
+    },
+    "panels": [
+      {
+        "sel": ".game-topbar",
+        "x": 80,
+        "y": 24,
+        "w": 1280,
+        "h": 48
+      },
+      {
+        "sel": ".bot-card",
+        "x": 80,
+        "y": 88,
+        "w": 190,
+        "h": 127
+      },
+      {
+        "sel": ".bot-card",
+        "x": 80,
+        "y": 689,
+        "w": 190,
+        "h": 106
+      },
+      {
+        "sel": ".bot-card",
+        "x": 1170,
+        "y": 88,
+        "w": 190,
+        "h": 127
+      },
+      {
+        "sel": ".lap-card",
+        "x": 1170,
+        "y": 671,
+        "w": 190,
+        "h": 124
+      },
+      {
+        "sel": ".game-bottom",
+        "x": 80,
+        "y": 803,
+        "w": 1280,
+        "h": 81
+      },
+      {
+        "sel": ".board3d-overlay",
+        "x": 304,
+        "y": 711,
+        "w": 832,
+        "h": 76
+      },
+      {
+        "sel": ".board3d-status",
+        "x": 598,
+        "y": 96,
+        "w": 244,
+        "h": 34
+      },
+      {
+        "sel": ".lang-toggle",
+        "x": 1244,
+        "y": 24,
+        "w": 116,
+        "h": 48
+      }
+    ],
+    "canvas": {
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900
+    },
+    "screen": {
+      "x": 80,
+      "y": 24,
+      "w": 1280,
+      "h": 860
+    },
+    "layout": {
+      "x": 80,
+      "y": 88,
+      "w": 1280,
+      "h": 796
+    },
+    "primary": {
+      "x": 701,
+      "y": 721,
+      "w": 421,
+      "h": 56
+    },
+    "buttons": [
+      {
+        "id": "btn",
+        "x": 906,
+        "y": 24,
+        "w": 143,
+        "h": 48
+      },
+      {
+        "id": "btn",
+        "x": 1061,
+        "y": 24,
+        "w": 171,
+        "h": 48
+      },
+      {
+        "id": "lang-toggle-seg",
+        "x": 1244,
+        "y": 24,
+        "w": 64,
+        "h": 48
+      },
+      {
+        "id": "lang-toggle-seg",
+        "x": 1308,
+        "y": 24,
+        "w": 52,
+        "h": 48
+      },
+      {
+        "id": "action-primary",
+        "x": 701,
+        "y": 721,
+        "w": 421,
+        "h": 56
+      },
+      {
+        "id": "board3d-reset",
+        "x": 1037,
+        "y": 656,
+        "w": 121,
+        "h": 48
+      },
+      {
+        "id": "btn-wallet",
+        "x": 403,
+        "y": 816,
+        "w": 114,
+        "h": 56
+      },
+      {
+        "id": "btn-help",
+        "x": 814,
+        "y": 815,
+        "w": 89,
+        "h": 57
+      }
+    ],
+    "free": {
+      "x": 270,
+      "y": 72,
+      "w": 900,
+      "h": 639
+    },
+    "topbarActionsRight": 1360,
+    "topbarRight": 1360,
+    "overlayStyle": {
+      "position": "absolute",
+      "flexDirection": "row",
+      "flexWrap": "nowrap"
+    },
+    "docOverflowX": 0
+  },
+  "desktop-1600x1000": {
+    "free": {
+      "x": 206,
+      "y": 72,
+      "w": 1188,
+      "h": 739
+    },
+    "bottomBar": {
+      "x": 16,
+      "y": 903,
+      "width": 1568,
+      "height": 81,
+      "top": 903,
+      "right": 1584,
+      "bottom": 984,
+      "left": 16
+    },
+    "overlay": {
+      "x": 384,
+      "y": 811,
+      "width": 832,
+      "height": 76,
+      "top": 811,
+      "right": 1216,
+      "bottom": 887,
+      "left": 384
+    }
+  },
+  "desktop-1920x1080": {
+    "free": {
+      "x": 350,
+      "y": 72,
+      "w": 1220,
+      "h": 819
+    },
+    "bottomBar": {
+      "x": 160,
+      "y": 983,
+      "width": 1600,
+      "height": 81,
+      "top": 983,
+      "right": 1760,
+      "bottom": 1064,
+      "left": 160
+    },
+    "overlay": {
+      "x": 544,
+      "y": 891,
+      "width": 832,
+      "height": 76,
+      "top": 891,
+      "right": 1376,
+      "bottom": 967,
+      "left": 544
+    }
+  }
+}
