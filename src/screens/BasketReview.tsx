@@ -3,37 +3,21 @@
  * 自己：菜谱进度 + 还缺什么 + 剩余币 + 先等等夹 + 待付夹 + 赠品菜/小玩意；
  * 他人：只看进度一句话（不比较、不排序）。
  */
-import { getIngredient, getRecipe, cards } from '../data/cards';
+import { getRecipe } from '../data/cards';
 import { coinWord, strings } from '../data/strings';
 import { missingIngredients } from '../game/selectors';
 import { fmt, marketPriceOf } from '../game/stations/shared';
 import { cardName, playerDisplayName } from '../i18n/cardText';
 import type { CardId, Command, GameState } from '../game/types';
 import { Button } from '../components/Button';
-import { CardIcon } from '../components/CardIcon';
 import { Coins } from '../components/Coins';
+import { MiniCardRow } from '../components/MiniCardRow';
 import { RecipeCard } from '../components/RecipeCard';
-
-function iconOf(id: CardId): string {
-  return (
-    getIngredient(id)?.icon ??
-    cards.temptations.find((t) => t.id === id)?.icon ??
-    '❔'
-  );
-}
 
 function MiniChips({ ids }: { ids: CardId[] }) {
   if (ids.length === 0) return <span className="screen-note">—</span>;
-  return (
-    <span className="mini-chips">
-      {ids.map((id, i) => (
-        <span key={`${id}-${i}`} className="mini-chip" title={cardName(id)}>
-          <CardIcon icon={iconOf(id)} />
-          {cardName(id)}
-        </span>
-      ))}
-    </span>
-  );
+  // R10 Slice B 轻卡面：芯片行换成一排小 CardView 卡面（纯展示，流程不变）
+  return <MiniCardRow ids={ids} />;
 }
 
 export function BasketReview({

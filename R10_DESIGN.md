@@ -289,3 +289,13 @@
 - 实现由 Devin CLI（SWE-2 Max）完成主体：`src/components/cards/` 八件原语齐备（Hand / TiltCard / useDragPlay / PlayableGlow / CoinCounter / Deck / cardArt / cards.css），CardView 按 §3.1 重构（props 不变），DrawTaskPanel 抽卡仪式、MarketPanel 扇形手牌 + 双投放区、Game 底栏与 CoinCounter 接入；三张 v3 卡图（番茄 / 番茄炒蛋 / 卡背）已入 `src/assets/cards/` 并登记 cardArt。
 - Devin 在收尾验证阶段因运行环境重启中断（日志佚失），PM 接手验收：build 干净、**152/152 测试全绿**（133 基线 + 19 新增）、`git diff src/game src/data` 为空、R8 fit 复跑 fill 0.660 不回归、桌面市场扇/发光/选中态截图核对通过、手感四件（回正上抬/跟随/吸附/弹回）与键盘购买在 Devin 中断前的日志中均已实测通过。
 - 遗留小项（转 Slice B 一并处理）：① 抽卡落位手机截图被演示条污染、桌面 draw 截图与 market 串名，需重拍一组干净的抽卡图；② 面板内扇形展开幅度偏紧（§6 风险 1 的实物），等负责人看试玩版后定是否放大扇面/改底栏手牌区；③ 触屏拖拽的 CDP 模拟验证未及留档，真机手测时补。
+
+---
+
+## 附记：Slice B 落地记录（2026-11-18，PM 验收）
+
+- 实现由 Devin CLI（SWE-2 Max）完成主体，收尾时运行环境重启中断（日志佚失，进程已死），PM 接手验收并代提交：build 干净、**155/155 测试全绿**（152 基线 + 3 新增：PlaySpark 2、cardArt 扩展）、`git diff e6634bb..HEAD -- src/game src/data` 为空、R8 fit 复跑 fill 0.660 不回归（手机四档与 1280×800 均为 0.660）、package.json 与 tokens.css 零改动。
+- 33 张 v3 卡图全部入 `src/assets/cards/` 并登记 cardArt（食材 13、菜谱 5、事件 9、诱惑 4、天气 3；`rec-tomato-egg-2` 复用番茄炒蛋图，两张邀请卡复用棒冰/贴纸图；未登记 id 仍走 emoji fallback，测试覆盖）。
+- 各站落地：EventPanel 牌背 Deck 翻牌揭示事件卡、天气亦为卡面；PartnerPanel 选项成 TiltCard 小扇（点选/焦点即选中）；BusPanel 车票卡拖拽上车（useDragPlay）+ tap-tap 点票→点「上车」双路径，同发 `PAY_BUS`；ParentPanel 图卡 TiltCard 扇 + 选中飞入，R9 Live/Offline 状态点原样保留；StorePanel 货架 Hand 扇 + 新插画；Cook/Feast/Reflection 飞入集齐、Feast 币总计用 CoinCounter、foil 只在菜谱集齐与开饭两处；PlaySpark（ClickSpark 改 DOM+CSS 零 rAF 版，已登记 THIRD_PARTY_NOTICES）接在买入/上车/集齐/开饭四处，全局并发 ≤3；BasketReview/WalletDrawer 仅轻卡面（新增 MiniCardRow），流程不动。
+- 截图 `shots/r10b_*` 共 22 张：抽卡翻牌/落位（演示条已关闭，干净重拍）、事件盖牌/翻牌/揭示、好友扇、家长扇、商店扇、车票、做菜、开饭 × 桌面 1280×800 与手机 874×402。PM 抽查两张通过：事件翻牌桌面（天气卡「晴」+ 事件卡「多送一」+ 两张选项卡在位）、开饭手机（四道菜 v3 图齐整，无演示条污染）。
+- 遗留（转 Slice C / 待负责人）：① Slice A 遗留②③仍未定——扇形展开幅度、触屏拖拽真机手测；② 五透镜 critique 已出（`critique/LENS-*.md`），优化项见 Slice C 简报，不属本片范围。

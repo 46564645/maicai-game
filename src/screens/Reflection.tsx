@@ -11,9 +11,23 @@ import { strings } from '../data/strings';
 import { playerDisplayName, reflectionEntryText, reflectionOptionLabel, reflectionPrompt } from '../i18n/cardText';
 import type { Command, GameState, Player } from '../game/types';
 import { Button } from '../components/Button';
+import { CardView } from '../components/CardView';
+import { Hand } from '../components/cards/Hand';
+import { TiltCard } from '../components/cards/TiltCard';
+import type { HandItem } from '../components/cards/Hand';
 
 /** 自写选项 id（cards.json reflections.humanOptions 最后一项 rho-6） */
 const FREE_OPTION_ID = 'rho-6';
+
+/* 选项卡角装饰图标：数据无 icon 字段，按 id 固定一组（纯装饰，不进文案） */
+const OPTION_ICON: Record<string, string> = {
+  'rho-1': '🥗',
+  'rho-2': '✋',
+  'rho-3': '🤝',
+  'rho-4': '🚌',
+  'rho-5': '💬',
+  'rho-6': '✏️',
+};
 
 /** 角色小头像：真人用所选角色图标，bot 用性格卡图标（cards.json icon 字段） */
 function avatarOf(p: Player): string {
@@ -53,6 +67,33 @@ export function Reflection({
   };
 
   let n = 0;
+  /* R10 Slice B：反思选项 = 手牌选择卡（§2.8）。预设项打出即选；
+     自写项先翻开输入框（与旧按钮版同流程）。键位 1..n 不变。 */
+  const optionItems: HandItem[] = preset.map((o) => {
+    const k = ++n;
+    const label = reflectionOptionLabel(o.id, o.label);
+    return {
+      key: o.id,
+      node: (
+        <TiltCard
+          glare
+          front={
+            <CardView
+              icon={OPTION_ICON[o.id] ?? '💬'}
+              name={label}
+              keyHint={String(k)}
+              dataKey={k}
+              primary={k === 1}
+              testid={k === 1 ? 'action-primary' : `action-reflect-${o.id}`}
+              ariaLabel={`${k} ${label}`}
+              onClick={() => send({ type: 'CHOOSE_REFLECTION', optionId: o.id })}
+            />
+          }
+        />
+      ),
+    };
+  });
+  const freeKey = ++n;
 
   return (
     <main className="intro-shell" data-testid="screen-reflection">
@@ -103,31 +144,20 @@ export function Reflection({
       ) : (
         humanPending && (
           <div className="reflection-options">
-            {preset.map((o) => {
-              const k = ++n;
-              return (
-                <Button
-                  key={o.id}
-                  variant={k === 1 ? 'primary' : 'secondary'}
-                  keyHint={String(k)}
-                  data-testid={k === 1 ? 'action-primary' : `action-reflect-${o.id}`}
-                  data-primary={k === 1 ? 'true' : undefined}
-                  data-key={k}
-                  onClick={() => send({ type: 'CHOOSE_REFLECTION', optionId: o.id })}
-                >
-                  {reflectionOptionLabel(o.id, o.label)}
-                </Button>
-              );
-            })}
+            <Hand
+              className="reflection-hand"
+              items={optionItems}
+              ariaLabel={reflectionPrompt()}
+            />
             {free && (
               <Button
                 variant="secondary"
-                keyHint={String(++n)}
+                keyHint={String(freeKey)}
                 data-testid={`action-reflect-${free.id}`}
-                data-key={n}
+                data-key={freeKey}
                 onClick={() => setWriteOwn(true)}
               >
-                {reflectionOptionLabel(free.id, free.label)}
+                {OPTION_ICON[free.id]} {reflectionOptionLabel(free.id, free.label)}
               </Button>
             )}
             {writeOwn && (

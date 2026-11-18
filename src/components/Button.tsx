@@ -3,7 +3,7 @@
  * 可选 keyHint 数字键徽标与 icon；speakText 提供且朗读可用时，右侧
  * 追加一个 🔊 朗读钮（不嵌套进主按钮）。全部用原生 <button>。
  */
-import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react';
 import { strings } from '../data/strings';
 import { useSpeech } from '../ui/useSpeech';
 import { KeyHint } from './KeyHint';
@@ -14,6 +14,8 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   icon?: ReactNode;
   /** 提供且 speechSynthesis 可用时，按钮右侧追加 🔊 朗读钮 */
   speakText?: string;
+  /** R10：拖拽投放区命中要拿按钮本体的 DOM 节点（forwardRef 等价物） */
+  innerRef?: Ref<HTMLButtonElement>;
 }
 
 export function Button({
@@ -23,12 +25,13 @@ export function Button({
   speakText,
   className,
   children,
+  innerRef,
   ...rest
 }: ButtonProps) {
   const { supported, speak } = useSpeech();
   const cls = ['btn', `btn--${variant}`, className ?? ''].filter(Boolean).join(' ');
   const btn = (
-    <button type="button" className={cls} {...rest}>
+    <button type="button" className={cls} ref={innerRef} {...rest}>
       {keyHint !== undefined && <KeyHint value={keyHint} />}
       {icon}
       {children}

@@ -140,3 +140,4 @@ the following restrictions:
 - BorderGlow → `src/components/cards/PlayableGlow.tsx`（可打出扫光，配色改为项目令牌）
 - Magnet → `src/components/cards/useDragPlay.ts` 中的近目标吸附（弹簧参数借用其实现）
 - Counter → `src/components/cards/CoinCounter.tsx`（逐位滚动数字，裁剪为整数 0–99）
+- ClickSpark → `src/components/cards/PlaySpark.tsx`（打出/买入迸溅短线；canvas 版改为零 rAF 的 DOM+CSS 实现，保留全局并发上限思路）

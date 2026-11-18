@@ -734,3 +734,389 @@
     animation: none;
   }
 }
+
+/* ==========================================================================
+   R10 Slice B —— 站点全面卡片化：事件翻牌舞台 / 邀请与换菜扇 / 车票拖拽 /
+   家长图卡飞入 / 商店货架扇 / 做饭组装 / 开饭盘卡弹入 / 反思选择卡 /
+   PlaySpark DOM 迸溅 / CSS foil 一次性闪光 / 卡面 🔊 朗读钮
+   ========================================================================== */
+
+/* —— 卡面 🔊 朗读钮（speakText）：包裹层不破坏 hand/tc 尺寸链 —— */
+.card-view-speak {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.card-view-speak > .card-view {
+  width: 100%;
+  height: 100%;
+}
+.card-view-speak-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  z-index: 5;
+  min-width: 34px;
+  min-height: 34px;
+  border-radius: 50%;
+}
+/* 翻牌面内也允许 speak 包裹（.tc-face > .card-view 之外的等价路径） */
+.tc-face > .card-view-speak {
+  width: 100%;
+  height: 100%;
+}
+
+/* ==========================================================================
+   事件站：牌堆翻牌舞台 + 落定天气小卡 + 二选一选择卡扇
+   ========================================================================== */
+.event-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+}
+/* 落定天气：小天气卡，等转盘（--motion-slow）停稳后淡入——不抢剧透 */
+.event-weather {
+  flex: none;
+  width: var(--card-w-sm);
+  height: var(--card-h-sm);
+  animation: event-weather-in var(--motion-med) var(--ease-spring)
+    calc(var(--motion-slow) + 120ms) backwards;
+}
+.event-weather .card-view {
+  width: 100%;
+  height: 100%;
+}
+@keyframes event-weather-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) rotate(6deg) scale(0.7);
+  }
+}
+/* 事件卡翻开落定：轻弹进场 */
+.event-reveal {
+  flex: none;
+  width: var(--card-w);
+  height: var(--card-h);
+  animation: event-reveal-pop var(--motion-med) var(--ease-spring) backwards;
+}
+.event-reveal .card-view {
+  width: 100%;
+  height: 100%;
+}
+@keyframes event-reveal-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.82) rotate(-3deg);
+  }
+}
+.event-text {
+  text-align: center;
+}
+/* 花钱/免费二选一：两张卡小扇 */
+.event-hand,
+.choice-hand {
+  --hand-card-w: 96px;
+  --hand-card-h: 128px;
+  --fan-expose: 70px;
+  margin: 0 auto;
+}
+
+/* ==========================================================================
+   伙伴站：邀请卡小台 + 回应选择卡扇 + 换菜 mini 卡扇
+   ========================================================================== */
+.invite-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+}
+.invite-tilt {
+  width: var(--card-w);
+  height: var(--card-h);
+}
+/* 换菜赠品菜：mini 卡扇（一行排得下一组，小卡也能认插画） */
+.swap-hand {
+  --hand-card-w: var(--card-w-sm);
+  --hand-card-h: var(--card-h-sm);
+  --fan-expose: 46px;
+  --fan-push: 20px;
+}
+.swap-hand .card-view-banner {
+  padding: 0 var(--space-1);
+}
+.swap-hand .card-view-name {
+  font-size: var(--font-size-xs);
+}
+.swap-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.swap-row .swap-hand {
+  justify-content: flex-start;
+}
+
+/* ==========================================================================
+   公交站：车票卡（可拖）→ 车门投放区
+   ========================================================================== */
+.bus-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  flex-wrap: wrap;
+}
+.bus-ticket-drag {
+  width: var(--card-w);
+  height: var(--card-h);
+}
+.bus-stage-arrow {
+  font-size: var(--font-size-xl);
+  color: var(--color-muted);
+}
+.drop-zone--door {
+  background: color-mix(in srgb, var(--color-mint) 16%, var(--color-surface));
+}
+
+/* ==========================================================================
+   家长站：图卡扇 + 选卡飞入克隆（FLIP 量测，transform/opacity）
+   ========================================================================== */
+.parent-fan {
+  --hand-card-w: 84px;
+  --hand-card-h: 116px;
+  --fan-expose: 58px;
+  --fan-push: 24px;
+  margin: var(--space-2) auto;
+}
+/* 飞行中：源卡隐藏（克隆替身已在飞），其余卡压暗 */
+.hand-item--src {
+  opacity: 0;
+}
+.card-fly {
+  position: fixed;
+  z-index: 1200;
+  pointer-events: none;
+  animation: card-fly 420ms var(--ease-spring) forwards;
+}
+.card-fly .card-view {
+  width: 100%;
+  height: 100%;
+}
+@keyframes card-fly {
+  to {
+    transform: translate(var(--fly-dx), var(--fly-dy)) scale(0.45);
+    opacity: 0.15;
+  }
+}
+
+/* ==========================================================================
+   商店站：缺货货架扇（其余组仍是网格，卡面换新剖面）
+   ========================================================================== */
+.store-shelf {
+  --hand-card-w: var(--card-w);
+  --hand-card-h: var(--card-h);
+}
+.store-tilt {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ==========================================================================
+   做饭/开饭/反思：组装飞入 + 盘卡弹入 + foil 闪光 + 反思选择卡扇
+   ========================================================================== */
+.cook-line {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+}
+.cook-card {
+  display: inline-block;
+  width: 52px;
+  height: 72px;
+  animation: cook-in var(--motion-med) var(--ease-spring) backwards;
+  animation-delay: var(--stagger, 0ms);
+}
+.cook-card .card-view {
+  width: 100%;
+  height: 100%;
+  padding: 2px;
+}
+.cook-card .card-view-banner {
+  padding: 0 var(--space-1);
+}
+.cook-card .card-view-name {
+  font-size: var(--font-size-xs);
+}
+@keyframes cook-in {
+  from {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.5) rotate(-8deg);
+  }
+}
+/* 开饭盘卡逐张弹入（stagger 120ms 由 --stagger 给） */
+.plate-in {
+  animation: plate-in var(--motion-med) var(--ease-spring) backwards;
+  animation-delay: var(--stagger, 0ms);
+}
+@keyframes plate-in {
+  from {
+    opacity: 0;
+    transform: translateY(26px) scale(0.7) rotate(4deg);
+  }
+}
+/* 盘里的菜插画（有美术就贴图，无美术回退 emoji 圆盘） */
+.plate-art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+/* CSS foil 一次性闪光：只挂「菜谱集齐/满盘」两个高光时刻——
+   transform/opacity only：渐变光带沿 X 轴扫过即收，不常驻 */
+.card-foil {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+}
+.card-foil::after {
+  content: '';
+  position: absolute;
+  inset: -20% -70%;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 42%,
+    var(--color-mint) 47%,
+    var(--color-accent-yellow) 50%,
+    var(--color-primary) 53%,
+    transparent 58%
+  );
+  opacity: var(--foil-opacity);
+  transform: translateX(-130%);
+  animation: card-foil-sweep 900ms var(--motion-ease) 380ms 1 forwards;
+}
+@keyframes card-foil-sweep {
+  to {
+    transform: translateX(130%);
+  }
+}
+/* 反思选择卡扇（5 张预设 + 自写按钮在扇下） */
+.reflection-hand {
+  --hand-card-w: 92px;
+  --hand-card-h: 126px;
+  --fan-expose: 62px;
+  --fan-push: 26px;
+  margin: 0 auto var(--space-3);
+}
+.reflection-hand .card-view-name {
+  font-size: var(--font-size-xs);
+  white-space: normal;
+}
+/* 流水页剩余币：句中 CoinCounter 滚动位 */
+.ledger-coins {
+  font-weight: var(--font-weight-heavy);
+  color: var(--color-primary);
+  font-size: var(--font-size-md);
+  vertical-align: baseline;
+}
+
+/* ==========================================================================
+   PlaySpark（ClickSpark → DOM 版）：8 根短线旋转外散，≤500ms 自毁
+   <i> 本体只带 rotate（内联），::after 是飞出的线段（transform/opacity）
+   ========================================================================== */
+.play-spark {
+  position: fixed;
+  z-index: 1300;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.play-spark i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+}
+.play-spark i::after {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 14px;
+  margin-left: -2px;
+  border-radius: 2px;
+  background: var(--color-accent-yellow);
+  box-shadow: 0 0 4px var(--glow-amber);
+  animation: spark-fly 460ms var(--motion-ease) forwards;
+}
+.play-spark i:nth-child(odd)::after {
+  background: var(--color-primary);
+}
+@keyframes spark-fly {
+  from {
+    transform: translateY(-4px) scaleY(0.6);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-30px) scaleY(1.15);
+    opacity: 0;
+  }
+}
+
+/* ==========================================================================
+   轻卡面：篮子回顾 / 钱包抽屉的一排小卡（纯展示）
+   ========================================================================== */
+.mini-cards {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  vertical-align: middle;
+  margin-top: var(--space-1);
+}
+.mini-cards .card-view {
+  width: 44px;
+  height: 60px;
+  padding: 2px;
+}
+.mini-cards .card-view-art {
+  min-height: 0;
+}
+.mini-cards .card-view-banner {
+  padding: 0 2px;
+}
+.mini-cards .card-view-name {
+  font-size: var(--font-size-xs);
+}
+
+/* ==========================================================================
+   Slice B reduced-motion 收尾：飞行/弹入/闪光/迸溅全部压平
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .event-weather {
+    animation-delay: 0ms;
+  }
+  .card-fly {
+    animation-duration: 120ms;
+  }
+  .cook-card,
+  .plate-in,
+  .event-reveal,
+  .event-weather {
+    animation: none;
+  }
+  .card-foil::after {
+    display: none;
+  }
+  .play-spark i::after {
+    animation: none;
+    opacity: 0;
+  }
+}

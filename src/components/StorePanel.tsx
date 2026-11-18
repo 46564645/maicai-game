@@ -18,6 +18,76 @@ import type { CardId, Command, GameState } from '../game/types';
 import { Button } from './Button';
 import { CardIcon } from './CardIcon';
 import { CardView } from './CardView';
+import { Hand } from './cards/Hand';
+import { PlayableGlow } from './cards/PlayableGlow';
+import { playSparkAt } from './cards/PlaySpark';
+import { TiltCard } from './cards/TiltCard';
+import { useDragPlay } from './cards/useDragPlay';
+import type { DropZoneRef } from './cards/useDragPlay';
+import type { HandItem } from './cards/Hand';
+
+/** 货架扇里的一张缺货卡：drag 层 + PlayableGlow + TiltCard + CardView，
+ *  可买时发光；拖到篮子区=买下，点卡=tap-tap 选中（与市场同一套两通道）。 */
+function ShelfCard({
+  id,
+  needed,
+  cost,
+  selected,
+  playable,
+  disabled,
+  zones,
+  onDrop,
+  onSelect,
+}: {
+  id: CardId;
+  needed: boolean;
+  cost: number;
+  selected: boolean;
+  playable: boolean;
+  disabled: boolean;
+  zones: () => DropZoneRef[];
+  onDrop: (cardId: CardId, zoneId: string) => void;
+  onSelect: (id: CardId) => void;
+}) {
+  const ing = getIngredient(id);
+  const drag = useDragPlay<CardId>({
+    enabled: !disabled,
+    payload: id,
+    zones,
+    onDrop,
+  });
+  const dragCls =
+    `hand-drag${drag.dragging ? ' hand-drag--up' : ''}` +
+    `${drag.shaking ? ' hand-drag--shake' : ''}`;
+  return (
+    <div className={dragCls} ref={drag.ref} style={drag.style}>
+      <PlayableGlow
+        active={playable}
+        className={playable ? '' : 'pglow--dim'}
+      >
+        <TiltCard
+          className="store-tilt"
+          glare
+          front={
+            <CardView
+              cardId={id}
+              icon={ing?.icon ?? '❔'}
+              name={cardName(id)}
+              price={cost}
+              mark={needed}
+              selected={selected}
+              disabled={disabled}
+              testid={`action-store-${id}`}
+              ariaLabel={`${cardName(id)}, ${cost} ${coinWord(cost)}`}
+              onClick={() => onSelect(id)}
+              onFocus={() => onSelect(id)}
+            />
+          }
+        />
+      </PlayableGlow>
+    </div>
+  );
+}
 
 export function StorePanel({
   state,
@@ -52,6 +122,7 @@ export function StorePanel({
   // 与菜市场同一套主动作逻辑（ww M4.5.6b 第 7/8 条）：没选中可买的卡时
   // 「走完这一站」是橙色主按钮；选中可买卡后「买下」接管主按钮。
   const endPrimary = !buySel;
+  const basketRef = useRef<HTMLButtonElement | null>(null);
 
   let n = 0;
   const kBuy = ++n;
@@ -59,12 +130,41 @@ export function StorePanel({
   const kHoldDrop = me.holdClip !== null ? ++n : 0;
   const kEnd = ++n;
 
+  const buy = (id: CardId) => {
+    playSparkAt(basketRef.current);
+    send({ type: 'STORE_BUY', ingredientId: id });
+  };
+
+  const zonesFor = (id: CardId) => () =>
+    [{ id: 'basket', el: basketRef.current, accepts: canBuy(id) }];
+
+  // 缺货组 = 货架扇（R10 §2.7）；拖拽进篮子区买下，tap-tap=选中→点区买下
+  const shelfItems: HandItem[] = missing.map((id) => ({
+    key: id,
+    className: selected === id ? 'hand-item--sel' : undefined,
+    node: (
+      <ShelfCard
+        id={id}
+        needed
+        cost={cost(id)}
+        selected={selected === id}
+        playable={canBuy(id)}
+        disabled={boughtHere.includes(id)}
+        zones={zonesFor(id)}
+        onDrop={(cid) => buy(cid)}
+        onSelect={(cid) => setSelected(selected === cid ? null : cid)}
+      />
+    ),
+  }));
+
+  // 其他组 = 紧凑网格（§2.7），但卡面换成新剖面（cardId 直出美术）
   const storeCard = (id: CardId) => {
     const ing = getIngredient(id);
     if (!ing) return null;
     return (
       <CardView
         key={id}
+        cardId={id}
         icon={ing.icon}
         name={cardName(ing.id)}
         price={cost(id)}
@@ -86,7 +186,7 @@ export function StorePanel({
       {missing.length > 0 && (
         <section className="store-section">
           <p className="panel-subtitle">{strings.panel.storeMissing}</p>
-          <div className="store-grid">{missing.map(storeCard)}</div>
+          <Hand className="store-shelf" items={shelfItems} ariaLabel={strings.panel.storeMissing} />
         </section>
       )}
 
@@ -114,6 +214,8 @@ export function StorePanel({
           <Button
             variant="primary"
             keyHint={String(kBuy)}
+            innerRef={basketRef}
+            className={`drop-zone drop-zone--basket${selected ? ' drop-zone--armed' : ''}`}
             data-testid="action-primary"
             data-primary={endPrimary ? undefined : 'true'}
             data-key={kBuy}
@@ -121,8 +223,11 @@ export function StorePanel({
             speakText={
               sel ? fmt(strings.actions.buy, { item: cardName(sel.id), n: cost(selected!) }) : undefined
             }
-            onClick={() => selected && send({ type: 'STORE_BUY', ingredientId: selected })}
+            onClick={() => selected && buy(selected)}
           >
+            <span className="dz-icon" aria-hidden="true">
+              🧺
+            </span>
             {sel ? fmt(strings.panel.buyPriced, { n: cost(selected!) }) : strings.buttons.buy}
           </Button>
         </div>
@@ -142,7 +247,10 @@ export function StorePanel({
                 data-testid={`action-${kHoldBuy}`}
                 data-key={kHoldBuy}
                 disabled={!canResolveBuy}
-                onClick={() => send({ type: 'RESOLVE_HOLD', buy: true })}
+                onClick={(e) => {
+                  playSparkAt(e.currentTarget);
+                  send({ type: 'RESOLVE_HOLD', buy: true });
+                }}
               >
                 {strings.panel.holdBuyPrice}
               </Button>

@@ -12,7 +12,9 @@
  * phone.css / hud.css 的窄栏、行式覆写不破。
  */
 import { Fragment } from 'react';
-import type { ReactNode } from 'react';
+import type { MouseEvent, ReactNode } from 'react';
+import { strings } from '../data/strings';
+import { useSpeech } from '../ui/useSpeech';
 import { CardIcon } from './CardIcon';
 import { KeyHint } from './KeyHint';
 import { cardArtFor } from './cards/cardArt';
@@ -33,9 +35,11 @@ export interface CardViewProps {
   primary?: boolean;
   /** R10：卡牌 id——cardArt.ts 有登记则在美术区显示插画 */
   cardId?: string;
-  onClick?: () => void;
+  onClick?: (e: MouseEvent<HTMLButtonElement>) => void;
   /** 键盘焦点落入即回调（市场「←→ 选卡」焦点=选中用） */
   onFocus?: () => void;
+  /** 提供且朗读可用时，卡右上角追加 🔊 朗读钮（不嵌套进卡按钮） */
+  speakText?: string;
   testid?: string;
   dataKey?: number;
   ariaLabel?: string;
@@ -63,6 +67,7 @@ function nameWithBreaks(name: string): string {
 }
 
 export function CardView(props: CardViewProps) {
+  const { supported: speakSupported, speak } = useSpeech();
   const cls = ['card-view', props.selected ? 'card-view--selected' : '']
     .filter(Boolean)
     .join(' ');
@@ -137,7 +142,7 @@ export function CardView(props: CardViewProps) {
     </>
   );
   if (props.onClick) {
-    return (
+    const btn = (
       <button
         type="button"
         className={cls}
@@ -152,6 +157,23 @@ export function CardView(props: CardViewProps) {
       >
         {body}
       </button>
+    );
+    if (!props.speakText || !speakSupported) return btn;
+    return (
+      <span className="card-view-speak">
+        {btn}
+        <button
+          type="button"
+          className="btn-speak card-view-speak-btn"
+          aria-label={strings.speech.speak}
+          onClick={(e) => {
+            e.stopPropagation();
+            speak(props.speakText!);
+          }}
+        >
+          🔊
+        </button>
+      </span>
     );
   }
   return <div className={cls}>{body}</div>;

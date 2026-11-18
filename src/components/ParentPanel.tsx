@@ -18,8 +18,10 @@
  * 「Offline script」，不再分不清当前走的是哪条路。
  */
 import { useEffect, useRef, useState } from 'react';
-import type { FormEvent } from 'react';
+import type { CSSProperties, FormEvent } from 'react';
+import { createPortal } from 'react-dom';
 import { cards } from '../data/cards';
+import type { ParentOption } from '../data/cards';
 import { strings } from '../data/strings';
 import { fmt } from '../game/stations/shared';
 import {
@@ -34,6 +36,10 @@ import { fetchParentReply, isGoodbyeTurn, parentLiveAvailable } from '../parent/
 import type { ParentTurn } from '../parent/parentLive';
 import { Button } from './Button';
 import { CardView } from './CardView';
+import { Hand } from './cards/Hand';
+import { PlayableGlow } from './cards/PlayableGlow';
+import { TiltCard } from './cards/TiltCard';
+import type { HandItem } from './cards/Hand';
 
 interface LiveBubble {
   who: 'ai' | 'me' | 'sys';
@@ -49,6 +55,45 @@ interface LiveSession {
   turns: number;
   busy: boolean;
   done: boolean;
+}
+
+/** R10 Slice B：图卡扇（§1.6）——每张是 PlayableGlow+TiltCard+CardView；
+ *  点卡交给外层 flyCard 做选卡飞入。键位 1..n 与旧网格完全一致。 */
+function OptionFan({
+  options,
+  locked,
+  flyKey,
+  onPick,
+}: {
+  options: ParentOption[];
+  locked: boolean;
+  flyKey: string | null;
+  onPick: (o: ParentOption, el: HTMLElement) => void;
+}) {
+  const items: HandItem[] = options.map((o, i) => ({
+    key: o.id,
+    className: flyKey === o.id ? 'hand-item--src' : undefined,
+    node: (
+      <PlayableGlow active={!locked} className={locked ? 'pglow--dim' : ''}>
+        <TiltCard
+          glare
+          front={
+            <CardView
+              icon={o.icon}
+              name={parentOptionLabel(o)}
+              keyHint={String(i + 1)}
+              dataKey={i + 1}
+              primary={i === 0}
+              testid={i === 0 ? 'action-primary' : `action-parent-${o.id}`}
+              ariaLabel={`${i + 1} ${parentOptionLabel(o)}`}
+              onClick={(e) => onPick(o, e.currentTarget)}
+            />
+          }
+        />
+      </PlayableGlow>
+    ),
+  }));
+  return <Hand className="parent-fan" items={items} ariaLabel={strings.parent.pickHint} />;
 }
 
 /** R9 状态点（仅展示）：真对话进行中绿点「Live chat/真对话」，
@@ -85,6 +130,90 @@ export function ParentPanel({
   const liveCtl = useRef({ started: false, completing: false, settleWatch: false });
   const liveChatRef = useRef<HTMLDivElement>(null);
   const dialogOpen = !!d && d.playerId === me.id;
+
+  /* —— R10 Slice B：图卡扇 + 选卡飞入（§1.6 selection flight）——
+     点图卡 → 克隆沿 transform 飞向聊天区（420ms）→ 落地才派发答案；
+     reduced-motion 缩到 120ms。飞行中锁卡，防连点重复派发。 */
+  const [fly, setFly] = useState<{
+    key: string;
+    rect: { x: number; y: number; w: number; h: number };
+    dx: number;
+    dy: number;
+    icon: string;
+    label: string;
+  } | null>(null);
+  const flyTimer = useRef<number | null>(null);
+  // 最新版 liveAnswer 的引用：飞行结束时回调仍用点击后的新闭包
+  const liveAnswerRef = useRef<
+    ((answer: ParentAnswer, displayText: string) => void) | null
+  >(null);
+  // 离线脚本聊天区锚点（飞行的落点量取对象）
+  const offlineChatRef = useRef<HTMLDivElement | null>(null);
+  useEffect(
+    () => () => {
+      if (flyTimer.current !== null) window.clearTimeout(flyTimer.current);
+    },
+    [],
+  );
+
+  const flyCard = (
+    el: HTMLElement,
+    key: string,
+    icon: string,
+    label: string,
+    target: Element | null,
+    locked: boolean,
+    dispatch: () => void,
+  ) => {
+    if (locked || fly) return;
+    const from = el.getBoundingClientRect();
+    const to = target?.getBoundingClientRect();
+    const dx = to ? to.x + to.width / 2 - (from.x + from.width / 2) : 0;
+    const dy = to
+      ? to.y + to.height - 20 - (from.y + from.height / 2)
+      : -90;
+    setFly({
+      key,
+      rect: { x: from.x, y: from.y, w: from.width, h: from.height },
+      dx,
+      dy,
+      icon,
+      label,
+    });
+    const rm =
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
+    flyTimer.current = window.setTimeout(
+      () => {
+        setFly(null);
+        dispatch();
+      },
+      rm ? 120 : 420,
+    );
+  };
+
+  /* 飞行克隆：fixed 层，左/top/宽高量自源卡 rect，沿 --fly-dx/dy 位移缩放淡出 */
+  const flyEl =
+    fly &&
+    createPortal(
+      <div
+        className="card-fly"
+        style={
+          {
+            left: fly.rect.x,
+            top: fly.rect.y,
+            width: fly.rect.w,
+            height: fly.rect.h,
+            '--fly-dx': `${fly.dx.toFixed(1)}px`,
+            '--fly-dy': `${fly.dy.toFixed(1)}px`,
+          } as CSSProperties
+        }
+        aria-hidden="true"
+      >
+        <CardView icon={fly.icon} name={fly.label} />
+      </div>,
+      document.body,
+    );
 
   /* R9 状态点取色：live 会话在 = 绿；还没启动过（parentUse 阶段或
      开场瞬间）按 key 预判——有 key 即将会话真对话 = 绿；一旦启动过
@@ -231,6 +360,8 @@ export function ParentPanel({
       setText('');
       void liveAnswer({ mode: 'text', text: t }, t);
     };
+    // 飞行延迟回调拿最新版 liveAnswer（飞行中可能到了新回复，busy 等已更新）
+    liveAnswerRef.current = liveAnswer;
 
     return (
       <div className="panel-body">
@@ -262,21 +393,27 @@ export function ParentPanel({
           })}{' '}
           · {strings.parent.pickHint}
         </p>
-        <div className="parent-options">
-          {liveQ.options.map((o, i) => (
-            <CardView
-              key={o.id}
-              icon={o.icon}
-              name={parentOptionLabel(o)}
-              keyHint={String(i + 1)}
-              dataKey={i + 1}
-              primary={i === 0}
-              testid={i === 0 ? 'action-primary' : `action-parent-${o.id}`}
-              ariaLabel={`${i + 1} ${parentOptionLabel(o)}`}
-              onClick={() => void liveAnswer({ mode: 'card', optionId: o.id }, parentOptionLabel(o))}
-            />
-          ))}
-        </div>
+        <OptionFan
+          options={liveQ.options}
+          locked={live.busy || live.done}
+          flyKey={fly?.key ?? null}
+          onPick={(o, el) =>
+            flyCard(
+              el,
+              o.id,
+              o.icon,
+              parentOptionLabel(o),
+              liveChatRef.current,
+              live.busy || live.done,
+              () =>
+                void liveAnswerRef.current?.(
+                  { mode: 'card', optionId: o.id },
+                  parentOptionLabel(o),
+                ),
+            )
+          }
+        />
+        {flyEl}
         <div className="panel-foot">
           <form className="parent-input-row" onSubmit={submitLiveText}>
             <input
@@ -373,26 +510,30 @@ export function ParentPanel({
   return (
     <div className="panel-body">
       <ParentStatus live={statusLive} />
-      <ChatHistory d={d} aiText={lastAi} systemText={lastSystem} />
+      <div ref={offlineChatRef}>
+        <ChatHistory d={d} aiText={lastAi} systemText={lastSystem} />
+      </div>
       <p className="panel-subtitle">
         {fmt(strings.parent.questionOf, { a: step + 1, b: questions.length })} ·{' '}
         {strings.parent.pickHint}
       </p>
-      <div className="parent-options">
-        {q.options.map((o, i) => (
-          <CardView
-            key={o.id}
-            icon={o.icon}
-            name={parentOptionLabel(o)}
-            keyHint={String(i + 1)}
-            dataKey={i + 1}
-            primary={i === 0}
-            testid={i === 0 ? 'action-primary' : `action-parent-${o.id}`}
-            ariaLabel={`${i + 1} ${parentOptionLabel(o)}`}
-            onClick={() => send({ type: 'PARENT_ANSWER', answer: { mode: 'card', optionId: o.id } })}
-          />
-        ))}
-      </div>
+      <OptionFan
+        options={q.options}
+        locked={false}
+        flyKey={fly?.key ?? null}
+        onPick={(o, el) =>
+          flyCard(
+            el,
+            o.id,
+            o.icon,
+            parentOptionLabel(o),
+            offlineChatRef.current,
+            false,
+            () => send({ type: 'PARENT_ANSWER', answer: { mode: 'card', optionId: o.id } }),
+          )
+        }
+      />
+      {flyEl}
       <div className="panel-foot">
         <form className="parent-input-row" onSubmit={submitText}>
           <input

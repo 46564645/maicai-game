@@ -22,6 +22,7 @@ import { CardView } from './CardView';
 import { KeyHint } from './KeyHint';
 import { Hand } from './cards/Hand';
 import { PlayableGlow } from './cards/PlayableGlow';
+import { playSparkAt } from './cards/PlaySpark';
 import { TiltCard } from './cards/TiltCard';
 import { useDragPlay } from './cards/useDragPlay';
 import type { DropZoneRef } from './cards/useDragPlay';
@@ -166,8 +167,11 @@ export function MarketPanel({
     ] as DropZoneRef[];
 
   const onDrop = (cardId: CardId, zoneId: string) => {
-    if (zoneId === 'basket') send({ type: 'STALL_BUY', cardId });
-    else send({ type: 'STALL_HOLD', cardId });
+    if (zoneId === 'basket') {
+      // R10 Slice B：买下瞬间在篮子区迸一次 PlaySpark（§3.3 买入反馈）
+      playSparkAt(basketRef.current);
+      send({ type: 'STALL_BUY', cardId });
+    } else send({ type: 'STALL_HOLD', cardId });
   };
 
   let n = 0;
@@ -248,7 +252,12 @@ export function MarketPanel({
                 ? fmt(strings.actions.buy, { item: sel.name, n: sel.price })
                 : strings.buttons.buy
             }
-            onClick={() => selected && send({ type: 'STALL_BUY', cardId: selected })}
+            onClick={() => {
+              if (selected) {
+                playSparkAt(basketRef.current);
+                send({ type: 'STALL_BUY', cardId: selected });
+              }
+            }}
           >
             <KeyHint value={String(kBuy)} />
             <span className="dz-icon" aria-hidden="true">
@@ -298,7 +307,10 @@ export function MarketPanel({
                 data-testid={`action-${kHoldBuy}`}
                 data-key={kHoldBuy}
                 disabled={!canResolveBuy}
-                onClick={() => send({ type: 'RESOLVE_HOLD', buy: true })}
+                onClick={(e) => {
+                  playSparkAt(e.currentTarget);
+                  send({ type: 'RESOLVE_HOLD', buy: true });
+                }}
               >
                 {strings.panel.holdBuyPrice}
               </Button>

@@ -11,6 +11,7 @@ import { fmt, marketPriceOf } from '../game/stations/shared';
 import { cardName } from '../i18n/cardText';
 import type { GameState, PlayerId } from '../game/types';
 import { Coins } from './Coins';
+import { MiniCardRow } from './MiniCardRow';
 import { RecipeCard } from './RecipeCard';
 import { StationPopup } from './StationPopup';
 
@@ -39,6 +40,10 @@ export function WalletDrawer({
             <p className="wallet-line">
               {fmt(strings.screens.progress, { a: me.collected.length, b: total })}
             </p>
+          )}
+          {/* R10 Slice B 轻卡面：自由买的小玩意/赠品列小卡面（纯展示） */}
+          {me.extras.length + me.temptations.length > 0 && (
+            <MiniCardRow ids={[...me.extras, ...me.temptations]} />
           )}
         </section>
         <section className="wallet-col" aria-label={strings.hud.wallet}>

@@ -1,7 +1,7 @@
 /**
  * cardArt.test.ts —— R10 卡面插画登记表：登记键必须是 cards.json 真实卡 id；
- * 已登记卡（番茄/番茄炒蛋/牌背）有图；未登记卡回退 undefined（CardView
- * 据此渲染 emoji/CardIcon——13 张食材在 PM 补图前走这条路）。
+ * Slice B 后全部食材/菜谱/诱惑/天气/事件卡均有图（MAPPING.md 33 张），
+ * 两张邀请卡复用诱惑品图；未知 id 仍回退 undefined（CardView 落到 emoji）。
  */
 import { describe, expect, it } from 'vitest';
 import { cards } from '../../src/data/cards';
@@ -11,31 +11,42 @@ const allCardIds = new Set<string>([
   ...cards.ingredients.map((c) => c.id),
   ...cards.recipes.map((c) => c.id),
   ...cards.temptations.map((c) => c.id),
+  ...cards.weather.map((c) => c.id),
+  ...cards.events.map((c) => c.id),
+  ...cards.invites.map((c) => c.id),
 ]);
 
 describe('cardArt 登记', () => {
-  it('已出图的卡返回插画 URL', () => {
-    expect(cardArtFor('ing-tomato')).toMatch(/\.webp$/);
-    expect(cardArtFor('rec-tomato-egg')).toMatch(/\.webp$/);
+  it('牌背与全部已出图卡返回插画 URL', () => {
     expect(CARD_BACK_ART).toMatch(/\.webp$/);
-  });
-
-  it('未出图的卡回退 undefined（CardView 落到 emoji 图标）', () => {
-    expect(cardArtFor('ing-egg')).toBeUndefined();
-    expect(cardArtFor('ing-pork')).toBeUndefined();
-    expect(cardArtFor('tmp-sticker')).toBeUndefined();
-    expect(cardArtFor('rec-braised-fish')).toBeUndefined();
-    expect(cardArtFor('not-a-card')).toBeUndefined();
-  });
-
-  it('登记键全部是 cards.json 真实卡 id（防拼错 id 图挂不上）', () => {
-    // 已出图的两张逐一断言；任何新增登记行也必须对应真卡
-    for (const id of ['ing-tomato', 'rec-tomato-egg']) {
-      expect(allCardIds.has(id), id).toBe(true);
+    for (const id of allCardIds) {
+      expect(cardArtFor(id), id).toMatch(/\.webp$/);
     }
   });
 
-  it('番茄炒蛋同名菜共用一图（rec-tomato-egg-2）', () => {
+  it('未知 id 回退 undefined（CardView 落到 emoji 图标）', () => {
+    expect(cardArtFor('not-a-card')).toBeUndefined();
+    expect(cardArtFor('pq1-opt-1')).toBeUndefined(); // 家长图卡无 PM 插画
+    expect(cardArtFor('chr-xiaohe')).toBeUndefined(); // 角色卡不出图
+  });
+
+  it('同名菜共用一图（rec-tomato-egg-2）', () => {
     expect(cardArtFor('rec-tomato-egg-2')).toBe(cardArtFor('rec-tomato-egg'));
+  });
+
+  it('邀请卡复用对应诱惑品图（MAPPING.md 指定）', () => {
+    expect(cardArtFor('inv-popsicle')).toBe(cardArtFor('tmp-popsicle'));
+    expect(cardArtFor('inv-sticker')).toBe(cardArtFor('tmp-sticker'));
+  });
+
+  it('每类卡抽查一张：食材/菜谱/诱惑/天气/事件图不重名', () => {
+    const picked = new Set([
+      cardArtFor('ing-egg'),
+      cardArtFor('rec-braised-fish'),
+      cardArtFor('tmp-toy'),
+      cardArtFor('wth-windy'),
+      cardArtFor('evt-hungry'),
+    ]);
+    expect(picked.size).toBe(5);
   });
 });
