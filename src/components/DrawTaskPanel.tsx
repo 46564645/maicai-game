@@ -5,7 +5,11 @@
  * 动画结束后才派发 DRAW_RECIPE，随后弹窗换成任务卡确认条（与旧
  * 「点按钮 → 卡片揭晓」的命令时序等价：状态先行，动画跟随）。
  * 第 2、3 圈：看一眼任务卡（还缺什么 + 好的），命令仍为 ACK。
+ * R10E（§3 大卡时刻）：翻开的菜谱先以「大卡」停在舞台等孩子点
+ * 「收进篮子」——点完整卡缩飞向左下篮子位才派发 DRAW_RECIPE。
+ * 命令时序照旧（点牌堆→派发），只是中间多一拍孩子的确认。
  */
+import { useState } from 'react';
 import { getRecipe, recipeMarketTotal } from '../data/cards';
 import { strings } from '../data/strings';
 import { missingIngredients } from '../game/selectors';
@@ -26,6 +30,27 @@ export function DrawTaskPanel({
 }) {
   const pd = state.pendingDecision;
   const me = state.players.find((p) => p.isHuman)!;
+  /* R10E：pop=菜谱大卡已翻出等收；fly=正缩飞向篮子（ghost 残影） */
+  const [pop, setPop] = useState(false);
+  const [fly, setFly] = useState<null | {
+    id: string;
+    icon: string;
+    name: string;
+    price: number | undefined;
+  }>(null);
+
+  /** 收进篮子：留下 480ms 缩飞残影（ghost），同时派发命令 */
+  const pocket = (r: NonNullable<typeof fly>) => {
+    setFly(r);
+    send({ type: 'DRAW_RECIPE' });
+    window.setTimeout(() => setFly(null), 520);
+  };
+
+  const ghost = fly && (
+    <div className="moment-card moment-card--pocket" aria-hidden="true">
+      <CardView cardId={fly.id} icon={fly.icon} name={fly.name} price={fly.price} />
+    </div>
+  );
 
   if (pd.kind === 'drawRecipe') {
     const rid = state.recipeDeck[0];
@@ -48,52 +73,88 @@ export function DrawTaskPanel({
         </div>
       );
     }
+    const r = {
+      id: recipe.id,
+      icon: recipe.icon,
+      name: cardName(recipe.id),
+      price: recipeMarketTotal(recipe),
+    };
     return (
-      <div className="panel-body">
-        <p className="panel-text">{strings.actions.drawRecipe}</p>
-        <div className="deck-stage">
-          <Deck
-            testid="action-primary"
-            dataKey={1}
-            ariaLabel={strings.actions.drawRecipe}
-            face={
-              <CardView
-                cardId={recipe.id}
-                icon={recipe.icon}
-                name={cardName(recipe.id)}
-                price={recipeMarketTotal(recipe)}
+      <>
+        {ghost}
+        <div className="panel-body">
+          <p className="panel-text">{strings.actions.drawRecipe}</p>
+          <div className="deck-stage">
+            {pop ? (
+              /* R10E（§3）：翻开的菜谱以「大卡」停在舞台——
+                 点一下「收进篮子」，整卡缩飞向篮子位才派发 */
+              <button
+                type="button"
+                className="moment-card"
+                data-testid="action-primary"
+                data-key={1}
+                data-primary="true"
+                aria-label={`${r.name} · ${strings.panel.pocketRecipe}`}
+                onClick={() => pocket(r)}
+              >
+                <CardView
+                  cardId={recipe.id}
+                  icon={recipe.icon}
+                  name={r.name}
+                  price={r.price}
+                />
+                <span className="moment-tap" aria-hidden="true">
+                  {strings.panel.pocketRecipe}
+                </span>
+              </button>
+            ) : (
+              <Deck
+                testid="action-primary"
+                dataKey={1}
+                ariaLabel={strings.actions.drawRecipe}
+                face={
+                  <CardView
+                    cardId={recipe.id}
+                    icon={recipe.icon}
+                    name={r.name}
+                    price={r.price}
+                  />
+                }
+                onDraw={() => setPop(true)}
               />
-            }
-            onDraw={() => send({ type: 'DRAW_RECIPE' })}
-          />
+            )}
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   // ack：看一眼任务卡（第 2、3 圈；第 1 圈抽完也停在这里确认）
   const missing = missingIngredients(me);
   return (
-    <div className="panel-body">
-      <p className="panel-text">{strings.panel.lookTitle}</p>
-      <div className="card-reveal">
-        <RecipeCard recipeId={me.recipeId} collected={me.collected} />
+    <>
+      {ghost}
+      <div className="panel-body">
+        <p className="panel-text">{strings.panel.lookTitle}</p>
+        <div className="card-reveal">
+          <RecipeCard recipeId={me.recipeId} collected={me.collected} />
+        </div>
+        <p className="panel-text">
+          {missing.length > 0
+            ? fmt(strings.panel.recipeMissing, { items: missing.map(cardName).join(', ') })
+            : strings.panel.recipeDone}
+        </p>
+        <Button
+          variant="primary"
+          keyHint="1"
+          data-testid="action-primary"
+          data-primary="true"
+          data-key={1}
+          onClick={() => send({ type: 'ACK' })}
+        >
+          {strings.actions.ok}
+        </Button>
       </div>
-      <p className="panel-text">
-        {missing.length > 0
-          ? fmt(strings.panel.recipeMissing, { items: missing.map(cardName).join(', ') })
-          : strings.panel.recipeDone}
-      </p>
-      <Button
-        variant="primary"
-        keyHint="1"
-        data-testid="action-primary"
-        data-primary="true"
-        data-key={1}
-        onClick={() => send({ type: 'ACK' })}
-      >
-        {strings.actions.ok}
-      </Button>
-    </div>
+    </>
   );
 }

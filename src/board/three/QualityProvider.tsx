@@ -114,6 +114,20 @@ export function QualityProvider({ children }: { children: ReactNode }) {
       flags.post = false; // 低配排查/e2e 兜底
       flags.lens = false;
     }
+    /* R10E（e2e 修复）：?fast=1 是 e2e/截图驱动专用标志——软渲染
+       （SwiftShader）下一帧要数秒，连续 invalidate 把主线程钉死，
+       主按钮 actionability 永远等不到而整体超时。fast 模式下按
+       low 档压成本：关后期/实时阴影/HDRI/dpr=1/疏花草，岛面照常渲染，
+       只少装饰性开销；产品真实游玩不带 ?fast=1，不受影响。 */
+    if (p.get('fast') === '1') {
+      flags.post = false;
+      flags.lens = false;
+      flags.ao = false;
+      flags.shadowMapSize = 0;
+      flags.dpr = [1, 1];
+      flags.env = false;
+      flags.flora = 0.4;
+    }
     if (p.get('ao') === '0') flags.ao = false; // T3 接地对照：只关 N8AO，其余后期不变
     if (p.get('env') === '0') flags.env = false;
     const tm = p.get('tonemap');

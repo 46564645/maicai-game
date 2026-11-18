@@ -12,6 +12,7 @@ import * as THREE from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { stationAnchor } from './positions';
 import { solveFit, type FreeRect } from './fitSolver';
+import { reducedMotion } from './ambient';
 
 export type CameraFocus = 'auto' | 'spinner';
 
@@ -116,7 +117,7 @@ function sameRect(a: FreeRect, b: FreeRect): boolean {
 export function CameraRig({
   followStation,
   resetKey,
-  focus = 'auto',
+  focus: focusProp = 'auto',
   compact = false,
   onUserGesture,
 }: {
@@ -130,6 +131,9 @@ export function CameraRig({
   /** 用户拖动/捏合起手 → 打断推近（Scene 用来跳过转盘演出） */
   onUserGesture?: () => void;
 }) {
+  /* R1-E2：reduced-motion 时 focus 恒 'auto'——在本组件内兜底，
+     不再只靠上游（Scene）不传 'spinner'，上游传错也不推近 */
+  const focus: CameraFocus = reducedMotion ? 'auto' : focusProp;
   const controlsRef = useRef<OrbitControlsImpl>(null);
   const goal = useRef(new THREE.Vector3().copy(DEFAULT_TARGET));
   const resetting = useRef(false);

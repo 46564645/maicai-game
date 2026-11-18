@@ -51,6 +51,13 @@ export function toBoardView(state: GameState): BoardViewProps {
       id: state.turn?.sub.kind === 'event' ? state.turn.sub.weatherId : null,
       nonce: state.turn?.orderIndex ?? 0,
     },
+    // R1-E3：天气时刻轮到 bot 时走简版（转盘直落、不推近）——行动者
+    // 非真人即 quick；真人回合保持完整样板节奏。
+    weatherQuick: (() => {
+      const actorId = S.currentActorId(state);
+      const actor = state.players.find((p) => p.id === actorId);
+      return !!actor && !actor.isHuman;
+    })(),
     fx: spendLog
       ? {
           nonce: spendLog.id,

@@ -35,6 +35,11 @@ export interface DeckProps {
 const FLIP_MS = 560;
 const FLIP_MS_RM = 120;
 
+/** 翻牌时长（纯函数，单测口径）：reduced-motion 缩到 120ms */
+export function deckFlipMs(reducedMotion: boolean): number {
+  return reducedMotion ? FLIP_MS_RM : FLIP_MS;
+}
+
 function prefersReducedMotion(): boolean {
   return (
     typeof window !== 'undefined' &&
@@ -54,8 +59,8 @@ export function Deck({ face, onDraw, disabled, ariaLabel, testid, dataKey, hint 
 
   const draw = () => {
     if (disabled) return;
-    // R10C（motion #6）：翻牌中再点一下 = 快进——立即落定派发，
-    // 不再等尾巴（输入死时压缩；第一次点按仍是完整仪式）
+    // R10C（motion #6）/ R1-E2：翻牌中再点一下 = 跳过——清掉推进
+    // 定时器立即落定派发，不再等尾巴（第一次点按仍是完整仪式）
     if (flipping) {
       if (timerRef.current !== null) window.clearTimeout(timerRef.current);
       onDraw();
@@ -64,7 +69,7 @@ export function Deck({ face, onDraw, disabled, ariaLabel, testid, dataKey, hint 
     setFlipping(true);
     timerRef.current = window.setTimeout(
       () => onDraw(),
-      prefersReducedMotion() ? FLIP_MS_RM : FLIP_MS,
+      deckFlipMs(prefersReducedMotion()),
     );
   };
 

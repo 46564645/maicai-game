@@ -7,9 +7,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { cards, getIngredient, getRecipe } from '../data/cards';
 import { gameConfig } from '../config/gameConfig';
-import { coinWord, strings } from '../data/strings';
+import { strings } from '../data/strings';
 import { fmt, marketPriceOf } from '../game/stations/shared';
-import type { Command, GameState, Player, PlayerId } from '../game/types';
+import type { CardId, Command, GameState, Player, PlayerId } from '../game/types';
 import { BoardMount } from '../board/BoardMount';
 import { toBoardView } from '../board/boardModel';
 import { LangToggle } from '../i18n/LangToggle';
@@ -17,13 +17,16 @@ import { cardName, playerDisplayName, stationGoal, stationName } from '../i18n/c
 import { botThinkLine } from '../ui/botThink';
 import { botTrait } from '../ui/botTrait';
 import { nextActorId } from '../ui/nextActor';
+import { spotlightInfo } from '../ui/spotlight';
+import { fastForwardBotTurn } from '../ui/botTiming';
+import { botWeatherSettleMs, weatherDressFor } from '../ui/weatherMoment';
 import { usePhoneMode } from '../ui/usePhoneMode';
 import { AutoPanel } from '../components/AutoPanel';
 import { BotCard } from '../components/BotCard';
 import { BusPanel } from '../components/BusPanel';
 import { Button } from '../components/Button';
 import { CardView } from '../components/CardView';
-import { Coins } from '../components/Coins';
+import { CoinDots } from '../components/CoinDots';
 import { CookPanel } from '../components/CookPanel';
 import { DrawTaskPanel } from '../components/DrawTaskPanel';
 import { EventPanel } from '../components/EventPanel';
@@ -38,6 +41,7 @@ import { StorePanel } from '../components/StorePanel';
 import { Toast } from '../components/Toast';
 import { CoinCounter } from '../components/cards/CoinCounter';
 import { Hand } from '../components/cards/Hand';
+import { ProfileCard } from '../components/cards/ProfileCard';
 
 function playerIcon(characterId: string | null): string {
   return cards.characters.find((c) => c.id === characterId)?.icon ?? '🙂';
@@ -72,7 +76,25 @@ export function Game({
   // 手机只支持横屏（M4.5.6）：竖屏由 App 的旋转提示层盖住；
   // 横屏（874×402）= 左 2/3 岛 + 右竖栏（当前要做的事 + 大按钮）
   const phoneLand = usePhoneMode() === 'phone-landscape';
-  const [openBot, setOpenBot] = useState<PlayerId | null>(null);
+  /* R10E（§3）：ProfileCard 高光时刻——点徽章/小头像弹全屏卡；
+     R1-E3 改：轮到 bot 的 auto 高光不再是全屏帘，改为角落小卡
+     （BotCard/手机头像片的 --spot 态）亮约 1s 自收，不挡操作；
+     manual=孩子点的全屏卡（不自动收），auto=轮流到点自收 */
+  const [spot, setSpot] = useState<{ id: PlayerId; manual: boolean } | null>(
+    null,
+  );
+  /* R10E（§2 天气布景）：孩子点掉大天气卡（或 bot 转盘落定）后，
+     给世界换上对应天气——DOM 洗色走 .game-screen.weather--*，
+     3D 灯光/雨丝/云速走 board.weatherDress。纯演出。 */
+  const [weatherDress, setWeatherDress] = useState<CardId | null>(null);
+  const openSpot = (id: PlayerId) => setSpot({ id, manual: true });
+  const closeSpot = () => setSpot(null);
+  /* R1-E3 快进入口：点「正在行动的 bot」的角落小卡 = 先给它的回合
+     快进（驱动层清零剩余延迟），同时照旧弹全屏卡看详情 */
+  const openBotSpot = (id: PlayerId) => {
+    if (board.activePlayerId === id) fastForwardBotTurn(id);
+    openSpot(id);
+  };
   // R10C（play #1）：事件卡翻开状态上移——翻牌完成前，toast/board-log
   // 里的「转到XX：『事件名』」日志是剧透，压到翻开后再上屏
   const [eventRevealed, setEventRevealed] = useState(false);
@@ -167,6 +189,63 @@ export function Game({
   const pendingPlayer = pendingPid
     ? state.players.find((p) => p.id === pendingPid)
     : null;
+  const sub = state.turn?.sub;
+
+  /* R10E（§2 天气布景）：新一次天气时刻开始先清布景——
+     真人等孩子点掉大天气卡才换（EventPanel.onWeatherDone 回调）；
+     bot 没人点：R1-E3 简版——3D 转盘直落，DOM 侧留一拍
+     （botWeatherSettleMs 400ms）就自动换，不再按真人整圈的 1900ms 等。 */
+  const weatherNonce = `${state.stationIndex}:${state.turn?.orderIndex ?? 0}:${
+    sub?.kind === 'event' ? sub.weatherId : '-'
+  }`;
+  useEffect(() => {
+    if (sub?.kind !== 'event') return undefined;
+    setWeatherDress(null);
+    const actor = pendingPid
+      ? state.players.find((p) => p.id === pendingPid)
+      : null;
+    if (actor && !actor.isHuman) {
+      const t = window.setTimeout(() => {
+        if (sub.kind === 'event') setWeatherDress(sub.weatherId);
+      }, botWeatherSettleMs());
+      return () => window.clearTimeout(t);
+    }
+    return undefined;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [weatherNonce]);
+
+  /* R10E（§3 高光时刻）+ R1-E3：轮到 bot 行动时角落小卡自动亮约 1s
+     （auto 态只点亮 BotCard/手机头像片，不开全屏帘、不挡操作）；
+     站点弹窗开着不抢戏，孩子手动点开的（manual 全屏卡）不被自动
+     覆盖、也不自动收。?fast=1（flags.fast）整条跳过——零延迟模式下
+     bot 连环行动，自动高光没有意义。 */
+  useEffect(() => {
+    if (state.flags.fast) return undefined;
+    const id = board.activePlayerId;
+    if (!id) return undefined;
+    const p = state.players.find((x) => x.id === id);
+    if (!p || p.isHuman) return undefined;
+    if (humanPending && pd.kind !== 'swapResponse') return undefined;
+    setSpot((cur) => (cur?.manual ? cur : { id, manual: false }));
+    const t = window.setTimeout(
+      () =>
+        setSpot((cur) => (cur && !cur.manual && cur.id === id ? null : cur)),
+      1000,
+    );
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [board.activePlayerId, humanPending, pd.kind, state.flags.fast]);
+
+  /* R10E：高光帘吃 Esc（与点帘/点卡同义） */
+  useEffect(() => {
+    if (!spot) return undefined;
+    const h = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeSpot();
+    };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, [spot]);
+
   /* —— R10D（UI #8）图形化进度簇 ——
      3 枚圈点（过完=实心，当前=描边圈）+ 8 格站点条（走完=实心，
      脚下这枚带「我在这」环）。全部读既有 state，无新数据。 */
@@ -228,7 +307,15 @@ export function Game({
         <span className="order-chip-ava" aria-hidden="true">
           {avatarIcon(p)}
         </span>
-        <span className="order-chip-name">{playerDisplayName(p)}</span>
+        {/* R10E（§4）：顺序片里币数画成金币点（迷你档）；
+            R1-E4：金币点旁补可见数字，金币只作辅助（读屏口径不变） */}
+        <span className="order-chip-mid">
+          <span className="order-chip-name">{playerDisplayName(p)}</span>
+          <span className="order-chip-coins">
+            <CoinDots n={p.coins} cap={5} className="coin-dots--xs" />
+            <span className="order-chip-num" aria-hidden="true">{p.coins}</span>
+          </span>
+        </span>
         {trait && (
           <span className={'bot-trait bot-trait--' + trait.key} aria-hidden="true">
             {trait.icon}
@@ -257,7 +344,13 @@ export function Game({
     const trait = botTrait(b);
     return (
       <div className="bot-slot" key={b.id}>
-        <BotCard player={b} thinking={board.activePlayerId === b.id} />
+        <BotCard
+          player={b}
+          thinking={board.activePlayerId === b.id}
+          expanded={spot?.id === b.id}
+          autoSpot={spot?.id === b.id && !spot.manual}
+          onOpen={openBotSpot}
+        />
         {think && (
           <p
             className={
@@ -291,7 +384,6 @@ export function Game({
     );
   };
 
-  const sub = state.turn?.sub;
   let panel = <AutoPanel state={state} send={send} />;
   switch (pd.kind) {
     case 'drawRecipe':
@@ -317,6 +409,7 @@ export function Game({
           send={send}
           revealed={eventRevealed}
           onReveal={() => setEventRevealed(true)}
+          onWeatherDone={setWeatherDress}
         />
       );
       break;
@@ -361,9 +454,14 @@ export function Game({
           data-key={1}
           onClick={() => send({ type: 'ACK' })}
         >
-          <span>
-            {strings.game.enterStation}
-            <span className="btn-kbd-hint">{strings.game.enterStationKbd}</span>
+          {/* R1-E7：主文案与 kbd 提示拆成两个同级盒——旧结构把提示
+              内联在文案 span 里，手机栏隐藏提示后文案的折行盒仍按
+              「文案+提示」一起算，曾量到文字 76 > 按钮 72 的溢出；
+              拆开后手机栏内只剩主文案一个盒（提示在 .phone-turn 里
+              直接 display:none，见 phone.css），折行只由主文案决定 */}
+          <span className="board-enter-label">{strings.game.enterStation}</span>
+          <span className="btn-kbd-hint" aria-hidden="true">
+            {strings.game.enterStationKbd}
           </span>
         </Button>
       )}
@@ -470,9 +568,19 @@ export function Game({
       : []),
   ];
 
+  /* R10E（§3）：高光帘里的角色卡数据（纯派生，不在就整个帘不画） */
+  const spotPlayer = spot
+    ? state.players.find((p) => p.id === spot.id)
+    : null;
+  const dress = weatherDressFor(weatherDress);
+
   return (
     <div
-      className={'game-screen' + (phoneLand ? ' game-screen--phone-land' : '')}
+      className={
+        'game-screen' +
+        (phoneLand ? ' game-screen--phone-land' : '') +
+        (dress ? ` weather--${dress}` : '')
+      }
       data-testid="screen-game"
     >
       {!phoneLand && (
@@ -497,7 +605,7 @@ export function Game({
 
         <div className="game-board-area">
           {/* 手机横屏：overlay 内容挪进右竖栏（.phone-turn），画布左侧占 2/3 屏 */}
-          <BoardMount {...board} compact={phoneLand}>
+          <BoardMount {...board} weatherDress={weatherDress} compact={phoneLand}>
             {phoneLand ? null : boardOverlay}
           </BoardMount>
         </div>
@@ -505,19 +613,12 @@ export function Game({
         {!phoneLand && (
           <aside className="game-right">
             {bots.slice(2).map(renderBotSlot)}
+            {/* R10E（§4 卡片节食）：圈数文字/「顺序：」标签撤掉——
+                图形簇（3 圈点 + 8 站点格 + 小头像片）自己就讲得清 */}
             <div className="lap-card">
-              <p className="lap-card-lap">
-                {fmt(strings.hud.lapOf, { lap: state.lap, laps: gameConfig.laps })}
-              </p>
-              {/* R10D（UI #8）：图形化进度簇——3 圈点 + 8 站点格 */}
               {progressCluster}
               {orderChips.length > 0 && (
-                <p className="lap-card-order">
-                  <span className="lap-card-order-label">
-                    {strings.hud.orderLabel}
-                  </span>
-                  <span className="order-strip">{orderChips}</span>
-                </p>
+                <span className="order-strip">{orderChips}</span>
               )}
             </div>
           </aside>
@@ -525,10 +626,18 @@ export function Game({
 
         {!phoneLand && (
           <footer className="game-bottom">
-            <div className="me-avatar" aria-hidden="true">
+            {/* R10E（§3/§4）：真人头像=「我的卡」ID 卡入口（点开高光卡） */}
+            <button
+              type="button"
+              className="me-avatar"
+              data-testid="me-card"
+              aria-label={strings.hud.meCard}
+              aria-expanded={spot?.id === human.id}
+              onClick={() => openSpot(human.id)}
+            >
               <span className="me-avatar-icon">{playerIcon(human.characterId)}</span>
               <span className="me-name">{playerDisplayName(human)}</span>
-            </div>
+            </button>
             {/* R10：常驻卡进手牌扇——菜谱任务卡 + 留菜夹卡（抽到菜谱时
                 新卡以 quest-land 翻落入手；free 档各卡自然宽） */}
             <div className="me-hand">
@@ -539,34 +648,50 @@ export function Game({
                 ariaLabel={strings.hud.basket}
               />
             </div>
-            <div className="me-coins">
-              <Coins
-                count={human.coins}
-                label={myCoinsLabel}
-                counter={<CoinCounter value={human.coins} label={myCoinsLabel} />}
-              />
-            </div>
+            {/* R10E（§4）：钱包=一小摞真金币 + 大数字（币堆即钱包入口） */}
             <button
               type="button"
-              className="clip-chip"
+              className="me-coins coin-pile"
               data-testid="btn-wallet"
               onClick={onOpenWallet}
-              aria-label={strings.hud.wallet}
+              aria-label={fmt(strings.hud.walletWithCoins, {
+                n: human.coins,
+              })}
             >
-              {strings.hud.wallet}
+              <CoinDots n={human.coins} className="coin-pile-dots" />
+              <span className="coin-pile-num">
+                <CoinCounter value={human.coins} label={myCoinsLabel} />
+              </span>
             </button>
-            <div className="clip-chip clip-chip--hold">
-              {strings.hud.holdClip}
-              <span className="clip-chip-sub">
-                {human.holdClip ? '1' : strings.hud.empty}
+            {/* R10E（§4）：先等等=迷你卡夹（两片卡影 + 角徽） */}
+            <div
+              className="clip-chip clip-chip--hold"
+              aria-label={fmt(strings.hud.holdClipAria, {
+                item: holdClipInfo ? cardName(human.holdClip!) : strings.hud.empty,
+              })}
+            >
+              <span className="clip-stack" aria-hidden="true">
+                <i />
+                <i />
+                <i className="clip-badge">{human.holdClip ? '1' : '–'}</i>
               </span>
+              <span className="clip-chip-sub">{strings.hud.holdClip}</span>
             </div>
-            <div className="clip-chip clip-chip--debt">
-              {strings.hud.busDebt}
-              <span className="clip-chip-sub">
-                {human.busDebt > 0 ? `${human.busDebt} ${coinWord(human.busDebt)}` : strings.hud.empty}
+            {/* R10E（§4）：待付=卡夹 + 一枚 IOU 代币 */}
+            <div
+              className="clip-chip clip-chip--debt"
+              aria-label={fmt(strings.hud.busDebtAria, { n: human.busDebt })}
+            >
+              <span className="clip-stack" aria-hidden="true">
+                <i />
+                <i />
+                <i className="iou-token">
+                  {human.busDebt > 0 ? human.busDebt : '–'}
+                </i>
               </span>
+              <span className="clip-chip-sub">{strings.hud.busDebt}</span>
             </div>
+            {/* R10E（§4）：求助牌=一张小求助卡 */}
             <button
               type="button"
               className="clip-chip clip-chip--help"
@@ -574,8 +699,10 @@ export function Game({
               onClick={onOpenHelp}
               aria-label={strings.hud.help}
             >
-              {strings.hud.help}
-              <span className="clip-chip-sub">{strings.hud.helpAnytime}</span>
+              <span className="help-card-btn" aria-hidden="true">
+                ?
+              </span>
+              <span className="clip-chip-sub">{strings.hud.help}</span>
             </button>
           </footer>
         )}
@@ -623,17 +750,18 @@ export function Game({
                     className={
                       'phone-bot' +
                       (board.activePlayerId === b.id ? ' phone-bot--on' : '') +
-                      (isNext ? ' phone-bot--next' : '')
+                      (isNext ? ' phone-bot--next' : '') +
+                      (spot?.id === b.id && !spot.manual ? ' phone-bot--spot' : '')
                     }
                     data-bot={b.characterId ?? undefined}
-                    aria-expanded={openBot === b.id}
+                    aria-expanded={spot?.id === b.id}
                     aria-label={
                       fmt(strings.hud.botChip, {
                         name: playerDisplayName(b),
                         n: b.coins,
                       }) + (isNext ? ` · ${strings.hud.nextUp}` : '')
                     }
-                    onClick={() => setOpenBot(openBot === b.id ? null : b.id)}
+                    onClick={() => openBotSpot(b.id)}
                   >
                     <span className="phone-bot-avatar" aria-hidden="true">
                       {botIcon(b)}
@@ -647,16 +775,13 @@ export function Game({
                         {trait.label}
                       </span>
                     )}
-                    <span className="phone-bot-name">{playerDisplayName(b)}</span>
-                    <span className="phone-bot-coins" aria-hidden="true">
-                      🪙{b.coins}
+                    {/* R10E（§4）：币数画成迷你金币点；
+                        R1-E4：旁边补可见数字，金币只作辅助（读屏走 aria-label） */}
+                    <span className="phone-bot-coins-row">
+                      <CoinDots n={b.coins} cap={5} className="coin-dots--xs" />
+                      <span className="phone-bot-num" aria-hidden="true">{b.coins}</span>
                     </span>
                   </button>
-                  {openBot === b.id && (
-                    <div className="phone-bot-pop">
-                      <BotCard player={b} thinking={board.activePlayerId === b.id} />
-                    </div>
-                  )}
                 </span>
               );
             })}
@@ -713,6 +838,34 @@ export function Game({
         </>
       ) : (
         popupEl
+      )}
+
+      {/* R10E（§3 高光时刻）：ProfileCard 全屏卡——点帘/点卡/Esc 都收；
+          R1-E3：全屏卡只给 manual（孩子点徽章/小头像亲手开的）；
+          bot 的 auto 高光改走角落小卡 --spot 态（见上方 effect），
+          不再用全屏帘挡住下方操作 */}
+      {spotPlayer && spot?.manual && (
+        <div className="spotlight-veil" onClick={closeSpot}>
+          <ProfileCard
+            player={spotPlayer}
+            info={spotlightInfo(
+              spotPlayer,
+              board.activePlayerId === spotPlayer.id,
+            )}
+            contact={
+              spotPlayer.isHuman ? strings.hud.spotlightBasket : undefined
+            }
+            onContact={
+              spotPlayer.isHuman
+                ? () => {
+                    closeSpot();
+                    onOpenWallet();
+                  }
+                : undefined
+            }
+            onDismiss={closeSpot}
+          />
+        </div>
       )}
     </div>
   );

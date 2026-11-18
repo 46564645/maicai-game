@@ -125,6 +125,13 @@ export function PopupOutlet({
       setVisible(true);
       return undefined;
     }
+    /* R10E（e2e 修复）：?fast=1 下不等 170ms 淡出尾——软渲染主线程
+       被钉死时该定时器可延迟数秒，钱包/求助抽屉的「Esc 关闭」断言
+       超时（keyboard e2e）。fast 只供测试驱动，退场演出本来不看。 */
+    if (new URLSearchParams(window.location.search).get('fast') === '1') {
+      setVisible(false);
+      return undefined;
+    }
     const t = window.setTimeout(() => setVisible(false), 170);
     return () => window.clearTimeout(t);
   }, [show]);

@@ -200,11 +200,14 @@ export function WeatherSpinner3D({
   shadows,
   onSpinChange,
   spinCtl,
+  quick = false,
 }: {
   weather?: { id: CardId | null; nonce: number };
   shadows: boolean;
   onSpinChange?: (spinning: boolean) => void;
   spinCtl?: MutableRefObject<SpinCtl>;
+  /** R1-E3：bot 简版——与 reduced 同路直落（不停整圈演出、不发推近信号） */
+  quick?: boolean;
 }) {
   const items = cards.weather;
   const count = items.length;
@@ -252,7 +255,8 @@ export function WeatherSpinner3D({
     burstMat.opacity = 0;
     if (burst.current) burst.current.visible = false;
     s.resultIdx = Math.max(0, items.findIndex((w) => w.id === id));
-    if (reduced) {
+    if (reduced || quick) {
+      // reduced-motion 或 bot 简版：直接停到结果，不转、不推近
       s.angle = sectorTargetAngle(s.resultIdx, count);
       s.phase = 'idle';
       return;

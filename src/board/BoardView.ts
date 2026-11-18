@@ -35,10 +35,19 @@ export interface BoardViewProps {
    *  id 由引擎先定（turn.sub.weatherId），3D 只负责演出；
    *  nonce=turn.orderIndex，区分同一玩家同站连转/同天气连出。 */
   weather?: { id: CardId | null; nonce: number };
+  /** R1-E3 追加（Board2D 忽略）：当前天气时刻的行动者是 bot 时为 true——
+   *  bot 简版：3D 转盘直落、不推近镜头（Scene/CameraRig 据此处理）。
+   *  纯演出标记，由 boardModel 从 state 派生，引擎结果不动。 */
+  weatherQuick?: boolean;
   /** M4.5.4 追加（Board2D 忽略）：最近一次「得/失币」信号（流水 log 派生），
    *  3D 用它播硬币飞行动画；nonce=log.id，同一笔不重复触发。 */
   fx?: { nonce: number; playerId: PlayerId | null; kind: 'spend' | 'gain' };
   /** M4.5.6 追加（Board2D 忽略）：视图选项而非 state 派生——
    *  手机横屏窄画布，3D 相机更贴近当前棋子（ww：镜头对准自己的棋子）。 */
   compact?: boolean;
+  /** R10E 追加（Board2D 忽略，DOM 洗色另有 .game-screen.weather--*）：
+   *  落定天气布景——孩子点掉大天气卡（或 bot 转盘落定）后由 Game 挂上，
+   *  3D 据此调灯光/雾/雨丝/云速；null=晴天常态。引擎结果不动，
+   *  本字段只驱动演出。 */
+  weatherDress?: CardId | null;
 }

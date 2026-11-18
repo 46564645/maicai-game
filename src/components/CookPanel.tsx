@@ -6,7 +6,7 @@
  * 内全部落锅），锅里随即长出菜谱成品菜（弹簧入场 + 蒸汽两朵），
  * 集齐时成品盖 CSS foil 闪光 + PlaySpark。纯表现，命令仍是 ACK。
  */
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { getIngredient, getRecipe } from '../data/cards';
 import { strings } from '../data/strings';
@@ -40,6 +40,30 @@ export function CookPanel({
   const sparked = useRef(false);
   const n = me.collected.length;
   const dishDelay = n * STAGGER_MS + FLY_MS;
+  /* R10E（§3 大卡时刻）：集齐时成品菜以「大卡」弹到舞台等点——
+     点掉才见 OK（命令照旧 ACK，节奏与旧「自动弹成品+OK」等价） */
+  const [dishPop, setDishPop] = useState<'wait' | 'show' | 'done'>('wait');
+  /* R1-E2：等待段可点击跳过——定时器存 ref，点舞台即清掉并立即
+     显示大卡（飞锅动画照常在 CSS 层播，点的是「等」不是「演」） */
+  const dishTimer = useRef<number | null>(null);
+  useEffect(() => {
+    if (!complete || dishPop !== 'wait') return undefined;
+    dishTimer.current = window.setTimeout(
+      () => setDishPop('show'),
+      dishDelay + 320,
+    );
+    return () => {
+      if (dishTimer.current !== null) window.clearTimeout(dishTimer.current);
+      dishTimer.current = null;
+    };
+  }, [complete, dishPop, dishDelay]);
+
+  const skipDishWait = () => {
+    if (!complete || dishPop !== 'wait') return;
+    if (dishTimer.current !== null) window.clearTimeout(dishTimer.current);
+    dishTimer.current = null;
+    setDishPop('show');
+  };
 
   // 量出每张食材卡到锅心的位移，写成 --fx/--fy 由 CSS keyframe 飞过去
   useEffect(() => {
@@ -72,7 +96,13 @@ export function CookPanel({
     <div className="panel-body">
       <p className="panel-text">{strings.panel.cookPut}</p>
 
-      <div className="cook-stage">
+      <div
+        className={
+          'cook-stage' + (complete && dishPop === 'wait' ? ' cook-stage--waiting' : '')
+        }
+        data-testid="cook-stage"
+        onClick={skipDishWait}
+      >
         {/* 大锅/盘：食材卡飞进来，成品菜从这里长出来 */}
         <div className="cook-pan" ref={panRef} aria-hidden="true">
           <span
@@ -118,16 +148,46 @@ export function CookPanel({
           })}
         </p>
       )}
-      <Button
-        variant="primary"
-        keyHint="1"
-        data-testid="action-primary"
-        data-primary="true"
-        data-key={1}
-        onClick={() => send({ type: 'ACK' })}
-      >
-        {strings.actions.ok}
-      </Button>
+
+      {/* R10E（§3）：成品大卡时刻——菜出锅弹到世界中心等孩子点掉，
+          期间 OK 不出场（避免两颗「主按钮」抢戏） */}
+      {complete && dishPop === 'show' && (
+        <div className="moment-pop-wrap">
+          <button
+            type="button"
+            className="moment-card"
+            data-testid="dish-card"
+            data-key={1}
+            data-primary="true"
+            aria-label={strings.panel.dishReady}
+            onClick={() => setDishPop('done')}
+          >
+            <span className="card-foil">
+              <CardView
+                cardId={recipe!.id}
+                icon={recipe!.icon}
+                name={cardName(recipe!.id)}
+              />
+            </span>
+            <span className="moment-tap" aria-hidden="true">
+              {strings.panel.dishReady}
+            </span>
+          </button>
+        </div>
+      )}
+
+      {dishPop !== 'show' && (
+        <Button
+          variant="primary"
+          keyHint="1"
+          data-testid="action-primary"
+          data-primary="true"
+          data-key={1}
+          onClick={() => send({ type: 'ACK' })}
+        >
+          {strings.actions.ok}
+        </Button>
+      )}
     </div>
   );
 }

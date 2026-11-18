@@ -252,6 +252,31 @@
   /* 选中卡名大浮签（R10C：≥28px bold 墨字奶油片，悬在卡上方） */
   --font-size-hero: 1.75rem; /* 28px */
   --pending-ms: 1500ms;      /* 后悔窗口：派发到账前的可撤销时长 */
+
+  /* —— R10 Slice E：去框舞台 / 物理金币点 / ProfileCard / 天气布景 —— */
+  /* 舞台顶信息丸：半透明墨底 + 毛玻璃（压得住岛面、又不抢卡） */
+  --stage-pill-bg: color-mix(in srgb, var(--color-ink) 75%, transparent); /* R1-E1 复测纠正：60% 时浮签白字在近白衬底（白卡面/竖栏）上实测 4.38–4.46 < 4.5，加深至 75%（对纯白衬底解析 ≈7.1:1）；--color-backdrop 本体未动 */
+  --stage-pill-fg: var(--color-surface);
+  --stage-blur: 3px;
+  /* 内容文字浮丸：半透明奶油底（说明句/副标题浮在压暗岛上仍可读） */
+  --stage-note-bg: color-mix(in srgb, var(--color-surface) 84%, transparent);
+  /* 物理金币点：徽章列迷你枚 / 底栏币堆大枚 */
+  --coin-dot-size: 14px;
+  --coin-dot-size-sm: 9px;
+  /* ProfileCard 竖版 ID 卡：宽高、描边高光、holo 强度（owner：≤0.8 的克制） */
+  --pc-w: 188px;
+  --pc-h: 296px;
+  --pc-rim: color-mix(in srgb, var(--color-surface) 62%, transparent);
+  --pc-holo-strength: 0.55;
+  /* 天气布景：DOM 洗色 + 弹窗遮罩调温共用（rainy 偏蓝、windy 偏薄荷、sunny 暖黄） */
+  --weather-tint-sunny: color-mix(in srgb, var(--color-accent-yellow) 15%, transparent);
+  --weather-tint-rainy: color-mix(in srgb, var(--color-blue) 26%, transparent);
+  --weather-tint-windy: color-mix(in srgb, var(--color-mint) 20%, transparent);
+  /* 大卡时刻：世界中心弹出 340ms（recipe/weather/dish/story 共用） */
+  --moment-pop-ms: 340ms;
+  /* 徽章列买到卡缩略图（迷你卡砖） */
+  --thumb-w: 22px;
+  --thumb-h: 30px;
 }
 
 /* —— R8 大屏弹性：舞台宽是参照、不是硬顶 ——

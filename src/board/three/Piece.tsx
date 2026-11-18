@@ -13,6 +13,7 @@ import { Billboard, useGLTF } from '@react-three/drei';
 import { SkeletonUtils } from 'three-stdlib';
 import type { BoardPawn } from '../BoardView';
 import { hopPose, pawnAnchor } from './positions';
+import { fastMode } from './ambient';
 import { PALETTE, pawnColor, blobShadowTexture } from './materials';
 import { setShadows, tintMeshes, upgradeToPlastic } from './gltf';
 
@@ -203,8 +204,9 @@ export function Piece({
       const a = pawnAnchor(stationIndex, slot);
       g.position.set(a.x, BASE_Y, a.z);
       body.current?.scale.set(1.12, 1.12, 1.12);
-      // 当前行动者轻轻上下晃（持续 invalidate 保持呼吸感）
-      if (active && !reduced && body.current) {
+      // 当前行动者轻轻上下晃（持续 invalidate 保持呼吸感）；
+      // ?fast=1 冻结（见 ambient.fastMode，软渲染下防持续 invalidate 钉死主线程）
+      if (active && !reduced && !fastMode && body.current) {
         body.current.position.y = Math.abs(Math.sin(now * 3.2)) * 0.09;
         invalidate();
       } else if (body.current) {

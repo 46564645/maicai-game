@@ -10,7 +10,7 @@
  * 钱不够时花钱卡仍可点——点出 shake+宝石红闪+币条轻跳（不发命令），
  * 「币不够了」标签做第二通道（interaction #6）。
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { cards } from '../data/cards';
 import { strings } from '../data/strings';
 import { availableCommands, missingCost } from '../game/selectors';
@@ -18,7 +18,12 @@ import { fmt } from '../game/stations/shared';
 import { cardName, eventFreeLabel, eventSpendLabel, eventText } from '../i18n/cardText';
 import { eventEchoKind } from '../ui/eventEcho';
 import { bumpCoinHud } from '../ui/hudNudge';
-import type { Command, GameState } from '../game/types';
+import {
+  nextWeatherPhase,
+  weatherCardDelayMs,
+} from '../ui/weatherMoment';
+import type { WeatherMomentPhase } from '../ui/weatherMoment';
+import type { CardId, Command, GameState } from '../game/types';
 import { CardIcon } from './CardIcon';
 import { CardView } from './CardView';
 import { WeatherSpinner } from './WeatherSpinner';
@@ -93,6 +98,7 @@ export function EventPanel({
   send,
   revealed,
   onReveal,
+  onWeatherDone,
 }: {
   state: GameState;
   send: (c: Command) => unknown;
@@ -100,6 +106,9 @@ export function EventPanel({
       剧透 toast（「转到XX：『事件名』」在翻开完成前不该上屏） */
   revealed: boolean;
   onReveal: () => void;
+  /** R10E（§2 天气时刻）：大卡被点掉 → Game 给世界换天气布景
+      （DOM 洗色 + 3D 灯光/雨丝/云速）。引擎结果不动。 */
+  onWeatherDone?: (weatherId: CardId) => void;
 }) {
   const sub = state.turn?.sub;
   const card =
@@ -121,6 +130,39 @@ export function EventPanel({
     opt: 'spend',
     n: 0,
   });
+  /* R10E（§2 天气电影时刻）：转盘演出 → 大天气卡浮在舞台等点 →
+     点掉后世界换天气（onWeatherDone）再继续事件流程；
+     相位推进走纯机 nextWeatherPhase，节奏走 weatherCardDelayMs */
+  const [moment, setMoment] = useState<WeatherMomentPhase>('spin');
+  /* R10E（§3 大卡时刻）：故事卡也是「点一下继续」的卡——
+     open 展示 → sinking 下沉退场 → done 换选项卡扇 */
+  const [story, setStory] = useState<'open' | 'sinking' | 'done'>('open');
+  const reduced =
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
+
+  /* R1-E2：spin 段可点击跳过——定时器存 ref，点舞台任意处即清掉
+     定时器并按「已落定」推进相位（nextWeatherPhase 的 landed 迁移），
+     不等 1.5s 转完；落定后的大卡仍须点掉（阅读时间归孩子） */
+  const spinTimer = useRef<number | null>(null);
+  useEffect(() => {
+    if (moment !== 'spin') return undefined;
+    spinTimer.current = window.setTimeout(
+      () => setMoment((p) => nextWeatherPhase(p, 'landed')),
+      weatherCardDelayMs(reduced),
+    );
+    return () => {
+      if (spinTimer.current !== null) window.clearTimeout(spinTimer.current);
+      spinTimer.current = null;
+    };
+  }, [moment, reduced]);
+
+  const skipSpin = () => {
+    if (moment !== 'spin') return;
+    if (spinTimer.current !== null) window.clearTimeout(spinTimer.current);
+    spinTimer.current = null;
+    setMoment((p) => nextWeatherPhase(p, 'landed'));
+  };
 
   // 后悔窗口开→关（命令落地或撤销）时回声同步收掉
   useEffect(() => {
@@ -214,49 +256,114 @@ export function EventPanel({
     ),
   };
 
+  /* R10E（§2）：大天气卡点掉——相位进 done、世界换天气（Game 侧布景） */
+  const dismissWeather = () => {
+    setMoment((p) => nextWeatherPhase(p, 'tap'));
+    if (sub.weatherId) onWeatherDone?.(sub.weatherId);
+  };
+  /* R10E（§3）：故事卡点掉——先 220ms 下沉退场再放选项扇 */
+  const dismissStory = () => {
+    if (story !== 'open') return;
+    if (reduced) {
+      setStory('done');
+      return;
+    }
+    setStory('sinking');
+    window.setTimeout(() => setStory('done'), 220);
+  };
+
   return (
     <div className="panel-body panel-body--event">
-      <WeatherSpinner key={`${sub.weatherId}-${orderIdx}`} weatherId={sub.weatherId} />
-
-      <div className="event-stage">
-        {/* 落定天气：小天气卡立在边上（wth-* 插画已入册） */}
-        {weather && (
-          <div className="event-weather" data-testid="event-weather">
-            <CardView
-              cardId={weather.id}
-              icon={weather.icon}
-              name={cardName(weather.id)}
+      {/* R10E（§2 天气电影时刻）：转盘推近演出 → 大天气卡浮在舞台等点。
+          DOM 路线仍是全部操作的权威（3D 转盘只是跟着演） */}
+      {moment !== 'done' ? (
+        <div
+          className="weather-moment"
+          data-testid="weather-moment"
+          onClick={moment === 'spin' ? skipSpin : undefined}
+        >
+          {moment === 'spin' ? (
+            <WeatherSpinner
+              key={`${sub.weatherId}-${orderIdx}`}
+              weatherId={sub.weatherId}
             />
-          </div>
-        )}
-        {revealed ? (
-          /* R10C（play #1）：一张大的故事卡——事件美术 + 完整故事正文，
-             两个选项卡在下面整幅可读（≤3 张扇不重叠，名字不截断） */
-          <div className="event-story" data-testid="event-card">
-            <div className="event-story-art">
+          ) : (
+            weather && (
+              <button
+                type="button"
+                className="moment-card"
+                data-testid="weather-card"
+                data-key={1}
+                data-primary="true"
+                aria-label={cardName(weather.id)}
+                onClick={dismissWeather}
+              >
+                <CardView
+                  cardId={weather.id}
+                  icon={weather.icon}
+                  name={cardName(weather.id)}
+                />
+                <span className="moment-tap" aria-hidden="true">
+                  {strings.event.cardTap}
+                </span>
+              </button>
+            )
+          )}
+        </div>
+      ) : (
+        <div className="event-stage">
+          {/* 落定天气：小天气卡立在边上（wth-* 插画已入册） */}
+          {weather && (
+            <div className="event-weather" data-testid="event-weather">
               <CardView
-                cardId={card.id}
-                icon={card.icon}
-                name={cardName(card.id)}
+                cardId={weather.id}
+                icon={weather.icon}
+                name={cardName(weather.id)}
               />
             </div>
-            <p className="event-story-text">{eventText(card)}</p>
-          </div>
-        ) : (
-          <Deck
-            testid="action-primary"
-            dataKey={1}
-            ariaLabel={strings.event.deckHint}
-            hint={strings.event.deckHint}
-            face={
-              <CardView cardId={card.id} icon={card.icon} name={cardName(card.id)} />
-            }
-            onDraw={onReveal}
-          />
-        )}
-      </div>
+          )}
+          {revealed ? (
+            story === 'done' ? null : (
+              /* R10E（§3）：故事卡=可点掉的卡——读完点一下，卡沉下去、
+                 选项扇上来（不再要一颗 UI 按钮来「继续」） */
+              <button
+                type="button"
+                className={'event-story' + (story === 'sinking' ? ' event-story--out' : '')}
+                data-testid="event-card"
+                data-key={1}
+                data-primary="true"
+                aria-label={strings.event.storyDone}
+                onClick={dismissStory}
+              >
+                <span className="event-story-art">
+                  <CardView
+                    cardId={card.id}
+                    icon={card.icon}
+                    name={cardName(card.id)}
+                  />
+                </span>
+                <span className="event-story-text">{eventText(card)}</span>
+                <span className="event-story-tap" aria-hidden="true">
+                  {strings.event.cardTap}
+                </span>
+              </button>
+            )
+          ) : (
+            <Deck
+              testid="action-primary"
+              dataKey={1}
+              ariaLabel={strings.event.deckHint}
+              hint={strings.event.deckHint}
+              face={
+                <CardView cardId={card.id} icon={card.icon} name={cardName(card.id)} />
+              }
+              onDraw={onReveal}
+            />
+          )}
+        </div>
+      )}
 
-      {revealed && (
+      {moment === 'done' && revealed && story === 'done' && (
         <>
           <div className="panel-foot">
             <p className="panel-subtitle">

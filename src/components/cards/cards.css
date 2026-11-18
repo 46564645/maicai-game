@@ -1247,6 +1247,11 @@
    做饭/开饭/反思：组装飞入 + 盘卡弹入 + foil 闪光 + 反思选择卡扇
    ========================================================================== */
 /* R10C（play #2）：大锅 + 食材飞锅 + 成品长出 + 蒸汽两朵 */
+/* R1-E2：成品卡出现前的等待段可点击跳过（点舞台立即出卡） */
+.cook-stage--waiting {
+  cursor: pointer;
+}
+
 .cook-stage {
   display: flex;
   flex-direction: column;
@@ -1628,5 +1633,209 @@
   .play-spark i::after {
     animation: none;
     opacity: 0;
+  }
+}
+
+/* ==========================================================================
+   R10 Slice E —— ProfileCard 竖版 ID 卡（角色高光时刻）
+   版式借 ReflectiveCard（MIT，THIRD_PARTY_NOTICES 新条目）的「竖版 ID 卡」
+   思路：头行小徽+状态点、中段大头像砖+名+头衔、底行「币=金币点」+
+   买到小卡缩略图 + 右下 44px 方块接触钮。
+   倾转/高光/foil 不另造引擎——复用 TiltCard（--tc-* 指针倾斜 +
+   tc-glare 高光斑 + tc-foil 一次性彩虹扫光，即「克制的 holo」）。
+   ========================================================================== */
+.pc {
+  width: var(--pc-w);
+  height: var(--pc-h);
+  border-radius: var(--radius-card);
+}
+.pc .tc {
+  border-radius: var(--radius-card);
+}
+.pc-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+  height: 100%;
+  padding: var(--space-3);
+  border-radius: var(--radius-card);
+  background: linear-gradient(
+    160deg,
+    var(--pc-backdrop, var(--color-surface)) 0%,
+    var(--color-surface) 55%,
+    color-mix(in srgb, var(--pc-accent, var(--color-primary)) 14%, var(--color-surface))
+      100%
+  );
+  border: 2px solid var(--pc-rim);
+  box-shadow: var(--shadow-lg), var(--inset-light);
+  overflow: hidden;
+  text-align: left;
+  color: var(--color-text);
+}
+.pc-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.pc-badge {
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-button);
+  background: var(--color-surface-dim);
+  border: 1.5px solid var(--color-line-strong);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pc-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-xs);
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+.pc-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-muted);
+}
+.pc-status--live .pc-dot {
+  background: var(--color-status-live);
+}
+.pc-id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin: var(--space-1) 0;
+}
+.pc-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-card);
+  font-size: 40px;
+  line-height: 1;
+  background: var(--pc-backdrop, var(--color-surface-dim));
+  border: 2px solid var(--pc-rim);
+  box-shadow: var(--shadow-sm), var(--inset-light);
+}
+.pc-name {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-heavy);
+  color: var(--color-ink);
+}
+.pc-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-muted);
+}
+.pc-foot {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1.5px solid var(--color-line-soft);
+}
+.pc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.pc-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-muted);
+}
+.pc-value {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-heavy);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+.pc-thumbs {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+}
+.pc-thumb {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--thumb-w);
+  height: var(--thumb-h);
+  border-radius: 4px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  font-size: 12px;
+  line-height: 1;
+  overflow: hidden;
+}
+.pc-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pc-thumb--more {
+  background: var(--color-surface-dim);
+  color: var(--color-muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+}
+/* 右下 44px 方块接触钮（真人=看看篮子，bot 无钮留空） */
+.pc-contact {
+  flex: none;
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-min-size);
+  height: var(--tap-min-size);
+  border-radius: var(--radius-card);
+  border: 2px solid var(--color-line-strong);
+  background: var(--gradient-card);
+  box-shadow: var(--shadow-sm), var(--inset-light);
+  color: var(--color-ink);
+  cursor: pointer;
+  transition:
+    transform var(--motion-fast) var(--ease-spring),
+    box-shadow var(--motion-fast) var(--motion-ease);
+}
+.pc-contact:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md), var(--inset-light);
+}
+.pc-contact:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+/* holo 强度压到 --pc-holo-strength（≤0.8 的克制档——是 ID 卡不是抽卡包） */
+.pc .tc-foil {
+  opacity: var(--pc-holo-strength);
+}
+/* PM 验收补记（Slice E）：glare 光斑默认停在卡面正中，正压在头像/名字上，
+   名字被冲成银灰低对比——ID 卡以认人认名为先，光斑压到三成。 */
+.pc .tc-glare {
+  opacity: 0.3;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pc .tc-foil {
+    opacity: calc(var(--pc-holo-strength) * 0.5);
   }
 }

@@ -141,3 +141,31 @@ the following restrictions:
 - Magnet → `src/components/cards/useDragPlay.ts` 中的近目标吸附（弹簧参数借用其实现）
 - Counter → `src/components/cards/CoinCounter.tsx`（逐位滚动数字，裁剪为整数 0–99）
 - ClickSpark → `src/components/cards/PlaySpark.tsx`（打出/买入迸溅短线；canvas 版改为零 rAF 的 DOM+CSS 实现，保留全局并发上限思路）
+
+## R10 Slice E「去框舞台」（2026-11-18；E9 登记订正）
+
+以下两条同归 **React Bits by David Haz**（https://github.com/DavidHDev/react-bits），
+许可证 **MIT + Commons Clause**（可用于本项目；不得将组件本身作为商品出售），
+与上文 R10 卡片交互各条同一出处、同一许可证：
+
+- ProfileCard → `src/components/cards/ProfileCard.tsx`（玩家角色高光卡）：
+  借用范围 = 组件概念与高光卡形态（角色信息集中成一张可弹出的高光卡）。
+  实现方式 = 本仓库重写：卡体结构与文案推导自写，倾转 / 箔光（foil）/
+  glare 引擎复用上文已登记的 TiltedCard（`TiltCard.tsx`），未搬入原组件代码。
+- ReflectiveCard → 同上 `ProfileCard.tsx` 的版式：借用范围 = 竖版 ID 卡
+  版式骨架（头行小徽 + 状态点 / 中段头像砖 + 大名 + 头衔 / 底行属性栏 +
+  右下方块钮）。实现方式 = 本仓库按本项目 token（奶油/橙/藏青）重写版式，
+  未搬入原组件代码。
+
+两条共同的「未引入项」（有意不移植，儿童课堂产品 + 低端平板帧率预算）：
+- @hugeicons 图标库未引入——原组件用到的图标一律以本仓手写内联 SVG 替代
+  （如 ProfileCard 的篮筐接触钮 BasketGlyph）；
+- 未移植 ReflectiveCard 的 WebGL2 反射着色器管线；
+- 无任何摄像头 / 视频采集路径（原组件的反射视频源不接）。
+
+本步其余新增均为自写代码，未新引第三方代码或素材：
+
+- `src/ui/coinDots.ts` / `src/ui/weatherMoment.ts` / `src/ui/spotlight.ts`：
+  金币点、天气时刻相位机、名片内容推导，全部手写纯函数。
+- `src/board/three/Scene.tsx` 的 `WeatherDresser` / `RainVeil`：灯光渐变与
+  InstancedMesh 雨丝阵为手写（instanced 写法同 `Flora.tsx` 惯例）。

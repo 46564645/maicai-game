@@ -72,6 +72,16 @@ export const zhStrings: StringsDict = {
     progressLabel: '第 {lap} 圈，走到第 {n} 站',
     nextUp: '下一位',
     recipeStrip: '菜谱进度',
+    /* R10E：角色高光卡（ProfileCard）状态点 / 底行标签 / 物件可点名 */
+    spotlightActing: '在行动',
+    spotlightWaiting: '等着',
+    spotlightBasket: '看看篮子',
+    spotlightCoins: '币',
+    spotlightMissing: '还差 {n} 样',
+    meCard: '我的卡',
+    /* R10E：卡夹/代币物件的读屏名（图形只认形状，名字走 aria） */
+    holdClipAria: '先等等夹：{item}',
+    busDebtAria: '待付夹：{n} 币',
   },
 
   game: {
@@ -189,6 +199,9 @@ export const zhStrings: StringsDict = {
     storeAll: '全部食材',
     storeHoldLine: '先等等夹：{item}（{n} 币）',
     cookPut: '把你的菜放进盘子',
+    /* R10E：弹出时刻——菜谱卡点按提示 + 成品出锅提示 */
+    pocketRecipe: '收进篮子',
+    dishReady: '菜出锅啦！',
     coachLine: '先找菜谱里的菜：你还缺 {items}',
   },
 
@@ -251,6 +264,9 @@ export const zhStrings: StringsDict = {
     echoSpendOk: '花了 {p} 币，买菜的钱还够',
     echoSpendGap: '注意：买菜还差 {n} 币了',
     echoFree: '1 个币也没花，留给后面的车费和买菜',
+    /* R10E：天气/故事卡时刻——大卡下面的点按提示与故事卡收卡的无障碍名 */
+    cardTap: '点一下，继续',
+    storyDone: '看好了',
   },
 
   parent: {

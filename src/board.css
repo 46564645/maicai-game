@@ -431,7 +431,9 @@
   text-align: left;
   transition:
     border-color var(--motion-fast) var(--motion-ease),
-    box-shadow var(--motion-fast) var(--motion-ease);
+    box-shadow var(--motion-fast) var(--motion-ease),
+    transform var(--motion-fast) var(--motion-ease),
+    background-color var(--motion-fast) var(--motion-ease);
 }
 
 .bot-card--thinking {
@@ -770,3 +772,124 @@
   color: var(--bot-accent-follower);
 }
 
+
+/* ==========================================================================
+   R10 Slice E —— 徽章化 bot 卡 / 顺序片金币点 / ProfileCard 高光帘
+   ========================================================================== */
+
+/* §3：bot 小卡瘦身成「徽章」——头像 + 名签 + 金币点 + 买到小卡缩略图；
+   本身是按钮（点开 ProfileCard 高光卡），盒样不变、补上交互 */
+button.bot-card {
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  width: 100%;
+}
+button.bot-card:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.bot-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+/* R1-E3：bot 自动角落高光（~1s）——墨描边 + 淡橙底 + 微微上抬，
+   与「下一位」order-chip 同语言；不开帘、不挡任何操作 */
+.bot-card--spot {
+  border-color: var(--color-ink);
+  background: var(--color-primary-soft);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* R1-E4：金币点 + 可见数字同行（数字小号粗体、等宽数字防跳动） */
+.bot-card-coins {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.bot-coin-num {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+
+/* 买到卡缩略图：迷你卡砖（有插画用插画，否则图标） */
+.bot-thumbs {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+}
+.bot-thumb {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--thumb-w);
+  height: var(--thumb-h);
+  border-radius: 4px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  font-size: 12px;
+  line-height: 1;
+  overflow: hidden;
+}
+.bot-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.bot-thumb--more {
+  background: var(--color-surface-dim);
+  color: var(--color-muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+}
+
+/* 顺序片两态：头像 + 名 + 金币点一行排不下就竖排（列宽 190px） */
+.order-chip-mid {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  min-width: 0;
+}
+
+/* R1-E4：顺序片的金币点旁补可见数字（与 .pc-value 同口径：等宽数字） */
+.order-chip-coins {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.order-chip-num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* §3：ProfileCard 高光时刻的暗帘——点帘/点卡都收起；
+   与 .popup-backdrop 同层（z 20 之上一点点，压在 toast 下） */
+.spotlight-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 22;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background: color-mix(in srgb, var(--color-backdrop) 60%, transparent);
+  backdrop-filter: blur(var(--stage-blur));
+  -webkit-backdrop-filter: blur(var(--stage-blur));
+}
+@media (prefers-reduced-motion: no-preference) {
+  .spotlight-veil .pc {
+    animation: moment-pop var(--moment-pop-ms) var(--ease-spring) backwards;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spotlight-veil .pc {
+    animation: moment-pop 140ms var(--ease-out) backwards;
+  }
+}

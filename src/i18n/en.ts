@@ -70,6 +70,16 @@ export const enStrings = {
     progressLabel: 'Lap {lap}, at stop {n}',
     nextUp: 'Next up',
     recipeStrip: 'Recipe progress',
+    /* R10E: ProfileCard spotlight — status dot / footer label / object names */
+    spotlightActing: 'On a turn',
+    spotlightWaiting: 'Waiting',
+    spotlightBasket: 'See my basket',
+    spotlightCoins: 'coins',
+    spotlightMissing: '{n} to go',
+    meCard: 'My card',
+    /* R10E: object-name aria labels for the clip tokens (icons only) */
+    holdClipAria: 'Maybe later clip: {item}',
+    busDebtAria: 'To pay later: {n} coins',
   },
 
   /* 棋盘与游戏主界面 */
@@ -194,6 +204,9 @@ export const enStrings = {
     storeAll: 'All food',
     storeHoldLine: '"Maybe later" clip: {item} ({n} coins)',
     cookPut: 'Put your food on the plate',
+    /* R10E: pop moments — recipe card tap aria + dish pop hint */
+    pocketRecipe: 'Pocket it',
+    dishReady: 'Fresh out of the pot!',
     coachLine: 'Find recipe food first — you still need {items}',
   },
 
@@ -262,6 +275,10 @@ export const enStrings = {
     echoSpendOk: 'Spent {p} — food money is still enough',
     echoSpendGap: 'Careful: food money is {n} coins short now',
     echoFree: 'Not a coin spent — saved for the bus and food',
+    /* R10E: weather/story card moments — tap hint under the big card
+       and the story card's dismiss a11y name */
+    cardTap: 'Tap to go on',
+    storyDone: 'Got it',
   },
 
   /* AI 家长站（06） */

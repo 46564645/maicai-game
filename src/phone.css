@@ -241,14 +241,27 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* 点头像展开的详情卡（复用 BotCard） */
-.phone-bot-pop {
-  position: absolute;
-  top: calc(100% + var(--space-1));
-  left: 0;
-  z-index: 11;
-  width: 190px;
+/* R1-E3：bot 自动角落高光（~1s）——与桌面 BotCard --spot 同语言 */
+.phone-bot--spot {
+  border-color: var(--color-ink);
+  background: var(--color-primary-soft);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
+
+/* R1-E4：手机头像片的金币点旁补可见数字（金币只作辅助） */
+.phone-bot-coins-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.phone-bot-num {
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* R10E（§3）：点头像改为全屏 ProfileCard 高光（.spotlight-veil），
+   旧的局部弹出详情卡位不再使用（.phone-bot-pop 已从 JSX 移除） */
 
 /* —— 右竖栏：轮到你了 + 当前要做的事 —— */
 .phone-rail {
@@ -306,6 +319,20 @@
   line-height: 1.25;
 }
 
+/* R1-E7：栏内主按钮统一允许折行——base.css 的 .btn 默认 nowrap，
+   长英文在窄栏里会把文字顶出按钮边界（scrollWidth > clientWidth，
+   切片 D 遗留④实测 76 > 72）。用 .game-screen--phone-land 前缀把
+   特异性抬到 base/hud 之上，是明确的作用域规则，不靠 CSS 加载顺序；
+   .phone-turn .btn-kbd-hint 在栏内直接不渲染盒（触屏无键盘，
+   且不让提示参与主文案的折行计算）。 */
+.game-screen--phone-land .phone-turn .btn,
+.game-screen--phone-land .panel-actions .btn {
+  white-space: normal;
+}
+.phone-turn .btn-kbd-hint {
+  display: none;
+}
+
 /* 触屏没有键盘：手机横屏下「Enter / 空格」一类按键提示不显示；
    只藏带 --kbd 标记的真键盘提示，AI 家长规则说明等照显 */
 .game-screen--phone-land .btn-kbd-hint,
@@ -336,10 +363,12 @@
   width: 100%;
   max-width: none;
   max-height: none;
-  padding: var(--space-2) var(--space-3);
-  border: 2px solid var(--color-line-strong);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-md);
+  padding: var(--space-1) var(--space-2);
+  /* R10E（§1 去框）：栏内弹窗同样透明化——卡扇/按钮/浮丸直接
+     浮在竖栏底上，不再套一层描边卡框 */
+  border: none;
+  box-shadow: none;
+  background: transparent;
   /* T0（M4.5.9 复验）：竖栏内不放 popup-rise 入场动画。hud.css 的
      popup-rise 从 translateY(26px) 起步——浮动对话框无妨，但竖栏内
      面板是流内布局，位移直接把底部按钮顶出安全区（实测：动画进行中
@@ -348,8 +377,21 @@
   animation: none;
 }
 
+/* 栏内 ::before 天气洗色锚不住（backdrop 是 static 流内盒），关掉 */
+.phone-rail .popup-backdrop::before {
+  display: none;
+}
+
+/* R10E：栏内头丸缩小一档（仍是半透明墨丸） */
 .phone-rail .popup-head {
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-1);
+  padding: 2px var(--space-1) 2px var(--space-3);
+  gap: var(--space-2);
+}
+
+/* R10E：栏内 foot 与内容之间连发丝线也不需要了 */
+.game-screen--phone-land .panel-foot {
+  border-top: none;
 }
 
 .phone-rail .popup-title {
@@ -681,7 +723,6 @@
 
 .game-screen--phone-land .panel-foot {
   position: static;
-  border-top: 2px solid var(--color-line);
 }
 
 /* 吸底区横排按钮里塞不下 🔊 朗读钮（会压住邻钮/探出栏缘），手机横屏
