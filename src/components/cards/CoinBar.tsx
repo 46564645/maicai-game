@@ -1,0 +1,81 @@
+/**
+ * CoinBar.tsx —— R10C（education #1 / UI runner-up）新加坡条形图金币条：
+ * 把 walletSummary 的抽象三段（菜谱还差 / 车费 / 自由花）画成一排金币格，
+ * 选中卡时从「自由花」端开始点亮它要吃掉的格子；价格溢出到菜谱/车费
+ * 段的格子会警示脉动。纯派生数据展示，不产生任何命令。
+ */
+import { strings } from '../../data/strings';
+import { fmt } from '../../game/stations/shared';
+
+interface Cell {
+  key: string;
+  seg: 'recipe' | 'bus' | 'free';
+  lit: 'idle' | 'spend' | 'warn';
+}
+
+export function CoinBar({
+  coins,
+  missingCost,
+  busDebt,
+  spend = 0,
+}: {
+  coins: number;
+  /** 菜谱还差的菜价总额（walletSummary.missingCost） */
+  missingCost: number;
+  /** 待付车费（walletSummary.busDebt） */
+  busDebt: number;
+  /** 选中卡的单价：从自由花端点亮 spend 格，溢出段警示脉动 */
+  spend?: number;
+}) {
+  // 段长 clamp：币不够时菜谱段先占位，车费/自由花依次收缩
+  const recipe = Math.max(0, Math.min(missingCost, coins));
+  const bus = Math.max(0, Math.min(busDebt, coins - recipe));
+  const free = Math.max(0, coins - recipe - bus);
+
+  const cells: Cell[] = [];
+  const push = (seg: Cell['seg'], n: number) => {
+    for (let i = 0; i < n; i++) cells.push({ key: `${seg}-${i}`, seg, lit: 'idle' });
+  };
+  push('recipe', recipe);
+  push('bus', bus);
+  push('free', free);
+
+  // 消费从「自由花」端（数组尾）往回吃；吃到菜谱/车费段的格 → warn
+  let left = Math.max(0, spend);
+  for (let i = cells.length - 1; i >= 0 && left > 0; i--) {
+    cells[i].lit = cells[i].seg === 'free' ? 'spend' : 'warn';
+    left--;
+  }
+
+  const segCells = (seg: Cell['seg']) => cells.filter((c) => c.seg === seg);
+  const seg = (name: Cell['seg'], label: string) =>
+    segCells(name).length > 0 && (
+      <span className={`cb-seg cb-seg--${name}`} key={name}>
+        <span className="cb-cells" aria-hidden="true">
+          {segCells(name).map((c) => (
+            <i key={c.key} className={`cb-cell cb-cell--${c.lit}`} />
+          ))}
+        </span>
+        <span className="cb-label">{label}</span>
+      </span>
+    );
+
+  return (
+    <div className="coin-bar">
+      <div
+        className="cb-segs"
+        role="img"
+        aria-label={`${coins} − ${spend} → ${coins - spend}`}
+      >
+        {seg('recipe', strings.coinbar.recipe)}
+        {seg('bus', strings.coinbar.bus)}
+        {seg('free', strings.coinbar.free)}
+      </div>
+      {spend > 0 && (
+        <p className="cb-math" aria-hidden="true">
+          {fmt(strings.coinbar.math, { a: coins, b: spend, c: Math.max(0, coins - spend) })}
+        </p>
+      )}
+    </div>
+  );
+}

@@ -9,6 +9,7 @@ import type { FormEvent } from 'react';
 import { cards } from '../data/cards';
 import { strings } from '../data/strings';
 import { playerDisplayName, reflectionEntryText, reflectionOptionLabel, reflectionPrompt } from '../i18n/cardText';
+import { orderOptions, reflectionDone } from '../ui/reflectionPick';
 import type { Command, GameState, Player } from '../game/types';
 import { Button } from '../components/Button';
 import { CardView } from '../components/CardView';
@@ -53,7 +54,15 @@ export function Reflection({
   const [freeText, setFreeText] = useState('');
 
   const options = cards.reflections.humanOptions;
-  const preset = options.filter((o) => o.id !== FREE_OPTION_ID);
+  /* R10C：从她自己的账本推「今天真做到的事」——做到的选项排前、
+     盖「做到了」小标，孩子挑真的那件说（education runner-up） */
+  const me = state.players.find((p) => p.id === state.humanId);
+  const done = me ? reflectionDone(state, me) : {};
+  const preset = orderOptions(
+    options.filter((o) => o.id !== FREE_OPTION_ID),
+    done,
+  );
+  const anyDone = preset.some((o) => done[o.id]);
   const free = options.find((o) => o.id === FREE_OPTION_ID);
   // 卡片顺序 = 开饭页座位顺序（players 即座位序，真人 p0 固定左上）；
   // 引擎按座位序依次提问，reflections 本来就是前缀，这里再按 players 显式排
@@ -81,6 +90,7 @@ export function Reflection({
             <CardView
               icon={OPTION_ICON[o.id] ?? '💬'}
               name={label}
+              tag={done[o.id] ? strings.reflection.didIt : undefined}
               keyHint={String(k)}
               dataKey={k}
               primary={k === 1}
@@ -144,6 +154,9 @@ export function Reflection({
       ) : (
         humanPending && (
           <div className="reflection-options">
+            {anyDone && (
+              <p className="reflection-personal">{strings.reflection.personalHint}</p>
+            )}
             <Hand
               className="reflection-hand"
               items={optionItems}

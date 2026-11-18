@@ -7,7 +7,6 @@
  * 键位（1=花钱 2=免费）与旧按钮流程完全一致；钱不够时花钱卡置灰
  * 不可打（不发命令、不发光）。
  */
-import { useState } from 'react';
 import { cards } from '../data/cards';
 import { strings } from '../data/strings';
 import { availableCommands } from '../game/selectors';
@@ -18,8 +17,10 @@ import { CardView } from './CardView';
 import { WeatherSpinner } from './WeatherSpinner';
 import { Deck } from './cards/Deck';
 import { Hand } from './cards/Hand';
+import { PendingChip } from './cards/PendingChip';
 import { PlayableGlow } from './cards/PlayableGlow';
 import { TiltCard } from './cards/TiltCard';
+import { usePending } from './cards/usePending';
 import type { HandItem } from './cards/Hand';
 
 /** 一张选择卡：PlayableGlow + TiltCard 检视 + CardView；点按即打出 */
@@ -68,9 +69,15 @@ function OptionCard({
 export function EventPanel({
   state,
   send,
+  revealed,
+  onReveal,
 }: {
   state: GameState;
   send: (c: Command) => unknown;
+  /** R10C（play #1）：翻开状态上移到 Game——它要用它压制翻牌前的
+      剧透 toast（「转到XX：『事件名』」在翻开完成前不该上屏） */
+  revealed: boolean;
+  onReveal: () => void;
 }) {
   const sub = state.turn?.sub;
   const card =
@@ -82,9 +89,18 @@ export function EventPanel({
   const cmds = availableCommands(state);
   const canSpend = cmds.some((c) => c.type === 'CHOOSE_EVENT_OPTION' && c.option === 'spend');
   const orderIdx = state.turn?.orderIndex ?? 0;
-  const [revealed, setRevealed] = useState(false);
+  // R10C 后悔窗口：花钱方案挂起 ~1.5s（撤销片回收），免费方案即时
+  const pending = usePending();
 
   if (!card || sub?.kind !== 'event') return null;
+  const busy = pending.pendingLabel !== null;
+  const commit = (option: 'spend' | 'free') => {
+    if (option === 'spend') {
+      pending.arm(eventSpendLabel(card), () =>
+        send({ type: 'CHOOSE_EVENT_OPTION', option: 'spend' }),
+      );
+    } else send({ type: 'CHOOSE_EVENT_OPTION', option: 'free' });
+  };
 
   const spendCard: HandItem = {
     key: 'opt-spend',
@@ -93,11 +109,11 @@ export function EventPanel({
         icon="🪙"
         label={eventSpendLabel(card)}
         price={card.spendOption.coins}
-        playable={canSpend}
+        playable={canSpend && !busy}
         testid={canSpend ? 'action-primary' : 'action-1'}
         dataKey={1}
         primary={canSpend}
-        onPlay={() => send({ type: 'CHOOSE_EVENT_OPTION', option: 'spend' })}
+        onPlay={() => commit('spend')}
       />
     ),
   };
@@ -107,11 +123,11 @@ export function EventPanel({
       <OptionCard
         icon="🤲"
         label={eventFreeLabel(card)}
-        playable
+        playable={!busy}
         testid={canSpend ? 'action-2' : 'action-primary'}
         dataKey={2}
         primary={!canSpend}
-        onPlay={() => send({ type: 'CHOOSE_EVENT_OPTION', option: 'free' })}
+        onPlay={() => commit('free')}
       />
     ),
   };
@@ -132,33 +148,41 @@ export function EventPanel({
           </div>
         )}
         {revealed ? (
-          <div className="event-reveal" data-testid="event-card">
-            <CardView
-              cardId={card.id}
-              icon={card.icon}
-              name={cardName(card.id)}
-            />
+          /* R10C（play #1）：一张大的故事卡——事件美术 + 完整故事正文，
+             两个选项卡在下面整幅可读（≤3 张扇不重叠，名字不截断） */
+          <div className="event-story" data-testid="event-card">
+            <div className="event-story-art">
+              <CardView
+                cardId={card.id}
+                icon={card.icon}
+                name={cardName(card.id)}
+              />
+            </div>
+            <p className="event-story-text">{eventText(card)}</p>
           </div>
         ) : (
           <Deck
             testid="action-primary"
             dataKey={1}
-            ariaLabel={cardName(card.id)}
+            ariaLabel={strings.event.deckHint}
+            hint={strings.event.deckHint}
             face={
               <CardView cardId={card.id} icon={card.icon} name={cardName(card.id)} />
             }
-            onDraw={() => setRevealed(true)}
+            onDraw={onReveal}
           />
         )}
       </div>
 
       {revealed && (
         <>
-          <p className="panel-text event-text">{eventText(card)}</p>
           <div className="panel-foot">
             <p className="panel-subtitle">
               <CardIcon icon={card.icon} /> {strings.event.choose}
             </p>
+            {pending.pendingLabel !== null && (
+              <PendingChip label={pending.pendingLabel} onCancel={pending.cancel} />
+            )}
             <Hand
               className="event-hand"
               items={[spendCard, freeCard]}

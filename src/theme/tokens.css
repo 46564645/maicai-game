@@ -38,7 +38,7 @@
   --color-surface-dim: #f7ede0;    /* 凹陷/槽位（奶油底上的浅暖灰） */
   --color-text: #1E1E2A;           /* 墨色 */
   --color-ink: #1E1E2A;            /* 墨蓝别名：正文/次动作/数字键徽标（同值，语义区分） */
-  --color-muted: #6b6572;          /* 次要文字 */
+  --color-muted: #55505e;          /* 次要文字（R10C UI 副项：加深到奶油底 ≈7:1） */
   --color-line: #e8ddd0;           /* 分隔线 */
   --color-line-soft: color-mix(in srgb, var(--color-line) 55%, var(--color-surface)); /* 更柔暖发丝线 */
   --color-line-strong: #cbbfae;    /* 强调描边 */
@@ -54,6 +54,7 @@
   --color-primary-hi: color-mix(in srgb, var(--color-primary) 82%, #ffffff);  /* 主色亮端 */
   --color-primary-lo: color-mix(in srgb, var(--color-primary) 78%, #a63c00);  /* 主色暗端/唇边 */
   --color-primary-soft: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface)); /* 选中淡橙底 */
+  --color-purple-soft: color-mix(in srgb, var(--color-purple) 16%, var(--color-surface)); /* R10C：AI 家长淡紫衬（hero 头像/示范块） */
   --color-primary-ghost: color-mix(in srgb, var(--color-primary) 30%, transparent); /* 主按钮柔光 */
   --color-primary-ghost-press: color-mix(in srgb, var(--color-primary) 18%, transparent);
   --gradient-primary: linear-gradient(
@@ -92,7 +93,7 @@
   --font-family: ui-rounded, "SF Pro Rounded", "Nunito", "Baloo 2",
     "Arial Rounded MT Bold", "Quicksand", "Noto Sans SC", "PingFang SC",
     system-ui, sans-serif;
-  --font-size-xs: 0.875rem;   /* 14px，仅辅助说明 */
+  --font-size-xs: 0.9375rem;  /* 15px（R10C UI 副项：功能文字地板从 14px 抬到 15px） */
   --font-size-sm: 1rem;       /* 16px */
   --font-size-md: 1.25rem;    /* 20px，正文 ≥20px */
   --font-size-lg: 1.5rem;     /* 24px，按钮/站名 */
@@ -150,9 +151,11 @@
     0 2px 6px color-mix(in srgb, var(--color-shadow) 8%, transparent);
 
   /* —— 按钮（R5：主按钮=橙渐变底白字；次按钮=纸白暖发丝边墨蓝字，
-     橙只留给一屏唯一主动作）—— */
+     橙只留给一屏唯一主动作）——
+     R10C（UI 副项）：白字/橙底只有 2.84:1，主按钮字改墨蓝
+     （#1E1E2A on #FF6B2C ≈ 6.4:1）——投影/明亮教室也读得清 */
   --button-primary-bg: var(--gradient-primary);
-  --button-primary-fg: var(--color-primary-contrast);
+  --button-primary-fg: var(--color-ink);
   --button-secondary-bg: var(--gradient-card);
   --button-secondary-fg: var(--color-ink);
   --button-secondary-border: var(--color-line);
@@ -180,6 +183,7 @@
   --motion-fast: 150ms;
   --motion-med: 300ms;
   --motion-slow: 900ms; /* 天气转盘转到位 */
+  --wheel-ms: 1300ms;   /* R10C（motion #6）：转盘 1300ms 起步快收尾慢 */
   --motion-ease: ease-out;
   /* R5 按压感：轻回弹 + 下沉位移（一切 tap/press ≤150ms） */
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -197,7 +201,7 @@
   --fan-arc-drop: 4px;
   --fan-push: 34px;
   --fan-expose: 72px;    /* 桌面扇形每卡露出宽（>48px 可点带） */
-  --fan-expose-sm: 35px; /* 手机横屏紧凑档（窄栏约束，见 cards.css） */
+  --fan-expose-sm: 48px; /* 手机横屏紧凑档（R10C：≥ --tap-min-size，见 cards.css） */
   --hand-lift: 16px;     /* 悬停/选中上抬 */
   /* 可打出柔光：黄 55% 外晕 + 扫光带（BorderGlow 改造，令牌化） */
   --glow-ring: color-mix(in srgb, var(--color-accent-yellow) 55%, transparent);
@@ -218,10 +222,16 @@
   --drop-basket-bg: var(--color-primary-soft);
   --drop-hold-bg: color-mix(in srgb, var(--color-accent-yellow) 14%, var(--color-surface));
   --drop-hot: color-mix(in srgb, var(--color-mint) 30%, var(--color-surface));
-  /* 动效时长：翻牌取 --motion-slow 的 2/3，弹回 420ms，金币滚动 700ms */
+  /* 动效时长：翻牌取 --motion-slow 的 2/3，弹回 420ms，金币滚动 450ms。
+     R10C：数字滚动改用 --ease-roll（不过冲，中段绝不闪过更高位；
+     --ease-spring 的 1.56 过冲只留给卡片位移/入场） */
   --flip-ms: 560ms;
   --drag-return-ms: 420ms;
-  --coin-roll-ms: 700ms;
+  --coin-roll-ms: 450ms;
+  --ease-roll: cubic-bezier(0.23, 1, 0.32, 1);
+  /* 选中卡名大浮签（R10C：≥28px bold 墨字奶油片，悬在卡上方） */
+  --font-size-hero: 1.75rem; /* 28px */
+  --pending-ms: 1500ms;      /* 后悔窗口：派发到账前的可撤销时长 */
 }
 
 /* —— R8 大屏弹性：舞台宽是参照、不是硬顶 ——

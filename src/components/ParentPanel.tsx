@@ -37,8 +37,10 @@ import type { ParentTurn } from '../parent/parentLive';
 import { Button } from './Button';
 import { CardView } from './CardView';
 import { Hand } from './cards/Hand';
+import { PendingChip } from './cards/PendingChip';
 import { PlayableGlow } from './cards/PlayableGlow';
 import { TiltCard } from './cards/TiltCard';
+import { PENDING_MS } from './cards/pendingCommit';
 import type { HandItem } from './cards/Hand';
 
 interface LiveBubble {
@@ -96,6 +98,17 @@ function OptionFan({
   return <Hand className="parent-fan" items={items} ariaLabel={strings.parent.pickHint} />;
 }
 
+/** R10C（play #3）：家长形象常驻——圆形紫衬头像 + 「AI 家长」名签，
+ *  让「这是在跟谁说话」先成立，再谈问题（不是一上来就答题卡） */
+function ParentHero() {
+  return (
+    <p className="parent-hero" aria-hidden="true">
+      <span className="parent-hero-avatar">👩</span>
+      <span className="parent-hero-name">{strings.parent.parentName}</span>
+    </p>
+  );
+}
+
 /** R9 状态点（仅展示）：真对话进行中绿点「Live chat/真对话」，
  *  离线脚本（未注入 key / 失败回退后）灰点「Offline script/离线脚本」。
  *  家长站每个渲染分支都挂在面板顶部，方便一眼分辨当前走的是哪条路。 */
@@ -141,8 +154,15 @@ export function ParentPanel({
     dy: number;
     icon: string;
     label: string;
+    /** R10C 后悔窗口：飞行落定后卡「泊」在聊天区边上一小段，
+        撤销片/点飞卡都能收回，泊停到期才真正派发答案 */
+    parked?: boolean;
   } | null>(null);
   const flyTimer = useRef<number | null>(null);
+  /* R10C（play #3 / education #2）：离线脚本里「已说清」那条要回声孩子
+     自己的答句（发令时记下展示句）；示范对话可跳过（demoOff） */
+  const [echoes, setEchoes] = useState<Record<number, string>>({});
+  const [demoOff, setDemoOff] = useState(false);
   // 最新版 liveAnswer 的引用：飞行结束时回调仍用点击后的新闭包
   const liveAnswerRef = useRef<
     ((answer: ParentAnswer, displayText: string) => void) | null
@@ -183,21 +203,31 @@ export function ParentPanel({
     const rm =
       typeof window !== 'undefined' &&
       window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
-    flyTimer.current = window.setTimeout(
-      () => {
+    const flyMs = rm ? 120 : 420;
+    flyTimer.current = window.setTimeout(() => {
+      // 落定 → 泊停：卡停在聊天区边上可点收回，撤销片同步显示
+      setFly((f) => (f ? { ...f, parked: true } : f));
+      flyTimer.current = window.setTimeout(() => {
         setFly(null);
         dispatch();
-      },
-      rm ? 120 : 420,
-    );
+      }, PENDING_MS - flyMs);
+    }, flyMs);
   };
 
-  /* 飞行克隆：fixed 层，左/top/宽高量自源卡 rect，沿 --fly-dx/dy 位移缩放淡出 */
+  /** 后悔窗口撤销：清计时器 + 克隆消失 → 源卡重新露出（没派发过） */
+  const cancelFly = () => {
+    if (flyTimer.current !== null) window.clearTimeout(flyTimer.current);
+    flyTimer.current = null;
+    setFly(null);
+  };
+
+  /* 飞行克隆：fixed 层，左/top/宽高量自源卡 rect，沿 --fly-dx/dy 位移缩放淡出；
+     泊停态（parked）去掉飞出动画、恢复可见可点——点它=收回这张答案 */
   const flyEl =
     fly &&
     createPortal(
       <div
-        className="card-fly"
+        className={`card-fly${fly.parked ? ' card-fly--parked' : ''}`}
         style={
           {
             left: fly.rect.x,
@@ -208,12 +238,19 @@ export function ParentPanel({
             '--fly-dy': `${fly.dy.toFixed(1)}px`,
           } as CSSProperties
         }
-        aria-hidden="true"
+        role={fly.parked ? 'button' : undefined}
+        aria-label={fly.parked ? fly.label : undefined}
+        aria-hidden={fly.parked ? undefined : true}
+        onClick={fly.parked ? cancelFly : undefined}
       >
         <CardView icon={fly.icon} name={fly.label} />
       </div>,
       document.body,
     );
+  const flyChip =
+    fly?.parked === true ? (
+      <PendingChip label={fly.label} onCancel={cancelFly} />
+    ) : null;
 
   /* R9 状态点取色：live 会话在 = 绿；还没启动过（parentUse 阶段或
      开场瞬间）按 key 预判——有 key 即将会话真对话 = 绿；一旦启动过
@@ -264,6 +301,7 @@ export function ParentPanel({
     return (
       <div className="panel-body">
         <ParentStatus live={statusLive} />
+        <ParentHero />
         <div className="chat">
           <p className="chat-bubble chat-bubble--ai">{parentIntro()}</p>
         </div>
@@ -289,7 +327,7 @@ export function ParentPanel({
             {strings.parent.useLater}
           </Button>
         </div>
-        <p className="panel-keyhelp">{strings.parent.ruleNote}</p>
+        {/* R10C：评分口径说明撤下——先聊天，币的夸奖在结算时事后给 */}
       </div>
     );
   }
@@ -366,6 +404,7 @@ export function ParentPanel({
     return (
       <div className="panel-body">
         <ParentStatus live={statusLive} />
+        <ParentHero />
         <div className="chat" data-testid="parent-chat" ref={liveChatRef}>
           <p className="chat-bubble chat-bubble--ai">{parentIntro()}</p>
           <p className="chat-bubble chat-bubble--ai">{parentQuestionText(questions[0])}</p>
@@ -415,6 +454,9 @@ export function ParentPanel({
         />
         {flyEl}
         <div className="panel-foot">
+          {flyChip}
+          {/* R10C：句首启口片——低表达信心的孩子先点片起手，再补/再发 */}
+          <StarterChips onUse={(s) => setText((t) => (t ? t + s : s))} />
           <form className="parent-input-row" onSubmit={submitLiveText}>
             <input
               className="parent-input"
@@ -451,7 +493,6 @@ export function ParentPanel({
               🎤 {strings.parent.voiceBtn}
             </Button>
           </form>
-          <p className="panel-keyhelp">{strings.parent.ruleNote}</p>
         </div>
       </div>
     );
@@ -470,6 +511,7 @@ export function ParentPanel({
     const t = text.trim();
     if (!t) return;
     setText('');
+    setEchoes((m) => ({ ...m, [step]: t }));
     send({ type: 'PARENT_ANSWER', answer: { mode: 'text', text: t } });
   };
 
@@ -478,7 +520,8 @@ export function ParentPanel({
     return (
       <div className="panel-body">
         <ParentStatus live={statusLive} />
-        <ChatHistory d={d} aiText={lastAi} systemText={lastSystem} />
+        <ParentHero />
+        <ChatHistory d={d} aiText={lastAi} systemText={lastSystem} echoes={echoes} />
         <div className="panel-actions">
           <Button
             variant="primary"
@@ -501,7 +544,6 @@ export function ParentPanel({
             {strings.parent.settleGo}
           </Button>
         </div>
-        <p className="panel-keyhelp">{strings.parent.ruleNote}</p>
       </div>
     );
   }
@@ -510,8 +552,16 @@ export function ParentPanel({
   return (
     <div className="panel-body">
       <ParentStatus live={statusLive} />
+      <ParentHero />
       <div ref={offlineChatRef}>
-        <ChatHistory d={d} aiText={lastAi} systemText={lastSystem} />
+        <ChatHistory
+          d={d}
+          aiText={lastAi}
+          systemText={lastSystem}
+          echoes={echoes}
+          demo={d.step === 0 && !d.offerSettle && !demoOff}
+          onDemoSkip={() => setDemoOff(true)}
+        />
       </div>
       <p className="panel-subtitle">
         {fmt(strings.parent.questionOf, { a: step + 1, b: questions.length })} ·{' '}
@@ -521,7 +571,8 @@ export function ParentPanel({
         options={q.options}
         locked={false}
         flyKey={fly?.key ?? null}
-        onPick={(o, el) =>
+        onPick={(o, el) => {
+          setEchoes((m) => ({ ...m, [step]: parentOptionLabel(o) }));
           flyCard(
             el,
             o.id,
@@ -530,11 +581,13 @@ export function ParentPanel({
             offlineChatRef.current,
             false,
             () => send({ type: 'PARENT_ANSWER', answer: { mode: 'card', optionId: o.id } }),
-          )
-        }
+          );
+        }}
       />
       {flyEl}
       <div className="panel-foot">
+        {flyChip}
+        <StarterChips onUse={(s) => setText((t) => (t ? t + s : s))} />
         <form className="parent-input-row" onSubmit={submitText}>
           <input
             className="parent-input"
@@ -562,22 +615,43 @@ export function ParentPanel({
             🎤 {strings.parent.voiceBtn}
           </Button>
         </form>
-        <p className="panel-keyhelp">{strings.parent.ruleNote}</p>
       </div>
     </div>
   );
 }
 
-/** 聊天气泡：AI 家长提问在左，已答清的问题右侧打「✓ 说清楚了」；
- *  系统提示（如「小禾 去找 AI 家长聊了聊」）走居中小字灰行，不进气泡 */
+/** R10C：句首启口片（education #2）——「我想买…/我还差…」点一下就进
+ *  输入框起手，低表达信心的孩子不用从零组织一句话 */
+function StarterChips({ onUse }: { onUse: (s: string) => void }) {
+  return (
+    <div className="starter-chips">
+      {strings.parent.starters.map((s) => (
+        <button key={s} type="button" className="starter-chip" onClick={() => onUse(s)}>
+          {s}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** 聊天气泡：AI 家长提问在左，已答清的问题右侧回孩子的答句 + ✓；
+ *  系统提示（如「小禾 去找 AI 家长聊了聊」）走居中小字灰行，不进气泡；
+ *  R10C：Q1 前插一段可跳过的「示范」对话（家长问 → 孩子这样答） */
 function ChatHistory({
   d,
   aiText,
   systemText,
+  echoes = {},
+  demo = false,
+  onDemoSkip,
 }: {
   d: ParentDialog;
   aiText?: string;
   systemText?: string;
+  /** 每步孩子自己的答句（面板侧记，引擎不改） */
+  echoes?: Record<number, string>;
+  demo?: boolean;
+  onDemoSkip?: () => void;
 }) {
   const questions = cards.parentStation.questions;
   const upto = Math.min(d.step, questions.length - 1);
@@ -598,8 +672,31 @@ function ChatHistory({
       {questions.slice(0, upto + 1).map((qq, i) => (
         <span key={qq.id} className="chat-pair">
           <p className="chat-bubble chat-bubble--ai">{parentQuestionText(qq)}</p>
+          {/* 示范：第一问还没答时，先演一遍「像这样说，就可以」 */}
+          {demo && i === 0 && (
+            <span className="chat-demo">
+              <span className="chat-demo-tag">{strings.parent.demoTag}</span>
+              <p className="chat-bubble chat-bubble--me chat-bubble--demo">
+                {parentOptionLabel(qq.options[0])}
+              </p>
+              <span className="chat-demo-tip">{strings.parent.demoTip}</span>
+              {onDemoSkip && (
+                <button
+                  type="button"
+                  className="chat-demo-skip"
+                  onClick={onDemoSkip}
+                >
+                  {strings.parent.demoSkip}
+                </button>
+              )}
+            </span>
+          )}
           {(i < upto || (i === upto && d.offerSettle)) && (
-            <p className="chat-bubble chat-bubble--me">{strings.parent.clearedMark}</p>
+            <p className="chat-bubble chat-bubble--me">
+              {echoes[i] !== undefined
+                ? fmt(strings.parent.echoLine, { item: echoes[i] })
+                : strings.parent.clearedMark}
+            </p>
           )}
         </span>
       ))}

@@ -27,6 +27,9 @@ export interface DeckProps {
   ariaLabel: string;
   testid?: string;
   dataKey?: number;
+  /** R10C（interaction #3）：等待期的提示句（「点一下，翻开看看」），
+      与 deck--idle 的轻轻上下浮动一起给「这是一张可以点的牌堆」信号 */
+  hint?: string;
 }
 
 const FLIP_MS = 560;
@@ -39,7 +42,7 @@ function prefersReducedMotion(): boolean {
   );
 }
 
-export function Deck({ face, onDraw, disabled, ariaLabel, testid, dataKey }: DeckProps) {
+export function Deck({ face, onDraw, disabled, ariaLabel, testid, dataKey, hint }: DeckProps) {
   const [flipping, setFlipping] = useState(false);
   const timerRef = useRef<number | null>(null);
   useEffect(
@@ -50,7 +53,14 @@ export function Deck({ face, onDraw, disabled, ariaLabel, testid, dataKey }: Dec
   );
 
   const draw = () => {
-    if (disabled || flipping) return;
+    if (disabled) return;
+    // R10C（motion #6）：翻牌中再点一下 = 快进——立即落定派发，
+    // 不再等尾巴（输入死时压缩；第一次点按仍是完整仪式）
+    if (flipping) {
+      if (timerRef.current !== null) window.clearTimeout(timerRef.current);
+      onDraw();
+      return;
+    }
     setFlipping(true);
     timerRef.current = window.setTimeout(
       () => onDraw(),
@@ -58,8 +68,11 @@ export function Deck({ face, onDraw, disabled, ariaLabel, testid, dataKey }: Dec
     );
   };
 
+  // R10C：等待期的牌堆轻轻浮动（deck--idle）——同屏唯一的持续动画位
+  const idle = !disabled && !flipping;
   return (
-    <div className={`deck${flipping ? ' deck--flipping' : ''}`}>
+    <div className={`deck${flipping ? ' deck--flipping' : ''}${idle ? ' deck--idle' : ''}`}>
+      {hint && <p className="deck-hint">{hint}</p>}
       {/* 底层两张 = 纯装饰错位牌背 */}
       <i className="deck-under deck-under--a" aria-hidden="true" />
       <i className="deck-under deck-under--b" aria-hidden="true" />

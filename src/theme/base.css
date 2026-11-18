@@ -70,14 +70,19 @@ button:not(:disabled):active {
   filter: brightness(0.98);
 }
 
-/* 尊重减少动效偏好 */
+/* 尊重减少动效偏好——「更少更轻」而不是「全归零」（R10C：去掉 0.01ms
+   全局核弹，cards.css 的 120ms 降级档（翻牌/弹回/滚动）必须真的生效：
+   回弹的 120ms 滑动正是教「卡回手牌了」的那条空间轨迹。全局只禁
+   无限/装饰性循环——一次性动画由各组件自己的 reduced-motion 档接管） */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+  }
+  .rotate-phone,
+  .weather-wheel {
+    animation: none !important;
   }
 }
 

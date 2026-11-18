@@ -299,3 +299,30 @@
 - 各站落地：EventPanel 牌背 Deck 翻牌揭示事件卡、天气亦为卡面；PartnerPanel 选项成 TiltCard 小扇（点选/焦点即选中）；BusPanel 车票卡拖拽上车（useDragPlay）+ tap-tap 点票→点「上车」双路径，同发 `PAY_BUS`；ParentPanel 图卡 TiltCard 扇 + 选中飞入，R9 Live/Offline 状态点原样保留；StorePanel 货架 Hand 扇 + 新插画；Cook/Feast/Reflection 飞入集齐、Feast 币总计用 CoinCounter、foil 只在菜谱集齐与开饭两处；PlaySpark（ClickSpark 改 DOM+CSS 零 rAF 版，已登记 THIRD_PARTY_NOTICES）接在买入/上车/集齐/开饭四处，全局并发 ≤3；BasketReview/WalletDrawer 仅轻卡面（新增 MiniCardRow），流程不动。
 - 截图 `shots/r10b_*` 共 22 张：抽卡翻牌/落位（演示条已关闭，干净重拍）、事件盖牌/翻牌/揭示、好友扇、家长扇、商店扇、车票、做菜、开饭 × 桌面 1280×800 与手机 874×402。PM 抽查两张通过：事件翻牌桌面（天气卡「晴」+ 事件卡「多送一」+ 两张选项卡在位）、开饭手机（四道菜 v3 图齐整，无演示条污染）。
 - 遗留（转 Slice C / 待负责人）：① Slice A 遗留②③仍未定——扇形展开幅度、触屏拖拽真机手测；② 五透镜 critique 已出（`critique/LENS-*.md`），优化项见 Slice C 简报，不属本片范围。
+
+---
+
+## 附记：Slice C 落地记录（2026-11-18，PM 验收）
+
+- 实现由 Devin CLI（SWE-2 Max）完成主体，收尾验证阶段运行环境重启中断（进程已死，日志仅存 `~/workspace/maicai-r10c.log` 前半段），PM 接手验收并代提交：build 干净、**171/171 测试全绿**（155 基线 + 16 新增：`tests/unit/r10c.test.ts`）、`git diff a029979..HEAD -- src/game src/data` 为空、package.json 零改动。R8 fit 未复跑：本构建无 `__fitD` 测点（`probe-fitd.mjs` 返回 null；`dist` 内亦无该钩子）；C 片未动 Board3D/相机/棋盘几何（`board.css` 仅改 bot 思考光晕与气泡样式，`Game.tsx` 无 3D 接线改动），fill 无回归路径。
+- 逐项（P0/P1 14 项 + P2 3 项全部落地，逐项代码核对见下）：
+  1. CoinCounter 不过冲：新增 `--ease-roll: cubic-bezier(0.23, 1, 0.32, 1)`，个位列错峰 40ms（CSS 验收测试覆盖）。
+  2. 常驻动画预算：可打光晕改静态 + 700ms 一次性扫光，foil 一次性 900ms，bot 思考脉冲只动 opacity（`::after` 光圈）；事件牌堆待机 bob 为面板等待时唯一循环。
+  3. 扇形可辨认：去名带（仅图 + 价码），选中卡名 ≥28px hero pill 全视口；≤3 张扇不重叠。
+  4. 手机横屏扇不裁切：固定扇区 overflow 可见，露出 48px（`--fan-expose-sm` 35→48）。
+  5. Tap-rescue：触屏起拖阈值 18px（鼠标 8px 不变），松手位移 <26px 且 <300ms 仍算点按（纯函数测试）。
+  6. 后悔窗口：`PendingChip` + `usePending`/`pendingCommit`，1500ms 挂起可撤销（点飞卡亦可撤），用于家长图卡答案与市场/事件买入；命令集与 engine 不动。
+  7. 事件牌堆提示：指示语「点一下，翻开看看」+ 待机微光/轻 bob。
+  8. 不剧透：结果 toast/log 只在翻开完成后上屏（`revealed` 门控）；揭示态一大故事卡 + 两选项卡完整可读。
+  9. 做菜高潮：CookPanel 食材卡飞入大盘/碟（220ms 错峰，<500ms 总预算）→ 菜谱图 + 蒸汽/火花 → foil 盖章。
+  10. 家长站对话化：常驻家长形象 + 语音气泡提问，撤掉前置评分规则文（币释移至结算后表扬），每答复述孩子需求整句，可跳过「示范」对话，句首启口片「我想买…/我还差…」；R9 Live/Offline 状态点与 parentLive 流程原样保留。
+  11. 一屏一主动作：买下/收下为唯一填充渐变主钮，虚线框只留给投放区与「先等等」。
+  12. CoinBar：新加坡条形图（菜谱还差/车费/自由花），选中卡点亮自由花端格子，溢出警示脉动；「12 − 2 → 10」式余数同步显示。
+  13. Bot 心里话：`botThink.ts`（按既有 log 事件出短理由气泡）+ 首圈首次进市场教练句（按孩子实际缺菜拼出）。
+  14. Reduced-motion：去掉全局 0.01ms 清零，改为仅禁循环（`animation-iteration-count: 1`）+ 指定装饰动画 none；`cards.css` 内 120ms 减动效值生效。
+  15. 对比度（P2）：`--color-muted` #6b6572→#55505e（奶油底 ≈7:1），功能文字地板 14→15px，主按钮字白→墨蓝（橙底 ≈6.4:1）；新增 `--color-purple-soft`（家长淡紫衬）、`--wheel-ms` 1300ms。
+  16. Reflection 个性化：`reflectionPick.ts` 按孩子开饭账本排序选项。
+  17. 触屏 hover 粘滞防护（hover 仅真指针设备）+ 转盘死区收紧（`--wheel-ms` 1300ms 起步快收尾慢）。
+- Token 改动（红线要求列出）：`--color-muted`、`--font-size-xs`、`--button-primary-fg`、`--fan-expose-sm` 四处改值（见上）；其余为新增 token。无新依赖，无网络请求，`.env.local` 未动。
+- 截图 `shots/r10c_*` 共 4 张（PM 自拍，Devin 未及出图）：市场扇/选中 × 桌面 1280×800 与手机 874×402。PM 抽查通过：桌面选中（hero pill「豆腐」+ CoinBar「12 − 2 → 10」+ 唯一主钮「买下（2币）」）、手机选中（CoinBar + 买下主钮 + bot 气泡「我也要！」）。
+- 遗留（待负责人/后续）：① e2e 未跑完——本轮 e2e 在 8 项中 2 项失败后被运行环境重启打断（board3d canvas 渲染超时、fullgame 3.0m 超时；Devin C 日志中同类失败曾归因于并行 R8 截图抢占 CPU，另有一处真实 safearea 问题已由 Devin 修 scroll/pin 恢复逻辑——未及复跑验证）；② R8 fit 无测点未复跑（见上）；③ 事件揭示/做菜/家长入口等其余简报要求截图未拍（仅市场 4 张）；④ Slice A 遗留②③仍未定——扇形展开幅度、触屏拖拽真机手测。

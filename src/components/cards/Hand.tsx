@@ -67,8 +67,12 @@ export function Hand({
     return undefined;
   }, [items, bounceIn]);
 
+  // R10C：≤3 张的扇不再叠带（16px 间隙，卡名横幅整幅可读）；
+  // >3 张才进入叠带拥挤态（横幅被盖部分收掉，认卡靠 .hand-tag 大浮签）
+  const fanCls =
+    layout === 'fan' ? (n > 3 ? ' hand--crowded' : ' hand--spread') : '';
   const cls =
-    `hand hand--${layout}${dimmed ? ' hand--dim' : ''}` +
+    `hand hand--${layout}${fanCls}${dimmed ? ' hand--dim' : ''}` +
     (className ? ` ${className}` : '');
   return (
     <div className={cls} role="group" aria-label={ariaLabel}>

@@ -14,6 +14,7 @@ import { BoardMount } from '../board/BoardMount';
 import { toBoardView } from '../board/boardModel';
 import { LangToggle } from '../i18n/LangToggle';
 import { cardName, playerDisplayName, stationName } from '../i18n/cardText';
+import { botThinkLine } from '../ui/botThink';
 import { usePhoneMode } from '../ui/usePhoneMode';
 import { AutoPanel } from '../components/AutoPanel';
 import { BotCard } from '../components/BotCard';
@@ -60,6 +61,9 @@ export function Game({
   // 横屏（874×402）= 左 2/3 岛 + 右竖栏（当前要做的事 + 大按钮）
   const phoneLand = usePhoneMode() === 'phone-landscape';
   const [openBot, setOpenBot] = useState<PlayerId | null>(null);
+  // R10C（play #1）：事件卡翻开状态上移——翻牌完成前，toast/board-log
+  // 里的「转到XX：『事件名』」日志是剧透，压到翻开后再上屏
+  const [eventRevealed, setEventRevealed] = useState(false);
   // M4.5.8b：右竖栏吸底滚动——新一站/新决策打开时滚到底，让
   // 「买下 / 走完这一站」等主按钮整颗落在安全区内的栏底；内容
   // 变高（选中卡出现 Picked 行）时只要没上滚就继续吸底；孩子上滚
@@ -79,10 +83,19 @@ export function Game({
   const railKey = `${state.lap}:${state.stationIndex}:${state.turn?.turnPhase ?? ''}:${state.pendingDecision.kind}`;
   const pinRail = () => {
     const rail = railRef.current;
-    if (rail && stickBottom.current) rail.scrollTop = rail.scrollHeight;
+    if (rail && stickBottom.current) {
+      rail.scrollTop = rail.scrollHeight;
+      // R10C：内容还会长（弹窗内嵌结构在钉底后再撑高 ~146px）——
+      // 钉底的 scroll 事件带着旧高度到达时会先把 stickBottom 误锁，
+      // 再补一帧复钉，缩短「底按钮悬在安全区下沿外」的过渡窗口。
+      requestAnimationFrame(() => {
+        if (stickBottom.current) rail.scrollTop = rail.scrollHeight;
+      });
+    }
   };
   useEffect(() => {
     stickBottom.current = true;
+    setEventRevealed(false);
     const rail = railRef.current;
     if (!rail) return;
     // 有提议气泡时滚到气泡（它是当前要做的事）；否则钉到栏底露出主按钮
@@ -115,7 +128,9 @@ export function Game({
     });
     for (const c of rail.children) ro.observe(c);
     lastScrollHeight.current = rail.scrollHeight;
-    mo.observe(rail, { childList: true });
+    // subtree：弹窗内部内容再撑高（如金币条/选中行补进 foot）也算
+    // 高度变化——只看直接子节点会漏掉，恢复要等 RO 的下一帧才追上
+    mo.observe(rail, { childList: true, subtree: true });
     return () => {
       ro.disconnect();
       mo.disconnect();
@@ -130,6 +145,13 @@ export function Game({
     ? state.players.find((p) => p.id === board.activePlayerId)
     : null;
   const lastLog = state.log[state.log.length - 1];
+  // R10C：人类玩家的事件卡还盖着时，最后一条日志就是剧透——
+  // toast 与 board-log 一律跳过它（引擎 log 本身不动）
+  const eventVeiled =
+    humanPending && pd.kind === 'eventOption' && !eventRevealed;
+  const shownLog = eventVeiled
+    ? (state.log[state.log.length - 2] ?? null)
+    : lastLog;
   const pendingPlayer = pendingPid
     ? state.players.find((p) => p.id === pendingPid)
     : null;
@@ -149,24 +171,34 @@ export function Game({
     ? state.players.find((p) => p.id === proposal.from)
     : undefined;
 
-  const renderBotSlot = (b: (typeof bots)[number]) => (
-    <div className="bot-slot" key={b.id}>
-      <BotCard player={b} thinking={board.activePlayerId === b.id} />
-      {proposal && proposalFrom?.id === b.id && (
-        <SpeechBubble
-          from={proposalFrom}
-          proposal={proposal}
-          onRespond={(accept) =>
-            send(
-              proposal.kind === 'swap'
-                ? { type: 'RESPOND_SWAP', proposalId: proposal.id, accept }
-                : { type: 'RESPOND_INVITE', proposalId: proposal.id, accept },
-            )
-          }
-        />
-      )}
-    </div>
-  );
+  const renderBotSlot = (b: (typeof bots)[number]) => {
+    // R10C（education #3）：bot 心里话气泡——最新一条日志归它时，
+    // 用 spend.kind + 性格映成一句短理由（复用日志时序，不加事件）
+    const think = botThinkLine(b, lastLog);
+    return (
+      <div className="bot-slot" key={b.id}>
+        <BotCard player={b} thinking={board.activePlayerId === b.id} />
+        {think && (
+          <p className="think-bubble" key={lastLog.id}>
+            {think}
+          </p>
+        )}
+        {proposal && proposalFrom?.id === b.id && (
+          <SpeechBubble
+            from={proposalFrom}
+            proposal={proposal}
+            onRespond={(accept) =>
+              send(
+                proposal.kind === 'swap'
+                  ? { type: 'RESPOND_SWAP', proposalId: proposal.id, accept }
+                  : { type: 'RESPOND_INVITE', proposalId: proposal.id, accept },
+              )
+            }
+          />
+        )}
+      </div>
+    );
+  };
 
   const sub = state.turn?.sub;
   let panel = <AutoPanel state={state} send={send} />;
@@ -188,7 +220,14 @@ export function Game({
       panel = <PartnerPanel state={state} send={send} />;
       break;
     case 'eventOption':
-      panel = <EventPanel state={state} send={send} />;
+      panel = (
+        <EventPanel
+          state={state}
+          send={send}
+          revealed={eventRevealed}
+          onReveal={() => setEventRevealed(true)}
+        />
+      );
       break;
     case 'parentUse':
     case 'parentAnswer':
@@ -248,9 +287,9 @@ export function Game({
             : fmt(strings.game.botTurn, { name: playerDisplayName(activePlayer) })
           : fmt(strings.game.pawnAt, { name: stationName(station.id) })}
       </p>
-      {lastLog && (
+      {shownLog && (
         <p className="board-log" aria-live="polite">
-          {lastLog.text}
+          {shownLog.text}
         </p>
       )}
     </>
@@ -429,7 +468,7 @@ export function Game({
         )}
       </div>
 
-      <Toast entries={state.log} />
+      <Toast entries={eventVeiled ? state.log.slice(0, -1) : state.log} />
 
       {phoneLand ? (
         <>
@@ -440,6 +479,15 @@ export function Game({
             </span>
             {bots.map((b) => (
               <span className="phone-bot-wrap" key={b.id}>
+                {/* R10C：心里话气泡也贴到手机小头像上 */}
+                {(() => {
+                  const t = botThinkLine(b, lastLog);
+                  return t ? (
+                    <span className="think-bubble think-bubble--phone" key={lastLog.id}>
+                      {t}
+                    </span>
+                  ) : null;
+                })()}
                 <button
                   type="button"
                   className={

@@ -181,6 +181,30 @@ export const zhStrings: StringsDict = {
     storeAll: '全部食材',
     storeHoldLine: '先等等夹：{item}（{n} 币）',
     cookPut: '把你的菜放进盘子',
+    coachLine: '先找菜谱里的菜：你还缺 {items}',
+  },
+
+  /* 后悔窗口（R10C）：钱/答案到账前的撤销片 */
+  regret: {
+    undo: '等等！收回{item}',
+  },
+
+  /* 金币条（新加坡条形图）：菜谱还差 / 车费 / 自由花 三段 */
+  coinbar: {
+    recipe: '菜谱还差',
+    bus: '车费',
+    free: '自由花',
+    math: '{a} − {b} → {c}',
+  },
+
+  /* bot 心里话（R10C：贴着 bot 卡冒出的短理由气泡） */
+  think: {
+    steady: '先买菜谱里的菜',
+    impulsiveHold: '好想要…先放先等等吧',
+    impulsiveBuy: '好想要！就买它',
+    follower: '我也要！',
+    busDebt: '车费先记着，待会还',
+    eventSpend: '惊喜要花币…想想再定',
   },
 
   bubble: {
@@ -213,6 +237,7 @@ export const zhStrings: StringsDict = {
     spinLabel: '天气转盘',
     spunTo: '是{name}！',
     choose: '你想怎么做？',
+    deckHint: '点一下，翻开看看',
   },
 
   parent: {
@@ -230,6 +255,13 @@ export const zhStrings: StringsDict = {
     statusLive: '真对话',
     statusOffline: '离线脚本',
     ruleNote: '说清多少、做什么 → 得 1 币；再说清花到哪、下次怎么做 → 得 2 币',
+    /* R10C：对话优先——家长形象名 + 示范对话 + 句首启口片 */
+    parentName: 'AI 家长',
+    echoLine: '{item} ✓ 说清楚了',
+    demoTag: '示范',
+    demoTip: '像这样说，就可以',
+    demoSkip: '跳过示范',
+    starters: ['我想买…', '我还差…', '下次我先…'],
   },
 
   feast: {
@@ -288,6 +320,9 @@ export const zhStrings: StringsDict = {
     writeOwn: '自己写…',
     waitingBots: '等小伙伴说完…',
     everyoneSaid: '大家都说完啦',
+    /* R10C：选项按她今天真做到的事排前 + 小标，提示句引导挑真的那件 */
+    personalHint: '挑一件你今天真做过的事说',
+    didIt: '做到了',
   },
 
   log: {

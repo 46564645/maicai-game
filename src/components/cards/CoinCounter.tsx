@@ -21,9 +21,9 @@ export interface CoinCounterProps {
 
 const DIGITS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-function DigitColumn({ d }: { d: number }) {
+function DigitColumn({ d, ones }: { d: number; ones?: boolean }) {
   return (
-    <span className="cc-col" aria-hidden="true">
+    <span className={ones ? 'cc-col cc-col--ones' : 'cc-col'} aria-hidden="true">
       <span
         className="cc-strip"
         style={{ transform: `translateY(${-d}em)` }}
@@ -55,7 +55,7 @@ export function CoinCounter({ value, label, className = '' }: CoinCounterProps) 
 
   const cols: ReactNode[] = [];
   if (tens > 0) cols.push(<DigitColumn key="t" d={tens} />);
-  cols.push(<DigitColumn key="o" d={ones} />);
+  cols.push(<DigitColumn key="o" d={ones} ones />);
 
   return (
     <span className={`coin-counter ${className}`.trim()}>

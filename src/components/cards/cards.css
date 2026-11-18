@@ -208,29 +208,28 @@
     transparent 62%
   );
 }
-/* CSS foil：token 色双彩虹斜纹 4s 缓慢漂移（只给完成菜谱/盛宴盘卡） */
+/* CSS foil：token 色双彩虹斜纹。R10C（motion #2）：无限 4s 背景漂移
+   改成一次性横向扫光（transform-only，与 .card-foil 同款一次性模式），
+   不再每帧 repaint 抢 3D 棋盘的帧预算。 */
 .tc-foil {
   position: absolute;
-  inset: 0;
+  inset: -10% -70%;
   pointer-events: none;
   opacity: var(--foil-opacity);
   background: linear-gradient(
     115deg,
-    transparent 30%,
-    var(--color-mint) 42%,
+    transparent 38%,
+    var(--color-mint) 46%,
     var(--color-accent-yellow) 50%,
-    var(--color-primary) 58%,
-    transparent 70%
+    var(--color-primary) 54%,
+    transparent 62%
   );
-  background-size: 260% 260%;
-  animation: foil-drift 4s linear infinite;
+  transform: translateX(-120%);
+  animation: tc-foil-sweep 900ms var(--motion-ease) 1 forwards;
 }
-@keyframes foil-drift {
-  from {
-    background-position: 0% 0%;
-  }
+@keyframes tc-foil-sweep {
   to {
-    background-position: 100% 100%;
+    transform: translateX(120%);
   }
 }
 
@@ -245,7 +244,8 @@
   align-items: flex-end;
   justify-content: center;
   min-height: var(--hand-card-h);
-  padding-top: var(--hand-lift); /* 上抬不裁切 */
+  /* 上抬不裁切 + 顶部给 28px 大浮签（.hand-tag）留位（R10C UI #1） */
+  padding-top: calc(var(--hand-lift) + 46px);
 }
 
 .hand-item {
@@ -269,6 +269,19 @@
 .hand--free .hand-item + .hand-item {
   margin-left: var(--space-2);
 }
+/* R10C：≤3 张的扇不叠带——16px 间隙整幅可读（卡名横幅不被盖） */
+.hand--spread .hand-item + .hand-item {
+  margin-left: var(--space-4);
+}
+/* R10C：>3 张才叠带的拥挤扇——被盖住的横幅直接收掉，卡面只留
+   美术 + 价格宝石（认卡靠选中卡的 .hand-tag 大浮签，见 §6.1） */
+.hand--crowded .card-view-banner {
+  display: none;
+}
+/* 家长站答话图卡的横幅就是「要说的话」本体——即使拥挤也保留 */
+.parent-fan .card-view-banner {
+  display: block;
+}
 
 /* 卡面撑满手牌位（drag 层 / glow 层 / Tilt 链条一路 100%） */
 .hand-item > .hand-drag,
@@ -289,20 +302,33 @@
   min-height: 0;
 }
 
-/* 悬停/聚焦：立直 + 上浮 + 放大 6%；相邻两卡让位 */
-.hand-item:hover,
+/* 聚焦/选中：立直 + 上浮 + 放大 6%；相邻两卡让位。
+   hover 效果只在真·指针设备上开（R10C motion #5：触屏 sticky hover
+   会让卡悬在半放大态甩不掉，平板首触用户看不懂） */
 .hand-item:focus-within,
 .hand-item--sel {
   transform: rotate(0deg) translateY(calc(var(--hand-lift) * -1)) scale(1.06);
   z-index: 10;
 }
-.hand-item:hover + .hand-item,
+@media (hover: hover) and (pointer: fine) {
+  .hand-item:hover {
+    transform: rotate(0deg) translateY(calc(var(--hand-lift) * -1)) scale(1.06);
+    z-index: 10;
+  }
+  .hand-item:hover + .hand-item {
+    transform: rotate(var(--fan-rot)) translateY(var(--fan-drop))
+      translateX(var(--fan-push));
+  }
+  .hand-item:has(+ .hand-item:hover) {
+    transform: rotate(var(--fan-rot)) translateY(var(--fan-drop))
+      translateX(calc(var(--fan-push) * -1));
+  }
+}
 .hand-item:focus-within + .hand-item,
 .hand-item--sel + .hand-item {
   transform: rotate(var(--fan-rot)) translateY(var(--fan-drop))
     translateX(var(--fan-push));
 }
-.hand-item:has(+ .hand-item:hover),
 .hand-item:has(+ .hand-item:focus-within),
 .hand-item:has(+ .hand-item--sel) {
   transform: rotate(var(--fan-rot)) translateY(var(--fan-drop))
@@ -325,10 +351,13 @@
   }
 }
 
-/* 任务卡（菜谱）入场：从上方翻转落入手牌位（§1.5 落位感） */
+/* 任务卡（菜谱）入场：从上方翻转落入手牌位（§1.5 落位感）。
+   R10C（motion #6）：900ms → 550ms + 不过冲的 --ease-roll，
+   抽牌仪式总死时 ≈1.1s（560 翻 + 550 落），尾巴不拖 */
 .hand-item--quest.hand-item--in {
   animation-name: quest-land;
-  animation-duration: var(--motion-slow);
+  animation-duration: 550ms;
+  animation-timing-function: var(--ease-roll);
 }
 @keyframes quest-land {
   from {
@@ -381,18 +410,14 @@
   display: block;
   border-radius: var(--radius-card);
 }
+/* R10C（motion #2）：可打出信号是静态的——一圈墨描边（明亮教室/投影也
+   看得见，colour-only 黄光 1.5:1 救不了）+ 静态黄晕；「注意了」的时刻
+   由卡变可打时的一次性扫光（.pglow-sweep 已建）承担。同屏持续动画
+   只允许一个（§4.4）：等待时的牌堆浮动。 */
 .pglow--on {
   box-shadow:
-    0 0 0 3px var(--glow-ring),
-    0 0 20px var(--glow-amber);
-  animation: pglow-breathe 2.6s ease-in-out infinite;
-}
-@keyframes pglow-breathe {
-  50% {
-    box-shadow:
-      0 0 0 4px var(--glow-ring),
-      0 0 30px var(--glow-amber);
-  }
+    0 0 0 2px var(--color-ink),
+    0 0 18px var(--glow-amber);
 }
 .pglow-sweep {
   position: absolute;
@@ -457,9 +482,20 @@
 .drop-zone:disabled {
   opacity: 0.45;
 }
-/* 有卡被选中/正拖拽 → 区亮边框「能收了」 */
+/* 有卡被选中/正拖拽 → 区亮边框「能收了」。R10C（UI #2）：每屏只有一个
+   主命令——篮子（买下）亮成实心橙渐变丸；「先等等」保持安静纸面
+   （虚线=投放区语义保留，不是第二颗主按钮） */
 .drop-zone--armed:not(:disabled) {
   border-color: var(--color-primary);
+}
+.drop-zone--basket.drop-zone--armed:not(:disabled) {
+  background: var(--gradient-primary);
+  color: var(--button-primary-fg);
+  border-color: var(--color-ink);
+  box-shadow: var(--shadow-md);
+}
+.drop-zone--hold.drop-zone--armed:not(:disabled) {
+  border-color: var(--color-line-strong);
 }
 /* 拖拽命中可接受区 → 薄荷高亮 + 微放大（Magnet 视觉端） */
 .drop-zone--hot:not(:disabled) {
@@ -550,6 +586,30 @@
     transform: translateY(-14px) scale(1.04);
   }
 }
+/* R10C（interaction #3）：等待期牌堆轻轻上下浮动 + 提示句——
+   同屏唯一的持续动画位（§4.4 预算），点第一次后 deck--idle 消失。
+   浮动挂在按钮内的卡面上（.deck-card），按钮本体 hitbox 不动——
+   首触用户点得到（指针稳定判定不吃晃动的视觉） */
+@media (prefers-reduced-motion: no-preference) {
+  .deck--idle .deck-card {
+    animation: deck-bob 2.4s ease-in-out infinite;
+  }
+}
+@keyframes deck-bob {
+  50% {
+    transform: translateY(-6px);
+  }
+}
+.deck-hint {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + var(--space-2));
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+}
 /* 无图回退卡背：藏青底 + 橙同心星纹（纯 CSS，§3.1 备用） */
 .card-back-css {
   background: var(--card-back-ink);
@@ -592,11 +652,16 @@
   height: 1em;
   overflow: hidden;
 }
+/* R10C：数字条用 --ease-roll（cubic-bezier(0.23,1,0.32,1)）——不过冲，
+   滚动中段绝不闪过「孩子还没有的数」；个位列错 40ms 落位（§4.2 错峰） */
 .cc-strip {
   display: flex;
   flex-direction: column;
   transform: translateY(0);
-  transition: transform var(--coin-roll-ms) var(--ease-spring);
+  transition: transform var(--coin-roll-ms) var(--ease-roll);
+}
+.cc-col--ones .cc-strip {
+  transition-delay: 40ms;
 }
 .cc-digit {
   display: flex;
@@ -617,71 +682,118 @@
 .me-hand .hand {
   min-height: 0;
 }
-/* 底栏手牌不放大 6%（地方小），上浮保留 */
-.me-hand .hand-item:hover,
+/* 底栏手牌不放大 6%（地方小），上浮保留；顶栏不加浮签位 */
+.me-hand .hand {
+  padding-top: var(--hand-lift);
+}
+@media (hover: hover) and (pointer: fine) {
+  .me-hand .hand-item:hover {
+    transform: rotate(0deg) translateY(calc(var(--hand-lift) * -0.5));
+  }
+}
 .me-hand .hand-item:focus-within,
 .me-hand .hand-item--sel {
   transform: rotate(0deg) translateY(calc(var(--hand-lift) * -0.5));
 }
 
-/* 手机横屏选中卡名浮条（窄卡横幅藏掉时替补，§6.1 可读性兜底） */
+/* 选中卡名大浮签（R10C UI #1：28px bold 墨字奶油片 + 2px 墨描边，
+   悬在选中卡上方——所有视口生效，不再只是手机横屏的 14px 小条） */
 .hand-tag {
   position: absolute;
   left: 50%;
-  bottom: calc(100% + 6px);
+  bottom: calc(100% + 8px);
   transform: translateX(-50%);
   display: none;
-  padding: 2px var(--space-2);
+  padding: 2px var(--space-3);
   border-radius: var(--radius-card);
-  background: var(--color-ink);
-  color: var(--color-surface);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
+  background: var(--color-bg);
+  color: var(--color-ink);
+  border: 2px solid var(--color-ink);
+  box-shadow: var(--shadow-md);
+  font-size: var(--font-size-hero);
+  font-weight: var(--font-weight-heavy);
   white-space: nowrap;
   pointer-events: none;
   z-index: 40;
 }
+.hand-item--sel .hand-tag,
+.hand-item:focus-within .hand-tag {
+  display: block;
+}
+@media (hover: hover) and (pointer: fine) {
+  .hand-item:hover .hand-tag {
+    display: block;
+  }
+}
 
 /* ==========================================================================
-   手机横屏紧凑档：扇形压小、横幅收掉、选中浮名、露出带收窄
+   手机横屏紧凑档（R10C UI #3）：窄栏装不下「每卡 ≥48px 露出带」的扇，
+   正式退回紧凑网格——两行不重叠，每卡完整露出（=整张点选面 ≥48px），
+   无裁切、无竖排一字标签；认卡仍靠选中卡的 28px 大浮签。
    ========================================================================== */
 
-.game-screen--phone-land .stall-hand {
+.game-screen--phone-land .stall-hand,
+.game-screen--phone-land .store-shelf {
   --hand-card-w: var(--card-w-sm);
   --hand-card-h: var(--card-h-sm);
   --fan-expose: var(--fan-expose-sm);
   --fan-push: 18px;
+  /* 固定扇区改自适应网格：flex-wrap 两行排下 6 张，overflow 不裁切 */
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-height: 0;
+  overflow: visible;
 }
-.game-screen--phone-land .stall-hand .card-view-banner {
-  display: none;
+.game-screen--phone-land .stall-hand .hand-item,
+.game-screen--phone-land .store-shelf .hand-item {
+  transform: none;
 }
-.game-screen--phone-land .stall-hand .card-view {
+.game-screen--phone-land .stall-hand .hand-item + .hand-item,
+.game-screen--phone-land .store-shelf .hand-item + .hand-item {
+  margin-left: 0;
+}
+.game-screen--phone-land .stall-hand .hand-item--sel,
+.game-screen--phone-land .store-shelf .hand-item--sel {
+  transform: translateY(-6px);
+}
+/* 网格里每卡完整露出 → 名字横幅恢复（14px 小字，4 字菜名可读） */
+.game-screen--phone-land .stall-hand .card-view-banner,
+.game-screen--phone-land .store-shelf .card-view-banner {
+  padding: 0 var(--space-1);
+}
+.game-screen--phone-land .stall-hand .card-view-name,
+.game-screen--phone-land .store-shelf .card-view-name {
+  font-size: var(--font-size-xs);
+}
+.game-screen--phone-land .stall-hand .card-view,
+.game-screen--phone-land .store-shelf .card-view {
   padding: var(--space-1);
 }
-.game-screen--phone-land .stall-hand .card-view-art {
+.game-screen--phone-land .stall-hand .card-view-art,
+.game-screen--phone-land .store-shelf .card-view-art {
   min-height: 0;
 }
-.game-screen--phone-land .stall-hand .card-view-gem {
+.game-screen--phone-land .stall-hand .card-view-gem,
+.game-screen--phone-land .store-shelf .card-view-gem {
   width: 22px;
   height: 22px;
   font-size: var(--font-size-xs);
-}
-.game-screen--phone-land .stall-hand .hand-item--sel .hand-tag,
-.game-screen--phone-land .stall-hand .hand-item:hover .hand-tag {
-  display: block;
 }
 /* 牌堆在窄栏里也小一号 */
 .game-screen--phone-land .deck {
   width: var(--card-w-sm);
   height: var(--card-h-sm);
 }
-/* 栏内容器窄：投放区两枚并排 + 跳过折行独占一行 */
+/* 栏内容器窄：投放区/跳过全部全宽竖排，一行一个动作，
+   标签横排整行可读（无竖排一字列） */
 .game-screen--phone-land .drop-row {
   flex-wrap: wrap;
   gap: var(--space-2);
 }
 .game-screen--phone-land .drop-zone {
-  flex: 1 1 42%;
+  flex: 1 1 100%;
   min-height: var(--tap-min-size);
   font-size: var(--font-size-md);
   white-space: normal;
@@ -704,6 +816,146 @@
     flex: none;
     width: 34px;
     min-height: 34px;
+  }
+}
+
+/* ==========================================================================
+   金币条（R10C education #1 / 新加坡条形图）：菜谱还差/车费/自由花
+   三段圆格；选中卡价从自由花端点亮（spend），溢出到菜谱/车费段的
+   格子警示脉动（warn）。transform/opacity only。
+   ========================================================================== */
+.coin-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: var(--space-1);
+}
+.cb-segs {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.cb-seg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+.cb-cells {
+  display: flex;
+  gap: 3px;
+}
+.cb-cell {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-accent-yellow);
+  border: 2px solid var(--color-ink);
+}
+/* 分段底色条：菜谱=薄荷、车费=墨灰、自由花=空描边（还是金格，段底着色） */
+.cb-seg--recipe .cb-cells {
+  border-bottom: 4px solid var(--color-mint);
+}
+.cb-seg--bus .cb-cells {
+  border-bottom: 4px solid var(--color-line-strong);
+}
+.cb-seg--free .cb-cells {
+  border-bottom: 4px solid var(--color-primary);
+}
+/* 选中卡价消耗格：自由花端点亮成实心墨（「花掉这几格」） */
+.cb-cell--spend {
+  background: var(--color-primary);
+  transform: scale(1.12);
+}
+/* 价格溢出到菜谱/车费段 → 该段格警示脉动（opacity，不抢帧） */
+.cb-cell--warn {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  animation: cb-warn-pulse 0.8s ease-in-out infinite alternate;
+}
+@keyframes cb-warn-pulse {
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.cb-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+}
+.cb-math {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-heavy);
+  color: var(--color-ink);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cb-cell--warn {
+    animation: none;
+    opacity: 0.8;
+  }
+}
+
+/* lap-1 教练句（education runner-up）：墨字奶油片，贴在扇上方 */
+.coach-line {
+  align-self: center;
+  padding: 4px var(--space-3);
+  border-radius: var(--radius-card);
+  background: var(--color-bg);
+  border: 2px solid var(--color-mint);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+}
+
+/* ==========================================================================
+   后悔窗口撤销片（R10C interaction #2）：黄底墨边大按钮 + 底部倒计时条
+   （scaleX transform-only；reduced-motion 下倒计时条静止但按钮照按）
+   ========================================================================== */
+.pending-chip {
+  position: relative;
+  overflow: hidden;
+  align-self: center;
+  min-height: var(--tap-min-size);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-button);
+  border: 2px solid var(--color-ink);
+  background: var(--color-accent-yellow);
+  color: var(--color-ink);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  box-shadow: var(--shadow-sm);
+}
+.pending-chip-ico {
+  margin-right: var(--space-1);
+}
+.pending-chip-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 5px;
+  background: var(--color-ink);
+  opacity: 0.35;
+  transform-origin: left center;
+  animation: pending-chip-drain var(--pending-ms, 1500ms) linear forwards;
+}
+@keyframes pending-chip-drain {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pending-chip-bar {
+    animation: none;
   }
 }
 
@@ -777,13 +1029,14 @@
   gap: var(--space-4);
   padding: var(--space-3) 0;
 }
-/* 落定天气：小天气卡，等转盘（--motion-slow）停稳后淡入——不抢剧透 */
+/* 落定天气：小天气卡，等转盘（--wheel-ms）停稳后淡入——不抢剧透。
+   R10C（motion #6）：延迟与转盘时长走同一 token，转盘慢下来它才到 */
 .event-weather {
   flex: none;
   width: var(--card-w-sm);
   height: var(--card-h-sm);
   animation: event-weather-in var(--motion-med) var(--ease-spring)
-    calc(var(--motion-slow) + 120ms) backwards;
+    calc(var(--wheel-ms) + 120ms) backwards;
 }
 .event-weather .card-view {
   width: 100%;
@@ -815,13 +1068,55 @@
 .event-text {
   text-align: center;
 }
-/* 花钱/免费二选一：两张卡小扇 */
+/* R10C（play #1）：翻开=一张大故事卡——左边事件美术卡，右边完整
+   故事正文（md 墨字奶油底，短句全可读，不再压在 14px 里） */
+.event-story {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2);
+  border-radius: var(--radius-card);
+  background: var(--color-bg);
+  border: 2px solid var(--color-ink);
+  box-shadow: var(--shadow-sm);
+  animation: event-reveal-pop var(--motion-med) var(--ease-spring) backwards;
+}
+.event-story-art {
+  flex: none;
+  width: var(--card-w);
+  height: var(--card-h);
+}
+.event-story-art .card-view {
+  width: 100%;
+  height: 100%;
+}
+.event-story-text {
+  flex: 1 1 auto;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.5;
+  color: var(--color-ink);
+}
+/* 花钱/免费二选一：两张卡——R10C 放大到名字整幅可读，允许换行 */
 .event-hand,
 .choice-hand {
-  --hand-card-w: 96px;
-  --hand-card-h: 128px;
+  --hand-card-w: 136px;
+  --hand-card-h: 140px;
   --fan-expose: 70px;
   margin: 0 auto;
+}
+.event-hand .card-view-name,
+.choice-hand .card-view-name {
+  white-space: normal;
+  font-size: var(--font-size-sm);
+  line-height: 1.2;
+}
+/* R10C（UI #2）：事件站的「主选项」卡横幅亮成实心橙丸——一眼主命令 */
+.event-hand .card-view[data-primary='true'] .card-view-banner,
+.choice-hand .card-view[data-primary='true'] .card-view-banner {
+  background: var(--gradient-primary);
+  color: var(--button-primary-fg);
 }
 
 /* ==========================================================================
@@ -913,6 +1208,17 @@
     opacity: 0.15;
   }
 }
+/* R10C 后悔窗口泊停态：落定后卡在聊天区边停住可点（点它=收回） */
+.card-fly--parked {
+  animation: none;
+  transform: translate(var(--fly-dx), var(--fly-dy)) scale(0.5);
+  opacity: 0.95;
+  pointer-events: auto;
+  cursor: pointer;
+  outline: 3px dashed var(--color-accent-yellow);
+  outline-offset: 3px;
+  border-radius: var(--radius-card);
+}
 
 /* ==========================================================================
    商店站：缺货货架扇（其余组仍是网格，卡面换新剖面）
@@ -930,19 +1236,41 @@
 /* ==========================================================================
    做饭/开饭/反思：组装飞入 + 盘卡弹入 + foil 闪光 + 反思选择卡扇
    ========================================================================== */
+/* R10C（play #2）：大锅 + 食材飞锅 + 成品长出 + 蒸汽两朵 */
+.cook-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+}
+.cook-pan {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 168px;
+  height: 110px;
+  border-radius: 50% / 58% 58% 42% 42%;
+  background: var(--color-surface-dim);
+  border: 3px solid var(--color-ink);
+  box-shadow:
+    var(--shadow-sm),
+    inset 0 0 0 6px var(--color-surface);
+}
 .cook-line {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: var(--space-2);
-  padding: var(--space-2) 0;
+  padding: var(--space-1) 0;
 }
 .cook-card {
   display: inline-block;
   width: 52px;
   height: 72px;
-  animation: cook-in var(--motion-med) var(--ease-spring) backwards;
-  animation-delay: var(--stagger, 0ms);
+  /* 飞进锅：--fx/--fy 由 JS 量到锅心；错峰 --stagger，落锅后淡出 */
+  animation: cook-fly 220ms var(--motion-ease) var(--stagger, 0ms) forwards;
 }
 .cook-card .card-view {
   width: 100%;
@@ -955,15 +1283,84 @@
 .cook-card .card-view-name {
   font-size: var(--font-size-xs);
 }
-@keyframes cook-in {
-  from {
+@keyframes cook-fly {
+  55% {
+    opacity: 1;
+  }
+  to {
+    transform: translate(var(--fx, 0px), var(--fy, -80px)) scale(0.4) rotate(12deg);
     opacity: 0;
-    transform: translateY(-30px) scale(0.5) rotate(-8deg);
   }
 }
-/* 开饭盘卡逐张弹入（stagger 120ms 由 --stagger 给） */
+/* 成品菜：全部食材落锅后从锅心弹出来（--dish-delay 由组件算好） */
+.cook-dish {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--color-ink);
+  background: var(--color-surface);
+  animation: cook-dish-in var(--motion-med) var(--ease-spring) var(--dish-delay, 300ms)
+    backwards;
+}
+.cook-dish.card-foil::after {
+  /* foil 闪光跟着成品走：成品落位后再扫（原 380ms 叠加 dishDelay） */
+  animation-delay: calc(var(--dish-delay, 300ms) + 260ms);
+}
+.cook-dish-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cook-dish-icon {
+  font-size: 44px;
+}
+@keyframes cook-dish-in {
+  from {
+    opacity: 0;
+    transform: scale(0.25) rotate(-8deg);
+  }
+}
+/* 蒸汽两朵：成品落位后各冒一次（一次性，不是常驻循环） */
+.cook-steam {
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-surface) 80%, var(--color-mint));
+  opacity: 0;
+  pointer-events: none;
+  animation: cook-steam 700ms var(--motion-ease) var(--dish-delay, 300ms) 2;
+}
+.cook-steam--a {
+  margin-left: -14px;
+}
+.cook-steam--b {
+  margin-left: 6px;
+  animation-delay: calc(var(--dish-delay, 300ms) + 180ms);
+}
+@keyframes cook-steam {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.6);
+  }
+  30% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-24px) scale(1.3);
+  }
+}
+/* 开饭盘卡逐张弹入（R10C motion #7：stagger 60ms + 260ms，4 盘 ≈440ms 收完） */
 .plate-in {
-  animation: plate-in var(--motion-med) var(--ease-spring) backwards;
+  animation: plate-in 260ms var(--motion-ease) backwards;
   animation-delay: var(--stagger, 0ms);
 }
 @keyframes plate-in {
@@ -1109,6 +1506,7 @@
   .cook-card,
   .plate-in,
   .event-reveal,
+  .event-story,
   .event-weather {
     animation: none;
   }

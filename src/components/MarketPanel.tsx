@@ -12,7 +12,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { cards, getIngredient } from '../data/cards';
 import { coinWord, strings } from '../data/strings';
-import { availableCommands, missingIngredients } from '../game/selectors';
+import { availableCommands, missingIngredients, walletSummary } from '../game/selectors';
 import { fmt, isTemptation, marketPriceOf } from '../game/stations/shared';
 import { cardName } from '../i18n/cardText';
 import type { CardId, Command, GameState } from '../game/types';
@@ -20,11 +20,14 @@ import { Button } from './Button';
 import { CardIcon } from './CardIcon';
 import { CardView } from './CardView';
 import { KeyHint } from './KeyHint';
+import { CoinBar } from './cards/CoinBar';
 import { Hand } from './cards/Hand';
+import { PendingChip } from './cards/PendingChip';
 import { PlayableGlow } from './cards/PlayableGlow';
 import { playSparkAt } from './cards/PlaySpark';
 import { TiltCard } from './cards/TiltCard';
 import { useDragPlay } from './cards/useDragPlay';
+import { usePending } from './cards/usePending';
 import type { DropZoneRef } from './cards/useDragPlay';
 
 function cardInfo(id: CardId) {
@@ -121,6 +124,8 @@ export function MarketPanel({
   const [selected, setSelected] = useState<CardId | null>(
     () => stall.find((x): x is CardId => x !== null) ?? null,
   );
+  // R10C 后悔窗口：买下先挂起 ~1.5s，撤销片/飞行卡点一下就收回（interaction #2）
+  const pending = usePending();
   // 投放区元素（拖拽命中现取 rect；tap-tap 时它们就是普通按钮）
   const basketRef = useRef<HTMLButtonElement | null>(null);
   const holdRef = useRef<HTMLButtonElement | null>(null);
@@ -162,16 +167,27 @@ export function MarketPanel({
 
   const zonesFor = (id: CardId) => () =>
     [
-      { id: 'basket', el: basketRef.current, accepts: canBuy(id) },
+      {
+        id: 'basket',
+        el: basketRef.current,
+        accepts: pending.pendingLabel === null && canBuy(id),
+      },
       { id: 'hold', el: holdRef.current, accepts: canHold(id) },
     ] as DropZoneRef[];
 
-  const onDrop = (cardId: CardId, zoneId: string) => {
-    if (zoneId === 'basket') {
-      // R10 Slice B：买下瞬间在篮子区迸一次 PlaySpark（§3.3 买入反馈）
+  /** 买下统一走后悔窗口：挂起 → 撤销片倒计时 → 到期才派发 STALL_BUY */
+  const commitBuy = (cardId: CardId) => {
+    const info = cardInfo(cardId);
+    pending.arm(info.name, () => {
+      // 到账一刻才迸 PlaySpark（§3.3 买入反馈跟着钱走，不跟手走）
       playSparkAt(basketRef.current);
       send({ type: 'STALL_BUY', cardId });
-    } else send({ type: 'STALL_HOLD', cardId });
+    });
+  };
+
+  const onDrop = (cardId: CardId, zoneId: string) => {
+    if (zoneId === 'basket') commitBuy(cardId);
+    else send({ type: 'STALL_HOLD', cardId });
   };
 
   let n = 0;
@@ -215,14 +231,29 @@ export function MarketPanel({
     };
   });
 
+  const w = walletSummary(state, me.id);
+  // R10C lap-1 教练句：孩子第一次进菜市场，用她真缺的菜组成一句话
+  const coach =
+    state.lap === 1 && missing.length > 0
+      ? fmt(strings.panel.coachLine, { items: missing.map(cardName).join('、') })
+      : null;
+
   return (
     <div className="panel-body">
       <p className="panel-text">{strings.panel.stallIntro}</p>
       <p className="panel-buysleft">{fmt(strings.panel.buysLeft, { n: buysLeft })}</p>
+      {coach && <p className="coach-line">{coach}</p>}
 
       <Hand className="stall-hand" items={handItems} ariaLabel={strings.panel.stallIntro} />
 
       <div className="panel-foot">
+        {/* 金币条：菜谱还差/车费/自由花三段；选中卡的价从自由花端点亮 */}
+        <CoinBar
+          coins={me.coins}
+          missingCost={w.missingCost}
+          busDebt={w.busDebt}
+          spend={sel ? sel.price : 0}
+        />
         {sel && (
           <p className="panel-text panel-selected" aria-live="polite">
             <span className="panel-selected-line">
@@ -238,6 +269,9 @@ export function MarketPanel({
         )}
 
         {/* 两个投放区 = tap-tap 的大按钮；有卡选中时亮描边「能收了」 */}
+        {pending.pendingLabel !== null && (
+          <PendingChip label={pending.pendingLabel} onCancel={pending.cancel} />
+        )}
         <div className="drop-row">
           <button
             type="button"
@@ -246,18 +280,13 @@ export function MarketPanel({
             data-testid="action-primary"
             data-primary={endPrimary ? undefined : 'true'}
             data-key={kBuy}
-            disabled={!canBuy(selected)}
+            disabled={!canBuy(selected) || pending.pendingLabel !== null}
             aria-label={
               sel
                 ? fmt(strings.actions.buy, { item: sel.name, n: sel.price })
                 : strings.buttons.buy
             }
-            onClick={() => {
-              if (selected) {
-                playSparkAt(basketRef.current);
-                send({ type: 'STALL_BUY', cardId: selected });
-              }
-            }}
+            onClick={() => selected && commitBuy(selected)}
           >
             <KeyHint value={String(kBuy)} />
             <span className="dz-icon" aria-hidden="true">
@@ -271,7 +300,7 @@ export function MarketPanel({
             className={`drop-zone drop-zone--hold${selected ? ' drop-zone--armed' : ''}`}
             data-testid={`action-${kHold}`}
             data-key={kHold}
-            disabled={!canHold(selected)}
+            disabled={!canHold(selected) || pending.pendingLabel !== null}
             onClick={() => selected && send({ type: 'STALL_HOLD', cardId: selected })}
           >
             <KeyHint value={String(kHold)} />
@@ -285,7 +314,7 @@ export function MarketPanel({
             keyHint={String(kSkip)}
             data-testid={`action-${kSkip}`}
             data-key={kSkip}
-            disabled={selected === null}
+            disabled={selected === null || pending.pendingLabel !== null}
             onClick={() => setSelected(null)}
           >
             {strings.panel.skipCard}
@@ -306,7 +335,7 @@ export function MarketPanel({
                 keyHint={String(kHoldBuy)}
                 data-testid={`action-${kHoldBuy}`}
                 data-key={kHoldBuy}
-                disabled={!canResolveBuy}
+                disabled={!canResolveBuy || pending.pendingLabel !== null}
                 onClick={(e) => {
                   playSparkAt(e.currentTarget);
                   send({ type: 'RESOLVE_HOLD', buy: true });
@@ -319,6 +348,7 @@ export function MarketPanel({
                 keyHint={String(kHoldDrop)}
                 data-testid={`action-${kHoldDrop}`}
                 data-key={kHoldDrop}
+                disabled={pending.pendingLabel !== null}
                 onClick={() => send({ type: 'RESOLVE_HOLD', buy: false })}
               >
                 {strings.panel.holdDropBtn}
@@ -333,6 +363,7 @@ export function MarketPanel({
           data-testid={`action-${kEnd}`}
           data-primary={endPrimary ? 'true' : undefined}
           data-key={kEnd}
+          disabled={pending.pendingLabel !== null}
           onClick={() => send({ type: 'END_TURN' })}
         >
           {strings.panel.endTurn}

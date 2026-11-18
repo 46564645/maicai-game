@@ -14,6 +14,7 @@ import { Coins } from './Coins';
 import { MiniCardRow } from './MiniCardRow';
 import { RecipeCard } from './RecipeCard';
 import { StationPopup } from './StationPopup';
+import { CoinBar } from './cards/CoinBar';
 
 export function WalletDrawer({
   state,
@@ -48,6 +49,8 @@ export function WalletDrawer({
         </section>
         <section className="wallet-col" aria-label={strings.hud.wallet}>
           <Coins count={me.coins} label={fmt(strings.game.myCoins, { n: me.coins })} />
+          {/* 金币条：抽象的「菜谱还差X/车费Y/自由花Z」画成三段金币格 */}
+          <CoinBar coins={w.coins} missingCost={w.missingCost} busDebt={w.busDebt} />
           <div className="wallet-lines">
             {w.recentLogs.map((e) => (
               <p key={e.id} className="wallet-line">

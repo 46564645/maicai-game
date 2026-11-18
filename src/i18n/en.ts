@@ -186,6 +186,30 @@ export const enStrings = {
     storeAll: 'All food',
     storeHoldLine: '"Maybe later" clip: {item} ({n} coins)',
     cookPut: 'Put your food on the plate',
+    coachLine: 'Find recipe food first — you still need {items}',
+  },
+
+  /* 后悔窗口（R10C）：钱/答案到账前的撤销片 */
+  regret: {
+    undo: 'Wait! Take back {item}',
+  },
+
+  /* 金币条（新加坡条形图）：菜谱还差 / 车费 / 自由花 三段 */
+  coinbar: {
+    recipe: 'for recipe',
+    bus: 'bus fare',
+    free: 'free to spend',
+    math: '{a} − {b} → {c}',
+  },
+
+  /* bot 心里话（R10C：贴着 bot 卡冒出的短理由气泡） */
+  think: {
+    steady: 'Recipe food first',
+    impulsiveHold: 'Want it… into "maybe later"',
+    impulsiveBuy: 'I want it! Buying it',
+    follower: 'Me too!',
+    busDebt: 'Fare noted, pay later',
+    eventSpend: 'A surprise costs coins… think',
   },
 
   /* bot 提议气泡（G4） */
@@ -223,6 +247,7 @@ export const enStrings = {
     spinLabel: 'Weather wheel',
     spunTo: 'It is {name}!',
     choose: 'What will you do?',
+    deckHint: 'Tap to flip it over',
   },
 
   /* AI 家长站（06） */
@@ -242,6 +267,13 @@ export const enStrings = {
     statusOffline: 'Offline script',
     ruleNote:
       'Say how many coins and what for → get 1 coin. Also say where coins went and your plan → get 2 coins',
+    /* R10C：对话优先——家长形象名 + 示范对话 + 句首启口片 */
+    parentName: 'Grown-up',
+    echoLine: '{item} ✓ Clear!',
+    demoTag: 'Example',
+    demoTip: 'Say it like this',
+    demoSkip: 'Skip the example',
+    starters: ['I want to buy…', 'I still need…', 'Next time I will…'],
   },
 
   /* 结局：开饭 + 流水 + 反思 */
@@ -305,6 +337,9 @@ export const enStrings = {
     writeOwn: 'Write your own…',
     waitingBots: 'Waiting for friends…',
     everyoneSaid: 'Everyone has shared',
+    /* R10C: options she actually did sort first + get a small badge */
+    personalHint: 'Pick one thing you really did today',
+    didIt: 'You did it',
   },
 
   /* 动作日志（引擎写入 state.log，{name}/{item}/{n} 为占位符） */

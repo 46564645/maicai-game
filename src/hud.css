@@ -747,15 +747,22 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .weather-wheel {
-    animation: weather-spin var(--motion-slow) var(--motion-ease);
+    animation: weather-spin var(--wheel-ms) linear;
   }
 }
 
+/* R10C（motion #6）：真转盘感——先加速（0→18% 起步），再长减速落定。
+   旧版 ease-out 第一帧就满速，剩下全是爬行，看着像坏了不像在转 */
 @keyframes weather-spin {
-  from {
+  0% {
     transform: rotate(0deg);
+    animation-timing-function: cubic-bezier(0.55, 0.06, 0.68, 0.19);
   }
-  to {
+  18% {
+    transform: rotate(calc(var(--spin-end) * 0.18));
+    animation-timing-function: cubic-bezier(0.12, 0.8, 0.16, 1);
+  }
+  100% {
     transform: rotate(var(--spin-end));
   }
 }
@@ -804,6 +811,91 @@
   font-size: var(--font-size-xs);
   color: var(--color-muted);
   text-align: center;
+}
+
+/* R10C（play #3）：家长形象常驻——紫衬圆头像 + 名签，暖色放在
+   聊天区上方，「这是在跟家长说话」先成立 */
+.parent-hero {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  align-self: flex-start;
+}
+.parent-hero-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: 28px;
+  background: var(--color-purple-soft);
+  border: 2px solid var(--color-purple);
+}
+.parent-hero-name {
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-card);
+  background: var(--color-purple-soft);
+  border: 2px solid var(--color-purple);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+}
+
+/* R10C（education #2）：句首启口片——点一下填进输入框起手 */
+.starter-chips {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.starter-chip {
+  min-height: var(--tap-min-size);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-button);
+  border: 2px solid var(--color-mint);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+}
+
+/* R10C（play #3）：「示范」对话块——Q1 前先看一遍怎么答，可跳过 */
+.chat-demo {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  padding: var(--space-2);
+  border-radius: var(--radius-card);
+  background: color-mix(in srgb, var(--color-purple-soft) 45%, var(--color-surface));
+  border: 2px dashed var(--color-purple);
+}
+.chat-demo-tag {
+  align-self: flex-start;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-card);
+  background: var(--color-purple);
+  color: var(--color-ink); /* 白字/淡紫只有 ~2:1，墨字 ≈5:1 */
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+}
+.chat-bubble--demo {
+  border: 1px dashed var(--color-purple);
+}
+.chat-demo-tip {
+  align-self: flex-start;
+  font-size: var(--font-size-xs);
+  color: var(--color-muted);
+}
+.chat-demo-skip {
+  align-self: flex-end;
+  padding: 2px var(--space-2);
+  border: none;
+  background: transparent;
+  color: var(--color-muted);
+  font-size: var(--font-size-xs);
+  text-decoration: underline;
 }
 
 /* R9 家长站状态点（仅展示，靠右贴在面板顶）：真对话进行中=绿点，离线脚本=灰点 */

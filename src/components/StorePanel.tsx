@@ -11,13 +11,14 @@ import { useEffect, useRef, useState } from 'react';
 import { cards, getIngredient } from '../data/cards';
 import { gameConfig } from '../config/gameConfig';
 import { coinWord, strings } from '../data/strings';
-import { availableCommands, missingIngredients } from '../game/selectors';
+import { availableCommands, missingIngredients, walletSummary } from '../game/selectors';
 import { fmt, marketPriceOf } from '../game/stations/shared';
 import { cardName } from '../i18n/cardText';
 import type { CardId, Command, GameState } from '../game/types';
 import { Button } from './Button';
 import { CardIcon } from './CardIcon';
 import { CardView } from './CardView';
+import { CoinBar } from './cards/CoinBar';
 import { Hand } from './cards/Hand';
 import { PlayableGlow } from './cards/PlayableGlow';
 import { playSparkAt } from './cards/PlaySpark';
@@ -60,32 +61,38 @@ function ShelfCard({
     `hand-drag${drag.dragging ? ' hand-drag--up' : ''}` +
     `${drag.shaking ? ' hand-drag--shake' : ''}`;
   return (
-    <div className={dragCls} ref={drag.ref} style={drag.style}>
-      <PlayableGlow
-        active={playable}
-        className={playable ? '' : 'pglow--dim'}
-      >
-        <TiltCard
-          className="store-tilt"
-          glare
-          front={
-            <CardView
-              cardId={id}
-              icon={ing?.icon ?? '❔'}
-              name={cardName(id)}
-              price={cost}
-              mark={needed}
-              selected={selected}
-              disabled={disabled}
-              testid={`action-store-${id}`}
-              ariaLabel={`${cardName(id)}, ${cost} ${coinWord(cost)}`}
-              onClick={() => onSelect(id)}
-              onFocus={() => onSelect(id)}
-            />
-          }
-        />
-      </PlayableGlow>
-    </div>
+    <>
+      <div className={dragCls} ref={drag.ref} style={drag.style}>
+        <PlayableGlow
+          active={playable}
+          className={playable ? '' : 'pglow--dim'}
+        >
+          <TiltCard
+            className="store-tilt"
+            glare
+            front={
+              <CardView
+                cardId={id}
+                icon={ing?.icon ?? '❔'}
+                name={cardName(id)}
+                price={cost}
+                mark={needed}
+                selected={selected}
+                disabled={disabled}
+                testid={`action-store-${id}`}
+                ariaLabel={`${cardName(id)}, ${cost} ${coinWord(cost)}`}
+                onClick={() => onSelect(id)}
+                onFocus={() => onSelect(id)}
+              />
+            }
+          />
+        </PlayableGlow>
+      </div>
+      {/* R10C：选中卡名大浮签（货架扇 >3 张时横幅被盖，靠它认卡） */}
+      <span className="hand-tag" aria-hidden="true">
+        {cardName(id)}
+      </span>
+    </>
   );
 }
 
@@ -119,6 +126,7 @@ export function StorePanel({
 
   const sel = selected ? getIngredient(selected) : null;
   const buySel = canBuy(selected);
+  const wallet = walletSummary(state, me.id);
   // 与菜市场同一套主动作逻辑（ww M4.5.6b 第 7/8 条）：没选中可买的卡时
   // 「走完这一站」是橙色主按钮；选中可买卡后「买下」接管主按钮。
   const endPrimary = !buySel;
@@ -196,6 +204,13 @@ export function StorePanel({
       </section>
 
       <div className="panel-foot">
+        {/* 金币条：菜谱还差/车费/自由花三段（R10C education #1） */}
+        <CoinBar
+          coins={wallet.coins}
+          missingCost={wallet.missingCost}
+          busDebt={wallet.busDebt}
+          spend={sel ? cost(selected!) : 0}
+        />
         {sel && (
           <p className="panel-text panel-selected" aria-live="polite">
             <span className="panel-selected-line">

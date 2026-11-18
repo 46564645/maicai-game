@@ -133,7 +133,7 @@ export function Feast({ state, send }: { state: GameState; send: (c: Command) =>
             <div
               key={plate.playerId}
               className={`plate-card plate-card--${plate.kind}${plate.kind === 'full' ? ' card-foil' : ''} plate-in`}
-              style={{ '--stagger': `${i * 120}ms` } as CSSProperties}
+              style={{ '--stagger': `${i * 60}ms` } as CSSProperties}
               data-testid={`plate-${plate.playerId}`}
             >
               <span className={`plate-disc plate-disc--${plate.kind}`} aria-hidden="true">

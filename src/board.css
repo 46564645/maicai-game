@@ -436,26 +436,70 @@
 
 .bot-card--thinking {
   border-color: var(--color-primary);
-  /* 轮到它想：一圈柔柔的橙光呼吸（paint-only，减动效时被全局关掉） */
-  box-shadow: var(--shadow-sm), var(--inset-light),
-    0 0 0 3px var(--color-primary-soft);
+  /* 轮到它想：一圈柔柔的橙光。R10C（motion #2）：呼吸不再每帧重绘
+     box-shadow——光圈放 ::after，只动 opacity（合成层，不抢帧预算） */
+  position: relative;
+}
+.bot-card--thinking::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: var(--radius-card);
+  box-shadow: 0 0 0 4px var(--color-primary-soft);
+  pointer-events: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .bot-card--thinking {
-    animation: think-glow 1.4s ease-in-out infinite alternate;
+  .bot-card--thinking::after {
+    animation: think-halo 1.4s ease-in-out infinite alternate;
   }
 }
 
-@keyframes think-glow {
+@keyframes think-halo {
   from {
-    box-shadow: var(--shadow-sm), var(--inset-light),
-      0 0 0 2px var(--color-primary-soft);
+    opacity: 0.4;
   }
   to {
-    box-shadow: var(--shadow-sm), var(--inset-light),
-      0 0 0 4px var(--color-primary-soft);
+    opacity: 1;
   }
+}
+
+/* R10C（education #3）：bot 心里话气泡——奶油片墨字，短理由贴在
+   bot 卡上方；transform/opacity 的一次性弹出（不常驻循环） */
+.think-bubble {
+  margin-top: var(--space-1);
+  padding: 3px var(--space-2);
+  border-radius: var(--radius-card);
+  background: var(--color-bg);
+  border: 2px solid var(--color-mint);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+  text-align: center;
+  animation: think-pop var(--motion-med) var(--ease-spring) backwards;
+}
+@keyframes think-pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.85);
+  }
+}
+.think-bubble--phone {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  z-index: 30;
+}
+@keyframes think-pop-phone {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(6px);
+  }
+}
+.think-bubble--phone {
+  animation-name: think-pop-phone;
 }
 
 .bot-card-avatar {

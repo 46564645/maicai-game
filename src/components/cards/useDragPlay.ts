@@ -39,6 +39,24 @@ export function exceedsDragThreshold(dx: number, dy: number, threshold = 8): boo
   return dx * dx + dy * dy > threshold * threshold;
 }
 
+/* R10C（interaction #1）：指针分型阈值——手指指腹在屏幕上天然有
+   10px+ 的慢漂移，8px 的鼠标阈值会把「想点一下」误判成「拖了一下」
+   再把紧跟的 click 吞掉（孩子觉得卡「点不动」）。鼠标仍 8px，
+   触屏/触笔 18px，且松手时小位移短时长一律tap-rescue回点按。 */
+export const DRAG_THRESHOLD_MOUSE = 8;
+export const DRAG_THRESHOLD_TOUCH = 18;
+export const TAP_RESCUE_DIST = 26;
+export const TAP_RESCUE_MS = 300;
+
+export function dragThresholdFor(pointerType: string): number {
+  return pointerType === 'mouse' ? DRAG_THRESHOLD_MOUSE : DRAG_THRESHOLD_TOUCH;
+}
+
+/** tap-rescue：松手时全程位移 <26px 且按住 <300ms → 仍算点按 */
+export function isTapRescue(dx: number, dy: number, elapsedMs: number): boolean {
+  return dx * dx + dy * dy < TAP_RESCUE_DIST * TAP_RESCUE_DIST && elapsedMs < TAP_RESCUE_MS;
+}
+
 /** 矩形命中：返回包含点的所有区中面积最小者（嵌套区时小者优先），无 → null */
 export function hitTestZone(p: PointLike, zones: ZoneRect[]): ZoneRect | null {
   let best: ZoneRect | null = null;
@@ -186,6 +204,7 @@ export function useDragPlay<T>(opts: UseDragPlayOptions<T>): UseDragPlay {
     lastX: 0,
     lastY: 0,
     pointerType: 'mouse' as string,
+    startT: 0,
   });
   const timersRef = useRef<number[]>([]);
   const optsRef = useRef(opts);
@@ -261,7 +280,8 @@ export function useDragPlay<T>(opts: UseDragPlayOptions<T>): UseDragPlay {
       st.lastY = e.clientY;
       const dx = e.clientX - st.startX;
       const dy = e.clientY - st.startY;
-      if (!st.moved && !exceedsDragThreshold(dx, dy)) return;
+      if (!st.moved && !exceedsDragThreshold(dx, dy, dragThresholdFor(st.pointerType)))
+        return;
       if (!st.moved) {
         st.moved = true;
         setDragging(true);
@@ -302,6 +322,17 @@ export function useDragPlay<T>(opts: UseDragPlayOptions<T>): UseDragPlay {
       window.removeEventListener('pointerup', onUp, true);
       window.removeEventListener('pointercancel', onCancel, true);
       if (!st.moved) return; // 点按：交给原生 click
+      // R10C tap-rescue：过了起拖阈值但松手时仍像「按住顿了一下」
+      // （小位移 + 短时长）→ 退回点按路径：卡复位、click 放行去选中
+      const dx = e.clientX - st.startX;
+      const dy = e.clientY - st.startY;
+      if (isTapRescue(dx, dy, e.timeStamp - st.startT)) {
+        st.moved = false;
+        clearZoneMarks();
+        resetTransform(false);
+        setDragging(false);
+        return;
+      }
       const zones = measureZones(optsRef.current.zones());
       finish(resolveDrop({ x: e.clientX, y: e.clientY }, zones), optsRef.current.payload);
     },
@@ -333,6 +364,7 @@ export function useDragPlay<T>(opts: UseDragPlayOptions<T>): UseDragPlay {
       st.pointerType = e.pointerType;
       st.startX = e.clientX;
       st.startY = e.clientY;
+      st.startT = e.timeStamp;
       try {
         elRef.current?.setPointerCapture?.(e.pointerId);
       } catch {

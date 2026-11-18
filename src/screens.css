@@ -335,6 +335,14 @@ button.card-view--selected:not(:disabled):active {
   max-width: 560px;
 }
 
+/* R10C：「挑一件你今天真做过的事说」——选项前的引导句 */
+.reflection-personal {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+  text-align: center;
+}
+
 .reflection-options .btn {
   width: 100%;
   justify-content: flex-start;
