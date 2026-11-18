@@ -12,6 +12,7 @@ import { PopupOutlet } from './components/StationPopup';
 import { RotatePhone } from './components/RotatePhone';
 import { WalletDrawer } from './components/WalletDrawer';
 import { DemoBar } from './demo/DemoBar';
+import { dismissSplash } from './splash';
 import { useBotDriver } from './ui/useBotDriver';
 import { useGame } from './ui/useGame';
 import { useHotkeys } from './ui/useHotkeys';
@@ -33,6 +34,15 @@ export default function App() {
   useEffect(() => {
     document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
   }, [lang]);
+
+  // 首次打开缓冲页：首帧真正画完（双 rAF）后收起 index.html 的静态
+  // #app-splash；看门狗在 main.tsx，这里只管正常路径。仅挂载一次。
+  useEffect(() => {
+    const raf = requestAnimationFrame(() =>
+      requestAnimationFrame(() => dismissSplash()),
+    );
+    return () => cancelAnimationFrame(raf);
+  }, []);
   useBotDriver(state, send);
   const layers = useLayerStack();
   // 手机判定只影响「小屏触屏设备」（M4.5.6）：竖屏 → 旋转提示层；

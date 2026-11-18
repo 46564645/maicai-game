@@ -1,0 +1,17 @@
+import { chromium } from '@playwright/test';
+import fs from 'node:fs';
+const browser = await chromium.launch({ args: ['--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader'] });
+const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+await page.goto('http://localhost:4173', { waitUntil: 'commit' });
+await page.waitForTimeout(350);
+let cdp = await page.context().newCDPSession(page);
+let res = await cdp.send('Page.captureScreenshot', { format: 'png', fromSurface: false });
+fs.writeFileSync('/home/hatch/workspace/maicai-work/shots/splash_loading.png', Buffer.from(res.data, 'base64'));
+console.log('frame1 splash present:', await page.evaluate(() => !!document.getElementById('app-splash')));
+await page.waitForTimeout(3000);
+console.log('frame2 splash present:', await page.evaluate(() => !!document.getElementById('app-splash')));
+cdp = await page.context().newCDPSession(page);
+res = await cdp.send('Page.captureScreenshot', { format: 'png', fromSurface: false });
+fs.writeFileSync('/home/hatch/workspace/maicai-work/shots/splash_gone.png', Buffer.from(res.data, 'base64'));
+await browser.close();
+console.log('done');
