@@ -340,16 +340,13 @@ export function EventPanel({
           )}
           {revealed ? (
             story === 'done' ? null : (
-              /* R10E（§3）：故事卡=可点掉的卡——读完点一下，卡沉下去、
-                 选项扇上来（不再要一颗 UI 按钮来「继续」） */
-              <button
-                type="button"
+              /* R3 修复（ww 必改 3b）：故事卡不再整卡当按钮——卡面只
+                 展示（左图右文），「Tap to go on」是说明文字下方一颗
+                 真按钮（≥48px、全宽一行）。旧版把提示丸挤在正文右侧，
+                 窄栏下正文被压成细条、丸还只有 44px 高。键盘 1 键与
+                 data-testid="event-card" 都落在新按钮上，行为不变 */
+              <div
                 className={'event-story' + (story === 'sinking' ? ' event-story--out' : '')}
-                data-testid="event-card"
-                data-key={1}
-                data-primary="true"
-                aria-label={strings.event.storyDone}
-                onClick={dismissStory}
               >
                 <span className="event-story-art">
                   <CardView
@@ -359,10 +356,18 @@ export function EventPanel({
                   />
                 </span>
                 <span className="event-story-text">{eventText(card)}</span>
-                <span className="event-story-tap" aria-hidden="true">
+                <button
+                  type="button"
+                  className="btn btn--primary event-story-next"
+                  data-testid="event-card"
+                  data-key={1}
+                  data-primary="true"
+                  aria-label={strings.event.storyDone}
+                  onClick={dismissStory}
+                >
                   {strings.event.cardTap}
-                </span>
-              </button>
+                </button>
+              </div>
             )
           ) : (
             <Deck

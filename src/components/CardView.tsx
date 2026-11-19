@@ -1,26 +1,29 @@
 /**
- * CardView.tsx —— 通用卡面。版式（Thong 试玩反馈改版，截图包 v3）：
- * 卡框不动；上方约 3/4 是美术区——原素材图整幅 contain 居中，
- * 不裁圆、不裁内容，比例不一致时留边；下方约 1/4 是白色底板
- * （.card-view-board），叠在美术区下沿之上，卡名/价格宝石/类别签/
- * 标签等全部文字都落在底板上，不再压图。旧版「美术区圆裁 + 宝石
- * 压卡角」的解剖（R10 §3.1）就此废止。
+ * CardView.tsx —— 通用卡面。版式（T-1 统一卡面，Thong 2026-11-19 定稿，
+ * 取代上一版白底板模板）：全站一张卡——统一尺寸（--card-w × --card-h，
+ * 104×152）、统一解剖，无逐屏尺寸（个别物理放不下的窄栏用整体等比
+ * zoom，见 phone.css，属已申报的例外）。卡面底色 = 插画自身底色
+ * （cardArt.ts 的 cardBgFor 采样表），原图整幅 contain 直接放在卡面
+ * 上：无框、无边框盒、无白板、无裁剪；图占上方约 2/3，全部文字
+ * （卡名/价格金币/类别/标签/✓/键位徽标）排在下方约 1/3 的文字区
+ * （.card-view-text），图上零文字零角标。长名在文字区内按音节软
+ * 连字符折两行，不缩字、不省略。人物卡（ProfileCard）不在此列。
  *
  * 美术区：cards/cardArt.ts 里登过 cardId → 渲染插画 <img>；没登 →
- * 回退原有 emoji/CardIcon 圆形衬底（13 张食材等 PM 后续补图）。
- * cardId 是 R10 新增的可选 prop——原有调用方不传则行为与旧版一致。
+ * 回退原有 emoji/CardIcon（底色用默认卡面色）。
  *
  * 可点时渲染为原生 <button>（角色卡、市场卡、图卡共用）；纯展示时渲染 div。
- * 旧类名全保留（.card-view/-icon/-name/-tag/-mark + --selected），
- * 新增 .card-view-board 底板层；phone.css / hud.css 的窄栏、行式覆写不破。
+ * 旧类名保留（.card-view/-icon/-name/-tag/-mark + --selected）；
+ * .card-view-board 白底板废止，文字区为 .card-view-text + 元行
+ * .card-view-meta。
  */
 import { Fragment } from 'react';
-import type { MouseEvent, ReactNode } from 'react';
+import type { CSSProperties, MouseEvent, ReactNode } from 'react';
 import { strings } from '../data/strings';
 import { useSpeech } from '../ui/useSpeech';
 import { CardIcon } from './CardIcon';
 import { KeyHint } from './KeyHint';
-import { cardArtFor } from './cards/cardArt';
+import { cardArtFor, cardBgFor } from './cards/cardArt';
 
 export interface CardViewProps {
   icon: string;
@@ -75,18 +78,29 @@ export function CardView(props: CardViewProps) {
     .filter(Boolean)
     .join(' ');
   const art = props.cardId ? cardArtFor(props.cardId) : undefined;
-  // 无价格卡 → 板上类别小标签取 tag 首段（「菜谱」/「想要的」）。
+  // T-1：卡面底色取插画自身底色（采样表在 cardArt.ts）——图与卡底
+  // 同色融合，无框无白板。无图卡不设，走 CSS 默认卡面色。
+  const bg = props.cardId ? cardBgFor(props.cardId) : undefined;
+  const rootStyle = bg
+    ? ({ '--card-bg': bg } as CSSProperties)
+    : undefined;
+  // 无价格卡 → 文字区类别小签取 tag 首段（「菜谱」/「想要的」）。
   // 只收短词（≤6 字）：整句型 tag（如搭档站分摊说明）不是类别，
-  // 塞进角标会膨胀成 161px 高的气球盖住整卡（全屏排查实测）——
-  // 长句只走下方标签行，角标不渲染
+  // 塞进小签会膨胀成大气球盖住整卡（全屏排查实测）——
+  // 长句只走元行的标签文本，小签不渲染
   const kindHead = props.tag?.split('·')[0]?.trim();
   const kindChip =
     props.price === undefined && kindHead && kindHead.length <= 6
       ? kindHead
       : undefined;
+  const hasMeta =
+    props.keyHint !== undefined ||
+    props.price !== undefined ||
+    kindChip !== undefined ||
+    props.tag !== undefined ||
+    props.mark === true;
   const body = (
     <>
-      {props.keyHint !== undefined && <KeyHint value={props.keyHint} />}
       <span className="card-view-art" aria-hidden="true">
         {art ? (
           <img className="card-view-art-img" src={art} alt="" draggable={false} />
@@ -96,59 +110,64 @@ export function CardView(props: CardViewProps) {
           </span>
         )}
       </span>
-      {/* 白色底板：叠在美术区下沿，承载全部文字（名/价/签/标签）。
-          宝石/类别签改为底板左上角的角标（绝对定位锚到本板），
-          不再压在卡角的图上 */}
-      <span className="card-view-board">
-      {props.mark && (
-        <span className="card-view-mark" aria-hidden="true">
-          ✓
+      {/* T-1 文字区（卡面下方约 1/3）：全部文字在此——卡名、价格
+          金币丸、类别签、标签、✓、键位徽标；图上零文字零角标。
+          底色与卡面同色（继承 --card-bg），与美术区无缝衔接 */}
+      <span className="card-view-text">
+        <span className="card-view-banner">
+          <span className="card-view-name">
+            {/* nameBreak：cards.json 标的音节断点，放 &shy; 软连字符——
+                放得下时不可见，放不下时按音节折两行（Mush-room、
+                Marsh-mallow），不会像 break-word 那样断出「Carro t」 */}
+            {props.nameBreak !== undefined &&
+            props.nameBreak > 0 &&
+            props.nameBreak < props.name.length ? (
+              <>
+                {props.name.slice(0, props.nameBreak)}
+                {'\u00AD'}
+                {props.name.slice(props.nameBreak)}
+              </>
+            ) : (
+              nameWithBreaks(props.name)
+            )}
+          </span>
         </span>
-      )}
-      {props.price !== undefined && (
-        <span className="card-view-gem" aria-hidden="true">
-          {props.price}
-        </span>
-      )}
-      {props.price === undefined && kindChip && (
-        <span className="card-view-kind" aria-hidden="true">
-          {kindChip}
-        </span>
-      )}
-      <span className="card-view-banner">
-        <span className="card-view-name">
-          {/* nameBreak：cards.json 标的音节断点，放 &shy; 软连字符——
-              放得下时不可见，放不下时按音节折两行（Mush-room、
-              Marsh-mallow），不会像 break-word 那样断出「Carro t」 */}
-          {props.nameBreak !== undefined &&
-          props.nameBreak > 0 &&
-          props.nameBreak < props.name.length ? (
-            <>
-              {props.name.slice(0, props.nameBreak)}
-              {'\u00AD'}
-              {props.name.slice(props.nameBreak)}
-            </>
-          ) : (
-            nameWithBreaks(props.name)
-          )}
-        </span>
-      </span>
-      {props.tag && (
-        <span className="card-view-tag">
-          {props.tag
-            .split('·')
-            .map((p) => p.trim())
-            .map((part, i, arr) => (
-              <Fragment key={i}>
-                {i > 0 && ' '}
-                <span className="card-view-tag-part">
-                  {part}
-                  {i < arr.length - 1 && ' ·'}
-                </span>
-              </Fragment>
-            ))}
-        </span>
-      )}
+        {hasMeta && (
+          <span className="card-view-meta">
+            {props.keyHint !== undefined && <KeyHint value={props.keyHint} />}
+            {props.price !== undefined && (
+              <span className="card-view-gem" aria-hidden="true">
+                {props.price}
+              </span>
+            )}
+            {props.price === undefined && kindChip && (
+              <span className="card-view-kind" aria-hidden="true">
+                {kindChip}
+              </span>
+            )}
+            {props.tag && (
+              <span className="card-view-tag">
+                {props.tag
+                  .split('·')
+                  .map((p) => p.trim())
+                  .map((part, i, arr) => (
+                    <Fragment key={i}>
+                      {i > 0 && ' '}
+                      <span className="card-view-tag-part">
+                        {part}
+                        {i < arr.length - 1 && ' ·'}
+                      </span>
+                    </Fragment>
+                  ))}
+              </span>
+            )}
+            {props.mark && (
+              <span className="card-view-mark" aria-hidden="true">
+                ✓
+              </span>
+            )}
+          </span>
+        )}
       </span>
       {props.children}
     </>
@@ -158,6 +177,7 @@ export function CardView(props: CardViewProps) {
       <button
         type="button"
         className={cls}
+        style={rootStyle}
         onClick={props.onClick}
         onFocus={props.onFocus}
         disabled={props.disabled}
@@ -188,5 +208,9 @@ export function CardView(props: CardViewProps) {
       </span>
     );
   }
-  return <div className={cls}>{body}</div>;
+  return (
+    <div className={cls} style={rootStyle}>
+      {body}
+    </div>
+  );
 }

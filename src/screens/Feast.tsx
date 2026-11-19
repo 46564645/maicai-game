@@ -16,7 +16,7 @@ import { cardName, playerDisplayName } from '../i18n/cardText';
 import type { Command, GameState, PlateResult } from '../game/types';
 import { Button } from '../components/Button';
 import { CardIcon } from '../components/CardIcon';
-import { cardArtFor } from '../components/cards/cardArt';
+import { cardArtFor, cardBgFor } from '../components/cards/cardArt';
 import { CoinCounter } from '../components/cards/CoinCounter';
 import { playSparkAt } from '../components/cards/PlaySpark';
 
@@ -133,7 +133,13 @@ export function Feast({ state, send }: { state: GameState; send: (c: Command) =>
             <div
               key={plate.playerId}
               className={`plate-card plate-card--${plate.kind}${plate.kind === 'full' ? ' card-foil' : ''} plate-in`}
-              style={{ '--stagger': `${i * 60}ms` } as CSSProperties}
+              style={
+                {
+                  '--stagger': `${i * 60}ms`,
+                  // T-1：盘卡底色 = 菜品插画底色（与 CardView 同口径）
+                  ...(recipe ? { '--card-bg': cardBgFor(recipe.id) } : {}),
+                } as CSSProperties
+              }
               data-testid={`plate-${plate.playerId}`}
             >
               <span className={`plate-disc plate-disc--${plate.kind}`} aria-hidden="true">

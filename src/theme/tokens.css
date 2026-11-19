@@ -210,12 +210,21 @@
   --shake-ms: 180ms;
 
   /* —— R10 卡片化（R10_DESIGN §3/§4；全部派生自现有色板，未改旧值）—— */
-  /* 手牌卡尺寸：桌面 104×144 起；手机横屏紧凑档 ≥56×80（扇形露出带约 34px，
-     §6.1 小屏可读性留待 Slice A 验收定夺） */
-  --card-w: 104px;
+  /* T-1 统一卡面（Thong 2026-11-19）：全站唯一卡尺寸 104×152——图占
+     上约 2/3、文字区占下约 1/3（两行名时文字区弹性伸长、图区相应收）。
+     旧小卡尺寸（64×92）废止：物理放不下的窄栏（手机浮层扇/右栏扇与
+     网格）用整体等比 zoom（0.84/0.85，见 phone.css）而不是第二种尺寸 */
+  /* T-1 统一卡面（Thong 2026-11-19 定稿）：全游戏一张卡——3:4 竖版
+     108×144。文字区（名 16px 两行 + 元行 22px + 内边距）在卡高 144 里
+     约占 48–67px，美术区落在 53%–67%（单行名时 2/3，符合 ww 验收
+     口径「硬约束优先、美术区尽量近 3/4、需要时落 2/3 并报告」）。
+     手机横屏物理放不下的情境（浮层扇/右栏）只允许整卡 zoom 等比
+     缩放（见 phone.css），不再有任何逐屏卡尺寸 */
+  --card-w: 108px;
   --card-h: 144px;
-  --card-w-sm: 64px;
-  --card-h-sm: 92px;
+  /* 无插画卡（emoji 回退）的默认卡面色：取采样底色的中枢奶油色，
+     与有图卡同族（采样区间 #e8dcce–#fcf1df，中枢约 #fce9c8） */
+  --card-bg-default: #fce9c8;
   /* 扇形：两侧递增转角上限、弧线下沉系数、悬停时邻卡让位距离、每卡露出带 */
   --fan-deg: 10deg;
   --fan-arc-drop: 4px;
@@ -263,9 +272,12 @@
   /* 物理金币点：徽章列迷你枚 / 底栏币堆大枚 */
   --coin-dot-size: 14px;
   --coin-dot-size-sm: 9px;
-  /* ProfileCard 竖版 ID 卡：宽高、描边高光、holo 强度（owner：≤0.8 的克制） */
-  --pc-w: 188px;
-  --pc-h: 296px;
+  /* ProfileCard 竖版 ID 卡：宽高、描边高光、holo 强度（owner：≤0.8 的克制）
+     R2-3（团队第 2 轮）：桌面卡宽 ≥280px——188px 时性格标签被省略号
+     截断（Care…）、金币行被裁半；放大到 288×400（竖版比例放宽），
+     手机横屏档在 board.css 里另给一档（250×330，不缩水到不可读） */
+  --pc-w: 288px;
+  --pc-h: 400px;
   --pc-rim: color-mix(in srgb, var(--color-surface) 62%, transparent);
   --pc-holo-strength: 0.55;
   /* 天气布景：DOM 洗色 + 弹窗遮罩调温共用（rainy 偏蓝、windy 偏薄荷、sunny 暖黄） */
@@ -274,6 +286,9 @@
   --weather-tint-windy: color-mix(in srgb, var(--color-mint) 20%, transparent);
   /* 大卡时刻：世界中心弹出 340ms（recipe/weather/dish/story 共用） */
   --moment-pop-ms: 340ms;
+  /* R2-4：事件提示条可见时长（2.5s 后自动消失）——与 Toast.tsx 的
+     TOAST_VISIBLE_MS 同值，JS 计时读不到 CSS 变量，两处要调一起调 */
+  --toast-visible-ms: 2500ms;
   /* 徽章列买到卡缩略图（迷你卡砖） */
   --thumb-w: 22px;
   --thumb-h: 30px;

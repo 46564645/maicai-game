@@ -536,6 +536,12 @@
   padding-top: var(--space-2);
 }
 
+/* S-4：市场说明行在桌面档进 foot 首行（MarketPanel）——丸形居中，
+   不随 foot 的 stretch 拉满 */
+.panel-foot .stall-guide {
+  align-self: center;
+}
+
 .panel-keyhelp {
   font-size: var(--font-size-xs);
   color: var(--color-muted);
@@ -561,7 +567,6 @@
 .popup .panel-body > .panel-subtitle,
 .popup .panel-foot > .panel-subtitle,
 .popup .panel-selected,
-.popup .weather-result,
 .popup .panel-keyhelp,
 .popup .chat-system,
 .popup .deck-hint,
@@ -575,6 +580,14 @@
   backdrop-filter: blur(var(--stage-blur));
   -webkit-backdrop-filter: blur(var(--stage-blur));
   color: var(--color-ink);
+}
+
+/* S-5：结果标题在弹窗里同样用不透明白胶囊（基础 .weather-result 已
+   定义）——不沿用浮丸组的 84% 半透明衬底，保证标题对比按纯白面计 */
+.popup .weather-result {
+  background: var(--color-surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 /* R10E（§1）：钱包两栏合进一只浮卡、求助牌整页一张卡——
@@ -596,7 +609,8 @@
 }
 
 .stall-slot {
-  min-height: 120px;
+  /* T-1：空槽占位与统一卡同高，卡入槽不跳高 */
+  min-height: var(--card-h);
   border: 2px dashed var(--color-line);
   border-radius: var(--radius-card);
 }
@@ -648,23 +662,12 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: var(--space-2);
+  justify-items: center;
 }
 
-/* R10D（UI #7）：「全部食材」格子卡整幅可读——插画 contain 不裁中段，
-   美术区给足高度；名横幅 + 价格宝石就在卡上（CardView 自带），
-   网格与买下钮之间不再有任何游离的价签行 */
-.store-grid .card-view {
-  min-height: 152px;
-  padding: var(--space-2);
-  gap: var(--space-1);
-}
-.store-grid .card-view-art {
-  min-height: 84px;
-}
-.store-grid .card-view-art-img {
-  object-fit: contain;
-  padding: var(--space-1);
-}
+/* R10D（UI #7）：「全部食材」格子卡整幅可读——插画 contain 不裁。
+   T-1：格子卡同统一尺寸/解剖（旧 min-height 152 + 内边距 + 美术
+   地板 84 的专档废止——会把卡拉高到 152 破坏统一高） */
 .store-grid .card-view-icon {
   font-size: var(--font-size-xl);
 }
@@ -999,6 +1002,20 @@
 .weather-result {
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
+  /* S-5（ww 建议）：结果标题「It is Sunny!」旧版墨蓝字直接压在压暗
+     的棋盘上无衬底——抗锯齿边缘对比只剩 4.5–4.7:1。改白胶囊衬底
+     （不透明纯白丸）：字落在胶囊上，对比按胶囊面复测（见 R10_DESIGN
+     第 5 轮记录）。手机天气浮层里它不在 .popup 内、原先的浮丸组规则
+     够不着，衬底必须落在基础规则上才两处都覆盖 */
+  align-self: center;
+  width: fit-content;
+  max-width: 100%;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-sm);
+  text-align: center;
 }
 
 /* —— AI 家长站：聊天气泡（G5）—— */
@@ -1196,35 +1213,8 @@
     gap: var(--space-2);
   }
 
-  /* 竖屏 AI 家长站（马教授 M3.7 反馈 4）：图卡改两列横排（键位徽标 + 图标 + 文字），
-     聊天区限高，打字/语音入口吸在抽屉底部 —— 390×844 首屏就能看到全部图卡、
-     「我还不知道」和打字/语音入口，不用滚动。 */
-  .parent-options .card-view {
-    flex-direction: row;
-    align-items: center;
-    gap: var(--space-1);
-    padding: var(--space-1) var(--space-2);
-    text-align: left;
-  }
-
-  .parent-options .card-view-icon {
-    flex: none;
-    font-size: var(--font-size-md);
-    line-height: 1.2;
-  }
-
-  .parent-options .card-view-name {
-    flex: 1 1 auto;
-    min-width: 0;
-    font-size: var(--font-size-md);
-    line-height: 1.25;
-  }
-
-  .parent-options .key-hint {
-    flex: none;
-    width: var(--space-5);
-    height: var(--space-5);
-  }
+  /* 竖屏 AI 家长站：图卡两列陈列（T-1 统一竖卡解剖，旧横排条卡
+     适配废止——新解剖纵列两区，横排 flex 会拆坏卡面） */
 
   /* 3 张图卡（如问题 1）时最后一张占满整行，「我还不知道」不再被挤成两行 */
   .parent-options > :last-child:nth-child(odd) {
@@ -1388,9 +1378,9 @@
 .moment-tap {
   padding: 2px var(--space-3);
   border-radius: var(--radius-button);
-  background: var(--stage-note-bg);
-  backdrop-filter: blur(var(--stage-blur));
-  -webkit-backdrop-filter: blur(var(--stage-blur));
+  /* S-5：与结果标题同口径——浮在棋盘上的提示字改不透明白衬底，
+     不再用 84% 半透明浮丸（抗锯齿边缘对比不足） */
+  background: var(--color-surface);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
   color: var(--color-ink);
@@ -1445,27 +1435,10 @@
   animation: story-sink 220ms var(--ease-in-out) forwards !important;
 }
 
-/* 故事卡变按钮：样式照旧（卡即按钮），只补指针与聚焦 */
-button.event-story {
-  border: 2px solid var(--color-ink);
-  cursor: pointer;
-  text-align: left;
-  font: inherit;
-  color: inherit;
-}
-button.event-story:focus-visible {
-  outline: 3px solid var(--color-focus);
-  outline-offset: 2px;
-}
-.event-story-tap {
-  align-self: center;
-  padding: 2px var(--space-3);
-  border-radius: var(--radius-button);
-  background: var(--stage-note-bg);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-muted);
-}
+/* R3 修复（必改 3b）：故事卡不再整卡是按钮（EventPanel 已改 div +
+   .event-story-next 真按钮），旧 button.event-story 与 .event-story-tap
+   小丸规则废止——按钮样式走 .btn 基础，布局走 cards.css 的
+   .event-story-next（独占一行、≥48px） */
 
 /* —— 天气布景（§2）：落定天气给 DOM 洗一层同色 —— */
 .game-screen.weather--sunny {

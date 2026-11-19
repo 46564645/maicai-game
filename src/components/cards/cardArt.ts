@@ -98,3 +98,59 @@ const artByCardId: Record<string, string> = {
 export function cardArtFor(cardId: string): string | undefined {
   return artByCardId[cardId];
 }
+
+/**
+ * 卡 id → 插画自身底色（T-1 统一卡面，Thong 定稿）：卡面背景直接取
+ * 插画的底色，图与卡融为一体（无框、无白板）。采样法：对每张
+ * 1600×1600 原图取四角各 100×100 区块的均值，再取四角中位数——
+ * v3 Coinly 扁平风底色是整幅平涂，四角离散度多在 ±4 以内；个别图
+ * 主体探到角区（猪肉/冰棍）用中位数抗离群。2026-11-18 实测采样，
+ * 换图时重跑同一采样更新本表。卡背另登（牌背无字，仅作 Deck 底色）。
+ */
+const bgByCardId: Record<string, string> = {
+  'ing-tomato': '#fdedcf',
+  'ing-egg': '#fae2bf',
+  'ing-scallion': '#f9e9c8',
+  'ing-greens': '#feecd2',
+  'ing-cucumber': '#fbefd6',
+  'ing-potato': '#fcf1df',
+  'ing-carrot': '#fce7c0',
+  'ing-tofu': '#f8e0b9',
+  'ing-mushroom': '#fce8c3',
+  'ing-pork': '#f8e3bb',
+  'ing-fish': '#fce5bb',
+  'ing-ginger': '#fdeccc',
+  'ing-garlic': '#feecd0',
+  'rec-tomato-egg': '#fdeaca',
+  'rec-tomato-egg-2': '#fdeaca',
+  'rec-veggie-stirfry': '#fdeacb',
+  'rec-potato-pork': '#fde9c9',
+  'rec-tofu-soup': '#feeac6',
+  'rec-braised-fish': '#f8deb2',
+  'tmp-sticker': '#fde5b7',
+  'tmp-marshmallow': '#f2e3c2',
+  'tmp-popsicle': '#e8dcce',
+  'tmp-toy': '#fbe9cc',
+  'inv-popsicle': '#e8dcce',
+  'inv-sticker': '#fde5b7',
+  'wth-sunny': '#fbe5bc',
+  'wth-rainy': '#fcebca',
+  'wth-windy': '#f8e4be',
+  'evt-neighbor-greens': '#feeaca',
+  'evt-help-vendor': '#fee9c9',
+  'evt-extra-egg': '#fcebd0',
+  'evt-thirsty': '#fbeccc',
+  'evt-bag-broken': '#fde9c4',
+  'evt-rain-umbrella': '#f4d99d',
+  'evt-muddy-shoes': '#fceccc',
+  'evt-windy-hat': '#fee9ca',
+  'evt-hungry': '#fde8c9',
+};
+
+/** 牌背底色（深藏青，采样同上） */
+export const CARD_BACK_BG = '#06113f';
+
+/** 卡 id → 插画底色；无图回 undefined（调用方用默认卡面色） */
+export function cardBgFor(cardId: string): string | undefined {
+  return bgByCardId[cardId];
+}

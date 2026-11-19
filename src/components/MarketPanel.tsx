@@ -300,11 +300,15 @@ export function MarketPanel({
     </div>
   );
 
-  // 卡扇 + 说明行是一个整体：手机横屏一起走 portal 浮到棋盘区
+  // 卡扇 + 说明行：手机横屏一起走 portal 浮到棋盘区；桌面档说明行
+  // 改放 panel-foot 首行（S-4）——旧版放在卡扇下方（面板体末行），
+  // 矮视口下弹窗总高超限、sticky 的 foot 初始态就盖住说明行并压住
+  // 金币条标签（1024 实测导引句 × 数字重叠 75.4px²）。说明行进 foot
+  // 后与金币条同流排布，结构上不可能再相叠；手机浮层里仍在扇下方
   const stallFanBlock = (
     <div className="stall-fan-block">
       {stallHand}
-      {stallGuide}
+      {handFloatEl ? stallGuide : null}
     </div>
   );
 
@@ -447,9 +451,10 @@ export function MarketPanel({
         : stallFanBlock}
 
       <div className="panel-foot">
-        {/* foot 首行只剩金币条：「还能买 N 张」已收口到浮签角标 ×N
-            一处；面板总高仍须压进弹窗内，否则 sticky 的 foot 在
-            初始态就会盖住卡扇下说明行 */}
+        {/* S-4：桌面档说明行（stallGuide）放 foot 首行——与金币条同流、
+            永不相叠（手机横屏不走这里，说明行在浮层扇下方）。
+            「还能买 N 张」仍只在浮签角标 ×N 一处 */}
+        {!handFloatEl && stallGuide}
         <div className="panel-foot-row">
           {/* 金币条：菜谱还差/车费/自由花三段；选中卡的价从自由花端点亮。
               R2-14：算式不在条下渲染——改放投放区同一行（见 drop-row） */}

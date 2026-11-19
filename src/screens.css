@@ -5,15 +5,22 @@
 
 
 /* —— 卡面（CardView）—— */
+/* T-1 统一卡面（Thong 2026-11-19）：全站唯一尺寸 --card-w × --card-h；
+   底色 = 插画自身底色（--card-bg 由 CardView 按 cardArt 采样表注入，
+   无图卡回退默认奶油色）；无边框、无框盒——图直接落在卡面上，
+   与底色同色融合；圆角 + 柔影只作卡片轮廓，不作「框」 */
 .card-view {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-4) var(--space-3);
-  background: var(--gradient-card);
-  border: 2px solid var(--color-line);
+  gap: 0;
+  width: var(--card-w);
+  height: var(--card-h);
+  padding: 0;
+  overflow: hidden;
+  background: var(--card-bg, var(--card-bg-default));
+  border: none;
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-sm), var(--inset-light);
   text-align: center;
@@ -21,13 +28,13 @@
 
 button.card-view--selected,
 .card-view--selected {
-  border-color: var(--color-primary);
-  border-width: 3px;
   /* 「抬起」：选中的卡浮起来一点（ww M4.5.6b：菜市场/小卖部选中态一致）
-     R5：再垫一层淡橙底——像被选中的玩具片 */
+     T-1 无边框后选中描边改走外圈光环（box-shadow 环，不占卡面） */
   transform: translateY(-2px);
-  background: var(--color-primary-soft);
-  box-shadow: var(--shadow-md), var(--inset-light);
+  box-shadow:
+    0 0 0 3px var(--color-primary),
+    var(--shadow-md),
+    var(--inset-light);
 }
 
 /* R5：选中卡已抬 -2px，按下回到 0（未选中卡走全局 +2px 下沉） */
@@ -45,56 +52,10 @@ button.card-view--selected:not(:disabled):active {
   }
 }
 
-.card-view-icon {
-  font-size: var(--font-size-xxl);
-}
-
-.card-view-name {
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-ink);
-}
-
-.card-view-price {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
-  font-variant-numeric: tabular-nums;
-  color: var(--color-muted);
-}
-
-.card-view-tag {
-  font-size: var(--font-size-xs);
-  color: var(--color-muted);
-  text-align: center;
-}
-
-/* 标签按「·」分段渲染：短段保持整段不拆；但整句型标签（如搭档站
-   分摊说明 287px 一行）必须能在板宽内折行——nowrap 会让它横溢出
-   卡外（全屏排查实测）。overflow-wrap:anywhere 只在单个词本身
-   超过行宽时才断词，短段不受影响 */
-.card-view-tag-part {
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
-
-/* 「On my list」卡角小 ✓（ww M4.5.7a）：窄卡放不下长标签，
-   改成角上一个圆徽标 + 一行短词 */
-.card-view-mark {
-  position: absolute;
-  top: var(--space-1);
-  right: var(--space-1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--key-hint-size);
-  height: var(--key-hint-size);
-  border-radius: var(--radius-button);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
-  background: var(--color-mint);
-  color: var(--color-text);
-  border: 2px solid var(--color-line-strong);
-}
+/* T-1：卡面解剖（.card-view-art/-text/-name/-tag/-gem/-kind/-mark）
+   全部收敛到 components/cards/cards.css 一处定义，本文件只留卡身
+   基础（尺寸/底色/圆角/选中环）。旧 .card-view-price 已无渲染方，
+   一并删除 */
 
 /* 构建戳：开始页左下角小字（构建注入的 commit 号），低调灰字、
    不占版面、不可点；安全区内缩，避开手机圆角/手势条 */
@@ -139,47 +100,60 @@ button.card-view--selected:not(:disabled):active {
     color-mix(in srgb, var(--color-shadow) 10%, transparent);
 }
 
+/* T-1：开饭盘卡同统一卡面——108×144、底色 = 菜品插画底色
+   （--card-bg 由 Feast 按 recipe 注入 cardBgFor）、无框无白板；
+   上美术区（菜品图整幅 contain）+ 下文字区（玩家名/菜名/成菜
+   档位/小注，全是文字、无一字压图）。旧渐变白板 + 描边瓷盘废止 */
 .plate-card {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-4) var(--space-3);
-  background: var(--gradient-card);
-  border: 2px solid var(--color-line);
+  align-items: stretch;
+  gap: 0;
+  width: var(--card-w);
+  height: var(--card-h);
+  padding: 0;
+  overflow: hidden;
+  background: var(--card-bg, var(--card-bg-default));
+  border: none;
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-sm), var(--inset-light);
+  text-align: center;
 }
 
 .plate-disc {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 96px;
-  height: 96px;
-  border-radius: var(--radius-button);
+  overflow: hidden;
   font-size: var(--font-size-xl);
-  /* R5：盘子是微凹的瓷片——内嵌一点影 */
-  box-shadow: inset 0 -3px 6px
-      color-mix(in srgb, var(--color-shadow) 10%, transparent),
-    inset 0 2px 3px color-mix(in srgb, var(--color-surface) 60%, transparent);
 }
 
-.plate-disc--full {
-  background: var(--tint-follower);
-  border: 3px solid var(--color-mint);
+/* .plate-art 的盒/贴图规则在 cards.css（开饭段）统一维护 */
+
+.plate-name {
+  /* T-1 文字区口径与 CardView 一致：名 16px/1.2（旧继承 20px/1.5
+     把四行文字撑到 135px、美术区只剩 9px——量测实证后收紧行高字号，
+     字号仍 ≥15） */
+  font-size: var(--font-size-sm);
+  line-height: 1.2;
+  padding: var(--space-1) var(--space-2) 0;
 }
 
-.plate-disc--simple {
-  background: var(--color-surface-dim);
-  border: 3px solid var(--color-line-strong);
+.plate-dish,
+.plate-kind {
+  line-height: 1.25;
+  padding: 0 var(--space-2);
 }
 
-.plate-disc--shadow {
-  background: transparent;
-  border: 3px dashed var(--color-line-strong);
-  color: var(--color-muted);
+.plate-note {
+  padding: 0 var(--space-2) var(--space-1);
 }
+
+/* 档位（full/simple/shadow）只走 .plate-kind 文字（文字区内），
+   美术区不再用描边/虚线区分——T-1 无框口径；类名保留供测试锚点 */
 
 .plate-name {
   font-weight: var(--font-weight-bold);
@@ -190,12 +164,13 @@ button.card-view--selected:not(:disabled):active {
 }
 
 .plate-kind {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
 }
 
 .plate-note {
   font-size: var(--font-size-xs);
+  line-height: 1.3;
   color: var(--color-muted);
 }
 

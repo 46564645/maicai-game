@@ -324,7 +324,10 @@ describe('Slice D 交付样式验收', () => {
     expect(out).toContain('var(--popup-out-ms)');
   });
   it('商店格子卡：插画 object-fit contain 整幅可读', () => {
-    expect(cssBlock(hudCss, '.store-grid .card-view-art-img')).toContain(
+    // T-1 统一卡面后，contain 由卡面解剖的基规则统一保证（cards.css
+    // .card-view-art-img），商店格不再有自己的 art 规则——断言随之
+    // 指向基规则（意图不变：商店卡插画整幅可读、不裁）
+    expect(cssBlock(cardsCss, '.card-view-art-img {')).toContain(
       'object-fit: contain',
     );
   });
