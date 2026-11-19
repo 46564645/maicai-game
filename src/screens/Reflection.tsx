@@ -4,7 +4,7 @@
  * bot 回合由 useBotDriver 自动提交，台词直接出现在列表里；
  * 全部说完（phase='finished'）：「再玩一局」。
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { cards } from '../data/cards';
 import { strings } from '../data/strings';
@@ -54,6 +54,16 @@ export function Reflection({
   const finished = state.phase === 'finished';
   const [writeOwn, setWriteOwn] = useState(false);
   const [freeText, setFreeText] = useState('');
+  /* R2 验收修复（ww 第 2 轮截图验收 #3）：选项卡先选后说——第一次点
+     只选中（卡抬起 + 名签整句 + 扇下大字读出整句），再点同一张才
+     发 CHOOSE_REFLECTION。旧版点卡即交，卡面又被扇叠住看不清，
+     孩子没机会看清自己选了哪句。命令与选项数据一字未动。 */
+  const [pickedId, setPickedId] = useState<string | null>(null);
+  // 换一位说（bot 先后说完/重开一局）→ 选中态清掉，不带到下一位
+  const pendingPlayer = pd.kind === 'reflection' ? pd.playerId : null;
+  useEffect(() => {
+    setPickedId(null);
+  }, [pendingPlayer, state.phase]);
 
   const options = cards.reflections.humanOptions;
   /* R10C：从她自己的账本推「今天真做到的事」——做到的选项排前、
@@ -86,15 +96,18 @@ export function Reflection({
   };
 
   let n = 0;
-  /* R10 Slice B：反思选项 = 手牌选择卡（§2.8）。预设项打出即选；
+  /* R10 Slice B：反思选项 = 手牌选择卡（§2.8）。预设项先点选中
+     （整句读出）、再点同卡才打出（R2 验收修复，见 pickedId 注）；
      自写项先翻开输入框（与旧按钮版同流程）。键位 1..n 不变。 */
   const optionItems: HandItem[] = preset.map((o) => {
     const k = ++n;
     const label = reflectionOptionLabel(o.id, o.label);
+    const picked = pickedId === o.id;
     return {
       key: o.id,
       name: label,
       speakText: label,
+      className: picked ? 'hand-item--sel' : undefined,
       node: (
         <TiltCard
           glare
@@ -106,15 +119,23 @@ export function Reflection({
               keyHint={String(k)}
               dataKey={k}
               primary={k === 1}
+              selected={picked}
               testid={k === 1 ? 'action-primary' : `action-reflect-${o.id}`}
               ariaLabel={`${k} ${label}`}
-              onClick={() => send({ type: 'CHOOSE_REFLECTION', optionId: o.id })}
+              onClick={() =>
+                picked
+                  ? send({ type: 'CHOOSE_REFLECTION', optionId: o.id })
+                  : setPickedId(o.id)
+              }
             />
           }
         />
       ),
     };
   });
+  const pickedOption = pickedId
+    ? preset.find((o) => o.id === pickedId)
+    : undefined;
   const freeKey = ++n;
 
   return (
@@ -174,6 +195,11 @@ export function Reflection({
               items={optionItems}
               ariaLabel={prompt}
             />
+            {pickedOption && (
+              <p className="reflection-picked" aria-live="polite">
+                {reflectionOptionLabel(pickedOption.id, pickedOption.label)}
+              </p>
+            )}
             {free && (
               <Button
                 variant="secondary"

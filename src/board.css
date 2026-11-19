@@ -125,11 +125,93 @@
   color: var(--color-muted);
 }
 
-/* 中央「进入这一站」主按钮：不限制单行，宁可折行也不溢出被裁 */
+/* 团队第 2 轮（ww 定稿）：等真人回应提议的浮签卡——写清提议内容
+   （谁想用哪件换你的哪件）+ 两件菜的图 + Yes（橙）/ No（藏青）药丸
+   按钮（≥48px），不再是 R1 的一句笼统短指令、也不只靠角落小气泡。
+   底仍走舞台浮签的墨底 token，挂在棋盘中央状态行下（手机横屏时随
+   boardOverlay 进右竖栏）。不设任何计时/自动回应，等孩子自己点。 */
+.board-await {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-card);
+  background: var(--stage-pill-bg);
+  backdrop-filter: blur(var(--stage-blur));
+  -webkit-backdrop-filter: blur(var(--stage-blur));
+  box-shadow: var(--shadow-md);
+  color: var(--stage-pill-fg);
+  text-align: center;
+}
+.board-await-text {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+}
+.board-await-thumbs {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.board-await-thumb {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-button);
+  background: var(--color-surface);
+  border: 2px solid var(--color-line-strong);
+  font-size: 24px;
+  line-height: 1;
+  overflow: hidden;
+}
+.board-await-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.board-await-swap {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-heavy);
+}
+.board-await-actions {
+  display: flex;
+  gap: var(--space-3);
+  width: 100%;
+}
+.board-await-actions .btn {
+  flex: 1 1 0;
+  min-height: 52px; /* ≥48px 触摸目标（团队第 2 轮口径） */
+  white-space: normal;
+}
+/* No = 藏青次按钮（墨蓝底 + 奶油字，与橙色 Yes 一主一次） */
+.board-await-no {
+  background: var(--color-ink);
+  color: var(--stage-pill-fg);
+  border-color: var(--color-ink);
+}
+
+/* 3D overlay 横排里浮签卡整行展开（同 .board-log 的整宽口径） */
+.board3d-overlay .board-await {
+  flex: 1 1 100%;
+  order: 2;
+}
+
+/* 中央「进入这一站」主按钮：不限制单行，宁可折行也不溢出被裁
+   R2-12（团队第 2 轮修订）：它就是底部唯一的橙色浮动药丸——居中、
+   药丸形（.btn 的 --radius-button 本就是 999px）、高度走 .btn 的
+   56px（≥48px）；overlay 锚在棋盘区底缘（底栏之上、安全区内），
+   intro 阶段没有弹窗，不盖任何卡片 */
 .board-enter {
   max-width: 100%;
   white-space: normal;
   text-align: center;
+  align-self: center;
+  min-height: 56px;
+  border-radius: var(--radius-button);
+  margin-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* 竖屏（触屏无键盘）：隐藏「（Enter / 空格）」提示，收窄内边距保证一行放下 */
@@ -673,6 +755,8 @@
   position: relative;
   display: inline-flex;
   align-items: center;
+  flex-wrap: wrap;
+  max-width: 100%;
   gap: 4px;
   padding: 2px var(--space-2) 2px 2px;
   border-radius: var(--radius-button);
@@ -714,7 +798,8 @@
   border: 1.5px solid var(--color-line-strong);
   background: var(--color-surface);
   font-style: normal;
-  font-size: calc(var(--font-size-xs) * 0.86);
+  /* 五尺寸硬底线（Thong/ww）：文字 ≥14px——原 0.86 倍率 = 12.9px 不达标，改回 xs 15px */
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
   color: var(--color-ink);
   line-height: 1.4;
@@ -806,15 +891,32 @@ button.bot-card:focus-visible {
   box-shadow: var(--shadow-md);
 }
 
-/* R1-E4：金币点 + 可见数字同行（数字小号粗体、等宽数字防跳动） */
+/* R1-E4：金币点 + 可见数字同行（数字小号粗体、等宽数字防跳动）
+   R2-5：窄列（150–190px）里整行曾溢出面板——改可折行，点排/数字/
+   得币角标都留在卡内；金币点已关溢出尾徽（R2-9），不会再排出 +n */
 .bot-card-coins {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  flex-wrap: wrap;
+  max-width: 100%;
 }
 .bot-coin-num {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+
+/* R2-9：这一圈拿到的钱——与顺序片 .order-chip-gain 同源（lapGainOf）
+   同值同造型：金黄小角标，HUD 里唯一的「+数字」语义 */
+.bot-lap-gain {
+  padding: 0 5px;
+  border-radius: var(--radius-button);
+  background: var(--color-accent-yellow);
+  border: 1px solid var(--color-line-strong);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-heavy);
   font-variant-numeric: tabular-nums;
   color: var(--color-ink);
 }
@@ -859,18 +961,41 @@ button.bot-card:focus-visible {
   min-width: 0;
 }
 
-/* R1-E4：顺序片的金币点旁补可见数字（与 .pc-value 同口径：等宽数字） */
+/* R1-E4：顺序片的金币点旁补可见数字（与 .pc-value 同口径：等宽数字）
+   R2-5：金币点 + 数字曾排出名单面板——可折行 + 关溢出尾徽后全部留在片内 */
 .order-chip-coins {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  flex-wrap: wrap;
 }
 .order-chip-num {
   font-variant-numeric: tabular-nums;
 }
 
+/* R2-9：这一圈拿到的钱（与角落卡 .bot-lap-gain 同源 lapGainOf、同值） */
+.order-chip-gain {
+  padding: 0 4px;
+  border-radius: var(--radius-button);
+  background: var(--color-accent-yellow);
+  border: 1px solid var(--color-line-strong);
+  font-size: calc(var(--font-size-xs) * 0.86);
+  font-weight: var(--font-weight-heavy);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+
 /* §3：ProfileCard 高光时刻的暗帘——点帘/点卡都收起；
-   与 .popup-backdrop 同层（z 20 之上一点点，压在 toast 下） */
+   与 .popup-backdrop 同层（z 20 之上一点点）；R2-4 后提示条层级
+   已降到弹窗之下（z 15），不再压帘 */
+
+/* R2-3：手机横屏的 ProfileCard 单独一档尺寸——桌面 288×400 放不进
+   402px 高的横屏帘（会被竖向裁），收一档到 250×330，仍远大于旧
+   188 档、字号不缩，标签/金币行照样完整 */
+.game-screen--phone-land .pc {
+  --pc-w: 250px;
+  --pc-h: 330px;
+}
 .spotlight-veil {
   position: fixed;
   inset: 0;

@@ -68,10 +68,13 @@ button.card-view--selected:not(:disabled):active {
   text-align: center;
 }
 
-/* 标签按「·」分段渲染：折行只发生在段间，
-   不会再出现「菜谱」/「里有」被拆开的尴尬断行 */
+/* 标签按「·」分段渲染：短段保持整段不拆；但整句型标签（如搭档站
+   分摊说明 287px 一行）必须能在板宽内折行——nowrap 会让它横溢出
+   卡外（全屏排查实测）。overflow-wrap:anywhere 只在单个词本身
+   超过行宽时才断词，短段不受影响 */
 .card-view-tag-part {
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 /* 「On my list」卡角小 ✓（ww M4.5.7a）：窄卡放不下长标签，
@@ -91,6 +94,21 @@ button.card-view--selected:not(:disabled):active {
   background: var(--color-mint);
   color: var(--color-text);
   border: 2px solid var(--color-line-strong);
+}
+
+/* 构建戳：开始页左下角小字（构建注入的 commit 号），低调灰字、
+   不占版面、不可点；安全区内缩，避开手机圆角/手势条 */
+.build-stamp {
+  position: fixed;
+  left: calc(var(--space-3) + var(--safe-l, 0px));
+  bottom: calc(var(--space-2) + var(--safe-b, 0px));
+  z-index: 5;
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-muted);
+  opacity: 0.75;
+  pointer-events: none;
+  user-select: none;
 }
 
 /* —— 角色选择 —— */
@@ -332,7 +350,24 @@ button.card-view--selected:not(:disabled):active {
   flex-direction: column;
   gap: var(--space-3);
   width: 100%;
-  max-width: 560px;
+  /* R2 验收修复：选项扇拉开后总宽 780，原 560 容器装不下、卡被挤叠 */
+  max-width: 860px;
+}
+
+/* R2 验收修复：点选后的整句读出——选中卡的完整文案在扇下一行大字
+   显示（文案取选项原文，不新写）；再点一次同一张卡才真正说出
+   （CHOOSE_REFLECTION），给孩子一个看清再确认的机会 */
+.reflection-picked {
+  margin: 0;
+  padding: var(--space-2) var(--space-4);
+  background: var(--gradient-card);
+  border: 2px solid var(--color-line-strong);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm), var(--inset-light);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+  text-align: center;
 }
 
 /* R10C：「挑一件你今天真做过的事说」——选项前的引导句 */

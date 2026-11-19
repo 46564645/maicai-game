@@ -10,19 +10,20 @@
  * 「先等等」夹有卡时可按原价买下或放弃；「走完这一站」END_TURN。
  */
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { cards, getIngredient } from '../data/cards';
 import { coinWord, strings } from '../data/strings';
 import { availableCommands, missingIngredients, walletSummary } from '../game/selectors';
 import { fmt, isTemptation, marketPriceOf } from '../game/stations/shared';
 import { cardName } from '../i18n/cardText';
 import { adjacentDupCounts } from '../ui/dupBadges';
-import { panelHintFor } from '../ui/supportLevel';
 import type { CardId, Command, GameState } from '../game/types';
 import { Button } from './Button';
 import { CardIcon } from './CardIcon';
 import { CardView } from './CardView';
 import { KeyHint } from './KeyHint';
 import { CoinBar } from './cards/CoinBar';
+import { cardArtFor } from './cards/cardArt';
 import { Hand } from './cards/Hand';
 import { PendingChip } from './cards/PendingChip';
 import { PlayableGlow } from './cards/PlayableGlow';
@@ -42,6 +43,22 @@ function cardInfo(id: CardId) {
   };
 }
 
+/** 缺菜小图标（R2-6）：卡扇下方说明句左边的缩略——有插画用插画，
+ *  没有回退图标圆衬（与 CardView 美术区同一口径），不再文字列缺菜名 */
+function MissingIcon({ id }: { id: CardId }) {
+  const info = cardInfo(id);
+  const art = cardArtFor(id);
+  return (
+    <span className="stall-guide-icon" title={info.name}>
+      {art ? (
+        <img src={art} alt="" draggable={false} />
+      ) : (
+        <CardIcon icon={info.icon} />
+      )}
+    </span>
+  );
+}
+
 /** 一张摊卡：drag 层 + PlayableGlow + TiltCard(检视倾斜/glare) + CardView */
 function StallCard({
   id,
@@ -49,6 +66,7 @@ function StallCard({
   tag,
   selected,
   playable,
+  bought,
   sweepKey,
   zones,
   onDrop,
@@ -59,6 +77,8 @@ function StallCard({
   tag: string;
   selected: boolean;
   playable: boolean;
+  /** R2-10：本趟已买过同名卡——加「Bought ✓」角标且不整张变灰 */
+  bought: boolean;
   sweepKey: string;
   zones: () => DropZoneRef[];
   onDrop: (cardId: CardId, zoneId: string) => void;
@@ -78,9 +98,9 @@ function StallCard({
     <>
       <div className={dragCls} ref={drag.ref} style={drag.style}>
         <PlayableGlow
-          active={playable}
+          active={playable && !bought}
           sweepKey={sweepKey}
-          className={playable ? '' : 'pglow--dim'}
+          className={!playable && !bought ? 'pglow--dim' : ''}
         >
           <TiltCard
             className="stall-tilt"
@@ -95,10 +115,20 @@ function StallCard({
                 mark={needed}
                 selected={selected}
                 testid={`action-stall-${id}`}
-                ariaLabel={`${info.name}, ${info.price} ${coinWord(info.price)}`}
+                ariaLabel={
+                  bought
+                    ? `${info.name}, ${strings.panel.boughtBadge}`
+                    : `${info.name}, ${info.price} ${coinWord(info.price)}`
+                }
                 onClick={() => onSelect(id)}
                 onFocus={() => onSelect(id)}
-              />
+              >
+                {bought && (
+                  <span className="card-view-bought" aria-hidden="true">
+                    {strings.panel.boughtBadge} ✓
+                  </span>
+                )}
+              </CardView>
             }
           />
         </PlayableGlow>
@@ -110,9 +140,13 @@ function StallCard({
 export function MarketPanel({
   state,
   send,
+  handFloatEl,
 }: {
   state: GameState;
   send: (c: Command) => unknown;
+  /** R2-1：手机横屏时卡扇的浮层挂载点（Game 在棋盘区上方提供）；
+   *  给了就用 portal 把卡扇送过去浮在压暗棋盘上，桌面不传、原地渲染 */
+  handFloatEl?: HTMLElement | null;
 }) {
   const me = state.players.find((p) => p.isHuman)!;
   const sub = state.turn?.sub;
@@ -157,7 +191,6 @@ export function MarketPanel({
     id !== null && cmds.some((c) => c.type === 'STALL_HOLD' && c.cardId === id);
   const canResolveBuy = cmds.some((c) => c.type === 'RESOLVE_HOLD' && c.buy);
   const sel = selected ? cardInfo(selected) : null;
-  const buysLeft = sub?.kind === 'market' ? sub.buysLeft : 0;
   // ww M4.5.5：买完卡（或无可买）后，主动作高亮跳到「走完这一站」
   const endPrimary = !canBuy(selected);
   // 扫光每次本站访问播一次（同 panel 实例靠 key 区分访问）
@@ -214,6 +247,9 @@ export function MarketPanel({
         ? strings.panel.tagNeeded
         : strings.panel.tagIngredient;
     const playable = canBuy(id) || canHold(id);
+    // 本趟已买过的同名卡：引擎已排除它的买/留命令（selectors 按
+    // boughtIds 过滤），扇里剩下的同名张靠角标说明，不靠变灰
+    const bought = sub?.kind === 'market' && sub.boughtIds.includes(id);
     const info = cardInfo(id);
     const dup = dupCounts[i];
     return {
@@ -230,6 +266,7 @@ export function MarketPanel({
           tag={tag}
           selected={selected === id}
           playable={playable}
+          bought={bought}
           sweepKey={sweepKey}
           zones={zonesFor(id)}
           onDrop={onDrop}
@@ -240,54 +277,49 @@ export function MarketPanel({
   });
 
   const w = walletSummary(state, me.id);
-  // R10C lap-1 教练句：孩子第一次进菜市场，用她真缺的菜组成一句话
-  const coach =
-    state.lap === 1 && missing.length > 0
-      ? fmt(strings.panel.coachLine, { items: missing.map(cardName).join('、') })
-      : null;
-  // R10D（education #5）：说明句随圈数退场——1 圈整句 / 2 圈图标+短句 / 3 圈撤
-  const hint = panelHintFor(state.lap);
 
-  return (
-    <div className="panel-body">
-      {hint === 'full' && <p className="panel-text">{strings.panel.stallIntro}</p>}
-      {hint === 'compact' && (
-        <p className="panel-text panel-text--compact">
-          <span aria-hidden="true">🧺</span> {strings.panel.stallIntroShort}
-        </p>
+  const stallHand = (
+    <Hand className="stall-hand" items={handItems} ariaLabel={strings.panel.stallIntro} />
+  );
+
+  // R2-6（ww 定稿）：面板顶部文字层全撤（原说明长句/短句、教练句、
+  // 「还能买 N 张」都不再堆在扇上方）——卡扇下方只留一句说明，
+  // 还缺的菜画成小图标排在句左（代掉原教练句的文字名单）。
+  // 「还能买 N 张」只在浮签右侧金币角标 ×N 一处（Game/StationPopup
+  // 侧），panel-foot 不再重复出文字行。
+  const stallGuide = (
+    <div className="stall-guide">
+      {missing.length > 0 && (
+        <span className="stall-guide-icons" aria-hidden="true">
+          {missing.map((id) => (
+            <MissingIcon key={id} id={id} />
+          ))}
+        </span>
       )}
-      <p className="panel-buysleft">{fmt(strings.panel.buysLeft, { n: buysLeft })}</p>
-      {coach && <p className="coach-line">{coach}</p>}
+      <span className="stall-guide-text">{strings.panel.stallIntro}</span>
+    </div>
+  );
 
-      <Hand className="stall-hand" items={handItems} ariaLabel={strings.panel.stallIntro} />
+  // 卡扇 + 说明行是一个整体：手机横屏一起走 portal 浮到棋盘区
+  const stallFanBlock = (
+    <div className="stall-fan-block">
+      {stallHand}
+      {stallGuide}
+    </div>
+  );
 
-      <div className="panel-foot">
-        {/* 金币条：菜谱还差/车费/自由花三段；选中卡的价从自由花端点亮 */}
-        <CoinBar
-          coins={me.coins}
-          missingCost={w.missingCost}
-          busDebt={w.busDebt}
-          spend={sel ? sel.price : 0}
-        />
-        {sel && (
-          <p className="panel-text panel-selected" aria-live="polite">
-            <span className="panel-selected-line">
-              {strings.panel.selectedMark}
-              <CardIcon icon={sel.icon} /> {sel.name} ({sel.price} {coinWord(sel.price)})
-            </span>
-            <span className="panel-selected-line">
-              {me.coins >= sel.price
-                ? fmt(strings.panel.afterBuy, { n: me.coins - sel.price })
-                : strings.panel.noCoins}
-            </span>
-          </p>
-        )}
-
-        {/* 两个投放区 = tap-tap 的大按钮；有卡选中时亮描边「能收了」 */}
-        {pending.pendingLabel !== null && (
-          <PendingChip label={pending.pendingLabel} onCancel={pending.cancel} />
-        )}
-        <div className="drop-row">
+  /* R2 验收修复（ww 第 2 轮截图验收）：主操作（投放区 + 先等等处理 +
+     Done）抽成一块——手机横屏时跟卡扇一起走 portal 浮到棋盘区
+     （竖栏 402 高塞不下 头+金币条+选中行+三行按钮，Buy/Done 被推出
+     帧外、要滚动才找得到，ww 判不合格）；桌面原地渲染、顺序不变。
+     金币条 + 选中行是状态，留在竖栏 panel-foot。 */
+  const actionBlock = (
+    <>
+      {/* 两个投放区 = tap-tap 的大按钮；有卡选中时亮描边「能收了」 */}
+      {pending.pendingLabel !== null && (
+        <PendingChip label={pending.pendingLabel} onCancel={pending.cancel} />
+      )}
+      <div className="drop-row">
           <button
             type="button"
             ref={basketRef}
@@ -324,6 +356,16 @@ export function MarketPanel({
             </span>
             {strings.buttons.hold}
           </button>
+          {/* R2-14：算式从金币条下挪到卡片下方、与按钮同一行，不压卡片 */}
+          {sel && (
+            <span className="cb-math cb-math--inrow" aria-hidden="true">
+              {fmt(strings.coinbar.math, {
+                a: me.coins,
+                b: sel.price,
+                c: Math.max(0, me.coins - sel.price),
+              })}
+            </span>
+          )}
           <Button
             variant="secondary"
             keyHint={String(kSkip)}
@@ -372,8 +414,11 @@ export function MarketPanel({
           </div>
         )}
 
+        {/* R2-10：主次定死——Buy 是橙色主按钮（篮子区 armed 态），
+            Done 永远是藏青次按钮（data-primary 仅留键盘主动作语义） */}
         <Button
-          variant={endPrimary ? 'primary' : 'secondary'}
+          variant="secondary"
+          className="btn--navy"
           keyHint={String(kEnd)}
           data-testid={`action-${kEnd}`}
           data-primary={endPrimary ? 'true' : undefined}
@@ -383,6 +428,56 @@ export function MarketPanel({
         >
           {strings.panel.endTurn}
         </Button>
+    </>
+  );
+
+  return (
+    <div className="panel-body">
+      {/* R2-1 + R2 验收修复：手机横屏卡扇 + 主操作走 portal 浮到棋盘区
+          （状态/选中/拖拽逻辑仍在本组件一处，拖拽坐标命中不受影响；
+          投放区按钮与卡扇同层，孩子不用滚动竖栏找主按钮） */}
+      {handFloatEl
+        ? createPortal(
+            <div className="phone-float-stack">
+              {stallFanBlock}
+              {actionBlock}
+            </div>,
+            handFloatEl,
+          )
+        : stallFanBlock}
+
+      <div className="panel-foot">
+        {/* foot 首行只剩金币条：「还能买 N 张」已收口到浮签角标 ×N
+            一处；面板总高仍须压进弹窗内，否则 sticky 的 foot 在
+            初始态就会盖住卡扇下说明行 */}
+        <div className="panel-foot-row">
+          {/* 金币条：菜谱还差/车费/自由花三段；选中卡的价从自由花端点亮。
+              R2-14：算式不在条下渲染——改放投放区同一行（见 drop-row） */}
+          <CoinBar
+            coins={me.coins}
+            missingCost={w.missingCost}
+            busDebt={w.busDebt}
+            spend={sel ? sel.price : 0}
+            hideMath
+          />
+        </div>
+        {sel && (
+          <p className="panel-text panel-selected" aria-live="polite">
+            <span className="panel-selected-line">
+              {strings.panel.selectedMark}
+              <CardIcon icon={sel.icon} /> {sel.name} ({sel.price} {coinWord(sel.price)})
+            </span>
+            <span className="panel-selected-line">
+              {me.coins >= sel.price
+                ? fmt(strings.panel.afterBuy, { n: me.coins - sel.price })
+                : strings.panel.noCoins}
+            </span>
+          </p>
+        )}
+
+        {/* 桌面：主操作原地接在状态行之后（与旧版顺序一致）；
+            手机横屏：已随卡扇 portal 到浮层，这里不再重复渲染 */}
+        {!handFloatEl && actionBlock}
         <p className="panel-keyhelp panel-keyhelp--kbd">{strings.panel.keyHelp}</p>
       </div>
     </div>

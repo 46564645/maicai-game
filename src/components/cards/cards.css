@@ -23,17 +23,22 @@
    卡面解剖（CardView §3.1）：卡框 / 美术区 / 名称横幅 / 价格宝石
    ========================================================================== */
 
-/* 美术区：约 55% 卡高；emoji 回退时圆形奶油衬底，插画时 object-fit 满铺 */
+/* 美术区：卡上方约 3/4（Thong 改版）——矩形区，原素材图整幅
+   contain 居中：不裁圆、不裁内容，比例不一致时留边（底色透出）。
+   旧版 radius-button(999px) 胶囊圆角 + cover 把图裁成圆/裁掉边角，
+   破坏原图完整性，废止。overflow 不再 hidden——contain 的图内容
+   本就不越界，留 visible 保底「一像素都不裁」 */
 .card-view-art {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   flex: 1 1 auto;
-  min-height: 44px;
+  /* 44→36：底板改版后文字区变高，小卡（如 144 高摊位卡）里
+     美术区地板让 8px 给底板，图仍整幅 contain 不裁 */
+  min-height: 36px;
   align-self: stretch;
-  border-radius: var(--radius-button);
-  overflow: hidden;
+  border-radius: var(--radius-card);
   background: var(--color-surface-dim);
 }
 
@@ -42,7 +47,7 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
 }
 
@@ -59,13 +64,60 @@
   box-shadow: inset 0 2px 4px color-mix(in srgb, var(--color-shadow) 10%, transparent);
 }
 
-/* 名称横幅：奶油底圆角长条，单行不换行，超长交给 &shy;/字号缩小 */
+/* 白色底板（Thong 改版）：卡下方约 1/4，负 margin 叠在美术区
+   下沿之上（层级压图），卡名/价格/类别/标签全部落在这块白板上。
+   板是定位祖先——宝石/类别签的绝对定位改锚到板左上角 */
+.card-view-board {
+  position: relative;
+  z-index: 1;
+  align-self: stretch;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  /* 叠带归零（全屏排查二轮实测）：负 margin 只补卡内 flex gap，
+     板顶与美术区底边齐平——16px/8px 叠带都试过，各上下文 gap
+     不一（4~9px）带宽漂移，角标/名字总有一处压进图里；归零后
+     任何文字天然在图外，与各上下文 gap 无关。板与图齐平相接，
+     视觉上仍是「上图下板」 */
+  margin-top: calc(-1 * var(--space-2));
+  padding: var(--space-1) var(--space-2);
+  background: var(--color-surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
+}
+
+/* 底板内标签行占满板宽：整句型标签在板内折行，不横溢出卡外 */
+.card-view-board .card-view-tag {
+  align-self: stretch;
+}
+
+/* 底板内横幅不再自带横向内边距：底板已有内边距，两层叠加把
+   104px 摊位卡的名可用宽从 64 挤到 48，「Potato」被裁尾字 */
+.card-view-board .card-view-banner {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* 带角标（宝石/类别签/✓）的底板：角标独占底板第一行（板内左/右
+   上角，顶边在叠带之外），名行整体下移让出角标高 + 4px 气口——
+   名字用全宽，绝不与角标同行抢宽（左右让位的做法在 94px 窄卡上
+   把名挤成中间几个字母，废止） */
+.card-view-board:has(.card-view-gem) .card-view-banner,
+.card-view-board:has(.card-view-kind) .card-view-banner,
+.card-view-board:has(.card-view-mark) .card-view-banner {
+  margin-top: calc(var(--gem-size));
+}
+
+/* 名称横幅：底板上的名行——底板已是白底，横幅自身不再铺奶油条，
+   单行不换行，超长交给 &shy;/字号缩小 */
 .card-view-banner {
   align-self: stretch;
   flex: none;
   padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-button);
-  background: var(--color-bg);
+  background: transparent;
   text-align: center;
   overflow: hidden;
 }
@@ -76,11 +128,13 @@
   overflow: hidden;
 }
 
-/* 价格宝石（炉石「形」）：橙渐变圆 + 白字 + 内嵌小金币点，卡左上出框 */
+/* 价格宝石（炉石「形」）：橙渐变圆 + 白字 + 内嵌小金币点。
+   打样规格（ww 合并版）：价格只放白色层——宝石全量落在底板内
+   左上角，不出框、不压图（旧版锚卡角出框压图，废止） */
 .card-view-gem {
   position: absolute;
-  top: calc(var(--gem-size) / -3);
-  left: calc(var(--gem-size) / -3);
+  top: var(--space-1);
+  left: var(--space-1);
   z-index: 2;
   display: flex;
   align-items: center;
@@ -112,11 +166,11 @@
   border: 1px solid var(--color-surface);
 }
 
-/* 无价卡的类别小标签（tag 首段）：与宝石同位同形的小片 */
+/* 无价卡的类别小标签（tag 首段）：与宝石同位——全量落在白色层内 */
 .card-view-kind {
   position: absolute;
-  top: calc(var(--gem-size) / -3);
-  left: calc(var(--gem-size) / -3);
+  top: var(--space-1);
+  left: var(--space-1);
   z-index: 2;
   padding: 1px var(--space-2);
   border-radius: var(--radius-card);
@@ -774,6 +828,12 @@
 .game-screen--phone-land .store-shelf .card-view-name {
   font-size: var(--font-size-xs);
 }
+/* 五尺寸自适应：手机右栏货架卡仅 64 宽，名字盒 ~48px——软连字符分段仍
+   溢出（874 实测 Tomato 12 / Cucumber 17px）；anywhere 兜底断行清零 */
+.game-screen--phone-land .store-shelf .card-view-name,
+.game-screen--phone-land .store-grid .card-view-name {
+  overflow-wrap: anywhere;
+}
 .game-screen--phone-land .stall-hand .card-view,
 .game-screen--phone-land .store-shelf .card-view {
   padding: var(--space-1);
@@ -1156,6 +1216,14 @@
 .swap-hand .card-view-name {
   font-size: var(--font-size-xs);
 }
+/* 搭档邀请卡名：md 20 在 104 卡上「Sticker」溢出 9px（实测）→ sm；
+   sm 下「Popsicle」还差 5px——卡内边距再收一档腾宽 */
+.invite-stage .card-view {
+  padding: var(--space-2);
+}
+.invite-stage .card-view-name {
+  font-size: var(--font-size-sm);
+}
 .swap-row {
   display: flex;
   align-items: center;
@@ -1177,8 +1245,12 @@
   flex-wrap: wrap;
 }
 .bus-ticket-drag {
-  width: var(--card-w);
+  /* 104→136（同 choice-hand 宽）：「Bus ticket」sm 号单行放得下 */
+  width: 136px;
   height: var(--card-h);
+}
+.bus-stage .card-view-name {
+  font-size: var(--font-size-sm);
 }
 .bus-stage-arrow {
   font-size: var(--font-size-xl);
@@ -1235,7 +1307,22 @@
    ========================================================================== */
 .store-shelf {
   --hand-card-w: var(--card-w);
-  --hand-card-h: var(--card-h);
+  /* 144→168：货架长名（Green Onion/Marshmallow）单行放不下，
+     折两行时底板变高，卡高给足（小卖部面板本体可滚，不挤压） */
+  --hand-card-h: calc(var(--card-h) + var(--space-4) + var(--space-2));
+}
+/* 货架卡：内边距收一档腾名宽，名 sm 号 + 允许在词/音节断点折行 */
+.store-shelf .card-view {
+  padding: var(--space-2);
+}
+.store-shelf .card-view-name {
+  font-size: var(--font-size-sm);
+  white-space: normal;
+}
+/* 小卖部网格卡同口径：md 20 号下 Green Onion 横溢出 22px（实测） */
+.store-grid .card-view-name {
+  font-size: var(--font-size-sm);
+  white-space: normal;
 }
 .store-tilt {
   display: block;
@@ -1282,8 +1369,10 @@
 }
 .cook-card {
   display: inline-block;
-  width: 52px;
-  height: 72px;
+  /* 52×72 时 Green Onion 等长名横溢出 74px（排查实测）——芯片
+     略放宽增高 + 名可折两行，飞入动画的落点不受影响 */
+  width: 64px;
+  height: 84px;
   /* 飞进锅：--fx/--fy 由 JS 量到锅心；错峰 --stagger，落锅后淡出 */
   animation: cook-fly 220ms var(--motion-ease) var(--stagger, 0ms) forwards;
 }
@@ -1292,11 +1381,15 @@
   height: 100%;
   padding: 2px;
 }
+.cook-card .card-view-art {
+  min-height: 20px;
+}
 .cook-card .card-view-banner {
   padding: 0 var(--space-1);
 }
 .cook-card .card-view-name {
   font-size: var(--font-size-xs);
+  white-space: normal;
 }
 @keyframes cook-fly {
   55% {
@@ -1422,16 +1515,38 @@
   }
 }
 /* 反思选择卡扇（5 张预设 + 自写按钮在扇下） */
+/* R2 验收修复（ww 第 2 轮截图验收 #3）：感想选项旧扇 92px 卡 + 62px
+   露出带互相遮盖，且拥挤扇默认藏名横幅——孩子只看得到图标和
+   「You did it」，五项无法辨认。改拉开扇：卡 148×176、露出带 =
+   卡宽 + 10（零重叠、五卡并排全露），转角/下沉收到三成（字要平），
+   横幅在拥挤态恢复显示——每张卡脸上常显自己的选项文案（短标签）；
+   点选后整句在扇下大字读出（.reflection-picked，见 screens.css），
+   扇层名签（.hand-tag）同出整句。文案一字未改。 */
 .reflection-hand {
-  --hand-card-w: 92px;
-  --hand-card-h: 126px;
-  --fan-expose: 62px;
-  --fan-push: 26px;
+  --hand-card-w: 148px;
+  /* 卡高按内容实测：内边距 32 + 键位徽标（流内）32 + 美术 ≥44 +
+     三行名横幅 75 + 「You did it」标签 20 + 间隙 24 = 227，
+     176/204 时标签行都被挤出卡底（两轮验收帧实证）——定 228 */
+  --hand-card-h: 228px;
+  --fan-expose: calc(var(--hand-card-w) + 10px);
+  --fan-push: 12px;
   margin: 0 auto var(--space-3);
+}
+.reflection-hand.hand--crowded .card-view-banner {
+  display: block;
+}
+.reflection-hand .hand-item {
+  transform: rotate(calc(var(--fan-rot) * 0.3))
+    translateY(calc(var(--fan-drop) * 0.4));
 }
 .reflection-hand .card-view-name {
   font-size: var(--font-size-xs);
   white-space: normal;
+}
+@media (hover: hover) and (pointer: fine) {
+  .reflection-hand .card-view-name {
+    font-size: var(--font-size-sm);
+  }
 }
 /* 流水页剩余币：句中 CoinCounter 滚动位 */
 .ledger-coins {
@@ -1501,11 +1616,20 @@
 .mini-cards .card-view-art {
   min-height: 0;
 }
+/* 缩略卡底板收紧：44×60 里只放得下小内边距 + 浅叠层 */
+.mini-cards .card-view-board {
+  margin-top: -6px;
+  padding: 2px;
+  gap: 0;
+}
 .mini-cards .card-view-banner {
   padding: 0 2px;
 }
 .mini-cards .card-view-name {
   font-size: var(--font-size-xs);
+  /* 44px 迷你卡里长名（Popsicle/Greens）单行横溢出 22~33px
+     （钱包抽屉实测）——允许折两行，长名迷你卡的图区自动让高 */
+  white-space: normal;
 }
 
 /* ==========================================================================
@@ -1679,19 +1803,20 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
+  flex-wrap: wrap;
 }
+/* R2-3：性格/头衔标签必须完整显示——撤掉 max-width + 省略号，
+   放不下就整片折行，绝不截断成「Care…」 */
 .pc-badge {
   padding: 1px var(--space-2);
   border-radius: var(--radius-button);
   background: var(--color-surface-dim);
   border: 1.5px solid var(--color-line-strong);
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
   color: var(--color-ink);
-  max-width: 60%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 .pc-status {
   display: inline-flex;
@@ -1722,10 +1847,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 72px;
-  height: 72px;
+  width: 88px;
+  height: 88px;
   border-radius: var(--radius-card);
-  font-size: 40px;
+  font-size: 48px;
   line-height: 1;
   background: var(--pc-backdrop, var(--color-surface-dim));
   border: 2px solid var(--pc-rim);
@@ -1747,6 +1872,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
+  flex-wrap: wrap;
   padding-top: var(--space-2);
   border-top: 1.5px solid var(--color-line-soft);
 }
@@ -1838,4 +1964,227 @@
   .pc .tc-foil {
     opacity: calc(var(--pc-holo-strength) * 0.5);
   }
+}
+
+/* ==========================================================================
+   R2 市场站批次（ww 定稿）：卡扇拉开 + 卡扇下唯一说明行 + 金币旁数字 +
+   Done 藏青次钮 + 已买角标 + 算式与按钮同行
+   ========================================================================== */
+
+/* —— 卡扇 + 说明行是一个整体（手机横屏一起走 portal 浮到棋盘区） —— */
+.stall-fan-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* R2 验收修复：扇顶为名签多留的 6px 从这里回收（gap 8→4），
+     桌面弹窗总高不增、底部不新增滚动 */
+  gap: var(--space-1);
+}
+
+/* R2-16：桌面扇拉开——相邻卡只留 4px 间隙（不再叠到只剩一条边），
+   转角/下沉收到三成半，卡名横幅在拥挤态也恢复显示：每张卡的
+   完整卡名 + 标签都露得出来。手机横屏的网格档/浮层档选择器
+   特异性更高，不受这组规则影响。 */
+.stall-hand {
+  --fan-expose: calc(var(--hand-card-w) + 4px);
+  --fan-push: 14px;
+  /* R2 验收修复（ww 第 2 轮截图验收 #4）：选中卡名签被 .popup-body
+     （overflow-y:auto）顶边裁掉一半——名签伸出量 = 上抬 16 + 缩放
+     顶边外扩 ~9.5 + 偏移 8 + 签高 ~53，比扇顶留位（lift+46=62）多
+     25px（实测）。三处收：签字号 hero→xl（签高 ~53→~40）、选中
+     上抬 16→10 且缩放 1.06→1.03（外扩 ~9.5→~4.5）、扇顶留位
+     +6——合计回收 ~29px，名签整颗回到滚动口内；选中变亮
+     （brightness 1.07）不动，仍是「抬起 + 变亮」。 */
+  padding-top: calc(var(--hand-lift) + 52px);
+  /* 边缘卡下沉溢出容器底——留出量，免得压住下方说明行/金币条
+     （下沉已减半且只在扇两端，居中说明行不与之相交；
+     R2 验收修复：底部留量改由 .stall-fan-block 的 gap 承担，这里归 0） */
+  padding-bottom: 0;
+}
+.stall-hand .hand-tag {
+  /* 字号档位实测：xl=32px 比 hero 28 还大；md=20px 才是要收的一档 */
+  font-size: var(--font-size-md);
+}
+.stall-hand.hand--crowded .card-view-banner {
+  display: block;
+}
+.stall-hand .card-view-name {
+  /* sm(16)→xs(15)：长名 Marshmallow 在 104 卡上可用宽 88 内放下
+     （排查口径：不许低于 14，xs=15 合规）；短名不受影响 */
+  font-size: var(--font-size-xs);
+}
+/* 摊位卡内边距收一档给名字腾宽（手机浮层同口径已有 space-1） */
+.stall-hand .card-view {
+  padding: var(--space-1);
+}
+.stall-hand .card-view-board {
+  padding-left: var(--space-1);
+  padding-right: var(--space-1);
+}
+.stall-hand .hand-item {
+  transform: rotate(calc(var(--fan-rot) * 0.35))
+    translateY(calc(var(--fan-drop) * 0.5));
+}
+.stall-hand .hand-item:focus-within,
+.stall-hand .hand-item--sel {
+  transform: rotate(0deg) translateY(-10px) scale(1.03);
+  z-index: 10;
+}
+@media (hover: hover) and (pointer: fine) {
+  .stall-hand .hand-item:hover {
+    transform: rotate(0deg) translateY(-10px) scale(1.03);
+    z-index: 10;
+  }
+  .stall-hand .hand-item:hover + .hand-item {
+    transform: rotate(calc(var(--fan-rot) * 0.35))
+      translateY(calc(var(--fan-drop) * 0.5)) translateX(var(--fan-push));
+  }
+  .stall-hand .hand-item:has(+ .hand-item:hover) {
+    transform: rotate(calc(var(--fan-rot) * 0.35))
+      translateY(calc(var(--fan-drop) * 0.5))
+      translateX(calc(var(--fan-push) * -1));
+  }
+}
+.stall-hand .hand-item:focus-within + .hand-item,
+.stall-hand .hand-item--sel + .hand-item {
+  transform: rotate(calc(var(--fan-rot) * 0.35))
+    translateY(calc(var(--fan-drop) * 0.5)) translateX(var(--fan-push));
+}
+.stall-hand .hand-item:has(+ .hand-item:focus-within),
+.stall-hand .hand-item:has(+ .hand-item--sel) {
+  transform: rotate(calc(var(--fan-rot) * 0.35))
+    translateY(calc(var(--fan-drop) * 0.5))
+    translateX(calc(var(--fan-push) * -1));
+}
+
+/* 选中卡整张抬起之外还要变亮（R2-16）：即使它此刻不可打（变灰态），
+   选中也恢复全亮度 + 轻提亮，不许「选中反而变淡」 */
+.stall-hand .hand-item--sel .card-view {
+  filter: brightness(1.07) saturate(1.05);
+}
+.stall-hand .hand-item--sel .pglow--dim {
+  opacity: 1;
+}
+.stall-hand .hand-item--sel .pglow--dim .card-view-art {
+  filter: none;
+}
+.stall-hand .hand-item--sel .pglow--dim .card-view-gem {
+  background: var(--gem-gem-grad);
+  color: var(--color-surface);
+}
+
+/* —— 卡扇下方唯一说明行（R2-6）：缺菜小图标 + 一句话，浮丸底
+   与其他舞台小字同口径（--stage-note-bg + 毛玻璃） —— */
+.stall-guide {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 100%;
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-button);
+  background: var(--stage-note-bg);
+  backdrop-filter: blur(var(--stage-blur));
+  -webkit-backdrop-filter: blur(var(--stage-blur));
+  color: var(--color-ink);
+}
+.stall-guide-icons {
+  display: inline-flex;
+  gap: var(--space-1);
+  flex: none;
+}
+.stall-guide-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--color-bg);
+  border: 2px solid var(--color-ink);
+  font-size: 16px;
+  line-height: 1;
+}
+.stall-guide-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.stall-guide-text {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+}
+
+/* —— 已买角标（R2-10）：卡面顶部居中一条薄荷片，不变灰、不挡名 —— */
+.card-view-bought {
+  position: absolute;
+  top: var(--space-1);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-button);
+  background: var(--color-mint);
+  color: var(--color-ink);
+  border: 2px solid var(--color-ink);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-heavy);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* —— 金币条分段数字（R2-13）：金币点右侧的等宽计数 —— */
+.cb-cells-row {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.cb-num {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-heavy);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+
+/* —— 金币条独占 foot 首行（R2-6 收高；「还能买 N 张」文字行已
+   撤，只留浮签角标 ×N 一处）：面板内容总高仍须压进弹窗 88vh
+   内，免得 sticky 的 panel-foot 在初始态就骑到卡扇下说明行上
+   （ZH 选中行在场时实测溢出约 45px） —— */
+.panel-foot-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.panel-foot-row .coin-bar {
+  margin-bottom: 0;
+}
+
+/* —— 算式与按钮同行（R2-14）：投放区行内的一枚静态数字组 —— */
+.cb-math--inrow {
+  flex: 0 0 auto;
+  align-self: center;
+  white-space: nowrap;
+}
+
+/* —— Done 藏青次钮（R2-10）：Button 的 className 修饰，
+   颜色对走舞台墨色（藏青），键帽反色与主按钮同口径 —— */
+.btn.btn--navy {
+  background: var(--color-ink);
+  color: var(--color-surface);
+  border-color: var(--color-ink);
+  box-shadow: var(--shadow-btn-quiet);
+}
+.btn.btn--navy .key-hint {
+  background: var(--key-hint-bg-on-primary);
+  color: var(--key-hint-fg-on-primary);
+}
+.btn.btn--navy:disabled {
+  background: var(--color-surface-dim);
+  color: var(--color-disabled);
+  border-color: var(--color-line);
+  box-shadow: none;
 }

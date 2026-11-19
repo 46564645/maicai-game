@@ -1,7 +1,10 @@
 /**
- * CardView.tsx —— 通用卡面，R10 §3.1 卡面解剖：卡框 → 美术区（约 55%）→
- * 名称横幅；价格渲染成左上角「法力宝石」（橙渐变圆 + 白字 + 内嵌小金币），
- * 无价卡改在角上放类别小标签（tag 首个分段）。
+ * CardView.tsx —— 通用卡面。版式（Thong 试玩反馈改版，截图包 v3）：
+ * 卡框不动；上方约 3/4 是美术区——原素材图整幅 contain 居中，
+ * 不裁圆、不裁内容，比例不一致时留边；下方约 1/4 是白色底板
+ * （.card-view-board），叠在美术区下沿之上，卡名/价格宝石/类别签/
+ * 标签等全部文字都落在底板上，不再压图。旧版「美术区圆裁 + 宝石
+ * 压卡角」的解剖（R10 §3.1）就此废止。
  *
  * 美术区：cards/cardArt.ts 里登过 cardId → 渲染插画 <img>；没登 →
  * 回退原有 emoji/CardIcon 圆形衬底（13 张食材等 PM 后续补图）。
@@ -9,7 +12,7 @@
  *
  * 可点时渲染为原生 <button>（角色卡、市场卡、图卡共用）；纯展示时渲染 div。
  * 旧类名全保留（.card-view/-icon/-name/-tag/-mark + --selected），
- * phone.css / hud.css 的窄栏、行式覆写不破。
+ * 新增 .card-view-board 底板层；phone.css / hud.css 的窄栏、行式覆写不破。
  */
 import { Fragment } from 'react';
 import type { MouseEvent, ReactNode } from 'react';
@@ -72,19 +75,36 @@ export function CardView(props: CardViewProps) {
     .filter(Boolean)
     .join(' ');
   const art = props.cardId ? cardArtFor(props.cardId) : undefined;
-  // 无价格卡 → 角上类别小标签取 tag 首段（「菜谱」/「想要的」）
+  // 无价格卡 → 板上类别小标签取 tag 首段（「菜谱」/「想要的」）。
+  // 只收短词（≤6 字）：整句型 tag（如搭档站分摊说明）不是类别，
+  // 塞进角标会膨胀成 161px 高的气球盖住整卡（全屏排查实测）——
+  // 长句只走下方标签行，角标不渲染
+  const kindHead = props.tag?.split('·')[0]?.trim();
   const kindChip =
-    props.price === undefined && props.tag
-      ? props.tag.split('·')[0]?.trim()
+    props.price === undefined && kindHead && kindHead.length <= 6
+      ? kindHead
       : undefined;
   const body = (
     <>
+      {props.keyHint !== undefined && <KeyHint value={props.keyHint} />}
+      <span className="card-view-art" aria-hidden="true">
+        {art ? (
+          <img className="card-view-art-img" src={art} alt="" draggable={false} />
+        ) : (
+          <span className="card-view-icon">
+            <CardIcon icon={props.icon} />
+          </span>
+        )}
+      </span>
+      {/* 白色底板：叠在美术区下沿，承载全部文字（名/价/签/标签）。
+          宝石/类别签改为底板左上角的角标（绝对定位锚到本板），
+          不再压在卡角的图上 */}
+      <span className="card-view-board">
       {props.mark && (
         <span className="card-view-mark" aria-hidden="true">
           ✓
         </span>
       )}
-      {props.keyHint !== undefined && <KeyHint value={props.keyHint} />}
       {props.price !== undefined && (
         <span className="card-view-gem" aria-hidden="true">
           {props.price}
@@ -95,15 +115,6 @@ export function CardView(props: CardViewProps) {
           {kindChip}
         </span>
       )}
-      <span className="card-view-art" aria-hidden="true">
-        {art ? (
-          <img className="card-view-art-img" src={art} alt="" draggable={false} />
-        ) : (
-          <span className="card-view-icon">
-            <CardIcon icon={props.icon} />
-          </span>
-        )}
-      </span>
       <span className="card-view-banner">
         <span className="card-view-name">
           {/* nameBreak：cards.json 标的音节断点，放 &shy; 软连字符——
@@ -138,6 +149,7 @@ export function CardView(props: CardViewProps) {
             ))}
         </span>
       )}
+      </span>
       {props.children}
     </>
   );

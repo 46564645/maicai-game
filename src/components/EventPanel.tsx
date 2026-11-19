@@ -11,6 +11,7 @@
  * 「币不够了」标签做第二通道（interaction #6）。
  */
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { cards } from '../data/cards';
 import { strings } from '../data/strings';
 import { availableCommands, missingCost } from '../game/selectors';
@@ -99,6 +100,7 @@ export function EventPanel({
   revealed,
   onReveal,
   onWeatherDone,
+  momentFloatEl,
 }: {
   state: GameState;
   send: (c: Command) => unknown;
@@ -109,6 +111,10 @@ export function EventPanel({
   /** R10E（§2 天气时刻）：大卡被点掉 → Game 给世界换天气布景
       （DOM 洗色 + 3D 灯光/雨丝/云速）。引擎结果不动。 */
   onWeatherDone?: (weatherId: CardId) => void;
+  /** R2 验收修复：手机横屏时天气时刻的浮层挂载点（Game 在棋盘区
+   *  上方提供）；给了就用 portal 把 .weather-moment 送过去浮在压暗
+   *  棋盘上（与市场卡扇同一模式），桌面不传、原地渲染 */
+  momentFloatEl?: HTMLElement | null;
 }) {
   const sub = state.turn?.sub;
   const card =
@@ -272,44 +278,54 @@ export function EventPanel({
     window.setTimeout(() => setStory('done'), 220);
   };
 
+  /* R2 验收修复：天气时刻整块抽成变量——手机横屏走 portal 浮到
+     压暗棋盘上（相位机/点按跳过/点卡收走的逻辑一字不动） */
+  const momentBlock = (
+    <div
+      className="weather-moment"
+      data-testid="weather-moment"
+      onClick={moment === 'spin' ? skipSpin : undefined}
+    >
+      {moment === 'spin' ? (
+        <WeatherSpinner
+          key={`${sub.weatherId}-${orderIdx}`}
+          weatherId={sub.weatherId}
+        />
+      ) : (
+        weather && (
+          <button
+            type="button"
+            className="moment-card"
+            data-testid="weather-card"
+            data-key={1}
+            data-primary="true"
+            aria-label={cardName(weather.id)}
+            onClick={dismissWeather}
+          >
+            <CardView
+              cardId={weather.id}
+              icon={weather.icon}
+              name={cardName(weather.id)}
+            />
+            <span className="moment-tap" aria-hidden="true">
+              {strings.event.cardTap}
+            </span>
+          </button>
+        )
+      )}
+    </div>
+  );
+
   return (
     <div className="panel-body panel-body--event">
       {/* R10E（§2 天气电影时刻）：转盘推近演出 → 大天气卡浮在舞台等点。
           DOM 路线仍是全部操作的权威（3D 转盘只是跟着演） */}
       {moment !== 'done' ? (
-        <div
-          className="weather-moment"
-          data-testid="weather-moment"
-          onClick={moment === 'spin' ? skipSpin : undefined}
-        >
-          {moment === 'spin' ? (
-            <WeatherSpinner
-              key={`${sub.weatherId}-${orderIdx}`}
-              weatherId={sub.weatherId}
-            />
-          ) : (
-            weather && (
-              <button
-                type="button"
-                className="moment-card"
-                data-testid="weather-card"
-                data-key={1}
-                data-primary="true"
-                aria-label={cardName(weather.id)}
-                onClick={dismissWeather}
-              >
-                <CardView
-                  cardId={weather.id}
-                  icon={weather.icon}
-                  name={cardName(weather.id)}
-                />
-                <span className="moment-tap" aria-hidden="true">
-                  {strings.event.cardTap}
-                </span>
-              </button>
-            )
-          )}
-        </div>
+        momentFloatEl ? (
+          createPortal(momentBlock, momentFloatEl)
+        ) : (
+          momentBlock
+        )
       ) : (
         <div className="event-stage">
           {/* 落定天气：小天气卡立在边上（wth-* 插画已入册） */}

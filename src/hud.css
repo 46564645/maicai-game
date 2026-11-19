@@ -207,13 +207,10 @@
   pointer-events: none;
 }
 
-/* R10E（§2）：天气电影时刻遮罩放轻（+ 去模糊）——3D 转盘推近
-   要让孩子看见，天气大卡仍盖在最上层 */
-.popup-backdrop:has(.weather-moment) {
-  background: color-mix(in srgb, var(--color-backdrop) 42%, transparent);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
+/* R2-11（团队第 2 轮，ww 定）：天气卡出现时与其它卡同一层压暗——
+   不再有 :has(.weather-moment) 的放轻/去模糊覆盖，天气时刻直接走
+   .popup-backdrop 本体的 --color-backdrop + 毛玻璃；天气洗色仍走
+   上面的 ::before（--weather-wash），与压暗互不影响。 */
 
 @media (prefers-reduced-motion: no-preference) {
   /* ART_3D §8.7：面板从下往上滑出（背后是压暗的 3D 场景）
@@ -371,14 +368,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 14px;
-  height: 14px;
+  /* 五尺寸硬底线（Thong/ww）：字形 ≥14px——原 0.66 倍率 = 9.9px 不达标；
+     徽点同步 14→18px 容纳 15px ✓ 字形 */
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: var(--color-mint);
   border: 2px solid var(--color-surface);
   color: var(--color-ink);
   font-style: normal;
-  font-size: calc(var(--font-size-xs) * 0.66);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-heavy);
   line-height: 1;
 }
@@ -403,6 +402,37 @@
   font-size: var(--font-size-sm);
   color: var(--stage-pill-fg);
   opacity: 0.85;
+}
+
+/* R2-6（团队第 2 轮）：市场浮签右边的金币角标——「还能买几张」不写
+   成句子，只用一枚金币 + ×N（N 来自 market 子状态 buysLeft） */
+.popup-coin-badge {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px var(--space-2) 2px 4px;
+  border-radius: var(--radius-button);
+  background: var(--color-accent-yellow);
+  border: 1.5px solid var(--color-line-strong);
+  color: var(--color-ink);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-heavy);
+  font-variant-numeric: tabular-nums;
+}
+.popup-coin-badge-dot {
+  flex: none;
+  width: var(--coin-dot-size-sm);
+  height: var(--coin-dot-size-sm);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 34% 30%,
+    color-mix(in srgb, var(--color-accent-yellow) 55%, var(--color-surface)) 0%,
+    var(--color-accent-yellow) 58%,
+    color-mix(in srgb, var(--color-accent-yellow) 80%, var(--color-primary-lo))
+      100%
+  );
+  border: 1px solid var(--color-line-strong);
 }
 
 .popup-close {
@@ -506,21 +536,23 @@
   padding-top: var(--space-2);
 }
 
-/* 「这次还能买 N 张」：要看得见，不做灰字 */
-.panel-buysleft {
-  align-self: center;
-  padding: var(--space-1) var(--space-4);
-  background: var(--color-surface-dim);
-  border-radius: var(--radius-button);
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-bold);
-  font-variant-numeric: tabular-nums;
-}
-
 .panel-keyhelp {
   font-size: var(--font-size-xs);
   color: var(--color-muted);
   text-align: center;
+}
+
+/* R2-17（团队第 2 轮）：键盘提示文字在触屏设备上隐藏——「←→ pick a
+   card · 1/2/3」说明行（.panel-keyhelp--kbd）与按钮上的 (Enter /
+   Space) 小字（.btn-kbd-hint）；用 pointer: coarse 判定触屏，不嗅探
+   UA。数字键徽标（.key-hint）同时是点按选项的编号，触屏保留。
+   !important 是因为 .board-enter .btn-kbd-hint 等上下文规则特异性
+   更高，触屏口径优先 */
+@media (pointer: coarse) {
+  .btn-kbd-hint,
+  .panel-keyhelp--kbd {
+    display: none !important;
+  }
 }
 
 /* R10E（§1）：去框后说明文字不再坐在白框里——小字各得一枚
@@ -653,10 +685,17 @@
 /* —— Toast 动作提示 —— */
 .toast-stack {
   position: fixed;
-  top: var(--space-5);
+  /* R3 修复（ww 第 3 轮必改 2）：旧位 top:space-5 与顶栏同高，长提示
+     （max-width 90vw 居中）横向能探到右上角、盖住语言开关。整条下移
+     到顶栏之下（顶栏高 = 按钮高 56 + 壳内边距），只在棋盘区上空出现 */
+  top: calc(var(--space-5) + var(--button-height) + var(--space-2));
   left: 50%;
   transform: translateX(-50%);
-  z-index: 30;
+  /* R2-4 + R3 修复（必改 2）：层级排在站点弹窗（.popup-backdrop z 20）、
+     高光帘（z 22）、手机竖栏（z 8）与手机浮层（z 7）之下——提示条永远
+     在卡片/面板下层，任何状态都不盖按钮；手机浮层打开时另有让位规则
+     （phone.css :has 段）直接藏条 */
+  z-index: 5;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -665,13 +704,21 @@
 }
 
 .toast {
-  max-width: 90vw;
+  /* R3 修复（必改 2）：宽度封顶 560——1024 宽下居中占 232..792，
+     进不了两侧 bot 列（≤190）与顶栏动作区 */
+  max-width: min(90vw, 560px);
   padding: var(--space-2) var(--space-4);
   background: var(--color-ink);
   color: var(--color-bg);
   border-radius: var(--radius-button);
   font-size: var(--font-size-sm);
   box-shadow: var(--shadow-md);
+  /* R2-4：消失前 300ms 淡出（Toast.tsx 的 TOAST_FADE_MS 同值） */
+  transition: opacity 300ms var(--motion-ease);
+}
+
+.toast--leaving {
+  opacity: 0;
 }
 
 /* R5：新提示轻轻落下——200ms 内，pointer-events 本就关闭不挡操作 */

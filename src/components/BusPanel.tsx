@@ -17,7 +17,7 @@
  */
 import { useRef, useState } from 'react';
 import { gameConfig } from '../config/gameConfig';
-import { coinWord, strings } from '../data/strings';
+import { strings } from '../data/strings';
 import { fmt } from '../game/stations/shared';
 import { bumpCoinHud } from '../ui/hudNudge';
 import type { Command, GameState } from '../game/types';
@@ -92,7 +92,11 @@ export function BusPanel({
               front={
                 <CardView
                   icon="🚌"
-                  name={`${strings.panel.busTicket} · ${fee} ${coinWord(fee)}`}
+                  /* 可见名只留「Bus ticket」：票价已在价格宝石上，
+                     全名「Bus ticket · 2 coins」在 104px 卡上横溢出
+                     124px（全屏排查实测，B 口径缩短文案）；aria-label
+                     仍是完整动作句，信息不丢 */
+                  name={strings.panel.busTicket}
                   price={fee > 0 ? fee : undefined}
                   tag={!canPay && fee > 0 ? strings.panel.noCoins : undefined}
                   selected={picked}

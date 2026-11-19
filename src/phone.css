@@ -156,11 +156,16 @@
   position: fixed;
   top: var(--space-2);
   left: var(--space-2);
-  right: calc(var(--rail-w) + 88px); /* 给「回默认视角」胶囊让位 */
+  /* R2-2：旧值另留 88px 给「回默认视角」胶囊——胶囊早已挪到棋盘
+     右下角（.board3d-overlay 是 bottom 定位），顶行右侧并无他人；
+     而头像条内容（圈牌+进度簇+3 头像片 ≈644px）比旧盒宽（454px）
+     多出一截，flex 子项不裁剪、直接画到右竖栏上空，盖住中英切换
+     与栏首内容。改贴到竖栏左缘为止，配合下面各处收紧让内容装进盒里 */
+  right: var(--rail-w);
   z-index: 10;
   display: flex;
   align-items: flex-start;
-  gap: var(--space-2);
+  gap: var(--space-1);
 }
 
 .phone-lap {
@@ -168,7 +173,7 @@
   display: inline-flex;
   align-items: center;
   min-height: var(--tap-min-size);
-  padding: 0 var(--space-3);
+  padding: 0 var(--space-2);
   background: var(--color-surface);
   border: 2px solid var(--color-line);
   border-radius: var(--radius-button);
@@ -190,7 +195,10 @@
   align-items: center;
   gap: var(--space-1);
   min-height: var(--tap-min-size);
-  padding: 0 var(--space-2);
+  /* R2-2：头像条装盒收紧——横 padding 降一档；金币点在小头像片里
+     再小一号（作用域变量覆盖，数字仍在点旁，E4 口径不变） */
+  padding: 0 var(--space-1);
+  --coin-dot-size-sm: 7px;
   background: var(--color-surface);
   border: 2px solid var(--color-line);
   border-radius: var(--radius-button);
@@ -216,8 +224,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--icon-size);
-  height: var(--icon-size);
+  /* R2-2：头像条装盒收紧——圆片比桌面 --icon-size 小一档（24px） */
+  width: calc(var(--icon-size) * 0.75);
+  height: calc(var(--icon-size) * 0.75);
   border-radius: var(--radius-button);
   font-size: var(--font-size-md);
   line-height: 1;
@@ -253,7 +262,7 @@
 .phone-bot-coins-row {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
 }
 .phone-bot-num {
   font-weight: var(--font-weight-bold);
@@ -383,10 +392,20 @@
 }
 
 /* R10E：栏内头丸缩小一档（仍是半透明墨丸） */
+/* R2-2 ③：桌面 .popup-head 是 align-self:center 的内容宽浮丸——
+   栏内内容区只有 ~182px，丸的最小内容宽（站名 + 不换行的目标小片
+   + 菜谱条同排 ≈246px）比栏宽，居中后左右各溢出 ~32px，左半被
+   竖栏滚动盒裁掉（站名牌左边缺一截）。栏内改拉满宽：丸宽=栏宽，
+   目标小片在丸内换行、菜谱条换到下一行，都不许再把丸撑宽。 */
 .phone-rail .popup-head {
+  align-self: stretch;
   margin-bottom: var(--space-1);
   padding: 2px var(--space-1) 2px var(--space-3);
   gap: var(--space-2);
+}
+
+.phone-rail .popup-goal {
+  white-space: normal;
 }
 
 /* R10E：栏内 foot 与内容之间连发丝线也不需要了 */
@@ -395,7 +414,16 @@
 }
 
 .phone-rail .popup-title {
-  font-size: var(--font-size-md);
+  /* R2 验收修复：md(20px) 下「⑤ Surprise Stop」在 150px 内容宽里
+     差一线折成两行、首字贴死浮签大圆角边缘看着像被裁——收一档
+     sm(16px) 后单行放下（仍 ≥14px 可读地板） */
+  font-size: var(--font-size-sm);
+}
+
+/* R2 验收修复：栏内浮签内容高时（目标句折行 + 菜谱条）大胶囊圆角
+   把首尾字挤出圆弧——栏内改卡圆角，方正收边 */
+.phone-rail .popup-head {
+  border-radius: var(--radius-card);
 }
 
 /* 栏内面板内容收紧一档 */
@@ -404,7 +432,6 @@
 }
 
 .game-screen--phone-land .panel-text,
-.game-screen--phone-land .panel-buysleft,
 .game-screen--phone-land .panel-selected {
   font-size: var(--font-size-sm);
 }
@@ -531,6 +558,243 @@
 
 .game-screen--phone-land .speech-bubble-actions {
   flex-direction: column;
+}
+
+/* R2-2 ①：心里话气泡（.think-bubble--phone）在 board.css 里以头像片
+   为中心绝对定位 + nowrap——最右一片的气泡会横跨进右竖栏，盖住
+   「轮到你了」。最后一片改右缘锚定：气泡右缘与头像片右缘齐平，
+   结构上不可能越过竖栏左缘；入场动画换无横移的一版配套。 */
+.game-screen--phone-land .phone-bot-wrap:last-child .think-bubble--phone {
+  left: auto;
+  right: 0;
+  transform: none;
+  animation-name: think-pop-phone-end;
+}
+
+@keyframes think-pop-phone-end {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* ==========================================================================
+   R2-1：市场卡扇浮层（棋盘区压暗 + 居中浮卡，右竖栏只留按钮/状态）
+   Game.tsx 常驻挂载点 .phone-market-float（棋盘区上方），MarketPanel
+   用 portal 把 .stall-hand 送进来。压暗/毛玻璃与桌面 .popup-backdrop
+   同一套 token；层本身 pointer-events:none 不拦点、只有卡扇可点
+   （与桌面 backdrop/popup 的分工一致）。空层（市场弹窗未开）不渲染。
+   R2 验收修复（ww 第 2 轮截图验收）：① 卡扇改单行定尺网格——旧版
+   借栏内紧凑档的 flex-wrap + 桌面卡尺寸，6 张卡 5+1 折成两行、整块
+   顶到屏顶/底（圈数片压卡、导引句贴下缘）；定尺 94×126 单行 6 张
+   584px ≤ 棋盘区内宽 596。② 主操作（投放区/Done）随卡扇进浮层
+   （.phone-float-stack 纵叠），不再留在竖栏里被滚动藏起来。
+   ③ 天气时刻同病同药：.phone-weather-float 同模式（EventPanel
+   portal .weather-moment）。④ 浮层期间左上头像排/左下圆钮让位
+   （visibility:hidden）——它们探进棋盘区的气泡/片角不再压卡。
+   ========================================================================== */
+.phone-market-float,
+.phone-weather-float {
+  position: fixed;
+  /* R3 修复（ww 第 3 轮必改 1）：浮层盒先收进安全区——旧版 left:0 让
+     584px 浮层栈在棋盘区（612px）里居中后卡扇/Buy/Done 左缘落在
+     x≈14，压进左侧 62px 安全区。层盒改为 safe-l 起、safe-t/safe-b
+     上下收，栈在安全区内居中（栈宽随之收窄，见下方定尺注释） */
+  top: var(--safe-t);
+  left: var(--safe-l);
+  bottom: var(--safe-b);
+  right: var(--rail-w);
+  z-index: 7; /* 棋盘（0）之上、右竖栏（8）与左上/左下 chrome（10）之下 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-backdrop);
+  backdrop-filter: blur(var(--stage-blur));
+  -webkit-backdrop-filter: blur(var(--stage-blur));
+  pointer-events: none;
+}
+
+.phone-market-float:empty,
+.phone-weather-float:empty {
+  display: none;
+}
+
+.phone-market-float .stall-hand {
+  pointer-events: auto;
+}
+
+.phone-weather-float .weather-moment {
+  pointer-events: auto;
+  flex: none;
+}
+
+/* 浮层纵叠栈：卡扇块（扇+导引句） + 主操作块（投放区/Done），
+   宽度由卡扇定（584），操作块拉满同宽——卡与主操作同框同宽 */
+.phone-float-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+  pointer-events: auto;
+}
+
+.phone-float-stack .stall-fan-block {
+  align-items: center;
+}
+
+/* 浮层里卡扇定尺单行网格：卡高 126，名签区（浮层档名签 20px 字 + 8
+   偏移 + 选中上抬 6 = 54 ≤ 64）收进 padding-top；特异性压过
+   cards.css 紧凑档。
+   R3 修复（必改 1）：浮层盒左收 safe-l(62) 后可用宽 = 874 − 62 −
+   竖栏 262 = 550；卡宽 94 → 86：6 张 × 86 + 5 × 4 间隙 = 536 ≤ 550，
+   栈居中后左缘 ≈69（首卡旋转包围盒再让 ~1.5 → ≈67.5 ≥ 62 ✓），
+   Buy/Done 随栈宽同缘。卡名在 86 宽下按 &shy; 音节折两行（S-1 口径：
+   不缩字号、不裁字），美术区 flex 相应让高、原图仍整幅 contain。 */
+.game-screen--phone-land .phone-market-float .stall-hand {
+  --hand-card-w: 86px;
+  --hand-card-h: 126px;
+  flex-wrap: nowrap;
+  padding-top: 64px;
+}
+
+/* 浮层内投放区回到横排一行（盖过紧凑档的全宽竖排）：篮/夹平分，
+   算式与 Skip 贴行尾；高度压到 tap-min 一档，Done 整行。
+   R3 修复（必改 1 续）：浮层盒收进安全区后可用宽 550 < 旧栈宽 584，
+   投放行的自然宽（键位片 + 算式 + Skip 内边距 ≈ 591）反过来把栈顶
+   满、Buy 被挤折行（高 62）、整栈塞满安全高 20..382 零裕量。浮层内
+   瘦身：键位片不显示（触屏无键盘，与栏内口径一致）、投放区横内边距
+   降一档、算式降一档字号、Skip 横内边距降一档——行宽回到卡扇宽
+   536 内，Buy 单行 48，整栈恢复 348 高（y 27..375）。 */
+.game-screen--phone-land .phone-market-float .drop-row {
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.game-screen--phone-land .phone-market-float .drop-row .key-hint {
+  display: none;
+}
+
+.game-screen--phone-land .phone-market-float .drop-zone {
+  padding-left: var(--space-2);
+  padding-right: var(--space-2);
+}
+
+.game-screen--phone-land .phone-market-float .cb-math--inrow {
+  font-size: var(--font-size-sm);
+}
+
+.game-screen--phone-land .phone-market-float .drop-row > .btn {
+  padding-left: var(--space-3);
+  padding-right: var(--space-3);
+}
+
+.game-screen--phone-land .phone-market-float .drop-zone {
+  flex: 1 1 0;
+  min-height: var(--tap-min-size);
+  /* md 字号下「Buy (3 coins)」+图标 ≈155px 比内容盒 150 宽一线、
+     折成两行把投放区顶到 72 高（实测）——收一档 sm 后单行 48 */
+  font-size: var(--font-size-sm);
+  white-space: normal;
+  line-height: 1.25;
+}
+
+.game-screen--phone-land .phone-market-float .drop-row > .btn {
+  flex: 0 0 auto;
+  min-height: var(--tap-min-size);
+}
+
+.game-screen--phone-land .phone-market-float .btn--navy {
+  width: 100%;
+  min-height: var(--tap-min-size);
+}
+
+/* 五尺寸自适应（Thong/ww 合并口径）：≤700px 宽档（667×375 小手机横屏）
+   棋盘区只剩 ~427px，584px 浮层栈居中必然出屏（实测首卡 x=−83）。
+   取舍顺序「先缩间距 > 等比缩卡」在此档的落点：卡片保持 94×126 模板
+   不缩（缩到 ~74 宽时白板文字区会吃掉整卡、图只剩 ~15px 高，违反
+   上图下文比例），改为浮层全宽 sheet——右栏在市场/天气浮层期间让位
+   （购买算式在栈内 drop-row 可见，金币栏关浮层即回）。层级 9：
+   右竖栏（8）之上、左上/左下 chrome（10）之下（chrome 浮层期间本就让位）。 */
+@media (max-width: 700px) {
+  .phone-market-float,
+  .phone-weather-float {
+    right: 0;
+    z-index: 9;
+  }
+
+  /* S-3（Critiquito 实测）：667×375 下浮层栈高 348 在 375 高里居中，
+     Done 下缘距屏底只剩 13.5px、侵入底部 20px 安全区 6.5px。栈高
+     必须 ≤335 才能居中后上下都留 ≥20：扇顶留位 64→56（名签实测需
+     52，仍够）、栈间隙 space-3→space-2、导引句上下内边距归零，
+     合计 −16 → 栈高 332，Done 下缘距屏底 21.5px ✓ */
+  .game-screen--phone-land .phone-market-float .stall-hand {
+    padding-top: 56px;
+  }
+
+  .phone-float-stack {
+    gap: var(--space-2);
+  }
+
+  .phone-market-float .stall-guide {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
+/* 五尺寸自适应：手机右栏内宽 ~182px，桌面档选择卡扇（整卡 136×170
+   两张 + 间隔 ≈ 310px）横向出栏——实测「No thanks」卡右界 968 超出
+   874 视口、只剩半张。手机档改纵叠：卡 150×120 整卡入栏（图完整
+   contain、白板文字行高不变），横向间隔改纵向。事件站同构同改。 */
+.game-screen--phone-land .event-hand,
+.game-screen--phone-land .choice-hand {
+  --hand-card-w: 150px;
+  --hand-card-h: 120px;
+  flex-direction: column;
+  align-items: center;
+}
+
+.game-screen--phone-land .event-hand .hand-item + .hand-item,
+.game-screen--phone-land .choice-hand .hand-item + .hand-item {
+  margin-left: 0;
+  margin-top: var(--space-2);
+}
+
+/* 交换 mini 扇同理收进栏宽：4 张封顶 76 + 3×34 = 178 ≤ 182 */
+.game-screen--phone-land .swap-hand {
+  --hand-card-w: 76px;
+  --hand-card-h: 95px;
+  --fan-expose: 34px;
+}
+
+/* 浮层内「先等等」处理行压成一行小字 + 两钮横排，不把栈顶出带 */
+.game-screen--phone-land .phone-market-float .hold-resolve .panel-actions {
+  flex-direction: row;
+}
+
+.game-screen--phone-land .phone-market-float .hold-resolve .btn {
+  flex: 1 1 0;
+  width: auto;
+  min-height: var(--tap-min-size);
+}
+
+/* 浮层期间 chrome 让位：头像排（含心里话气泡）与左下圆钮隐藏——
+   浮层是模态决策时刻，棋盘区只留卡与主操作（ww 验收口径：
+   圈数片/头像条/气泡不得压卡，可在浮层期间让位） */
+.game-screen--phone-land:has(.phone-market-float:not(:empty)) .phone-bots,
+.game-screen--phone-land:has(.phone-market-float:not(:empty)) .phone-quick,
+.game-screen--phone-land:has(.phone-weather-float:not(:empty)) .phone-bots,
+.game-screen--phone-land:has(.phone-weather-float:not(:empty)) .phone-quick {
+  visibility: hidden;
+}
+
+/* R3 修复（必改 2）：浮层打开时提示条同让位——旧版提示条（z 15）浮在
+   浮层（z 7）之上，真人买卡的日志条正好压住投放区的「Maybe later」。
+   现在提示条层级已降到 5（hud.css），浮层期间再直接藏条：日志在竖栏
+   board-log 里照样可读，浮层关掉条自然回来（2.5s 生命周期不变） */
+.game-screen--phone-land:has(.phone-market-float:not(:empty)) .toast-stack,
+.game-screen--phone-land:has(.phone-weather-float:not(:empty)) .toast-stack {
+  visibility: hidden;
 }
 
 /* —— 左下：钱包（常显币数）+ 求助牌 圆钮 —— */
@@ -929,7 +1193,14 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-2);
-  max-width: 640px;
+  /* R2 验收修复：拉开后的感想扇总宽 692，容器随之放宽到壳内宽 */
+  max-width: 720px;
+}
+
+/* R2 验收修复：引导句/自写钮在手机网格里整行（与扇同宽居中） */
+.app-shell--phone-land .reflection-options .reflection-personal,
+.app-shell--phone-land .reflection-options > .btn {
+  grid-column: 1 / -1;
 }
 
 .app-shell--phone-land .reflection-options .btn {
@@ -937,6 +1208,60 @@
   padding: var(--space-1) var(--space-3);
   font-size: var(--font-size-md);
   line-height: 1.25;
+}
+
+/* R2 验收修复：感想扇在手机横屏定尺——5 卡 × 132 + 4 × 8 间隙 =
+   692 ≤ 壳内宽 718，单行全露不重叠；扇跨两列居中（旧版塞在半列
+   里溢出叠卡）；名签字号收一档防长句探出屏外；扇顶留位收紧
+   （整句读出走扇下 .reflection-picked，名签只是副通道） */
+.app-shell--phone-land .reflection-options .reflection-hand {
+  grid-column: 1 / -1;
+  justify-self: center;
+  --hand-card-w: 132px;
+  --hand-card-h: 168px;
+  --fan-expose: calc(var(--hand-card-w) + 8px);
+  padding-top: calc(var(--hand-lift) + 20px);
+}
+
+/* 五尺寸自适应 ≤700px 档（667×375 实测）：132 档扇总宽 692 超出壳内宽、
+   第五张卡被切出右界；标题（xl 32）横贯到右上角压住语言开关。
+   先缩间距/卡档：卡 118×162、expose +6 → 扇总宽 614 入壳；
+   标题降一档到 lg 24 让出开关区。字号下限仍 ≥15（卡名 xs）。 */
+@media (max-width: 700px) {
+  .app-shell--phone-land .reflection-options .reflection-hand {
+    --hand-card-w: 118px;
+    --hand-card-h: 162px;
+    --fan-expose: calc(var(--hand-card-w) + 6px);
+  }
+
+  .app-shell--phone-land .intro-shell[data-testid='screen-reflection'] .intro-title {
+    font-size: var(--font-size-lg);
+  }
+}
+
+/* 手机摊位长名兜底：94px 卡里 Marshmallow 等长名单行放不下时
+   在音节断点折两行（短名仍单行，扇高固定、版式不跳） */
+.phone-market-float .card-view-name {
+  white-space: normal;
+}
+
+/* 手机感想卡内收一档：卡内边距/间隙/美术地板压小，168 卡高里
+   装下 三行名 + 标签（桌面同构内容实测需 186@桌面内边距） */
+.app-shell--phone-land .reflection-hand .card-view {
+  padding: var(--space-2) var(--space-1);
+  gap: var(--space-1);
+}
+
+.app-shell--phone-land .reflection-hand .card-view-art {
+  min-height: 30px;
+}
+
+.app-shell--phone-land .reflection-options .reflection-picked {
+  grid-column: 1 / -1;
+}
+
+.app-shell--phone-land .reflection-hand .hand-tag {
+  font-size: var(--font-size-lg);
 }
 
 /* 「Write your own…」展开后的输入行占满两列 */
@@ -973,17 +1298,18 @@
   padding: var(--space-1);
 }
 .phone-bots .lap-dot {
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
 }
 .phone-bots .stop-pip {
-  width: 7px;
-  height: 7px;
+  /* R2-2：头像条装盒收紧——站点格再小 1px（簇宽由这一行 8 格决定） */
+  width: 6px;
+  height: 6px;
   border-radius: 2px;
 }
 .phone-bots .stop-pip--here {
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
   margin: -1px;
 }
 

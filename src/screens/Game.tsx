@@ -13,7 +13,9 @@ import type { CardId, Command, GameState, Player, PlayerId } from '../game/types
 import { BoardMount } from '../board/BoardMount';
 import { toBoardView } from '../board/boardModel';
 import { LangToggle } from '../i18n/LangToggle';
-import { cardName, playerDisplayName, stationGoal, stationName } from '../i18n/cardText';
+import { cardName, localizeLogText, playerDisplayName, stationGoal, stationName } from '../i18n/cardText';
+import { awaitingHumanKind } from '../ui/awaitingHuman';
+import { lapGainOf } from '../ui/lapGain';
 import { botThinkLine } from '../ui/botThink';
 import { botTrait } from '../ui/botTrait';
 import { nextActorId } from '../ui/nextActor';
@@ -33,6 +35,7 @@ import { EventPanel } from '../components/EventPanel';
 import { MarketPanel } from '../components/MarketPanel';
 import { ParentPanel } from '../components/ParentPanel';
 import { PartnerPanel } from '../components/PartnerPanel';
+import { ProposalPill } from '../components/ProposalPill';
 import { RecipeCard } from '../components/RecipeCard';
 import { SpeechBubble } from '../components/SpeechBubble';
 import { PopupOutlet, StationPopup } from '../components/StationPopup';
@@ -87,6 +90,21 @@ export function Game({
      给世界换上对应天气——DOM 洗色走 .game-screen.weather--*，
      3D 灯光/雨丝/云速走 board.weatherDress。纯演出。 */
   const [weatherDress, setWeatherDress] = useState<CardId | null>(null);
+  /* R2-1（团队第 2 轮）：手机市场站的卡扇不再塞进右竖栏（栏内滚动
+     把卡推到屏外，孩子看不到卡）——Game 在棋盘区上方常驻一层浮层
+     挂载点，MarketPanel 用 portal 把卡扇送进去，像桌面一样浮在
+     压暗棋盘上；右竖栏只留弹窗头 + 状态 + 操作按钮。挂载点元素
+     经 state 回填（ref 首帧为 null 时卡扇先留在栏内，回填后迁移）。
+     R2 验收修复：主操作（投放区/Done）也随卡扇进浮层——竖栏 402
+     高里头+状态+三行按钮同屏放不下，Buy/Done 曾被推出帧外。 */
+  const [marketHandEl, setMarketHandEl] = useState<HTMLDivElement | null>(null);
+  /* R2 验收修复（ww 第 2 轮截图验收）：手机天气时刻同市场卡扇的病——
+     结果卡塞在右竖栏里、棋盘不压暗、站名浮签被栏内滚动截出屏。
+     同一味药：棋盘区上方再常驻一层天气浮层挂载点，EventPanel 用
+     portal 把 .weather-moment（spin + card 两相位）送进去浮在压暗
+     棋盘上；站名浮签留在竖栏弹窗头里（浮层不进栏、栏不再滚动，
+     浮签自然整颗入镜）。 */
+  const [weatherFloatEl, setWeatherFloatEl] = useState<HTMLDivElement | null>(null);
   const openSpot = (id: PlayerId) => setSpot({ id, manual: true });
   const closeSpot = () => setSpot(null);
   /* R1-E3 快进入口：点「正在行动的 bot」的角落小卡 = 先给它的回合
@@ -115,9 +133,22 @@ export function Game({
   // （translateY 26px），已在 phone.css 竖栏内禁用；此处为次因加固。
   const lastScrollHeight = useRef(0);
   const railKey = `${state.lap}:${state.stationIndex}:${state.turn?.turnPhase ?? ''}:${state.pendingDecision.kind}`;
+  // 提议浮签在场时它是当前要做的事：把浮签所在的 .phone-turn 块
+  // 顶对齐到竖栏顶（浮签随之落在语言开关下方、整卡可见）。用
+  // block:'start' 对齐块顶而不是浮签底——浮签下方内容（气泡/日志）
+  // 增高不会把对齐点带偏（block:'end' 实测会被增高冲掉 68px，
+  // 浮签首行被顶出屏外——R2 手机实测）。三个滚动写入点共用。
+  const scrollRailToPill = (rail: HTMLElement): boolean => {
+    const pill = rail.querySelector('.board-await');
+    if (!pill) return false;
+    const anchor = rail.querySelector('.phone-turn') ?? pill;
+    anchor.scrollIntoView({ block: 'start' });
+    return true;
+  };
   const pinRail = () => {
     const rail = railRef.current;
     if (rail && stickBottom.current) {
+      if (scrollRailToPill(rail)) return;
       rail.scrollTop = rail.scrollHeight;
       // R10C：内容还会长（弹窗内嵌结构在钉底后再撑高 ~146px）——
       // 钉底的 scroll 事件带着旧高度到达时会先把 stickBottom 误锁，
@@ -132,10 +163,13 @@ export function Game({
     setEventRevealed(false);
     const rail = railRef.current;
     if (!rail) return;
-    // 有提议气泡时滚到气泡（它是当前要做的事）；否则钉到栏底露出主按钮
-    const bubble = rail.querySelector('.speech-bubble');
-    if (bubble) bubble.scrollIntoView({ block: 'end' });
-    else rail.scrollTop = rail.scrollHeight;
+    // 有提议浮签时滚到浮签（ww 定稿的第一回应面：文案+两件菜图+
+    // Yes/No）；没有浮签时滚到气泡；否则钉到栏底露出主按钮
+    if (!scrollRailToPill(rail)) {
+      const bubble = rail.querySelector('.speech-bubble');
+      if (bubble) bubble.scrollIntoView({ block: 'end' });
+      else rail.scrollTop = rail.scrollHeight;
+    }
     lastScrollHeight.current = rail.scrollHeight;
   }, [railKey]);
   // 弹窗可能与决策不同步挂载：任何重渲染后仍吸底就保持钉底
@@ -145,6 +179,12 @@ export function Game({
     const rail = railRef.current;
     if (!rail || !phoneLand) return;
     const recoverPin = () => {
+      // 提议浮签在场：高度变化后仍把浮签留在视野里（与 pinRail 同
+      // 口径），不许钉底把它顶出屏外。
+      if (scrollRailToPill(rail)) {
+        lastScrollHeight.current = rail.scrollHeight;
+        return;
+      }
       // T0：增高前还在底部 160px 内（按上次栏高算）→ 恢复吸底并追到
       // 新底；孩子主动上滚看卡（离底更远）时不打扰。
       const wasNearBottom =
@@ -175,9 +215,6 @@ export function Game({
   const pendingPid = 'playerId' in pd ? pd.playerId : null;
   const introPhase = state.turn?.turnPhase === 'intro';
   const humanPending = state.turn?.turnPhase === 'act' && pendingPid === state.humanId;
-  const activePlayer = board.activePlayerId
-    ? state.players.find((p) => p.id === board.activePlayerId)
-    : null;
   const lastLog = state.log[state.log.length - 1];
   // R10C：人类玩家的事件卡还盖着时，最后一条日志就是剧透——
   // toast 与 board-log 一律跳过它（引擎 log 本身不动）
@@ -186,9 +223,6 @@ export function Game({
   const shownLog = eventVeiled
     ? (state.log[state.log.length - 2] ?? null)
     : lastLog;
-  const pendingPlayer = pendingPid
-    ? state.players.find((p) => p.id === pendingPid)
-    : null;
   const sub = state.turn?.sub;
 
   /* R10E（§2 天气布景）：新一次天气时刻开始先清布景——
@@ -294,6 +328,7 @@ export function Game({
   const orderChips = (state.turn?.order ?? []).map((id) => {
     const p = state.players.find((x) => x.id === id);
     if (!p) return null;
+    const gain = lapGainOf(state, p.id);
     const trait = botTrait(p);
     const isNext = nextId === id;
     return (
@@ -308,12 +343,19 @@ export function Game({
           {avatarIcon(p)}
         </span>
         {/* R10E（§4）：顺序片里币数画成金币点（迷你档）；
-            R1-E4：金币点旁补可见数字，金币只作辅助（读屏口径不变） */}
+            R1-E4：金币点旁补可见数字，金币只作辅助（读屏口径不变）
+            R2-5/R2-9：关掉金币点溢出尾徽（曾排出名单面板），「+n」只
+            表示这一圈拿到的钱——与角落卡同源 lapGainOf、同值 */}
         <span className="order-chip-mid">
           <span className="order-chip-name">{playerDisplayName(p)}</span>
           <span className="order-chip-coins">
-            <CoinDots n={p.coins} cap={5} className="coin-dots--xs" />
+            <CoinDots n={p.coins} cap={5} className="coin-dots--xs" hideExtra />
             <span className="order-chip-num" aria-hidden="true">{p.coins}</span>
+            {gain > 0 && (
+              <span className="order-chip-gain" aria-hidden="true">
+                +{gain}
+              </span>
+            )}
           </span>
         </span>
         {trait && (
@@ -336,6 +378,21 @@ export function Game({
     ? state.players.find((p) => p.id === proposal.from)
     : undefined;
 
+  /* 等真人回应提议（换菜/一起买）时，驱动已停摆但 currentActorId
+     仍是发起的 bot——发起者的 BotCard 不再亮「正在想…」（下方
+     thinking 传 !awaitKind）。回应提示按团队第 2 轮 ww 定稿走
+     ProposalPill 浮签卡（写清提议内容 + 两件菜图 + Yes/No 药丸按钮，
+     见 boardOverlay）；角落气泡保留但不是唯一入口。团队第 2 轮更正：
+     不设任何计时提醒（R1 的 10s 气泡轻跳已撤除），绝不替孩子回应。 */
+  const awaitKind = awaitingHumanKind(pd, state.humanId);
+  const awaitProposal =
+    awaitKind && 'proposalId' in pd
+      ? state.proposals.find((p) => p.id === pd.proposalId)
+      : undefined;
+  const awaitFrom = awaitProposal
+    ? state.players.find((p) => p.id === awaitProposal.from)
+    : proposalFrom;
+
   const renderBotSlot = (b: (typeof bots)[number]) => {
     // R10C（education #3）：bot 心里话气泡——最新一条日志归它时，
     // 用 spend.kind + 性格映成一句短理由（复用日志时序，不加事件）
@@ -346,9 +403,10 @@ export function Game({
       <div className="bot-slot" key={b.id}>
         <BotCard
           player={b}
-          thinking={board.activePlayerId === b.id}
+          thinking={board.activePlayerId === b.id && !awaitKind}
           expanded={spot?.id === b.id}
           autoSpot={spot?.id === b.id && !spot.manual}
+          lapGain={lapGainOf(state, b.id)}
           onOpen={openBotSpot}
         />
         {think && (
@@ -390,7 +448,13 @@ export function Game({
       panel = <DrawTaskPanel state={state} send={send} />;
       break;
     case 'marketTurn':
-      panel = <MarketPanel state={state} send={send} />;
+      panel = (
+        <MarketPanel
+          state={state}
+          send={send}
+          handFloatEl={phoneLand ? marketHandEl : null}
+        />
+      );
       break;
     case 'payBus':
       panel = <BusPanel state={state} send={send} />;
@@ -410,6 +474,7 @@ export function Game({
           revealed={eventRevealed}
           onReveal={() => setEventRevealed(true)}
           onWeatherDone={setWeatherDress}
+          momentFloatEl={phoneLand ? weatherFloatEl : null}
         />
       );
       break;
@@ -428,23 +493,16 @@ export function Game({
   // 提议气泡自带两个按钮，不再开站点弹窗
   const showPopup = humanPending && pd.kind !== 'swapResponse';
 
-  // 「轮到你了 / 进入这一站 + 状态行 + 最近一条日志」——
-  // 桌面/平板放进棋盘 overlay；手机横屏放进右竖栏顶部
+  // 「进入这一站 + 最近一条日志」——桌面/平板放进棋盘 overlay；
+  // 手机横屏放进右竖栏顶部。
+  // R2-12（团队第 2 轮）：同一句话一个画面只说一次——轮到谁只标在
+  // 该玩家的角落卡（高光/thinking 态），这里不再有 Your turn /
+  // Zip's turn 轮次文字；事件只走浮签/提示条，日志行保留一行且与
+  // Toast 同口径本地化（R2 一致性）。「Go to this stop」保留为底部
+  // 居中橙色浮动药丸（.board-enter，见 board.css）。
   const boardOverlay = introPhase ? (
     <>
       <p className="board-town">{strings.game.townAlt}</p>
-      <p className="board-status">
-        {pendingPid === state.humanId ? (
-          <>
-            {strings.game.yourTurn}:{' '}
-            {fmt(strings.game.pawnAt, { name: stationName(station.id) })}
-          </>
-        ) : (
-          fmt(strings.game.botTurn, {
-            name: pendingPlayer ? playerDisplayName(pendingPlayer) : '',
-          })
-        )}
-      </p>
       {pendingPid === state.humanId && (
         <Button
           variant="primary"
@@ -469,16 +527,26 @@ export function Game({
   ) : (
     <>
       <p className="board-town">{strings.game.townAlt}</p>
-      <p className="board-status">
-        {activePlayer
-          ? activePlayer.isHuman
-            ? strings.game.yourTurn
-            : fmt(strings.game.botTurn, { name: playerDisplayName(activePlayer) })
-          : fmt(strings.game.pawnAt, { name: stationName(station.id) })}
-      </p>
+      {awaitKind && awaitFrom && awaitProposal && (
+        /* 等真人回应提议的浮签卡（团队第 2 轮 ww 定稿）：写清提议
+           内容 + 两件菜图 + Yes/No 药丸按钮，挂在棋盘中央（手机横屏
+           时随 boardOverlay 进右竖栏）；与角落气泡同一条回应命令 */
+        <ProposalPill
+          from={awaitFrom}
+          proposal={awaitProposal}
+          onRespond={(accept) =>
+            send(
+              awaitProposal.kind === 'swap'
+                ? { type: 'RESPOND_SWAP', proposalId: awaitProposal.id, accept }
+                : { type: 'RESPOND_INVITE', proposalId: awaitProposal.id, accept },
+            )
+          }
+        />
+      )}
       {shownLog && (
         <p className="board-log" aria-live="polite">
-          {shownLog.text}
+          {/* 与 Toast 同口径：引擎烘焙的英文槽位名按当前语言重渲染 */}
+          {localizeLogText(shownLog.text)}
         </p>
       )}
     </>
@@ -507,15 +575,35 @@ export function Game({
       }))
     : undefined;
 
+  /* R2-6（团队第 2 轮）：市场站浮签定稿——站名用定稿短名
+     （② The Market / ② 菜市场），右边挂金币角标 ×N（N = 还能买的
+     张数，取 market 子状态既有 buysLeft，不新造计数）；「Practice:
+     notice temptations」练习标签从顶部撤掉，挪进「How to play」
+     （HelpCard 已加当前站练习行）。其他站浮签维持原口径不动。 */
+  const isMarket = station.id === 'market';
+  const marketBuysLeft = sub?.kind === 'market' ? sub.buysLeft : null;
+
   // R10D（interaction #8）：PopupOutlet 统一给所有站点弹窗加进出场；
   // 弹窗关掉时保留最后一帧 ~160ms 播淡出（一处实现，三处受益）
   const popupEl = (
     <PopupOutlet show={showPopup}>
       <StationPopup
-        title={`${CIRCLED[state.stationIndex] ?? state.stationIndex + 1} ${stationName(station.id)}`}
+        title={`${CIRCLED[state.stationIndex] ?? state.stationIndex + 1} ${isMarket ? strings.hud.marketTitle : stationName(station.id)}`}
         testid={`panel-${station.id}`}
-        goal={stationGoal(station.id)}
+        goal={isMarket ? undefined : stationGoal(station.id)}
         recipe={recipeStrip}
+        badge={
+          isMarket && marketBuysLeft !== null ? (
+            <span
+              className="popup-coin-badge"
+              role="img"
+              aria-label={fmt(strings.panel.buysLeft, { n: marketBuysLeft })}
+            >
+              <i className="popup-coin-badge-dot" aria-hidden="true" />
+              <span aria-hidden="true">×{marketBuysLeft}</span>
+            </span>
+          ) : undefined
+        }
         aside={
           phoneLand && station.id === 'store' ? strings.panel.storeAll : undefined
         }
@@ -658,7 +746,7 @@ export function Game({
                 n: human.coins,
               })}
             >
-              <CoinDots n={human.coins} className="coin-pile-dots" />
+              <CoinDots n={human.coins} className="coin-pile-dots" hideExtra />
               <span className="coin-pile-num">
                 <CoinCounter value={human.coins} label={myCoinsLabel} />
               </span>
@@ -712,6 +800,12 @@ export function Game({
 
       {phoneLand ? (
         <>
+          {/* R2-1：市场卡扇浮层挂载点（棋盘区上方、压暗层 + 居中浮卡；
+              空时 CSS :empty 隐藏，市场弹窗关掉卡扇随面板卸载自动清空） */}
+          <div className="phone-market-float" ref={setMarketHandEl} />
+          {/* R2 验收修复：天气时刻浮层挂载点（与市场浮层同模式，
+              空时 :empty 隐藏；两层不会同时有内容——不同站点） */}
+          <div className="phone-weather-float" ref={setWeatherFloatEl} />
           {/* 左上：一圈小头像排（第几圈 + 3 个电脑人，点头像展开详情） */}
           <div className="phone-bots">
             <span className="phone-lap">
@@ -776,9 +870,10 @@ export function Game({
                       </span>
                     )}
                     {/* R10E（§4）：币数画成迷你金币点；
-                        R1-E4：旁边补可见数字，金币只作辅助（读屏走 aria-label） */}
+                        R1-E4：旁边补可见数字，金币只作辅助（读屏走 aria-label）
+                        R2-9：关掉溢出尾徽——「+」只表示这一圈拿到的钱 */}
                     <span className="phone-bot-coins-row">
-                      <CoinDots n={b.coins} cap={5} className="coin-dots--xs" />
+                      <CoinDots n={b.coins} cap={5} className="coin-dots--xs" hideExtra />
                       <span className="phone-bot-num" aria-hidden="true">{b.coins}</span>
                     </span>
                   </button>

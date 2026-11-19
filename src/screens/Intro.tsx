@@ -45,6 +45,12 @@ export function Intro({ send }: { send: (c: Command) => unknown }) {
       <p className="intro-hint" aria-live="polite">
         {strings.intro.startHint}
       </p>
+
+      {/* 构建戳（ww 网页审核）：开始页角落小字标版本，低调、不占
+          版面、不进游戏流程；commit 由构建注入，拿不到显示 dev */}
+      <span className="build-stamp" aria-hidden="true">
+        build {__BUILD_COMMIT__}
+      </span>
     </main>
   );
 }
