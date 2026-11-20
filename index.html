@@ -5,9 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥬</text></svg>" />
     <title>Let's Go Shopping</title>
-    <!-- 首次打开缓冲页（用户 2026-11-18 要求）：纯静态内联，JS 包到达前
-         就先上屏，避免白屏；App 首帧画完后由 src/splash.ts 淡出移除，
-         另有 6 秒内联兜底，永远不会把页面困在加载页后面。 -->
+    <!-- 首次打开缓冲页：纯静态内联，JS 包到达前就先上屏，避免白屏。
+         进度条是「真进度」——src/boot.ts 按资源实际加载完成数驱动
+         （卡图/模型/3D 场景），不做往返假动画；App 首帧画完 +
+         资源齐 + 3D 场景首帧出画后才由 src/splash.ts 淡出移除。
+         卡住/失败 → 子层错误卡（英文短句 + ≥56px Try again 按钮）。
+         内联兜底只管「本模块根本没加载到」（data-ctl 未置位）：
+         到点也亮同一张错误卡，重试 = 整页刷新。 -->
     <style>
       #app-splash {
         position: fixed; inset: 0; z-index: 9999;
@@ -17,63 +21,97 @@
         transition: opacity 0.32s ease;
       }
       #app-splash.splash--out { opacity: 0; pointer-events: none; }
-      #app-splash .splash-card { text-align: center; padding: 24px; }
+      #app-splash .splash-card {
+        text-align: center; padding: 20px 24px;
+        max-width: min(88vw, 360px);
+      }
       #app-splash .splash-coin {
-        font-size: 64px; line-height: 1; display: inline-block;
+        font-size: 56px; line-height: 1; display: inline-block;
         animation: splash-bounce 0.9s ease-in-out infinite alternate;
       }
       #app-splash .splash-title {
-        margin-top: 14px; font-size: 34px; font-weight: 800; color: #1e1e2a;
+        margin-top: 12px; font-size: 30px; font-weight: 800; color: #1e1e2a;
         letter-spacing: 0.04em;
       }
-      #app-splash .splash-title-en {
-        margin-top: 2px; font-size: 17px; font-weight: 700; color: #ff6b2c;
-        letter-spacing: 0.06em;
-      }
       #app-splash .splash-bar {
-        margin: 22px auto 10px; width: 176px; height: 12px; border-radius: 6px;
+        margin: 18px auto 10px; width: 200px; max-width: 100%;
+        height: 12px; border-radius: 6px;
         background: #ffe3c2; overflow: hidden;
       }
       #app-splash .splash-bar-fill {
-        display: block; width: 40%; height: 100%; border-radius: 6px;
+        display: block; width: 0; height: 100%; border-radius: 6px;
         background: #ff6b2c;
-        animation: splash-slide 1.1s ease-in-out infinite alternate;
+        transition: width 0.25s ease;
       }
-      #app-splash .splash-note { font-size: 14px; font-weight: 600; color: #8a7a63; }
+      #app-splash .splash-note {
+        font-size: 14px; font-weight: 600; color: #8a7a63;
+        font-variant-numeric: tabular-nums;
+      }
+      #app-splash .splash-error-text {
+        margin: 18px 0 0; font-size: 16px; font-weight: 600;
+        color: #6b5a43; line-height: 1.45;
+        overflow-wrap: break-word;
+      }
+      #app-splash .splash-retry {
+        margin-top: 16px; min-width: 160px; min-height: 56px;
+        padding: 0 28px; border: none; border-radius: 999px;
+        background: #ff6b2c; color: #fff;
+        font-size: 18px; font-weight: 800; letter-spacing: 0.03em;
+        cursor: pointer; touch-action: manipulation;
+        box-shadow: 0 3px 0 #d8541f, 0 6px 14px rgba(216, 84, 31, 0.28);
+      }
+      #app-splash .splash-retry:active { transform: translateY(2px); box-shadow: none; }
       @keyframes splash-bounce {
         from { transform: translateY(0); }
         to { transform: translateY(-14px); }
       }
-      @keyframes splash-slide {
-        from { transform: translateX(-30%); }
-        to { transform: translateX(190%); }
-      }
       @media (prefers-reduced-motion: reduce) {
-        #app-splash .splash-coin, #app-splash .splash-bar-fill { animation: none; }
+        #app-splash .splash-coin { animation: none; }
       }
     </style>
-    <script type="module" crossorigin src="./assets/index-CX468quK.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-DFVcO4mG.css">
+    <script type="module" crossorigin src="./assets/index-BOdcKyVa.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-Cs34Za2x.css">
   </head>
   <body>
     <div id="root"></div>
-    <div id="app-splash" role="status" aria-label="Loading">
+    <div id="app-splash" role="group" aria-label="Loading">
       <div class="splash-card">
         <span class="splash-coin" aria-hidden="true">🪙</span>
-        <div class="splash-title">一起去买菜</div>
-        <div class="splash-title-en">Let's Go Shopping</div>
-        <div class="splash-bar"><span class="splash-bar-fill"></span></div>
-        <div class="splash-note">Loading… 加载中…</div>
+        <div class="splash-title">Let's Go Shopping</div>
+        <div
+          class="splash-bar"
+          role="progressbar"
+          aria-label="Loading progress"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="0"
+        ><span class="splash-bar-fill"></span></div>
+        <div class="splash-note">Getting ready…</div>
+        <div class="splash-error" role="alert" hidden>
+          <p class="splash-error-text"></p>
+          <button type="button" class="splash-retry">Try again</button>
+        </div>
       </div>
     </div>
     <script>
+      /* 内联兜底（模块没加载到也能用）：12s 后缓冲页仍没接管标记
+         （data-ctl）就亮同一张错误卡——不强行收起，避免把白屏丢给孩子；
+         Try again = 整页刷新。模块活着时它自己的卡死/失败检测更快，
+         并直接复用这张卡的节点（见 src/splash.ts）。 */
       setTimeout(function () {
         var s = document.getElementById('app-splash');
-        if (s) {
-          s.classList.add('splash--out');
-          setTimeout(function () { s.remove(); }, 350);
-        }
-      }, 6000);
+        if (!s || s.getAttribute('data-ctl') === '1') return;
+        var bar = s.querySelector('.splash-bar');
+        var note = s.querySelector('.splash-note');
+        var err = s.querySelector('.splash-error');
+        var txt = s.querySelector('.splash-error-text');
+        var btn = s.querySelector('.splash-retry');
+        if (bar) bar.hidden = true;
+        if (note) note.hidden = true;
+        if (txt) txt.textContent = "The game can't start. Check the internet, then try again.";
+        if (err) err.hidden = false;
+        if (btn) btn.onclick = function () { window.location.reload(); };
+      }, 12000);
     </script>
   </body>
 </html>
