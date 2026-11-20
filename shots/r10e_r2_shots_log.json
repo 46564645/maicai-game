@@ -1,0 +1,113 @@
+{
+  "desktop-en": {
+    "market": {
+      "headText": "② The Market🐟🌿🫚🧄×2",
+      "badgeText": "×2",
+      "stallCards": 6,
+      "stallCardNames": [
+        "Fish, 3 coins",
+        "Potato, 3 coins",
+        "Ginger, 1 coin",
+        "Carrot, 1 coin",
+        "Ginger, 1 coin",
+        "Tofu, 2 coins"
+      ],
+      "floatCards": 0,
+      "guideText": "Tap a card. Get your recipe food first.",
+      "guideIcons": 4,
+      "buysLeftTextGone": true
+    },
+    "hud": {
+      "popupGone": false
+    },
+    "weather": {
+      "phase": "card"
+    },
+    "profile": {
+      "veilOpen": true,
+      "weatherCardGone": true,
+      "pcRectW": 189,
+      "pcRectH": 251,
+      "pcOffsetW": 288,
+      "pcOffsetH": 400
+    },
+    "marketbought": {
+      "badgeFound": true
+    },
+    "botspot": {
+      "caught": true
+    }
+  },
+  "desktop-zh": {
+    "market": {
+      "headText": "② 菜市场🐟🌿🫚🧄×2",
+      "badgeText": "×2",
+      "stallCards": 6,
+      "stallCardNames": [
+        "鱼, 3 币",
+        "土豆, 3 币",
+        "姜, 1 币",
+        "胡萝卜, 1 币",
+        "姜, 1 币",
+        "豆腐, 2 币"
+      ],
+      "floatCards": 0,
+      "guideText": "点一张卡，先买菜谱上的菜。",
+      "guideIcons": 4,
+      "buysLeftTextGone": true
+    },
+    "hud": {
+      "popupGone": false
+    },
+    "weather": {
+      "phase": "card"
+    },
+    "profile": {
+      "veilOpen": true,
+      "weatherCardGone": true,
+      "pcRectW": 189,
+      "pcRectH": 251,
+      "pcOffsetW": 288,
+      "pcOffsetH": 400
+    },
+    "marketbought": {
+      "badgeFound": true
+    }
+  },
+  "phone": {
+    "market": {
+      "headText": "② The Market🐟🌿🫚🧄×2",
+      "badgeText": "×2",
+      "stallCards": 6,
+      "stallCardNames": [
+        "Fish, 3 coins",
+        "Potato, 3 coins",
+        "Ginger, 1 coin",
+        "Carrot, 1 coin",
+        "Ginger, 1 coin",
+        "Tofu, 2 coins"
+      ],
+      "floatCards": 6,
+      "guideText": "Tap a card. Get your recipe food first.",
+      "guideIcons": 4,
+      "buysLeftTextGone": true
+    },
+    "hud": {
+      "popupGone": false
+    },
+    "weather": {
+      "phase": "card"
+    },
+    "profile": {
+      "veilOpen": true,
+      "weatherCardGone": true,
+      "pcRectW": 163,
+      "pcRectH": 208,
+      "pcOffsetW": 250,
+      "pcOffsetH": 330
+    },
+    "marketbought": {
+      "badgeFound": true
+    }
+  }
+}

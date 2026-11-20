@@ -20,3 +20,16 @@ export function boardMode(): BoardMode {
   const v = new URLSearchParams(window.location.search).get('board');
   return v === '2d' || v === '3d' ? v : 'auto';
 }
+
+/* 首屏暖机失败标记（src/board/three/SceneWarmup.tsx → src/boot.ts）：
+   缓冲期场景首帧超时/报错 → 本局 3D 判不可用，BoardMount 直落 2D，
+   不再让孩子等第二次 10s 看门狗。模块级、会话内有效。 */
+let sceneFailed = false;
+
+export function markBoard3DFailed(): void {
+  sceneFailed = true;
+}
+
+export function board3DFailed(): boolean {
+  return sceneFailed;
+}

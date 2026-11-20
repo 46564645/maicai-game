@@ -1,0 +1,56 @@
+开始采样（普通模式）…
+  回合 1: bot-p1 lap1 站1 = 0.12s
+  回合 2: bot-p2 lap1 站1 = 0.88s
+  回合 3: bot-p3 lap1 站1 = 0.80s
+  回合 4: bot-p1 lap1 站2 = 1.08s
+  回合 5: bot-p2 lap1 站2 = 20.52s
+  回合 6: bot-p3 lap1 站2 = 1.39s
+  回合 7: bot-p2 lap1 站3 = 1.02s
+  回合 8: bot-p3 lap1 站3 = 1.08s
+  回合 9: bot-p1 lap1 站3 = 1.01s
+  回合 10: bot-p3 lap1 站4 = 0.22s
+  回合 11: bot-p1 lap1 站4 = 0.80s
+  回合 12: bot-p2 lap1 站4 = 0.80s
+  回合 13: bot-p1 lap1 站5 = 1.02s
+  回合 14: bot-p2 lap1 站5 = 0.90s
+  回合 15: bot-p3 lap1 站5 = 0.79s
+  回合 16: bot-p1 lap1 站6 = 0.22s
+  回合 17: bot-p2 lap1 站6 = 0.87s
+  回合 18: bot-p3 lap1 站6 = 0.81s
+  回合 19: bot-p2 lap1 站7 = 1.01s
+  回合 20: bot-p3 lap1 站7 = 1.31s
+  回合 21: bot-p1 lap1 站7 = 1.02s
+  回合 22: bot-p3 lap1 站8 = 0.22s
+  回合 23: bot-p1 lap1 站8 = 0.79s
+  回合 24: bot-p2 lap1 站8 = 0.82s
+
+===== E3 计时结果 =====
+采样总时长: 176s；采到 bot 回合 24 个（lap1 完整回合 24 个）
+  bot-p1 站1: 0.12s
+  bot-p2 站1: 0.88s
+  bot-p3 站1: 0.80s
+  bot-p1 站2: 1.08s
+  bot-p2 站2: 20.52s
+  bot-p3 站2: 1.39s
+  bot-p2 站3: 1.02s
+  bot-p3 站3: 1.08s
+  bot-p1 站3: 1.01s
+  bot-p3 站4: 0.22s
+  bot-p1 站4: 0.80s
+  bot-p2 站4: 0.80s
+  bot-p1 站5: 1.02s
+  bot-p2 站5: 0.90s
+  bot-p3 站5: 0.79s
+  bot-p1 站6: 0.22s
+  bot-p2 站6: 0.87s
+  bot-p3 站6: 0.81s
+  bot-p2 站7: 1.01s
+  bot-p3 站7: 1.31s
+  bot-p1 站7: 1.02s
+  bot-p3 站8: 0.22s
+  bot-p1 站8: 0.79s
+  bot-p2 站8: 0.82s
+lap1 bot 回合总时长: 39.48s；平均每回合: 1.65s（标准 ≤2.00s → PASS）
+一圈完成: 是
+形态证据: .spotlight-veil 采样命中 0 次（bot 自动高光应为 0）；.bot-card--spot 命中 344 次
+估算对照（botTiming 纯函数）: 3 条命令回合 1300ms / 4 条 1550ms / 5 条 1670ms（base=800）；若实测回合命令数分布未知，全圈估算 = 24 回合 × 平均命令数对应值，见报告口径说明。

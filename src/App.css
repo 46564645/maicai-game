@@ -82,6 +82,9 @@
 .stat-card-label {
   font-size: var(--font-size-sm);
   color: var(--color-muted);
+  /* 一行放下（验收：最长标签「Coins you start with」五档尺寸均不折行；
+     栏宽由下方媒体查询保证装得下，nowrap 是兜底锁） */
+  white-space: nowrap;
 }
 
 .intro-shell > .btn {
@@ -108,6 +111,30 @@
   min-height: var(--tap-min-size);
   display: flex;
   align-items: center;
+}
+
+/* 数字卡 4 列档的标签宽度账（「Coins you start with」16px ≈ 160–170px 实宽）：
+   ≥861px 壳放宽到 900 + 卡内边距收一档 → 每列标签区 ≥178px；
+   ≤860px（如 667×375 横屏）4 列装不下 → 改 2×2，每格 ≥270px，字号不动 */
+@media (min-width: 861px) {
+  .intro-shell[data-testid='screen-intro'] {
+    max-width: 900px;
+  }
+
+  .intro-shell[data-testid='screen-intro'] .intro-stats {
+    gap: var(--space-2);
+  }
+
+  .intro-shell[data-testid='screen-intro'] .stat-card {
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
+  }
+}
+
+@media (min-width: 641px) and (max-width: 860px) {
+  .intro-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /* 竖屏：数字卡 2×2，避免横向滚动 */

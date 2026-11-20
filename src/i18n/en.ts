@@ -52,6 +52,8 @@ export const enStrings = {
     lapLabel: 'Lap {lap}',
     lapOf: 'Lap {lap} of {laps}',
     stationLabel: 'Stop {n} · {name}',
+    /* R2-6：市场站浮签站名定稿（与 stationName 的通用名分开，只用于浮签） */
+    marketTitle: 'The Market',
     orderLabel: 'Order: ',
     wallet: 'My wallet',
     basket: 'My basket',
@@ -153,6 +155,8 @@ export const enStrings = {
   /* 求助牌 */
   help: {
     title: 'Little hint',
+    /* R6：求助牌里的类别记号图例标题 */
+    iconLegend: 'Card marks',
     gentleAdvice: 'Buy your recipe food first. Then look at fun stuff.',
     /* 各站一句话提示（helpHints 用） */
     stationTips: {
@@ -175,7 +179,8 @@ export const enStrings = {
 
   /* 站点面板（M3.2 正式面板） */
   panel: {
-    stallIntro: '6 cards: food and fun stuff mixed together. Tap one, then pick what to do.',
+    /* R2-6（ww 定稿）：卡扇下方唯一一句说明（原长句+教练句已撤） */
+    stallIntro: 'Tap a card. Get your recipe food first.',
     /* R10D: lap-2 short form; the line is gone entirely on lap 3 */
     stallIntroShort: 'Tap a card, then pick',
     selected: 'Picked: {item} {n} coins',
@@ -183,6 +188,8 @@ export const enStrings = {
     afterBuy: 'After you buy: {n} coins',
     noCoins: 'Not enough coins',
     buysLeft: 'You can buy {n} more this visit',
+    /* R2-10：已买卡的角标（不整张变灰） */
+    boughtBadge: 'Bought',
     buyPriced: 'Buy ({n} coins)',
     skipCard: 'Skip',
     endTurn: 'Done with this stop',
@@ -192,6 +199,10 @@ export const enStrings = {
     tagNeeded: 'On my list',
     tagIngredient: 'Food',
     tagTemptation: 'Fun stuff',
+    /* R6：第一次进市场时提示条播一遍类别记号的意思（仅一次） */
+    iconsIntro: 'Card marks: green check = On my list · carrot = Food · star = Fun stuff',
+    /* R6：锁记号的读屏名（暂时拿不到的卡） */
+    lockedLabel: "Can't get this yet",
     keyHelp: '←→ pick a card · 1/2/3 pick an action',
     lookTitle: 'Look at your recipe card',
     recipeMissing: 'Still need: {items}',
@@ -239,6 +250,13 @@ export const enStrings = {
     inviteAsk: '"{name} — want to join?"',
     note: 'No lending or giving coins here.',
     fromSuffix: ' · Friends Stop',
+    /* 等真人回应提议时浮签卡的完整提议句（团队第 2 轮 ww 定稿）：
+       写清谁想用哪件（give=对方的）换你的哪件（want=你的） */
+    proposalSwap: '{name} wants your {want} for its {give}. Yes or No?',
+    proposalInvite: '{name} wants to buy {item} together. Yes or No?',
+    /* 浮签卡上的两个药丸按钮（与文案的 Yes or No? 同词） */
+    proposalYes: 'Yes',
+    proposalNo: 'No',
   },
 
   /* 朗读按钮（speechSynthesis 不可用时隐藏） */

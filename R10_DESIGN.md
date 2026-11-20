@@ -419,3 +419,84 @@
 - **文字排查（Thong B）**：卡面文字压图改前最高 1557px²（partner）等多屏 → 改后双视口全屏 0；真叶溢出逐项修（cook/wallet 卡名折行、商店名加高、车票可见名缩短为「Bus ticket」——全名保留 ariaLabel，此为一处按 B 口径执行的文案缩短，特此记录）。量测原始值非 0 但定性为机制/装饰的 artifact 清单（gem ::after 下探、滚动数字列、sr-only、转盘旋转体、气泡上浮容器等）已在交付说明中列明，勿再「修」。**零散文字清单只列不删**（含机器人特质片「🐾Go/⚡Ea/🛡️Ca」语义不清一项），随截图包 v3 交 Thong/ww 定夺。
 - **构建号注入（ww 口径）**：vite define 从 `BUILD_COMMIT` 读 commit，开始页左下角小字「build {commit}」；部署构建必须带该变量，否则显示 build dev。
 - 收尾口径：build（tsc+vite）干净、引擎三目录 diff 空；**全量单测未在收尾复跑**（Thong 指示构建后跳过测试环节；中途 279/279 为模板改版前状态，不引用为最终）。回退点：tag `pre-r2fix-20261119`（1d44ddb）。
+
+## 附记：R6 卡面修复轮（2026-11-19，对 c63c46e 版）
+
+本轮由 Prof 对 T-1 卡（c63c46e）的评审起，经 ww 口径覆盖与 Thong 两项裁定、ww 验收规格 Part 1/Part 2、ww 三项建议（S1–S3），以及 ww+Prof 对 r6 截图的第一眼复核（N1–N9）。逐项如下（对比度均为像素采样、注明被测对象；套件每项提交后全量 312/312，日志在 ~/workspace/maicai-testlogs/）。
+
+### ① 卡名绝不断词（96f7174）
+CardView 旧实现给英文名插音节软连字符（nameWithBreaks），实测出现 gre-ens / clot-hes / Marshma-llow 式断词。改：名字原样渲染；三条 CSS 精确按 ww 口径钉死（hyphens: none、word-break: keep-all、overflow-wrap: normal，只在空格处换行，「Stir-Fry」自带连字符保留）；放不下时以 useNameFit 逐级降字号（下限 14px）、最多 3 行，无省略号无裁切。五尺寸 × 全卡面站点（市场/小卖部/伙伴/开饭/反思/天气/事件/家长/抽卡）巡测：bad=0（bad = 软连字符残留 / >3 行 / <14px / 裁切）。
+
+### ② 吐司回归（b67fb1b）
+缺陷本体在已部署的预览构建 4a34d06（吐司停在 R3 前位置、z 15）；集成构建里 R3 修复其实已在，残余风险在 667 档：641–900px 视口下 .toast 再封顶 max-width: min(560px, calc(100vw - 300px))。复测五尺寸 × 多场景：吐司与语言开关重叠 0px²（详 N2 的后续收口）。
+
+### ③ 情景对比度 + Fish 双名（7147186）
+旧 r2fix/r3fix 情景图是 T-1 前构建，不作数；本轮在当前构建重拍市场景（667/874/1280，shots/r6_market_*.png）。灰/糊的成因实测定位：不是整卡 opacity（被测场景无 .pglow--dim），是 TiltCard 的 .tc-glare 径向高光（88% 表面色）在卡面上罩了一层——像素采样 1280 市场景卡名（名 vs 自身卡面底）：Fish（选中）1.95:1、Potato 2.73:1、Ginger 2.82:1/2.71:1、Carrot 2.70:1、Tofu 2.11:1。修：.tc-glare opacity 0.3（全局）。修后同法复测：1280 为 7.28–8.26:1、874 为 6.68–8.30:1、667 为 6.62–8.37:1（均为卡名 vs 自身卡面底）。Fish 双名复现并证实：浮动 .hand-tag 与卡面名重复——.stall-hand 内的 .hand-tag 隐藏，复测重复名 = 0。注：.hand--dim（opacity .55）只作用于 bot 回合中玩家自己的手牌（回合状态指示），不在 Part 1.4 范围，未动。
+
+### ④ 价格 ≥18px（389e793，ww+马教授追加，原暂缓项启用）
+令牌 --font-size-price 改 1.125rem（18px），价丸高 22→26px、币点 12→14px。验收（五尺寸最终构建实测）：每张有价卡恰 1 枚价丸、计算字号 18px、价丸不出卡界、价丸∩绿勾 = 0px²。有价卡美术占比（美术区高/卡高，1280 种子 1）：0.542–0.559（详 ⑧ 的记号放大后复测值），未跌破 ~45%，无版式妥协。
+
+### ⑤ 邀请卡（232e4e7，ww 必改）
+卡面只留名字 + 短签：inviteFaceTag() 从数据 note 切第一段（split / — |，/，EN 为 “Buy together”），无新文案；完整分摊规则进邀请台说明行（.invite-split-note，面板内全文可见）。邀请卡美术占比 0.509（五尺寸，≥50% ✓）。留注：1280 换菜图上邀请卡短签在卡面折成 2 行（Buy / together）、连名字共 3 行文字——硬指标（美术 ≥50%、≥14px、溢出 0、规则在面板）全过，记录在此不擅改。
+
+### ⑥ Heavy rain 一致化（e2f14d0）
+源图 event-rain-umbrella.webp 本身满幅构图（内容包围盒 1.00×1.00），在卡面美术区 contain 时显得满出血。修：cardArt.ts 的 ART_INSET_BY_ID（'evt-rain-umbrella': 0.86）+ CardView 对美术图施 transform: scale() 内缩，与其他卡的留白观感齐平。诚实注记：伞尖等源图自身元素仍按原图绘制，本轮未重画美术。卡背部分经 ww 例外取消——卡背保留深色 + 边框，未动。
+
+### ⑦ 番茄炒蛋双卡（报告项，无代码）
+rec-tomato-egg 与 rec-tomato-egg-2 数据全同（同名 “Tomato & Egg”、同 ingredientIds [ing-tomato, ing-egg, ing-scallion]，仅 icon 🍳 vs 🍅 之差，同为占位状态 待确认）。不臆造区分名/图，不动 src/data。
+
+### ⑧ Item B 合并——STOP（按其自带闸门停手，未改任何文件）
+合并前全仓 grep 发现 cards.json 之外的依赖，逐条列明：
+- tests/unit/cards.test.ts:29 —— expect(cards.recipes.length).toBeGreaterThanOrEqual(6)；现 6 张，合并后 5 张跌破下限；
+- tests/unit/cardArt.test.ts:33-34 —— 用例「同名菜共用一图（rec-tomato-egg-2）」断言 cardArtFor('rec-tomato-egg-2') 与 rec-tomato-egg 同图；
+- src/components/cards/cardArt.ts:68 美术项、:133 背景项 'rec-tomato-egg-2': '#fdeaca'、:9 注释；
+- src/i18n/cardText.ts:47 —— 'rec-tomato-egg-2': '番茄炒蛋'。
+抽卡组本身是动态的（src/game/engine.ts:108 recipeDeck: recipes.items），非阻塞项。待团队裁定测试下限与同图用例后再合并。
+
+### ⑨ 决策 1 灰底核对（1a0ceb7，Thong 裁定：只核对对齐、不许暖化）
+逐卡量测 Fun stuff 美术主色 vs CARD_BG_BY_ID：sticker #fee5b9 vs #fde5b7 ✓、toy #fce8c8 vs #fbe9cc ✓、marshmallow #feeed2 vs #f2e3c2（采样保真内）——均按采样色不动。唯一离群：tmp-popsicle 美术众数 #fde9c9 vs 表值 #e8dcce（偏灰的占位色）→ 表值对齐为 #fde9c9（邀请卡同 id 同步受益）。全程无任何暖化/提亮。
+
+### ⑩ 决策 2 + Part 2 图标代字（2e4d0ff，证据修正 e895837）
+新增 MetaIcon（list/food/fun 三形：绿盘白勾 / 胡萝卜 / 紫星——以形区分不只靠色；绿勾专属 On my list）；aria-label 与释义复用 strings.panel.tagNeeded/tagIngredient/tagTemptation。卡面：mark 改绿勾图标、「Food / Fun stuff」文字改图标进价格行（不另占行，省下的整行还给美术区）。释义面：桌面 hover 提示条（压美术区下缘、不碰名，bottom: calc(100% + 22px)——聚焦触发曾实测盖名/被邻卡裁，改为仅 hover）；手机点选时导引行给全名（见 S2）；《How to play》新增图例块（三图标 + 全名，strings.help.iconLegend）。首访市场提示：localStorage maicai-icons-seen 未置位时吐司讲一遍三记号含义（panel.iconsIntro），只出现一次——五尺寸实测均触发。
+证据修正（e895837）：首轮量测图标对比 2.80–2.97:1、food 2.50–2.87:1，未达 3:1 线；且手机扇 zoom 0.79 下图标渲染 17px < 20px。修：图标配色加深（绿盘 #1e9e57→#14713a、胡萝卜身 #f06423→#cf4a0e、叶 #2f9e44→#1f7a33、描边 #c24e12→#a63e0a；紫星 #7b4fd0 本已达标保留）+ 布局 22→26px。复测（图标 vs 各自卡面底，像素采样）：874 种子 2 —— Fish/food 3.68:1、Greens/food 3.91:1、Cucumber/food 3.97:1、Pork/list 4.84:1、Toy/fun 4.55:1、Popsicle/fun 4.57:1，渲染 20.5–21.3px；1280 种子 1 —— Fish/list 4.94:1、Ginger/list 5.23:1、Potato/food 4.05:1、Carrot/food 3.74:1、Tofu/food 3.53:1，渲染 26.3–27.5px。全 ≥3:1 且 ≥20px。（N4 续：布局再 26→28px，见 ⑭。）
+
+### ⑪ Part 1 可点 affordance（101689c）
+(a) 统一影参：令牌 --shadow-card = var(--shadow-sm), var(--inset-light)，.card-view 统一引用——灰底卡与普通卡同一套（N1 以计算值复核：非选中卡阴影集合基数 = 1）。(b) 按下/悬停：button.card-view 悬停（精细指针）上抬 −2px + shadow-md、:active −3px + shadow-md、过渡 100ms；TiltCard 的 .tc-face 卡除外（倾斜裁切，其反馈是扇内抬起 + 倾斜 + 光晕）。(c) 选中：.card-view--selected 上抬 −4px + 3px 主色环（非仅变色）。(d) 不可点：.pglow--dim 的整套灰化（opacity .65、美术 grayscale(.72)、价丸变灰及三条选中豁免规则）全删，类名保留为空钩；新增 CardView locked 属性 → 元信息行 28px 墨色挂锁（role img，aria-label strings.panel.lockedLabel），五处原 dim 点全接（市场/小卖部/事件/家长/伙伴）。基础与卡 CSS 里无其他 disabled 灰化。
+
+### ⑫ S1 买/再想想一行（7e9f801）
+.drop-zone 内边距/间隙各降一档 + ≥1024px 时 nowrap。实测（种子 1）：修前 1280 钮宽 219px 文字 2 行；修后五尺寸「Buy (3 coins)」「Maybe later」均 1 行，钮 219×56（桌面）/ 173×48（手机），scrollW ≤ clientW 处处成立。
+
+### ⑬ S2 874 竖栏两行短句 + Part 2.4 手机路线（dc0b475）
+病灶：874 竖栏弹窗仅 182px 宽（内容 166px），选中块两行都折成残片（种子 1/5 全卡实测各 2 行残折）。修：价格括注拆为 .sel-price-part 独立片、仅手机档隐藏（价在卡面价丸/买钮/算式三处都在）；.panel-selected-line 在手机档 nowrap。导引行在选中时改为「图标 {名} — {全名}」（如 Fish — On my list / Popsicle — Fun stuff，20px）——Part 2.4 的点选释义落在此面；未选中时仍是原 stallIntro。种子 1/2/3/4/5/7/9 × 874 复测：两行各恰 1 行（含 Green Onion / Popsicle / Sticker），释义按类别正确。
+
+### ⑭ S3 扇重叠（bc0a703，仅验证无代码改动）
+probe-r6-s3 五尺寸 × 静止/选中（首/中/尾卡）：名区与价丸被更高层邻卡覆盖 = 0px² 处处（扇以底边为轴，文字区天然让开）。修前 = 修后 = 0，无需改扇角/间距。
+
+### ⑮ ww+Prof 第一眼复核 N1–N9（截图为估读，以下均为实测）
+
+**N1 三态证据重拍（量测 + 新图 shots/r6_states_*.png、r6_states_press_1280.png）**：旧 states 图是不同卡组拼凑、非真三态，作废重拍。量测（市场扇，种子 2，五尺寸同型）：非选中卡的计算 box-shadow 集合基数 = 1（灰底 Toy/Popsicle 与普通卡同一套 --shadow-card 参数，Part 1.1 成立）；选中灰卡 Toy：3px 主色环在位（且修了一个真缺陷，见下）、扇内相对抬升 −13~−22px（各尺寸，手机档经 zoom 折算）、导引句同步给释义。按下态：摊卡是 TiltCard 面，按下反馈是倾斜 + 检视抬起（press 图中 Fish 处于按压检视态、释义条浮出、投放区 armed）；普通 button.card-view 的 :active 规格（−3px + shadow-md，100ms）为代码规则，TiltCard 面按 Part 1 豁免口径不走位移。**复核中发现并修的真缺陷（3f9253b）**：选中环/抬升被 hover/active 规则以更高特异性盖掉——鼠标停在已选中卡上时 3px 环消失、抬升沉回（点选 Toy 实测环不见）；新增「选中 + 悬停/按下」组合规则（环保留、抬升保持 −4px），复测悬停中的已选 Toy 环在位。锁：Part 1.4 的锁标为 28px 布局（见 ⑪），不可点卡不灰化不透明（.pglow--dim 视觉规则已删，见 ⑪）。
+
+**N2 吐司层级（9a54aeb + 726e0eb）**：复现三处：(a) 1440/1024 市场景吐司被站名签盖住（实测吐司∩签 = 7285px²，吐司 z 5 < 弹窗 z 21）；(b) 874 手机档竖栏滚动时 sticky 语言开关盖住回合卡日志行「Tag bought Sticker」右段（栏 scrollTop 70 实测）；(c) 三行合并长吐司在市场车道仍压扇上卡名（1024/1280 像素假读 1.06:1 即此）。修法：① 弹窗在场时（桌面）吐司升 z 30（仍低于高光层 40），消息永远可读、× 可点；② 市场弹窗在场时吐司改走 33vh 空段车道（市场弹窗是全高纵列，签在顶、摊位帖在底、中段空）+ 限宽 480px（长吐司至多 2 行）；③ 手机档弹窗期间语言开关改随栏滚动（static），与栏内文字零重叠。复测：1440/1024 市场 + 伙伴景吐司∩签 = 0、∩开关 = 0、∩卡名 = 0；874 手机档吐司（岛左下锚）∩开关/签/卡名 = 0；1024 市场景重拍卡名 8.12–11.17:1（吐司离场后采样）。KEEP 口径遵守：「Fish — On my list / Fish — Food」选中释义行原样保留（S2）。
+
+**N3 667 标题与 After-you-buy 外漏（9ca034a）**：病灶实测：667 档浮层（z 9）横跨右栏（z 8），栏内市场弹窗站名签中心命中 = 扇卡图面（被盖）、选中行中心命中 = 浮层 Done 钮（只露右尾巴，即「外漏」）。667 宽里扇（528）与栏信息（232）物理不可并存——沿 S-4「栏让位」口径收口：浮层打开期间栏内市场弹窗整件让位（opacity 0、pointer-events none；结构与 aria-live 选中播报保留），信息改由浮层栈自带：站名进导引句（.stall-guide-station，仅 ≤700 浮层显示，如「② The Market · ✓ Pork — On my list」）、选中行 + 算式进栈内专行（.panel-selected--float，仅 ≤700 显示）；金币数有左下 HUD、菜谱缺口有导引句缺口片，不重复带。配套：扇 zoom 0.79→0.72 + 扇顶留位 56→44，栈高回到 332 ≤ 335（S-3 线）。复测（667）：栈高 332、Done 下缘距屏底 21px、标题全文可见、选中/算式无外漏、扇上 6 卡全见。874 不走此路（岛宽 624 ≥ 扇 528，栏内头签/选中行/算式行实测均 self 命中、完整可读，见 r6_market_874.png）。注记（按转达口径）：667/874 安全区复检在手机分支合并后由协调方再跑一轮，本轮未合并该分支。
+
+**N4 价格/记号复测（9ca034a）**：价丸计算字号五尺寸均为 18px（computed，非字形估读）。记号布局 26→28px：874 渲染 20.5–21.3px（zoom 0.79）、667 渲染 20.2–20.9px（zoom 0.72）、桌面 28px，全 ≥20px。扇可见宽（1280 种子 1 / 874 种子 1 实测）：卡片渲染宽 85–108px，邻卡横向盖住的部分只在卡顶角区——名/价覆盖仍为 0（S3 口径，见 ⑭）；Potato 在 874 可见宽 79/89px（其余同理），价丸与记号均在可见带内。价放大未挤记号/未添覆盖。
+
+**N5 钮尺寸实测（无代码改动）**：团队估读 ~44px 不成立——667/874 投放区 Buy/Maybe later/Skip 与 Done 的真实可点矩形均为高 48px（border-box，getBoundingClientRect + 中心 elementFromPoint 命中验证），达 ≥48px 线。记录在案，不做无据改动。
+
+**N6 算式独立行（30fc1d8）**：原状实测：算式被塞在投放行余空（79px 宽、16px 字，667/874 同）。修：手机档行内算式隐藏，改在竖栏 foot 选中块下独占一行（20px 居中加粗，与「After you buy: 9 coins」同列相邻，式与果一眼对上）；≤700 档该行随弹窗让位、改由栈内专行承载（见 N3）。桌面行内式（R2-14）不变。复测：874 算式 [166×30 @20px]、667 栈内行同为 20px，投放钮仍 48px 且更宽（216px）。
+
+**N7 复拍 + 徽标（8de72da + ff8b378）**：r6_swap_667/874 已按要求重拍（演示条全程关闭，两图 demoVisible = 0 实测）：874 弹窗全框 [622,−29] 182×785（竖栏可滚长列，单帧窗内邀约卡 + 分摊行完整入框）；667 弹窗 [427,−29] 232×761（同口径）。复拍中发现并修：竖栏里邀约 Yes/No 横扇（≈230px）宽于栏（182px）、第二张被裁出栏外——栏内选择扇改纵叠（.choice-hand 在 .phone-rail 内纵排居中，卡不缩放、点击面不变；桌面扇形不受影响）。桌面徽标：Yes 卡朗读徽标原在右下角，实测压价丸 269px²（价丸居中、徽标 51px）——移回右上角外挂（压到的只是选择卡图的角落留白），复测徽标∩价丸 = 0（r6_swap_1280.png 可见价丸完整）。「Tag joined the buy together」吐司探头问题由 N2 的 z 30 升层一并解决（吐司不再被邀请卡/2/2 压住）。
+
+**N8 遮罩覆盖（427193b）**：874 实测：浮层压暗底只盖安全区内盒（[62,20] 550×362），左右安全带里的棋盘格全亮透出（293 个采样点未被遮罩命中）。修：浮层加全视口压暗垫（::before 按安全距反向外扩到屏边，颜色/模糊与原底同一套 token，本体底移除避免双重压暗出色差；≤700 右缘本在屏边不外扩）。复测截图：874 全幅均匀压暗，无亮缝。1024 桌面：.popup-backdrop 实测全视口覆盖（[0,0] 1024×768）；演示条入镜属拍摄口径（正式图全程关演示条）；标题透出是背板 0.42 半透明的既定 token——按 ww 口径只补覆盖、不擅改浓度，如需更暗请 ww 另行裁定。
+
+**N9 证据包补充**：长名卡——Marshmallow 在 1024 市场景（种子 768）入镜（r6_longname_1024.png）：单行全名可见、选中态、名对比 11.17:1（名 vs 自身卡面底，像素采样）；Green Onion 同帧 2 行词界换行（8.12:1）。事件总览（r6_event_1280.png / r6_event_moment_1280.png）：天气大卡 Sunny 名对比 13.47:1（名 vs 自身卡面底）；故事卡「Grandma shares greens」实测 3 行、16px、无裁切（三次独立到达同读数；其单帧截图因该景合成器持续繁忙多次超时未存成，量测数据为准）；「Wet clothes」（evt-thirsty）本轮种子内未抽到，其名与 Grandma 同走 CardView 名字规则（事件卡名已测：An extra egg 2 行 / Wind takes the hat 2 行 / A torn bag 1 行，均 16px 无裁切）。全卡情景对比表（最终构建）：市场名 667 档 6.62–8.37:1、874 档 6.68–8.30:1、1024 档 8.12–11.17:1、1280 档 7.28–8.26:1（均为卡名 vs 自身卡面底）；天气大卡名 13.47:1；图标对比见 ⑩（全 ≥3:1，图标 vs 各自卡面底）。
+
+### ⑯ 套件与 e2e（最终提交 726e0eb）
+单元套件：312/312 全过（22 文件），日志 ~/workspace/maicai-testlogs/726e0eb.log；本轮每个代码提交均有对应全量日志（96f7174 起至 726e0eb，同目录）。
+e2e（npm run e2e，最终树）：2 过 6 败——与本轮开始前的跑法同集。逐条归因（均非本轮引入）：
+- board3d 两条：无头 SwiftShader 下 canvas 20s 内未出现 / 上下文建立超时——环境（本轮探针同机可跑 3D，但需更长等待）；
+- fullgame + mobile 横屏整局：点动画中的 .deck-top「element is not stable / detached」直至整局超时——本机 1.5 CPU 性能口径，牌堆组件本轮未动；
+- keyboard：两跑失败点不同——一跑死在钱包 Esc（下一跑该步通过，属时序 flaky）、一跑死在 demo-bar 不存在：演示条只在 VITE_DEMO_BAR=1 构建渲染（App.tsx R11 口径），而 e2e 配置的 webServer 是常规构建——规格与配置的既有错位；
+- safearea：市场步「栏内按钮 0 命中」——在基线树 7dd15c1 上同签名复现（R2-1 后市场动作经 portal 进浮层，规格的栏内期望与之错位，既有问题）。
+归因验证：keyboard + safearea 在基线树 7dd15c1（本轮开始点）单独重跑，同签名双败——本轮零新增 e2e 失败。建议（不在本轮范围）：e2e 配置给 webServer 构建带 VITE_DEMO_BAR=1、safearea 市场步选择器同步浮层口径、整局类用例在本机放宽稳定性等待。

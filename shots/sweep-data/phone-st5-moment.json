@@ -1,0 +1,93 @@
+{
+ "overflow": [],
+ "cardOverlap": {
+  "max": 0,
+  "worst": null
+ },
+ "stray": [
+  {
+   "sel": "button.board3d-reset",
+   "text": "Reset view",
+   "fs": 16,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Sunny",
+   "fs": 20,
+   "inButton": true,
+   "inCard": true
+  },
+  {
+   "sel": "span.moment-tap",
+   "text": "Tap to go on",
+   "fs": 16,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "button.lang-toggle-seg",
+   "text": "中文",
+   "fs": 20,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "button.lang-toggle-seg.lang-toggle-seg--on",
+   "text": "EN",
+   "fs": 20,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "p.board-log",
+   "text": "Zip is 1 coin short — into \"to pay later\"",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "h2.popup-title",
+   "text": "⑤ Surprise Stop",
+   "fs": 16,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.popup-goal",
+   "text": "Practice: leave room for surprises",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.rcp-item",
+   "text": "🐟",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.rcp-item",
+   "text": "🌿",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.rcp-item",
+   "text": "🫚",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.rcp-item",
+   "text": "🧄",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  }
+ ]
+}

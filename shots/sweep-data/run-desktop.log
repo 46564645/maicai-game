@@ -1,0 +1,175 @@
+  [sweep desktop/charsel] overflowEls=0 leafText=0 cardTextOnArt=0px² stray=35
+  jump st1 ok=true
+  [sweep desktop/st1-draw] overflowEls=52 leafText=23 cardTextOnArt=0px² stray=65
+    ov {"sel":"div.game-screen","text":"Let's Go Shopping⚙ Settings? How to ","dW":10,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.game-layout","text":"🛡️CaSteady12⚡EaZip12Stop 1 · Recipe","dW":10,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"aside.game-left","text":"🛡️CaSteady12⚡EaZip12","dW":10,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.bot-slot","text":"🛡️CaSteady12","dW":10,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"button.bot-card","text":"🛡️CaSteady12","dW":12,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"span.bot-card-avatar","text":"🛡️Ca","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"span.bot-card-body","text":"Steady12","dW":24,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"span.bot-card-coins","text":"12","dW":24,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.bot-slot","text":"⚡EaZip12","dW":10,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"button.bot-card","text":"⚡EaZip12","dW":12,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"span.bot-card-avatar","text":"⚡Ea","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"span.bot-card-body","text":"Zip12","dW":24,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"span.bot-card-coins","text":"12","dW":24,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.game-board-area","text":"Stop 1 · Recipe Stop · Lap 1 · Sprou","dW":5,"dH":0,"leaf":false,"fs":20}
+  jump st2 ok=true
+  [sweep desktop/st2-market] overflowEls=54 leafText=30 cardTextOnArt=0px² stray=70
+    ov {"sel":"div.game-screen","text":"Let's Go Shopping⚙ Settings? How to ","dW":10,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.game-layout","text":"🛡️CaSteady6⚡EaZip7Stop 2 · The Mark","dW":10,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"span.bot-card-avatar","text":"🛡️Ca","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"span.bot-card-avatar","text":"⚡Ea","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"span.bot-card-body","text":"Zip7","dW":8,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"span.bot-card-coins","text":"7","dW":8,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.game-board-area","text":"Stop 2 · The Market · Lap 1 · Sprout","dW":5,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.board3d-overlay","text":"Shopping townTag bought TomatoReset ","dW":24,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"aside.game-right","text":"🐾GoTag9🐾GoMe too!🛡️Steady6🛡️Ca⚡Z","dW":10,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.bot-slot","text":"🐾GoTag9🐾GoMe too!","dW":10,"dH":5,"leaf":false,"fs":20}
+    ov {"sel":"button.bot-card","text":"🐾GoTag9","dW":12,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"span.bot-card-avatar","text":"🐾Go","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"span.bot-card-body","text":"Tag9","dW":24,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"span.bot-card-coins","text":"9","dW":24,"dH":0,"leaf":false,"fs":20}
+  jump st3 ok=true
+  [sweep desktop/st3-partner] overflowEls=43 leafText=17 cardTextOnArt=0px² stray=55
+    ov {"sel":"div.game-screen","text":"Let's Go Shopping⚙ Settings? How to ","dW":10,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.game-layout","text":"🛡️CaSteady6⚡EaZip6Stop 3 · Friends ","dW":10,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"span.bot-card-avatar","text":"🛡️Ca","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"span.bot-card-avatar","text":"⚡Ea","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"div.game-board-area","text":"Stop 3 · Friends Stop · Lap 1 · Spro","dW":5,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.board3d-overlay","text":"Shopping townTag skipped the buy-tog","dW":24,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"aside.game-right","text":"🐾GoTag9⚡Zip6⚡Ea🐾Tag9🐾Go🌾Sprout7\ud83d","dW":10,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.bot-slot","text":"🐾GoTag9","dW":10,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"button.bot-card","text":"🐾GoTag9","dW":12,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"span.bot-card-avatar","text":"🐾Go","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"span.bot-card-body","text":"Tag9","dW":24,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"span.bot-card-coins","text":"9","dW":24,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.prog","text":"","dW":0,"dH":1,"leaf":false,"fs":16}
+    ov {"sel":"span.stop-pips","text":"","dW":0,"dH":2,"leaf":false,"fs":16}
+  jump st4 ok=true
+  [sweep desktop/st4-bus] overflowEls=28 leafText=15 cardTextOnArt=0px² stray=53
+    ov {"sel":"span.bot-card-avatar","text":"🛡️Ca","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"span.bot-card-avatar","text":"⚡Ea","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"div.game-board-area","text":"Stop 4 · Bus Stop · Lap 1 · Sprout's","dW":5,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.board3d-overlay","text":"Shopping townTag paid 2 coins of bus","dW":24,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.bot-slot","text":"🐾GoTag5🐾GoFare noted, pay later","dW":0,"dH":4,"leaf":false,"fs":20}
+    ov {"sel":"span.bot-card-avatar","text":"🐾Go","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"div.prog","text":"","dW":0,"dH":1,"leaf":false,"fs":16}
+    ov {"sel":"span.stop-pips","text":"","dW":0,"dH":2,"leaf":false,"fs":16}
+    ov {"sel":"span.sr-only","text":"Next up","dW":58,"dH":22,"leaf":true,"fs":15}
+    ov {"sel":"span.cc-col.cc-col--ones","text":"0123456789","dW":0,"dH":216,"leaf":false,"fs":24}
+    ov {"sel":"span.cc-strip","text":"0123456789","dW":0,"dH":4,"leaf":false,"fs":24}
+    ov {"sel":"span.cc-digit","text":"0","dW":0,"dH":4,"leaf":true,"fs":24}
+    ov {"sel":"span.cc-digit","text":"1","dW":0,"dH":4,"leaf":true,"fs":24}
+    ov {"sel":"span.cc-digit","text":"2","dW":0,"dH":4,"leaf":true,"fs":24}
+  jump st5 ok=true
+  [sweep desktop/st5-event] overflowEls=30 leafText=14 cardTextOnArt=0px² stray=51
+    ov {"sel":"span.bot-card-avatar","text":"🛡️Ca","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"span.bot-card-avatar","text":"⚡Ea","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"div.game-board-area","text":"Stop 5 · Surprise Stop · Lap 1 · Spr","dW":5,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.board3d-overlay","text":"Shopping townZip paid 2 coins of bus","dW":24,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"span.bot-card-avatar","text":"🐾Go","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"div.prog","text":"","dW":0,"dH":1,"leaf":false,"fs":16}
+    ov {"sel":"span.stop-pips","text":"","dW":0,"dH":2,"leaf":false,"fs":16}
+    ov {"sel":"span.sr-only","text":"Next up","dW":58,"dH":22,"leaf":true,"fs":15}
+    ov {"sel":"span.cc-col.cc-col--ones","text":"0123456789","dW":0,"dH":216,"leaf":false,"fs":24}
+    ov {"sel":"span.cc-strip","text":"0123456789","dW":0,"dH":4,"leaf":false,"fs":24}
+    ov {"sel":"span.cc-digit","text":"0","dW":0,"dH":4,"leaf":true,"fs":24}
+    ov {"sel":"span.cc-digit","text":"1","dW":0,"dH":4,"leaf":true,"fs":24}
+    ov {"sel":"span.cc-digit","text":"2","dW":0,"dH":4,"leaf":true,"fs":24}
+    ov {"sel":"span.cc-digit","text":"3","dW":0,"dH":4,"leaf":true,"fs":24}
+  [sweep desktop/st5-moment] overflowEls=24 leafText=13 cardTextOnArt=0px² stray=48
+    ov {"sel":"span.bot-card-avatar","text":"🛡️Ca","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"span.bot-card-avatar","text":"⚡Ea","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"div.game-board-area","text":"Stop 5 · Surprise Stop · Lap 1 · Spr","dW":5,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.board3d-overlay","text":"Shopping townZip paid 2 coins of bus","dW":24,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"span.bot-card-avatar","text":"🐾Go","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"div.prog","text":"","dW":0,"dH":1,"leaf":false,"fs":16}
+    ov {"sel":"span.stop-pips","text":"","dW":0,"dH":2,"leaf":false,"fs":16}
+    ov {"sel":"span.sr-only","text":"Next up","dW":58,"dH":22,"leaf":true,"fs":15}
+    ov {"sel":"span.cc-col.cc-col--ones","text":"0123456789","dW":0,"dH":216,"leaf":false,"fs":24}
+    ov {"sel":"span.cc-strip","text":"0123456789","dW":0,"dH":4,"leaf":false,"fs":24}
+    ov {"sel":"span.cc-digit","text":"0","dW":0,"dH":4,"leaf":true,"fs":24}
+    ov {"sel":"span.cc-digit","text":"1","dW":0,"dH":4,"leaf":true,"fs":24}
+    ov {"sel":"span.cc-digit","text":"2","dW":0,"dH":4,"leaf":true,"fs":24}
+    ov {"sel":"span.cc-digit","text":"3","dW":0,"dH":4,"leaf":true,"fs":24}
+  jump st6 ok=true
+  [sweep desktop/st6-parent] overflowEls=24 leafText=13 cardTextOnArt=0px² stray=52
+    ov {"sel":"span.bot-card-avatar","text":"🛡️Ca","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"span.bot-card-avatar","text":"⚡Ea","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"div.game-board-area","text":"Stop 6 · Parent Stop · Lap 1 · Sprou","dW":5,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.board3d-overlay","text":"Shopping townTag skipped it this tim","dW":24,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"span.bot-card-avatar","text":"🐾Go","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"div.prog","text":"","dW":0,"dH":1,"leaf":false,"fs":16}
+    ov {"sel":"span.stop-pips","text":"","dW":0,"dH":2,"leaf":false,"fs":16}
+    ov {"sel":"span.cc-col.cc-col--ones","text":"0123456789","dW":0,"dH":216,"leaf":false,"fs":24}
+    ov {"sel":"span.cc-strip","text":"0123456789","dW":0,"dH":4,"leaf":false,"fs":24}
+    ov {"sel":"span.cc-digit","text":"0","dW":0,"dH":4,"leaf":true,"fs":24}
+    ov {"sel":"span.cc-digit","text":"1","dW":0,"dH":4,"leaf":true,"fs":24}
+    ov {"sel":"span.cc-digit","text":"2","dW":0,"dH":4,"leaf":true,"fs":24}
+    ov {"sel":"span.cc-digit","text":"3","dW":0,"dH":4,"leaf":true,"fs":24}
+    ov {"sel":"span.cc-digit","text":"4","dW":0,"dH":4,"leaf":true,"fs":24}
+  jump st7 ok=true
+  [sweep desktop/st7-store] overflowEls=52 leafText=27 cardTextOnArt=0px² stray=71
+    ov {"sel":"span.bot-card-avatar","text":"🛡️Ca","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"span.bot-card-avatar","text":"⚡Ea","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"div.game-board-area","text":"Stop 7 · The Shop · Lap 1 · Sprout's","dW":5,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.board3d-overlay","text":"Shopping townTag bought Egg at the s","dW":24,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"span.bot-card-avatar","text":"🐾Go","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"div.prog","text":"","dW":0,"dH":1,"leaf":false,"fs":16}
+    ov {"sel":"span.stop-pips","text":"","dW":0,"dH":2,"leaf":false,"fs":16}
+    ov {"sel":"span.sr-only","text":"Next up","dW":58,"dH":22,"leaf":true,"fs":15}
+    ov {"sel":"span.cc-col.cc-col--ones","text":"0123456789","dW":0,"dH":216,"leaf":false,"fs":24}
+    ov {"sel":"span.cc-strip","text":"0123456789","dW":0,"dH":4,"leaf":false,"fs":24}
+    ov {"sel":"span.cc-digit","text":"0","dW":0,"dH":4,"leaf":true,"fs":24}
+    ov {"sel":"span.cc-digit","text":"1","dW":0,"dH":4,"leaf":true,"fs":24}
+    ov {"sel":"span.cc-digit","text":"2","dW":0,"dH":4,"leaf":true,"fs":24}
+    ov {"sel":"span.cc-digit","text":"3","dW":0,"dH":4,"leaf":true,"fs":24}
+  jump st8 ok=true
+  [sweep desktop/st8-cook] overflowEls=24 leafText=13 cardTextOnArt=0px² stray=62
+    ov {"sel":"span.bot-card-avatar","text":"🛡️Ca","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"span.bot-card-avatar","text":"⚡Ea","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"div.game-board-area","text":"Stop 8 · Home for Dinner · Lap 1 · S","dW":5,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.board3d-overlay","text":"Shopping townTag put food on the pla","dW":24,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"span.bot-card-avatar","text":"🐾Go","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"div.prog","text":"","dW":0,"dH":1,"leaf":false,"fs":16}
+    ov {"sel":"span.stop-pips","text":"","dW":2,"dH":2,"leaf":false,"fs":16}
+    ov {"sel":"span.sr-only","text":"Next up","dW":58,"dH":22,"leaf":true,"fs":15}
+    ov {"sel":"span.cc-col.cc-col--ones","text":"0123456789","dW":0,"dH":216,"leaf":false,"fs":24}
+    ov {"sel":"span.cc-strip","text":"0123456789","dW":0,"dH":4,"leaf":false,"fs":24}
+    ov {"sel":"span.cc-digit","text":"0","dW":0,"dH":4,"leaf":true,"fs":24}
+    ov {"sel":"span.cc-digit","text":"1","dW":0,"dH":4,"leaf":true,"fs":24}
+    ov {"sel":"span.cc-digit","text":"2","dW":0,"dH":4,"leaf":true,"fs":24}
+    ov {"sel":"span.cc-digit","text":"3","dW":0,"dH":4,"leaf":true,"fs":24}
+  [sweep desktop/wallet] overflowEls=27 leafText=16 cardTextOnArt=0px² stray=85
+    ov {"sel":"span.bot-card-avatar","text":"🛡️Ca","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"span.bot-card-avatar","text":"⚡Ea","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"div.game-board-area","text":"Stop 8 · Home for Dinner · Lap 1 · S","dW":5,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.board3d-overlay","text":"Shopping townTag put food on the pla","dW":24,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"span.bot-card-avatar","text":"🐾Go","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"div.prog","text":"","dW":0,"dH":1,"leaf":false,"fs":16}
+    ov {"sel":"span.stop-pips","text":"","dW":2,"dH":2,"leaf":false,"fs":16}
+    ov {"sel":"span.sr-only","text":"Next up","dW":58,"dH":22,"leaf":true,"fs":15}
+    ov {"sel":"span.cc-col.cc-col--ones","text":"0123456789","dW":0,"dH":216,"leaf":false,"fs":24}
+    ov {"sel":"span.cc-strip","text":"0123456789","dW":0,"dH":4,"leaf":false,"fs":24}
+    ov {"sel":"span.cc-digit","text":"0","dW":0,"dH":4,"leaf":true,"fs":24}
+    ov {"sel":"span.cc-digit","text":"1","dW":0,"dH":4,"leaf":true,"fs":24}
+    ov {"sel":"span.cc-digit","text":"2","dW":0,"dH":4,"leaf":true,"fs":24}
+    ov {"sel":"span.cc-digit","text":"3","dW":0,"dH":4,"leaf":true,"fs":24}
+  [sweep desktop/help] overflowEls=24 leafText=13 cardTextOnArt=0px² stray=71
+    ov {"sel":"span.bot-card-avatar","text":"🛡️Ca","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"span.bot-card-avatar","text":"⚡Ea","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"div.game-board-area","text":"Stop 8 · Home for Dinner · Lap 1 · S","dW":5,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.board3d-overlay","text":"Shopping townTag put food on the pla","dW":24,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"span.bot-card-avatar","text":"🐾Go","dW":7,"dH":5,"leaf":false,"fs":24}
+    ov {"sel":"div.prog","text":"","dW":0,"dH":1,"leaf":false,"fs":16}
+    ov {"sel":"span.stop-pips","text":"","dW":2,"dH":2,"leaf":false,"fs":16}
+    ov {"sel":"span.sr-only","text":"Next up","dW":58,"dH":22,"leaf":true,"fs":15}
+    ov {"sel":"span.cc-col.cc-col--ones","text":"0123456789","dW":0,"dH":216,"leaf":false,"fs":24}
+    ov {"sel":"span.cc-strip","text":"0123456789","dW":0,"dH":4,"leaf":false,"fs":24}
+    ov {"sel":"span.cc-digit","text":"0","dW":0,"dH":4,"leaf":true,"fs":24}
+    ov {"sel":"span.cc-digit","text":"1","dW":0,"dH":4,"leaf":true,"fs":24}
+    ov {"sel":"span.cc-digit","text":"2","dW":0,"dH":4,"leaf":true,"fs":24}
+    ov {"sel":"span.cc-digit","text":"3","dW":0,"dH":4,"leaf":true,"fs":24}
+done

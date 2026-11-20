@@ -81,6 +81,7 @@ function OptionCard({
             name={label}
             price={price}
             tag={tag}
+            locked={!playable}
             primary={primary}
             testid={testid}
             dataKey={dataKey}

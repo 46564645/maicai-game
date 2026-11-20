@@ -18,9 +18,9 @@ const allCardIds = new Set<string>([
 
 describe('cardArt 登记', () => {
   it('牌背与全部已出图卡返回插画 URL', () => {
-    expect(CARD_BACK_ART).toMatch(/\.webp$/);
+    expect(CARD_BACK_ART).toMatch(/\.png$/);
     for (const id of allCardIds) {
-      expect(cardArtFor(id), id).toMatch(/\.webp$/);
+      expect(cardArtFor(id), id).toMatch(/\.png$/);
     }
   });
 

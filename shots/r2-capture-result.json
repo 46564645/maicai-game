@@ -1,0 +1,43 @@
+{
+  "seed": 1,
+  "snap": {
+    "bubble": true,
+    "bubbleText": "Tag · Friends Stop\"My Egg for your Potato?\"No lending or giving coins here.1Yes2No thanks",
+    "pill": true,
+    "pillText": "Tag wants to swap with you. Tap OK or No in the bubble.",
+    "statusText": "Your turn",
+    "botThinking": null,
+    "anyThinking": false,
+    "lap": 2,
+    "station": 3,
+    "replay": false,
+    "stallCards": 0,
+    "pendingChip": false,
+    "buysLeftText": null
+  },
+  "desktop": {
+    "statusText": "Your turn",
+    "pillText": "Tag wants to swap with you. Tap OK or No in the bubble.",
+    "pillVisible": true,
+    "bubblePresent": true,
+    "bubbleText": "Tag · Friends Stop\"My Egg for your Potato?\"No lending or giving coins here.1Yes2No thanks",
+    "speechBubblePresent": true,
+    "anyBotThinking": false,
+    "thinkingCards": []
+  },
+  "phone": {
+    "statusText": "Your turn",
+    "pillText": "Tag wants to swap with you. Tap OK or No in the bubble.",
+    "pillRect": {
+      "x": 246,
+      "y": 318,
+      "w": 383,
+      "h": 56
+    },
+    "pillInViewport": true,
+    "pillVisible": true,
+    "bubblePresent": true,
+    "anyBotThinking": false,
+    "phoneRail": false
+  }
+}

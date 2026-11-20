@@ -1,0 +1,291 @@
+{
+ "overflow": [
+  {
+   "sel": "span.splash-coin",
+   "text": "🪙",
+   "dW": 0,
+   "dH": 11,
+   "leaf": true,
+   "fs": 64
+  }
+ ],
+ "cardOverlap": {
+  "max": 0,
+  "worst": null
+ },
+ "stray": [
+  {
+   "sel": "span.demo-title",
+   "text": "Demo controls",
+   "fs": 16,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.demo-label",
+   "text": "Jump to a stop",
+   "fs": 16,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "button.demo-chip.demo-chip--on",
+   "text": "Lap 1",
+   "fs": 16,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "button.demo-chip",
+   "text": "Lap 2",
+   "fs": 16,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "button.demo-chip",
+   "text": "Lap 3",
+   "fs": 16,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "button.demo-chip.demo-chip--go",
+   "text": "Jump",
+   "fs": 16,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "span.demo-label",
+   "text": "Bot style",
+   "fs": 16,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.demo-label",
+   "text": "Steady",
+   "fs": 16,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "button.demo-chip.demo-chip--on",
+   "text": "Careful",
+   "fs": 16,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "button.demo-chip",
+   "text": "Eager",
+   "fs": 16,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "button.demo-chip",
+   "text": "Goes along",
+   "fs": 16,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "span.demo-label",
+   "text": "Zip",
+   "fs": 16,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "button.demo-chip",
+   "text": "Careful",
+   "fs": 16,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "button.demo-chip.demo-chip--on",
+   "text": "Eager",
+   "fs": 16,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "button.demo-chip",
+   "text": "Goes along",
+   "fs": 16,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "span.demo-label",
+   "text": "Tag",
+   "fs": 16,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "button.demo-chip",
+   "text": "Careful",
+   "fs": 16,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "button.demo-chip",
+   "text": "Eager",
+   "fs": 16,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "button.demo-chip.demo-chip--on",
+   "text": "Goes along",
+   "fs": 16,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "button.demo-chip",
+   "text": "No bot delay: on",
+   "fs": 16,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "button.demo-chip",
+   "text": "Restart",
+   "fs": 16,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "button.demo-chip.demo-chip--warn",
+   "text": "Demo: spend all spare coins",
+   "fs": 16,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "button.demo-chip",
+   "text": "Hide demo bar",
+   "fs": 16,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "button.lang-toggle-seg",
+   "text": "中文",
+   "fs": 20,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "button.lang-toggle-seg.lang-toggle-seg--on",
+   "text": "EN",
+   "fs": 20,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "h1.intro-title.intro-title--sm",
+   "text": "Pick a character you like",
+   "fs": 24,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "p.intro-tagline",
+   "text": "The other three will be your friends",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.card-view-icon",
+   "text": "🌾",
+   "fs": 32,
+   "inButton": true,
+   "inCard": true
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Spr­out",
+   "fs": 20,
+   "inButton": true,
+   "inCard": true
+  },
+  {
+   "sel": "span.card-view-icon",
+   "text": "🐰",
+   "fs": 32,
+   "inButton": true,
+   "inCard": true
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Annie",
+   "fs": 20,
+   "inButton": true,
+   "inCard": true
+  },
+  {
+   "sel": "span.card-view-icon",
+   "text": "🐯",
+   "fs": 32,
+   "inButton": true,
+   "inCard": true
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Leo",
+   "fs": 20,
+   "inButton": true,
+   "inCard": true
+  },
+  {
+   "sel": "span.card-view-icon",
+   "text": "🐻",
+   "fs": 32,
+   "inButton": true,
+   "inCard": true
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Bean",
+   "fs": 20,
+   "inButton": true,
+   "inCard": true
+  },
+  {
+   "sel": "span.splash-coin",
+   "text": "🪙",
+   "fs": 64,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "div.splash-title",
+   "text": "一起去买菜",
+   "fs": 34,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "div.splash-title-en",
+   "text": "Let's Go Shopping",
+   "fs": 17,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "div.splash-note",
+   "text": "Loading… 加载中…",
+   "fs": 14,
+   "inButton": false,
+   "inCard": false
+  }
+ ]
+}

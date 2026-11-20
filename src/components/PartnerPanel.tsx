@@ -7,13 +7,15 @@
  * - proposeSwap：真人主动发起一换一——我方/对方赠品菜 chips 全部升级
  *   为 TiltCard 小卡扇（食材插画）；点选规则同旧 chip（点选/焦点即选中），
  *   [确认提议] 发出 PROPOSE_SWAP；[1] 走完这一站（primary）。
+ *   对方行名字下挂全词性格名（botPersonalityLabel）——性格信息只活在
+ *   这类详情视图里（本站 + 点头像的 ProfileCard 高光卡）。
  * 不借钱、不送钱：交换只动 extras，提议由引擎判定。
  */
 import { useState } from 'react';
 import { cards } from '../data/cards';
 import { strings } from '../data/strings';
 import { fmt } from '../game/stations/shared';
-import { cardName, inviteSplitNote, inviteText, playerDisplayName } from '../i18n/cardText';
+import { botPersonalityLabel, cardName, inviteFaceTag, inviteSplitNote, inviteText, playerDisplayName } from '../i18n/cardText';
 import type { CardId, Command, GameState, PlayerId } from '../game/types';
 import { Button } from './Button';
 import { CardView } from './CardView';
@@ -93,6 +95,7 @@ function ChoiceCard({
             name={label}
             price={price}
             disabled={!playable}
+            locked={!playable}
             primary={primary}
             testid={testid}
             dataKey={dataKey}
@@ -173,7 +176,7 @@ export function PartnerPanel({
                 cardId={invite.giveCardId}
                 icon={invite.icon}
                 name={cardName(invite.giveCardId)}
-                tag={inviteSplitNote(invite)}
+                tag={inviteFaceTag(invite)}
               />
             }
           />
@@ -182,6 +185,9 @@ export function PartnerPanel({
             <span aria-hidden="true">{strings.partner.inviteAvatars}</span>{' '}
             {fmt(strings.partner.inviteCount, { a: joined, b: invite.minPlayers })}
           </span>
+          {/* R6（ww 必改）：完整分摊规则从卡面移进邀请台说明行——
+              卡面只剩短签「Buy together」，规则全文在这里读得到 */}
+          <p className="panel-text invite-split-note">{inviteSplitNote(invite)}</p>
         </div>
         <div className="panel-foot">
           <Hand
@@ -259,9 +265,19 @@ export function PartnerPanel({
               />
             ),
           }));
+          const botDef = cards.bots.find((x) => x.id === b.characterId);
           return (
             <div className="swap-row" key={b.id}>
-              <span className="swap-row-name">{playerDisplayName(b)}</span>
+              {/* 伙伴站是详情视图：性格在这里写全词（Careful/Eager/Goes
+                  along），常驻面的缩写小徽已撤 */}
+              <span className="swap-row-name">
+                {playerDisplayName(b)}
+                {botDef && (
+                  <span className="swap-row-trait">
+                    {botPersonalityLabel(botDef)}
+                  </span>
+                )}
+              </span>
               <Hand
                 className="swap-hand"
                 items={theirItems}

@@ -54,6 +54,8 @@ export const zhStrings: StringsDict = {
     lapLabel: '第 {lap} 圈',
     lapOf: '第 {lap} 圈 / 共 {laps} 圈',
     stationLabel: '第 {n} 站 · {name}',
+    /* R2-6：市场站浮签站名定稿（stationName 通用名是「菜市场摊位」，浮签用「菜市场」） */
+    marketTitle: '菜市场',
     orderLabel: '顺序：',
     wallet: '我的钱包',
     basket: '我的篮子',
@@ -151,6 +153,8 @@ export const zhStrings: StringsDict = {
 
   help: {
     title: '小提示',
+    /* R6：求助牌里的类别记号图例标题 */
+    iconLegend: '卡上的记号',
     gentleAdvice: '先买菜谱上的菜，再看小玩意。',
     stationTips: {
       drawTask: '记住菜谱上要买的菜。',
@@ -170,7 +174,8 @@ export const zhStrings: StringsDict = {
   },
 
   panel: {
-    stallIntro: '翻开 6 张卡：食材和诱惑混在一起。点一张，再选怎么做。',
+    /* R2-6（ww 定稿）：卡扇下方唯一一句说明（原长句+教练句已撤） */
+    stallIntro: '点一张卡，先买菜谱上的菜。',
     /* R10D：第 2 圈起说明收成短句；第 3 圈整句撤掉 */
     stallIntroShort: '点卡，再选怎么做',
     selected: '选中：{item} {n} 币',
@@ -178,6 +183,8 @@ export const zhStrings: StringsDict = {
     afterBuy: '买完还剩 {n} 币',
     noCoins: '币不够了',
     buysLeft: '这次还能买 {n} 张',
+    /* R2-10：已买卡的角标（不整张变灰） */
+    boughtBadge: '已买',
     buyPriced: '买下（{n} 币）',
     skipCard: '跳过',
     endTurn: '走完这一站',
@@ -187,6 +194,10 @@ export const zhStrings: StringsDict = {
     tagNeeded: '菜谱里有',
     tagIngredient: '食材',
     tagTemptation: '诱惑',
+    /* R6：第一次进市场时提示条播一遍类别记号的意思（仅一次） */
+    iconsIntro: '卡上的记号：绿勾 = 菜谱里有 · 胡萝卜 = 食材 · 星星 = 诱惑',
+    /* R6：锁记号的读屏名（暂时拿不到的卡） */
+    lockedLabel: '暂时拿不到',
     keyHelp: '←→ 选卡 · 1/2/3 选操作',
     lookTitle: '看一眼你的菜谱卡',
     recipeMissing: '还缺：{items}',
@@ -233,6 +244,13 @@ export const zhStrings: StringsDict = {
     inviteAsk: '「{name}，一起来吗？」',
     note: '这里不能借钱，也不能送钱。',
     fromSuffix: ' · 伙伴站',
+    /* 等真人回应提议时浮签卡的完整提议句（团队第 2 轮 ww 定稿）：
+       写清谁想用哪件（give=对方的）换你的哪件（want=你的） */
+    proposalSwap: '{name}想用{give}换你的{want}，换吗？',
+    proposalInvite: '{name}想跟你一起买{item}，一起吗？',
+    /* 浮签卡上的两个药丸按钮 */
+    proposalYes: '好呀',
+    proposalNo: '不用了',
   },
 
   speech: {

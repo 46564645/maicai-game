@@ -1,0 +1,325 @@
+{
+ "overflow": [
+  {
+   "sel": "div.hand.hand--fan",
+   "text": "✋I skip­ped the stic­ker1You d",
+   "dW": 8,
+   "dH": 9,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-icon",
+   "text": "✋",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 48
+  },
+  {
+   "sel": "span.card-view-banner",
+   "text": "I skip­ped the stic­ker",
+   "dW": 0,
+   "dH": 1,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "I skip­ped the stic­ker",
+   "dW": 0,
+   "dH": 1,
+   "leaf": true,
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-art",
+   "text": "🥗",
+   "dW": 0,
+   "dH": 5,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-icon",
+   "text": "🥗",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 48
+  },
+  {
+   "sel": "span.card-view-banner",
+   "text": "I bou­ght all my rec­ipe food",
+   "dW": 0,
+   "dH": 1,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "I bou­ght all my rec­ipe food",
+   "dW": 0,
+   "dH": 1,
+   "leaf": true,
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-art",
+   "text": "🤝",
+   "dW": 0,
+   "dH": 5,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-icon",
+   "text": "🤝",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 48
+  },
+  {
+   "sel": "span.card-view-banner",
+   "text": "I tra­ded for food I nee­ded",
+   "dW": 0,
+   "dH": 1,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "I tra­ded for food I nee­ded",
+   "dW": 0,
+   "dH": 1,
+   "leaf": true,
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-art",
+   "text": "🚌",
+   "dW": 0,
+   "dH": 5,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-icon",
+   "text": "🚌",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 48
+  },
+  {
+   "sel": "span.card-view-banner",
+   "text": "I paid the bus fare first",
+   "dW": 0,
+   "dH": 1,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "I paid the bus fare first",
+   "dW": 0,
+   "dH": 1,
+   "leaf": true,
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-art",
+   "text": "💬",
+   "dW": 0,
+   "dH": 5,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-icon",
+   "text": "💬",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 48
+  },
+  {
+   "sel": "span.card-view-banner",
+   "text": "I told my par­ent my plan",
+   "dW": 0,
+   "dH": 1,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "I told my par­ent my plan",
+   "dW": 0,
+   "dH": 1,
+   "leaf": true,
+   "fs": 15
+  }
+ ],
+ "cardOverlap": {
+  "max": 0,
+  "worst": null
+ },
+ "buttons": [
+  {
+   "sel": "button.lang-toggle-seg",
+   "text": "中文",
+   "w": 64,
+   "h": 48
+  },
+  {
+   "sel": "button.lang-toggle-seg.lang-toggle-seg--on",
+   "text": "EN",
+   "w": 52,
+   "h": 48
+  },
+  {
+   "sel": "div.hand-item",
+   "text": "✋I skip­ped the stic­k",
+   "w": 115.4,
+   "h": 149.5
+  },
+  {
+   "sel": "button.card-view",
+   "text": "✋I skip­ped the stic­k",
+   "w": 115.4,
+   "h": 149.5
+  },
+  {
+   "sel": "div.hand-item",
+   "text": "🥗I bou­ght all my rec",
+   "w": 111.7,
+   "h": 146.8
+  },
+  {
+   "sel": "button.card-view",
+   "text": "🥗I bou­ght all my rec",
+   "w": 111.7,
+   "h": 146.8
+  },
+  {
+   "sel": "div.hand-item",
+   "text": "🤝I tra­ded for food I",
+   "w": 108,
+   "h": 144
+  },
+  {
+   "sel": "button.card-view",
+   "text": "🤝I tra­ded for food I",
+   "w": 108,
+   "h": 144
+  },
+  {
+   "sel": "div.hand-item",
+   "text": "🚌I paid the bus fare ",
+   "w": 111.7,
+   "h": 146.8
+  },
+  {
+   "sel": "button.card-view",
+   "text": "🚌I paid the bus fare ",
+   "w": 111.7,
+   "h": 146.8
+  },
+  {
+   "sel": "div.hand-item",
+   "text": "💬I told my par­ent my",
+   "w": 115.4,
+   "h": 149.5
+  },
+  {
+   "sel": "button.card-view",
+   "text": "💬I told my par­ent my",
+   "w": 115.4,
+   "h": 149.5
+  },
+  {
+   "sel": "button.btn.btn--secondary",
+   "text": "6✏️ Write your own…",
+   "w": 702,
+   "h": 48
+  }
+ ],
+ "fonts": [
+  {
+   "sel": "button.lang-toggle-seg",
+   "text": "中文",
+   "fs": 20
+  },
+  {
+   "sel": "button.lang-toggle-seg.lang-toggle-seg--on",
+   "text": "EN",
+   "fs": 20
+  },
+  {
+   "sel": "h1.intro-title.intro-title--sm",
+   "text": "Tell us one choice you f",
+   "fs": 24
+  },
+  {
+   "sel": "p.reflection-personal",
+   "text": "Pick one thing you reall",
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-icon",
+   "text": "✋",
+   "fs": 48
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "I skip­ped the stic­ker",
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-tag-part",
+   "text": "You did it",
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-icon",
+   "text": "🥗",
+   "fs": 48
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "I bou­ght all my rec­ipe",
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-icon",
+   "text": "🤝",
+   "fs": 48
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "I tra­ded for food I nee",
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-icon",
+   "text": "🚌",
+   "fs": 48
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "I paid the bus fare firs",
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-icon",
+   "text": "💬",
+   "fs": 48
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "I told my par­ent my pla",
+   "fs": 15
+  }
+ ]
+}

@@ -1,0 +1,730 @@
+{
+ "overflow": [
+  {
+   "sel": "div.phone-bots",
+   "text": "Lap 1/3🛡️🛡️Ca12⚡⚡Ea11🐾Me to",
+   "dW": 72,
+   "dH": 42,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.stop-pips",
+   "text": "",
+   "dW": 0,
+   "dH": 1,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.phone-bot-avatar",
+   "text": "🛡️",
+   "dW": 1,
+   "dH": 1,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.phone-bot-avatar",
+   "text": "⚡",
+   "dW": 1,
+   "dH": 1,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.phone-bot-wrap",
+   "text": "🐾Me too!🐾🐾Go11",
+   "dW": 0,
+   "dH": 42,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.phone-bot-avatar",
+   "text": "🐾",
+   "dW": 1,
+   "dH": 1,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "div.popup-backdrop",
+   "text": "③ Friends StopPractice: trade ",
+   "dW": 4,
+   "dH": 7,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "div.popup",
+   "text": "③ Friends StopPractice: trade ",
+   "dW": 4,
+   "dH": 7,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "div.popup-body",
+   "text": "Pops­icleBuy together — everyo",
+   "dW": 12,
+   "dH": 11,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "div.panel-body",
+   "text": "Pops­icleBuy together — everyo",
+   "dW": 12,
+   "dH": 11,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "div.tc-face.tc-face--front",
+   "text": "Pops­icleBuy together — everyo",
+   "dW": 0,
+   "dH": 81,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "div.card-view",
+   "text": "Pops­icleBuy together — everyo",
+   "dW": 0,
+   "dH": 83,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "div.panel-foot",
+   "text": "👍1Yes🔊👋No tha­nks",
+   "dW": 12,
+   "dH": 11,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "div.hand.hand--fan",
+   "text": "👍1Yes🔊👋No tha­nks",
+   "dW": 45,
+   "dH": 11,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-art",
+   "text": "👍",
+   "dW": 0,
+   "dH": 20,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-gem",
+   "text": "1",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Yes",
+   "dW": 0,
+   "dH": 1,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-art",
+   "text": "👋",
+   "dW": 0,
+   "dH": 13,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "No tha­nks",
+   "dW": 0,
+   "dH": 1,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "span.cc-col",
+   "text": "0123456789",
+   "dW": 0,
+   "dH": 180,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-strip",
+   "text": "0123456789",
+   "dW": 0,
+   "dH": 3,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "0",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "1",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "2",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "3",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "4",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "5",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "6",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "7",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "8",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "9",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-col.cc-col--ones",
+   "text": "0123456789",
+   "dW": 0,
+   "dH": 180,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-strip",
+   "text": "0123456789",
+   "dW": 0,
+   "dH": 3,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "0",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "1",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "2",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "3",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "4",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "5",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "6",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "7",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "8",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "9",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-live",
+   "text": "My wallet, 12 coins",
+   "dW": 191,
+   "dH": 26,
+   "leaf": true,
+   "fs": 20
+  }
+ ],
+ "cardOverlap": {
+  "max": 0,
+  "worst": null
+ },
+ "buttons": [
+  {
+   "sel": "button.board3d-reset",
+   "text": "Reset view",
+   "w": 121.4,
+   "h": 48
+  },
+  {
+   "sel": "button.phone-bot.phone-bot--next",
+   "text": "🛡️🛡️Ca12",
+   "w": 103.3,
+   "h": 48
+  },
+  {
+   "sel": "button.phone-bot",
+   "text": "⚡⚡Ea11",
+   "w": 103.3,
+   "h": 48
+  },
+  {
+   "sel": "button.phone-bot",
+   "text": "🐾🐾Go11",
+   "w": 103.3,
+   "h": 48
+  },
+  {
+   "sel": "button.lang-toggle-seg",
+   "text": "中文",
+   "w": 64,
+   "h": 48
+  },
+  {
+   "sel": "button.lang-toggle-seg.lang-toggle-seg--on",
+   "text": "EN",
+   "w": 52,
+   "h": 48
+  },
+  {
+   "sel": "div.hand-item",
+   "text": "👍1Yes🔊",
+   "w": 159,
+   "h": 127.2
+  },
+  {
+   "sel": "button.card-view",
+   "text": "👍1Yes",
+   "w": 159,
+   "h": 127.2
+  },
+  {
+   "sel": "div.hand-item",
+   "text": "👋No tha­nks",
+   "w": 159.9,
+   "h": 132.6
+  },
+  {
+   "sel": "button.card-view",
+   "text": "👋No tha­nks",
+   "w": 159.9,
+   "h": 132.6
+  },
+  {
+   "sel": "button.phone-fab",
+   "text": "🪙01234567890123456789",
+   "w": 87.1,
+   "h": 56
+  },
+  {
+   "sel": "button.phone-fab.phone-fab--help",
+   "text": "?",
+   "w": 56,
+   "h": 56
+  }
+ ],
+ "fonts": [
+  {
+   "sel": "button.board3d-reset",
+   "text": "Reset view",
+   "fs": 16
+  },
+  {
+   "sel": "span.phone-lap",
+   "text": "Lap 1/3",
+   "fs": 16
+  },
+  {
+   "sel": "span.phone-bot-avatar",
+   "text": "🛡️",
+   "fs": 20
+  },
+  {
+   "sel": "span.bot-trait.bot-trait--steady",
+   "text": "🛡️Ca",
+   "fs": 15
+  },
+  {
+   "sel": "span.phone-bot-num",
+   "text": "12",
+   "fs": 16
+  },
+  {
+   "sel": "span.phone-bot-avatar",
+   "text": "⚡",
+   "fs": 20
+  },
+  {
+   "sel": "span.bot-trait.bot-trait--impulsive",
+   "text": "⚡Ea",
+   "fs": 15
+  },
+  {
+   "sel": "span.phone-bot-num",
+   "text": "11",
+   "fs": 16
+  },
+  {
+   "sel": "span.think-trait",
+   "text": "🐾",
+   "fs": 15
+  },
+  {
+   "sel": "span.phone-bot-avatar",
+   "text": "🐾",
+   "fs": 20
+  },
+  {
+   "sel": "span.bot-trait.bot-trait--follower",
+   "text": "🐾Go",
+   "fs": 15
+  },
+  {
+   "sel": "span.phone-bot-num",
+   "text": "11",
+   "fs": 16
+  },
+  {
+   "sel": "button.lang-toggle-seg",
+   "text": "中文",
+   "fs": 20
+  },
+  {
+   "sel": "button.lang-toggle-seg.lang-toggle-seg--on",
+   "text": "EN",
+   "fs": 20
+  },
+  {
+   "sel": "p.board-log",
+   "text": "Tag joined the buy-toget",
+   "fs": 15
+  },
+  {
+   "sel": "h2.popup-title",
+   "text": "③ Friends Stop",
+   "fs": 16
+  },
+  {
+   "sel": "span.popup-goal",
+   "text": "Practice: trade and shar",
+   "fs": 15
+  },
+  {
+   "sel": "span.rcp-item",
+   "text": "🐟",
+   "fs": 15
+  },
+  {
+   "sel": "span.rcp-item",
+   "text": "🌿",
+   "fs": 15
+  },
+  {
+   "sel": "span.rcp-item",
+   "text": "🫚",
+   "fs": 15
+  },
+  {
+   "sel": "span.rcp-item",
+   "text": "🧄",
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Pops­icle",
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-tag-part",
+   "text": "Buy together — everyone ",
+   "fs": 15
+  },
+  {
+   "sel": "span",
+   "text": "👦👧",
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-icon",
+   "text": "👍",
+   "fs": 48
+  },
+  {
+   "sel": "span.card-view-gem",
+   "text": "1",
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Yes",
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-icon",
+   "text": "👋",
+   "fs": 48
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "No tha­nks",
+   "fs": 16
+  },
+  {
+   "sel": "span",
+   "text": "🪙",
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "0",
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "1",
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "2",
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "3",
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "4",
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "5",
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "6",
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "7",
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "8",
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "9",
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "0",
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "1",
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "2",
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "3",
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "4",
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "5",
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "6",
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "7",
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "8",
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "9",
+   "fs": 20
+  },
+  {
+   "sel": "span",
+   "text": "?",
+   "fs": 24
+  }
+ ],
+ "layout": {
+  "phoneLand": true,
+  "popup": {
+   "x": 427,
+   "y": -290,
+   "w": 232,
+   "h": 657,
+   "right": 659,
+   "bottom": 367
+  },
+  "floatStack": null,
+  "reflectionHand": null,
+  "cards": [
+   {
+    "x": 491,
+    "y": -161,
+    "w": 104,
+    "h": 144,
+    "right": 595,
+    "bottom": -17
+   },
+   {
+    "x": 464,
+    "y": 91,
+    "w": 159,
+    "h": 127,
+    "right": 623,
+    "bottom": 218
+   },
+   {
+    "x": 503,
+    "y": 240,
+    "w": 160,
+    "h": 133,
+    "right": 663,
+    "bottom": 373
+   }
+  ]
+ }
+}

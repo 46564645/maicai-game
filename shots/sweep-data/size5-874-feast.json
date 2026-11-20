@@ -1,0 +1,180 @@
+{
+ "overflow": [
+  {
+   "sel": "span.plate-name",
+   "text": "Sprout",
+   "dW": 0,
+   "dH": 1,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "span.plate-dish",
+   "text": "Braised Fish",
+   "dW": 0,
+   "dH": 1,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "span.plate-name",
+   "text": "Steady",
+   "dW": 0,
+   "dH": 1,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "span.plate-dish",
+   "text": "Pork & Potatoes",
+   "dW": 0,
+   "dH": 1,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "span.plate-name",
+   "text": "Zip",
+   "dW": 0,
+   "dH": 1,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "span.plate-dish",
+   "text": "Veggie Stir-Fry",
+   "dW": 0,
+   "dH": 1,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "span.plate-name",
+   "text": "Tag",
+   "dW": 0,
+   "dH": 1,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "span.plate-dish",
+   "text": "Tomato & Egg",
+   "dW": 0,
+   "dH": 1,
+   "leaf": true,
+   "fs": 16
+  }
+ ],
+ "cardOverlap": {
+  "max": 0,
+  "worst": null
+ },
+ "buttons": [
+  {
+   "sel": "button.lang-toggle-seg",
+   "text": "中文",
+   "w": 64,
+   "h": 48
+  },
+  {
+   "sel": "button.lang-toggle-seg.lang-toggle-seg--on",
+   "text": "EN",
+   "w": 52,
+   "h": 48
+  },
+  {
+   "sel": "button.btn.btn--primary",
+   "text": "1See where my coins we",
+   "w": 404.7,
+   "h": 48
+  },
+  {
+   "sel": "button.btn.btn--secondary",
+   "text": "2Play again",
+   "w": 223.3,
+   "h": 48
+  }
+ ],
+ "fonts": [
+  {
+   "sel": "button.lang-toggle-seg",
+   "text": "中文",
+   "fs": 20
+  },
+  {
+   "sel": "button.lang-toggle-seg.lang-toggle-seg--on",
+   "text": "EN",
+   "fs": 20
+  },
+  {
+   "sel": "h1.intro-title.intro-title--sm",
+   "text": "Dinner time",
+   "fs": 24
+  },
+  {
+   "sel": "p.screen-note",
+   "text": "3 laps done. Everyone ge",
+   "fs": 16
+  },
+  {
+   "sel": "span.plate-name",
+   "text": "Sprout",
+   "fs": 16
+  },
+  {
+   "sel": "span.plate-dish",
+   "text": "Braised Fish",
+   "fs": 16
+  },
+  {
+   "sel": "span.plate-kind",
+   "text": "Next time",
+   "fs": 15
+  },
+  {
+   "sel": "span.plate-name",
+   "text": "Steady",
+   "fs": 16
+  },
+  {
+   "sel": "span.plate-dish",
+   "text": "Pork & Potatoes",
+   "fs": 16
+  },
+  {
+   "sel": "span.plate-kind",
+   "text": "Next time",
+   "fs": 15
+  },
+  {
+   "sel": "span.plate-name",
+   "text": "Zip",
+   "fs": 16
+  },
+  {
+   "sel": "span.plate-dish",
+   "text": "Veggie Stir-Fry",
+   "fs": 16
+  },
+  {
+   "sel": "span.plate-kind",
+   "text": "Next time",
+   "fs": 15
+  },
+  {
+   "sel": "span.plate-name",
+   "text": "Tag",
+   "fs": 16
+  },
+  {
+   "sel": "span.plate-dish",
+   "text": "Tomato & Egg",
+   "fs": 16
+  },
+  {
+   "sel": "span.plate-kind",
+   "text": "Next time",
+   "fs": 15
+  }
+ ]
+}

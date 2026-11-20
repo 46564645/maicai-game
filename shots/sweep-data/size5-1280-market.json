@@ -1,0 +1,1368 @@
+{
+ "overflow": [
+  {
+   "sel": "div.game-screen",
+   "text": "Let's Go Shopping⚙ Settings? H",
+   "dW": 10,
+   "dH": 0,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "div.game-layout",
+   "text": "🛡️CaSteady6⚡EaZip9Stop 2 · Th",
+   "dW": 10,
+   "dH": 0,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "aside.game-left",
+   "text": "🛡️CaSteady6⚡EaZip9",
+   "dW": 10,
+   "dH": 0,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.bot-card-avatar",
+   "text": "🛡️Ca",
+   "dW": 7,
+   "dH": 5,
+   "leaf": false,
+   "fs": 24
+  },
+  {
+   "sel": "div.bot-slot",
+   "text": "⚡EaZip9",
+   "dW": 10,
+   "dH": 0,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "button.bot-card",
+   "text": "⚡EaZip9",
+   "dW": 12,
+   "dH": 0,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.bot-card-avatar",
+   "text": "⚡Ea",
+   "dW": 7,
+   "dH": 5,
+   "leaf": false,
+   "fs": 24
+  },
+  {
+   "sel": "span.bot-card-body",
+   "text": "Zip9",
+   "dW": 24,
+   "dH": 0,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.bot-card-coins",
+   "text": "9",
+   "dW": 24,
+   "dH": 0,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "div.game-board-area",
+   "text": "Stop 2 · The Market · Lap 1 · ",
+   "dW": 5,
+   "dH": 0,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "div.board3d-overlay",
+   "text": "Shopping townTag bought Sticke",
+   "dW": 24,
+   "dH": 0,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "aside.game-right",
+   "text": "🐾GoTag9🐾GoMe too!🛡️Steady6\ud83d",
+   "dW": 10,
+   "dH": 0,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "div.bot-slot",
+   "text": "🐾GoTag9🐾GoMe too!",
+   "dW": 10,
+   "dH": 5,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "button.bot-card",
+   "text": "🐾GoTag9",
+   "dW": 12,
+   "dH": 0,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.bot-card-avatar",
+   "text": "🐾Go",
+   "dW": 7,
+   "dH": 5,
+   "leaf": false,
+   "fs": 24
+  },
+  {
+   "sel": "span.bot-card-body",
+   "text": "Tag9",
+   "dW": 24,
+   "dH": 0,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.bot-card-coins",
+   "text": "9",
+   "dW": 24,
+   "dH": 0,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "div.prog",
+   "text": "",
+   "dW": 0,
+   "dH": 1,
+   "leaf": false,
+   "fs": 16
+  },
+  {
+   "sel": "span.stop-pips",
+   "text": "",
+   "dW": 0,
+   "dH": 2,
+   "leaf": false,
+   "fs": 16
+  },
+  {
+   "sel": "span.cc-col",
+   "text": "0123456789",
+   "dW": 0,
+   "dH": 216,
+   "leaf": false,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-strip",
+   "text": "0123456789",
+   "dW": 0,
+   "dH": 4,
+   "leaf": false,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "0",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "1",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "2",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "3",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "4",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "5",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "6",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "7",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "8",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "9",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-col.cc-col--ones",
+   "text": "0123456789",
+   "dW": 0,
+   "dH": 216,
+   "leaf": false,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-strip",
+   "text": "0123456789",
+   "dW": 0,
+   "dH": 4,
+   "leaf": false,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "0",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "1",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "2",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "3",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "4",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "5",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "6",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "7",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "8",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "9",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-live",
+   "text": "My coins: 12",
+   "dW": 146,
+   "dH": 35,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.clip-stack",
+   "text": "–",
+   "dW": 12,
+   "dH": 4,
+   "leaf": false,
+   "fs": 16
+  },
+  {
+   "sel": "i.clip-badge",
+   "text": "–",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 15
+  },
+  {
+   "sel": "span.clip-stack",
+   "text": "–",
+   "dW": 0,
+   "dH": 4,
+   "leaf": false,
+   "fs": 16
+  },
+  {
+   "sel": "div.stall-fan-block",
+   "text": "Fish3On my list✓FishPot­ato3Fo",
+   "dW": 0,
+   "dH": 16,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "div.hand.hand--fan",
+   "text": "Fish3On my list✓FishPot­ato3Fo",
+   "dW": 9,
+   "dH": 16,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-banner",
+   "text": "Fish",
+   "dW": 0,
+   "dH": 1,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Fish",
+   "dW": 0,
+   "dH": 1,
+   "leaf": true,
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-gem",
+   "text": "3",
+   "dW": 0,
+   "dH": 1,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-banner",
+   "text": "Pot­ato",
+   "dW": 0,
+   "dH": 1,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Pot­ato",
+   "dW": 0,
+   "dH": 1,
+   "leaf": true,
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-gem",
+   "text": "3",
+   "dW": 0,
+   "dH": 1,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-banner",
+   "text": "Gin­ger",
+   "dW": 0,
+   "dH": 1,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Gin­ger",
+   "dW": 0,
+   "dH": 1,
+   "leaf": true,
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-gem",
+   "text": "1",
+   "dW": 0,
+   "dH": 1,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-banner",
+   "text": "Car­rot",
+   "dW": 0,
+   "dH": 1,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Car­rot",
+   "dW": 0,
+   "dH": 1,
+   "leaf": true,
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-gem",
+   "text": "1",
+   "dW": 0,
+   "dH": 1,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-banner",
+   "text": "Gin­ger",
+   "dW": 0,
+   "dH": 1,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Gin­ger",
+   "dW": 0,
+   "dH": 1,
+   "leaf": true,
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-gem",
+   "text": "1",
+   "dW": 0,
+   "dH": 1,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-banner",
+   "text": "Tofu",
+   "dW": 0,
+   "dH": 1,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Tofu",
+   "dW": 0,
+   "dH": 1,
+   "leaf": true,
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-gem",
+   "text": "2",
+   "dW": 0,
+   "dH": 1,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "span.cb-cells",
+   "text": "",
+   "dW": 1,
+   "dH": 1,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.dz-icon",
+   "text": "🧺",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.dz-icon",
+   "text": "📎",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  }
+ ],
+ "cardOverlap": {
+  "max": 0,
+  "worst": null
+ },
+ "buttons": [
+  {
+   "sel": "button.btn.btn--secondary",
+   "text": "⚙ Settings",
+   "w": 142.8,
+   "h": 48
+  },
+  {
+   "sel": "button.btn.btn--secondary",
+   "text": "? How to play",
+   "w": 171,
+   "h": 48
+  },
+  {
+   "sel": "button.lang-toggle-seg",
+   "text": "中文",
+   "w": 64,
+   "h": 48
+  },
+  {
+   "sel": "button.lang-toggle-seg.lang-toggle-seg--on",
+   "text": "EN",
+   "w": 52,
+   "h": 48
+  },
+  {
+   "sel": "button.bot-card",
+   "text": "🛡️CaSteady6",
+   "w": 190,
+   "h": 140
+  },
+  {
+   "sel": "button.bot-card",
+   "text": "⚡EaZip9",
+   "w": 190,
+   "h": 140
+  },
+  {
+   "sel": "button.board3d-reset",
+   "text": "Reset view",
+   "w": 121.4,
+   "h": 48
+  },
+  {
+   "sel": "button.bot-card",
+   "text": "🐾GoTag9",
+   "w": 190,
+   "h": 140
+  },
+  {
+   "sel": "button.me-avatar",
+   "text": "🌾Sprout",
+   "w": 61.3,
+   "h": 68
+  },
+  {
+   "sel": "div.hand-item.hand-item--quest",
+   "text": "My basket: 🐠 Braised ",
+   "w": 559.2,
+   "h": 134.5
+  },
+  {
+   "sel": "button.me-coins.coin-pile",
+   "text": "01234567890123456789My",
+   "w": 188.8,
+   "h": 56
+  },
+  {
+   "sel": "button.clip-chip.clip-chip--help",
+   "text": "?Hint",
+   "w": 66,
+   "h": 76
+  },
+  {
+   "sel": "div.hand-item.hand-item--sel",
+   "text": "Fish3On my list✓Fish",
+   "w": 111.2,
+   "h": 148.3
+  },
+  {
+   "sel": "button.card-view.card-view--selected",
+   "text": "Fish3On my list✓",
+   "w": 111.2,
+   "h": 148.3
+  },
+  {
+   "sel": "div.hand-item",
+   "text": "Pot­ato3FoodPotato",
+   "w": 113.2,
+   "h": 147.9
+  },
+  {
+   "sel": "button.card-view",
+   "text": "Pot­ato3Food",
+   "w": 113.2,
+   "h": 147.9
+  },
+  {
+   "sel": "div.hand-item",
+   "text": "Gin­ger1On my list✓Gin",
+   "w": 109.8,
+   "h": 145.3
+  },
+  {
+   "sel": "button.card-view",
+   "text": "Gin­ger1On my list✓",
+   "w": 109.8,
+   "h": 145.3
+  },
+  {
+   "sel": "div.hand-item",
+   "text": "Car­rot1FoodCarrot",
+   "w": 109.8,
+   "h": 145.3
+  },
+  {
+   "sel": "button.card-view",
+   "text": "Car­rot1Food",
+   "w": 109.8,
+   "h": 145.3
+  },
+  {
+   "sel": "div.hand-item",
+   "text": "Gin­ger1On my list✓Gin",
+   "w": 113.2,
+   "h": 147.9
+  },
+  {
+   "sel": "button.card-view",
+   "text": "Gin­ger1On my list✓",
+   "w": 113.2,
+   "h": 147.9
+  },
+  {
+   "sel": "div.hand-item",
+   "text": "Tofu2FoodTofu",
+   "w": 116.6,
+   "h": 150.3
+  },
+  {
+   "sel": "button.card-view",
+   "text": "Tofu2Food",
+   "w": 116.6,
+   "h": 150.3
+  },
+  {
+   "sel": "button.drop-zone.drop-zone--basket",
+   "text": "1🧺Buy (3 coins)",
+   "w": 218.8,
+   "h": 76
+  },
+  {
+   "sel": "button.drop-zone.drop-zone--hold",
+   "text": "2📎Maybe later",
+   "w": 218.8,
+   "h": 76
+  },
+  {
+   "sel": "button.btn.btn--secondary",
+   "text": "3Skip",
+   "w": 159.7,
+   "h": 76
+  },
+  {
+   "sel": "button.btn.btn--secondary",
+   "text": "4Done with this stop",
+   "w": 732,
+   "h": 56
+  }
+ ],
+ "fonts": [
+  {
+   "sel": "h1.game-title",
+   "text": "Let's Go Shopping",
+   "fs": 24
+  },
+  {
+   "sel": "button.btn.btn--secondary",
+   "text": "⚙ Settings",
+   "fs": 20
+  },
+  {
+   "sel": "button.btn.btn--secondary",
+   "text": "? How to play",
+   "fs": 20
+  },
+  {
+   "sel": "button.lang-toggle-seg",
+   "text": "中文",
+   "fs": 20
+  },
+  {
+   "sel": "button.lang-toggle-seg.lang-toggle-seg--on",
+   "text": "EN",
+   "fs": 20
+  },
+  {
+   "sel": "i.bot-trait.bot-trait--steady",
+   "text": "Ca",
+   "fs": 15
+  },
+  {
+   "sel": "span.bot-card-name",
+   "text": "Steady",
+   "fs": 20
+  },
+  {
+   "sel": "span.bot-coin-num",
+   "text": "6",
+   "fs": 16
+  },
+  {
+   "sel": "i.bot-trait.bot-trait--impulsive",
+   "text": "Ea",
+   "fs": 15
+  },
+  {
+   "sel": "span.bot-card-name",
+   "text": "Zip",
+   "fs": 20
+  },
+  {
+   "sel": "span.bot-coin-num",
+   "text": "9",
+   "fs": 16
+  },
+  {
+   "sel": "p.board3d-status",
+   "text": "Stop 2 · The Market · La",
+   "fs": 16
+  },
+  {
+   "sel": "p.board-log",
+   "text": "Tag bought Sticker",
+   "fs": 16
+  },
+  {
+   "sel": "button.board3d-reset",
+   "text": "Reset view",
+   "fs": 16
+  },
+  {
+   "sel": "i.bot-trait.bot-trait--follower",
+   "text": "Go",
+   "fs": 15
+  },
+  {
+   "sel": "span.bot-card-name",
+   "text": "Tag",
+   "fs": 20
+  },
+  {
+   "sel": "span.bot-coin-num",
+   "text": "9",
+   "fs": 16
+  },
+  {
+   "sel": "span.think-trait",
+   "text": "🐾Go",
+   "fs": 15
+  },
+  {
+   "sel": "span.order-chip-ava",
+   "text": "🛡️",
+   "fs": 15
+  },
+  {
+   "sel": "span.order-chip-name",
+   "text": "Steady",
+   "fs": 15
+  },
+  {
+   "sel": "span.order-chip-num",
+   "text": "6",
+   "fs": 15
+  },
+  {
+   "sel": "span.bot-trait.bot-trait--steady",
+   "text": "🛡️Ca",
+   "fs": 15
+  },
+  {
+   "sel": "span.order-chip-ava",
+   "text": "⚡",
+   "fs": 15
+  },
+  {
+   "sel": "span.order-chip-name",
+   "text": "Zip",
+   "fs": 15
+  },
+  {
+   "sel": "span.order-chip-num",
+   "text": "9",
+   "fs": 15
+  },
+  {
+   "sel": "span.bot-trait.bot-trait--impulsive",
+   "text": "⚡Ea",
+   "fs": 15
+  },
+  {
+   "sel": "span.order-chip-ava",
+   "text": "🐾",
+   "fs": 15
+  },
+  {
+   "sel": "span.order-chip-name",
+   "text": "Tag",
+   "fs": 15
+  },
+  {
+   "sel": "span.order-chip-num",
+   "text": "9",
+   "fs": 15
+  },
+  {
+   "sel": "span.bot-trait.bot-trait--follower",
+   "text": "🐾Go",
+   "fs": 15
+  },
+  {
+   "sel": "span.order-chip-ava",
+   "text": "🌾",
+   "fs": 15
+  },
+  {
+   "sel": "span.order-chip-name",
+   "text": "Sprout",
+   "fs": 15
+  },
+  {
+   "sel": "span.order-chip-num",
+   "text": "12",
+   "fs": 15
+  },
+  {
+   "sel": "span.me-avatar-icon",
+   "text": "🌾",
+   "fs": 20
+  },
+  {
+   "sel": "span.me-name",
+   "text": "Sprout",
+   "fs": 16
+  },
+  {
+   "sel": "p.recipe-card-title",
+   "text": "My basket: 🐠 Braised Fi",
+   "fs": 16
+  },
+  {
+   "sel": "span.recipe-slot-icon",
+   "text": "🐟",
+   "fs": 20
+  },
+  {
+   "sel": "span.recipe-slot-name",
+   "text": "Fish 3 coins",
+   "fs": 15
+  },
+  {
+   "sel": "span.recipe-slot-icon",
+   "text": "🌿",
+   "fs": 20
+  },
+  {
+   "sel": "span.recipe-slot-name",
+   "text": "Green Onion 1 coin",
+   "fs": 15
+  },
+  {
+   "sel": "span.recipe-slot-icon",
+   "text": "🫚",
+   "fs": 20
+  },
+  {
+   "sel": "span.recipe-slot-name",
+   "text": "Ginger 1 coin",
+   "fs": 15
+  },
+  {
+   "sel": "span.recipe-slot-icon",
+   "text": "🧄",
+   "fs": 20
+  },
+  {
+   "sel": "span.recipe-slot-name",
+   "text": "Garlic 1 coin",
+   "fs": 15
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "0",
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "1",
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "2",
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "3",
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "4",
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "5",
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "6",
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "7",
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "8",
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "9",
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "0",
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "1",
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "2",
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "3",
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "4",
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "5",
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "6",
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "7",
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "8",
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "9",
+   "fs": 24
+  },
+  {
+   "sel": "i.clip-badge",
+   "text": "–",
+   "fs": 15
+  },
+  {
+   "sel": "span.clip-chip-sub",
+   "text": "Maybe later",
+   "fs": 15
+  },
+  {
+   "sel": "i.iou-token",
+   "text": "–",
+   "fs": 15
+  },
+  {
+   "sel": "span.clip-chip-sub",
+   "text": "To pay later",
+   "fs": 15
+  },
+  {
+   "sel": "span.help-card-btn",
+   "text": "?",
+   "fs": 24
+  },
+  {
+   "sel": "span.clip-chip-sub",
+   "text": "Hint",
+   "fs": 15
+  },
+  {
+   "sel": "h2.popup-title",
+   "text": "② The Market",
+   "fs": 24
+  },
+  {
+   "sel": "span.rcp-item",
+   "text": "🐟",
+   "fs": 15
+  },
+  {
+   "sel": "span.rcp-item",
+   "text": "🌿",
+   "fs": 15
+  },
+  {
+   "sel": "span.rcp-item",
+   "text": "🫚",
+   "fs": 15
+  },
+  {
+   "sel": "span.rcp-item",
+   "text": "🧄",
+   "fs": 15
+  },
+  {
+   "sel": "span",
+   "text": "×2",
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Fish",
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-gem",
+   "text": "3",
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-tag-part",
+   "text": "On my list",
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-mark",
+   "text": "✓",
+   "fs": 16
+  },
+  {
+   "sel": "span.hand-tag",
+   "text": "Fish",
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Pot­ato",
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-gem",
+   "text": "3",
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-tag-part",
+   "text": "Food",
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Gin­ger",
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-gem",
+   "text": "1",
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-tag-part",
+   "text": "On my list",
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-mark",
+   "text": "✓",
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Car­rot",
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-gem",
+   "text": "1",
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-tag-part",
+   "text": "Food",
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Gin­ger",
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-gem",
+   "text": "1",
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-tag-part",
+   "text": "On my list",
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-mark",
+   "text": "✓",
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Tofu",
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-gem",
+   "text": "2",
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-tag-part",
+   "text": "Food",
+   "fs": 15
+  },
+  {
+   "sel": "span.stall-guide-text",
+   "text": "Tap a card. Get your rec",
+   "fs": 20
+  },
+  {
+   "sel": "span.cb-num",
+   "text": "6",
+   "fs": 16
+  },
+  {
+   "sel": "span.cb-label",
+   "text": "for recipe",
+   "fs": 15
+  },
+  {
+   "sel": "span.cb-num",
+   "text": "6",
+   "fs": 16
+  },
+  {
+   "sel": "span.cb-label",
+   "text": "free to spend",
+   "fs": 15
+  },
+  {
+   "sel": "span.panel-selected-line",
+   "text": "Picked: 🐟 Fish (3 coins",
+   "fs": 20
+  },
+  {
+   "sel": "span.panel-selected-line",
+   "text": "After you buy: 9 coins",
+   "fs": 20
+  },
+  {
+   "sel": "span.key-hint",
+   "text": "1",
+   "fs": 16
+  },
+  {
+   "sel": "span.dz-icon",
+   "text": "🧺",
+   "fs": 24
+  },
+  {
+   "sel": "span.key-hint",
+   "text": "2",
+   "fs": 16
+  },
+  {
+   "sel": "span.dz-icon",
+   "text": "📎",
+   "fs": 24
+  },
+  {
+   "sel": "span.cb-math.cb-math--inrow",
+   "text": "12 − 3 → 9",
+   "fs": 20
+  },
+  {
+   "sel": "span.key-hint",
+   "text": "3",
+   "fs": 16
+  },
+  {
+   "sel": "span.key-hint",
+   "text": "4",
+   "fs": 16
+  },
+  {
+   "sel": "p.panel-keyhelp.panel-keyhelp--kbd",
+   "text": "←→ pick a card · 1/2/3 p",
+   "fs": 15
+  }
+ ],
+ "layout": {
+  "phoneLand": false,
+  "popup": {
+   "x": 250,
+   "y": 74,
+   "w": 780,
+   "h": 704,
+   "right": 1030,
+   "bottom": 778
+  },
+  "floatStack": null,
+  "reflectionHand": null,
+  "cards": [
+   {
+    "x": 304,
+    "y": 225,
+    "w": 111,
+    "h": 148,
+    "right": 416,
+    "bottom": 374
+   },
+   {
+    "x": 426,
+    "y": 244,
+    "w": 113,
+    "h": 148,
+    "right": 540,
+    "bottom": 392
+   },
+   {
+    "x": 528,
+    "y": 242,
+    "w": 110,
+    "h": 145,
+    "right": 638,
+    "bottom": 387
+   },
+   {
+    "x": 642,
+    "y": 242,
+    "w": 110,
+    "h": 145,
+    "right": 752,
+    "bottom": 387
+   },
+   {
+    "x": 754,
+    "y": 245,
+    "w": 113,
+    "h": 148,
+    "right": 868,
+    "bottom": 392
+   },
+   {
+    "x": 866,
+    "y": 251,
+    "w": 117,
+    "h": 150,
+    "right": 983,
+    "bottom": 402
+   }
+  ]
+ }
+}

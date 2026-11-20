@@ -1,0 +1,122 @@
+[
+  {
+    "name": "desktop",
+    "free": {
+      "x": 206,
+      "y": 72,
+      "w": 868,
+      "h": 524
+    },
+    "panels": {
+      ".game-topbar": {
+        "x": 16,
+        "y": 24,
+        "w": 1248,
+        "h": 48
+      },
+      ".game-left": {
+        "x": 16,
+        "y": 88,
+        "w": 190,
+        "h": 592
+      },
+      ".game-right": {
+        "x": 1074,
+        "y": 88,
+        "w": 190,
+        "h": 592
+      },
+      ".game-bottom": {
+        "x": 16,
+        "y": 688,
+        "w": 1248,
+        "h": 96
+      },
+      ".board3d-overlay": {
+        "x": 239,
+        "y": 596,
+        "w": 803,
+        "h": 76
+      }
+    },
+    "normalMask": {
+      "landShareView": 0.70142578125,
+      "landShareFree": 0.8367485137369403,
+      "landBboxView": {
+        "x": 16,
+        "y": 24,
+        "w": 1258,
+        "h": 760
+      },
+      "samples": 256000
+    },
+    "canvasMask": {
+      "landShareView": 0.485796875,
+      "landShareFree": 0.8215428993562458,
+      "landBboxView": {
+        "x": 158,
+        "y": 84,
+        "w": 1114,
+        "h": 632
+      },
+      "samples": 256000
+    }
+  },
+  {
+    "name": "phone",
+    "free": {
+      "x": 62,
+      "y": 76,
+      "w": 549.8125,
+      "h": 242
+    },
+    "panels": {
+      ".board3d-overlay": {
+        "x": 482,
+        "y": 326,
+        "w": 121,
+        "h": 48
+      },
+      ".phone-rail": {
+        "x": 612,
+        "y": 0,
+        "w": 262,
+        "h": 402
+      },
+      ".phone-bots": {
+        "x": 70,
+        "y": 28,
+        "w": 542,
+        "h": 48
+      },
+      ".phone-quick": {
+        "x": 70,
+        "y": 318,
+        "w": 151,
+        "h": 56
+      }
+    },
+    "normalMask": {
+      "landShareView": 0.710645855391236,
+      "landShareFree": 0.7653397993493274,
+      "landBboxView": {
+        "x": 70,
+        "y": 0,
+        "w": 804,
+        "h": 402
+      },
+      "samples": 87837
+    },
+    "canvasMask": {
+      "landShareView": 0.3463233033915093,
+      "landShareFree": 0.7616721327800517,
+      "landBboxView": {
+        "x": 84,
+        "y": 50,
+        "w": 574,
+        "h": 316
+      },
+      "samples": 87837
+    }
+  }
+]

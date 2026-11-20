@@ -1,0 +1,392 @@
+{
+ "overflow": [
+  {
+   "sel": "span.stop-pips",
+   "text": "",
+   "dW": 0,
+   "dH": 1,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.phone-bot-avatar",
+   "text": "🛡️",
+   "dW": 1,
+   "dH": 1,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.phone-bot-avatar",
+   "text": "⚡",
+   "dW": 1,
+   "dH": 1,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.phone-bot-avatar",
+   "text": "🐾",
+   "dW": 1,
+   "dH": 1,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-col.cc-col--ones",
+   "text": "0123456789",
+   "dW": 0,
+   "dH": 180,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-strip",
+   "text": "0123456789",
+   "dW": 0,
+   "dH": 3,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "0",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "1",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "2",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "3",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "4",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "5",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "6",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "7",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "8",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "9",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-live",
+   "text": "My wallet, 1 coin",
+   "dW": 169,
+   "dH": 26,
+   "leaf": true,
+   "fs": 20
+  }
+ ],
+ "cardOverlap": {
+  "max": 0,
+  "worst": null
+ },
+ "buttons": [
+  {
+   "sel": "button.board3d-reset",
+   "text": "Reset view",
+   "w": 121.4,
+   "h": 48
+  },
+  {
+   "sel": "button.phone-bot",
+   "text": "🛡️🛡️Ca4",
+   "w": 85.2,
+   "h": 48
+  },
+  {
+   "sel": "button.phone-bot",
+   "text": "⚡⚡Ea0",
+   "w": 51.2,
+   "h": 48
+  },
+  {
+   "sel": "button.phone-bot.phone-bot--on",
+   "text": "🐾🐾Go1",
+   "w": 60.2,
+   "h": 48
+  },
+  {
+   "sel": "button.lang-toggle-seg",
+   "text": "中文",
+   "w": 64,
+   "h": 48
+  },
+  {
+   "sel": "button.lang-toggle-seg.lang-toggle-seg--on",
+   "text": "EN",
+   "w": 52,
+   "h": 48
+  },
+  {
+   "sel": "button.btn.btn--primary",
+   "text": "Yes",
+   "w": 80,
+   "h": 48
+  },
+  {
+   "sel": "button.btn.btn--secondary",
+   "text": "No",
+   "w": 80,
+   "h": 48
+  },
+  {
+   "sel": "button.btn.btn--primary",
+   "text": "1Yes",
+   "w": 196,
+   "h": 56
+  },
+  {
+   "sel": "button.btn.btn--secondary",
+   "text": "2No thanks",
+   "w": 196,
+   "h": 56
+  },
+  {
+   "sel": "button.phone-fab",
+   "text": "🪙0123456789My wallet,",
+   "w": 75.6,
+   "h": 56
+  },
+  {
+   "sel": "button.phone-fab.phone-fab--help",
+   "text": "?",
+   "w": 56,
+   "h": 56
+  }
+ ],
+ "fonts": [
+  {
+   "sel": "button.board3d-reset",
+   "text": "Reset view",
+   "fs": 16
+  },
+  {
+   "sel": "span.phone-lap",
+   "text": "Lap 2/3",
+   "fs": 16
+  },
+  {
+   "sel": "span.phone-bot-avatar",
+   "text": "🛡️",
+   "fs": 20
+  },
+  {
+   "sel": "span.bot-trait.bot-trait--steady",
+   "text": "🛡️Ca",
+   "fs": 15
+  },
+  {
+   "sel": "span.phone-bot-num",
+   "text": "4",
+   "fs": 16
+  },
+  {
+   "sel": "span.phone-bot-avatar",
+   "text": "⚡",
+   "fs": 20
+  },
+  {
+   "sel": "span.bot-trait.bot-trait--impulsive",
+   "text": "⚡Ea",
+   "fs": 15
+  },
+  {
+   "sel": "span.phone-bot-num",
+   "text": "0",
+   "fs": 16
+  },
+  {
+   "sel": "span.phone-bot-avatar",
+   "text": "🐾",
+   "fs": 20
+  },
+  {
+   "sel": "span.bot-trait.bot-trait--follower",
+   "text": "🐾Go",
+   "fs": 15
+  },
+  {
+   "sel": "span.phone-bot-num",
+   "text": "1",
+   "fs": 16
+  },
+  {
+   "sel": "button.lang-toggle-seg",
+   "text": "中文",
+   "fs": 20
+  },
+  {
+   "sel": "button.lang-toggle-seg.lang-toggle-seg--on",
+   "text": "EN",
+   "fs": 20
+  },
+  {
+   "sel": "p.board-await-text",
+   "text": "Tag wants your Fish for ",
+   "fs": 20
+  },
+  {
+   "sel": "span.board-await-swap",
+   "text": "⇄",
+   "fs": 24
+  },
+  {
+   "sel": "button.btn.btn--primary",
+   "text": "Yes",
+   "fs": 20
+  },
+  {
+   "sel": "button.btn.btn--secondary",
+   "text": "No",
+   "fs": 20
+  },
+  {
+   "sel": "p.board-log",
+   "text": "Tag joined the buy-toget",
+   "fs": 15
+  },
+  {
+   "sel": "p.speech-bubble-from",
+   "text": "Tag · Friends Stop",
+   "fs": 15
+  },
+  {
+   "sel": "p.speech-bubble-text",
+   "text": "\"My Egg for your Fish?\"",
+   "fs": 20
+  },
+  {
+   "sel": "p.speech-bubble-note",
+   "text": "No lending or giving coi",
+   "fs": 15
+  },
+  {
+   "sel": "span",
+   "text": "🪙",
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "0",
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "1",
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "2",
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "3",
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "4",
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "5",
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "6",
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "7",
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "8",
+   "fs": 20
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "9",
+   "fs": 20
+  },
+  {
+   "sel": "span",
+   "text": "?",
+   "fs": 24
+  }
+ ],
+ "layout": {
+  "phoneLand": true,
+  "popup": null,
+  "floatStack": null,
+  "reflectionHand": null,
+  "cards": []
+ }
+}

@@ -21,6 +21,8 @@ import type {
 } from '../data/cards';
 import { gameConfig } from '../config/gameConfig';
 import { getLang } from './store';
+import { enStrings } from './en';
+import { zhStrings } from './zh';
 
 /* ================= 中文表（按 id） ================= */
 
@@ -271,6 +273,94 @@ export function playerDisplayName(p: {
   return p.name;
 }
 
+/** 卡名列表拼接（R2-7）：英文用 ", "、中文用 "、"——英文语境不得出现中文顿号 */
+export function joinCardNames(ids: readonly string[]): string {
+  return ids.map((id) => cardName(id)).join(zh() ? '、' : ', ');
+}
+
+/* ================= 引擎日志条目的显示本地化（R2-7） =================
+ * state.log 的 text 是引擎在行动时烘焙的整句：模板按当时语言取，
+ * 但 {name}/{item}/{weather} 槽位一律填数据源原文名（英文，如
+ * p.name="Sprout"、cardName="Fish"），于是中文界面出现
+ * 「Sprout买了Fish」这类夹生提示条。引擎不可改，这里在显示层按
+ * 模板反解槽位：把槽位里的原文名反查卡 id、换成当前语言显示名，
+ * 再用当前语言的同键模板重渲染。匹配不上任何日志模板的条目
+ * （家长台词、自由文本等）原样返回。 */
+
+type LogDict = typeof enStrings.log;
+const enLog: LogDict = enStrings.log;
+const zhLog: LogDict = zhStrings.log as unknown as LogDict;
+
+/** 数据源原文名 → 卡 id（角色/伙伴名也在卡表里，一并覆盖） */
+const sourceNameToId = new Map<string, string>();
+for (const [id, c] of anyCardById) {
+  if (!sourceNameToId.has(c.name)) sourceNameToId.set(c.name, id);
+}
+
+function localizeSlotValue(v: string): string {
+  const id = sourceNameToId.get(v);
+  return id ? cardName(id) : v;
+}
+
+type LogSlot = 'name' | 'item' | 'weather' | 'n';
+interface LogMatcher {
+  key: keyof LogDict;
+  slots: LogSlot[];
+  re: RegExp;
+  literalLen: number;
+}
+
+function templateToMatcher(key: keyof LogDict, tpl: string): LogMatcher {
+  const slots: LogSlot[] = [];
+  let pattern = '^';
+  tpl.split(/\{(name|item|weather|n)\}/g).forEach((part, i) => {
+    if (i % 2 === 1) {
+      slots.push(part as LogSlot);
+      pattern += '([\\s\\S]+?)';
+    } else {
+      /* 字面段转义；另容忍引擎 fmt 的单数化（"{n} coins" 写成 "1 coin"） */
+      pattern += part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/coins/g, 'coins?');
+    }
+  });
+  pattern += '$';
+  return {
+    key,
+    slots,
+    re: new RegExp(pattern),
+    literalLen: tpl.replace(/\{(name|item|weather|n)\}/g, '').length,
+  };
+}
+
+/* 两套字典的全部日志模板都编成匹配器，按字面长度降序试匹配——
+   先匹配更具体的模板（如 holdBought 先于 bought），避免被短模板截胡 */
+const logMatchers: LogMatcher[] = (Object.keys(enLog) as (keyof LogDict)[])
+  .flatMap((key) => [
+    templateToMatcher(key, enLog[key]),
+    templateToMatcher(key, zhLog[key]),
+  ])
+  .sort((a, b) => b.literalLen - a.literalLen);
+
+function renderLogTemplate(tpl: string, values: Partial<Record<LogSlot, string>>): string {
+  const out = tpl.replace(/\{(name|item|weather|n)\}/g, (_, k: string) => values[k as LogSlot] ?? '');
+  /* 与引擎 fmt 一致：英文 1 币写单数 */
+  return out.replace(/\b1 coins\b/g, '1 coin');
+}
+
+/** 把一条引擎日志文本按当前语言重渲染（名字/物品/天气换当前语言显示名） */
+export function localizeLogText(text: string): string {
+  for (const m of logMatchers) {
+    const hit = m.re.exec(text);
+    if (!hit) continue;
+    const values: Partial<Record<LogSlot, string>> = {};
+    m.slots.forEach((slot, i) => {
+      const raw = hit[i + 1];
+      values[slot] = slot === 'n' ? raw : localizeSlotValue(raw);
+    });
+    return renderLogTemplate(zh() ? zhLog[m.key] : enLog[m.key], values);
+  }
+  return text;
+}
+
 export function botPersonalityLabel(bot: BotCard): string {
   if (zh() && zhPersonality[bot.id]) return zhPersonality[bot.id];
   return bot.personalityLabel;
@@ -291,6 +381,13 @@ export function inviteText(card: InviteCard): string {
 }
 export function inviteSplitNote(card: InviteCard): string {
   return zh() && zhInvite[card.id] ? zhInvite[card.id].splitNote : card.splitNote;
+}
+/** R6 邀请卡面短签（ww 必改）：卡面只留分摊说明的第一段
+ *  （EN "Buy together" / 中文「一起买」），完整规则（everyone pays
+ *  their own）移进点开后的邀请台说明行（PartnerPanel 邀请台）。
+ *  从数据原文切分，不新造文案 */
+export function inviteFaceTag(card: InviteCard): string {
+  return inviteSplitNote(card).split(/ — |，/)[0].trim();
 }
 
 export function parentIntro(): string {

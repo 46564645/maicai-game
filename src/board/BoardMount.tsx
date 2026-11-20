@@ -9,7 +9,7 @@ import { Component, lazy, Suspense, useEffect, useRef, useState } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
 import { Board2D } from './Board2D';
 import type { BoardViewProps } from './BoardView';
-import { boardMode, detectWebGL } from './three/webgl';
+import { board3DFailed, boardMode, detectWebGL } from './three/webgl';
 
 const LazyBoard3D = lazy(() => import('./three/Board3D'));
 
@@ -37,7 +37,11 @@ class Boundary extends Component<
 
 export function BoardMount(props: Props) {
   const [mode] = useState(boardMode);
-  const [webglOk] = useState(() => mode !== '2d' && detectWebGL());
+  // 首屏暖机已判 3D 不可用（SceneWarmup 首帧超时/报错）→ 直落 2D，
+  // 不再等本组件自己的 10s 首帧看门狗白耗一轮
+  const [webglOk] = useState(
+    () => mode !== '2d' && detectWebGL() && !board3DFailed(),
+  );
   const [failed, setFailed] = useState(false);
   const readyRef = useRef(false);
   const use3d = webglOk && !failed;

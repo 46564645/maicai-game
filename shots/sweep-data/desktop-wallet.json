@@ -1,0 +1,821 @@
+{
+ "overflow": [
+  {
+   "sel": "span.bot-card-avatar",
+   "text": "🛡️Ca",
+   "dW": 7,
+   "dH": 5,
+   "leaf": false,
+   "fs": 24
+  },
+  {
+   "sel": "span.bot-card-avatar",
+   "text": "⚡Ea",
+   "dW": 7,
+   "dH": 5,
+   "leaf": false,
+   "fs": 24
+  },
+  {
+   "sel": "div.game-board-area",
+   "text": "Stop 8 · Home for Dinner · Lap 1 · S",
+   "dW": 5,
+   "dH": 0,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "div.board3d-overlay",
+   "text": "Shopping townTag put food on the pla",
+   "dW": 24,
+   "dH": 0,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.bot-card-avatar",
+   "text": "🐾Go",
+   "dW": 7,
+   "dH": 5,
+   "leaf": false,
+   "fs": 24
+  },
+  {
+   "sel": "div.prog",
+   "text": "",
+   "dW": 0,
+   "dH": 1,
+   "leaf": false,
+   "fs": 16
+  },
+  {
+   "sel": "span.stop-pips",
+   "text": "",
+   "dW": 2,
+   "dH": 2,
+   "leaf": false,
+   "fs": 16
+  },
+  {
+   "sel": "span.sr-only",
+   "text": "Next up",
+   "dW": 58,
+   "dH": 22,
+   "leaf": true,
+   "fs": 15
+  },
+  {
+   "sel": "span.cc-col.cc-col--ones",
+   "text": "0123456789",
+   "dW": 0,
+   "dH": 216,
+   "leaf": false,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-strip",
+   "text": "0123456789",
+   "dW": 0,
+   "dH": 4,
+   "leaf": false,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "0",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "1",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "2",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "3",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "4",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "5",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "6",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "7",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "8",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "9",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-live",
+   "text": "My coins: 3",
+   "dW": 133,
+   "dH": 35,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.clip-stack",
+   "text": "–",
+   "dW": 12,
+   "dH": 4,
+   "leaf": false,
+   "fs": 16
+  },
+  {
+   "sel": "i.clip-badge",
+   "text": "–",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 15
+  },
+  {
+   "sel": "span.clip-stack",
+   "text": "–",
+   "dW": 0,
+   "dH": 4,
+   "leaf": false,
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Gre­ens",
+   "dW": 24,
+   "dH": 0,
+   "leaf": true,
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Pot­ato",
+   "dW": 22,
+   "dH": 0,
+   "leaf": true,
+   "fs": 15
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Pops­icle",
+   "dW": 33,
+   "dH": 0,
+   "leaf": true,
+   "fs": 15
+  }
+ ],
+ "cardOverlap": {
+  "max": 0,
+  "worst": null
+ },
+ "stray": [
+  {
+   "sel": "h1.game-title",
+   "text": "Let's Go Shopping",
+   "fs": 24,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "button.btn.btn--secondary",
+   "text": "⚙ Settings",
+   "fs": 20,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "button.btn.btn--secondary",
+   "text": "? How to play",
+   "fs": 20,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "button.lang-toggle-seg",
+   "text": "中文",
+   "fs": 20,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "button.lang-toggle-seg.lang-toggle-seg--on",
+   "text": "EN",
+   "fs": 20,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "i.bot-trait.bot-trait--steady",
+   "text": "Ca",
+   "fs": 12.9,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "span.bot-card-name",
+   "text": "Steady",
+   "fs": 20,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "i.bot-trait.bot-trait--impulsive",
+   "text": "Ea",
+   "fs": 12.9,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "span.bot-card-name",
+   "text": "Zip",
+   "fs": 20,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "span.bot-lap-gain",
+   "text": "+2",
+   "fs": 15,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "span.bot-thumb.bot-thumb--more",
+   "text": "+1",
+   "fs": 15,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "p.board3d-status",
+   "text": "Stop 8 · Home for Dinner · Lap 1 · Sprout'",
+   "fs": 16,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "p.board-log",
+   "text": "Tag put food on the plate",
+   "fs": 16,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "button.board3d-reset",
+   "text": "Reset view",
+   "fs": 16,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "i.bot-trait.bot-trait--follower",
+   "text": "Go",
+   "fs": 12.9,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "span.bot-card-name",
+   "text": "Tag",
+   "fs": 20,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "span.order-chip-ava",
+   "text": "🐾",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.order-chip-name",
+   "text": "Tag",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.bot-trait.bot-trait--follower",
+   "text": "🐾Go",
+   "fs": 12.9,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.order-chip-ava",
+   "text": "🌾",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.order-chip-name",
+   "text": "Sprout",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.order-chip-gain",
+   "text": "+1",
+   "fs": 12.9,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.order-chip-ava",
+   "text": "🛡️",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.order-chip-name",
+   "text": "Steady",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.bot-trait.bot-trait--steady",
+   "text": "🛡️Ca",
+   "fs": 12.9,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.sr-only",
+   "text": "Next up",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.order-chip-name",
+   "text": "Zip",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.order-chip-gain",
+   "text": "+2",
+   "fs": 12.9,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.bot-trait.bot-trait--impulsive",
+   "text": "⚡Ea",
+   "fs": 12.9,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.me-avatar-icon",
+   "text": "🌾",
+   "fs": 20,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "span.me-name",
+   "text": "Sprout",
+   "fs": 16,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "p.recipe-card-title",
+   "text": "My basket: 🐠 Braised Fish (6 coins)",
+   "fs": 16,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-icon",
+   "text": "🐟",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-name",
+   "text": "Fish 3 coins",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-icon",
+   "text": "🌿",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-name",
+   "text": "Green Onion 1 coin",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-icon",
+   "text": "🫚",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-name",
+   "text": "Ginger 1 coin",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-icon",
+   "text": "🧄",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-name",
+   "text": "Garlic 1 coin",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.cc-live",
+   "text": "My coins: 3",
+   "fs": 24,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "span.clip-chip-sub",
+   "text": "Maybe later",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.clip-chip-sub",
+   "text": "To pay later",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.clip-chip-sub",
+   "text": "Hint",
+   "fs": 15,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "h2.popup-title",
+   "text": "⑧ Home for Dinner",
+   "fs": 24,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.popup-goal",
+   "text": "Practice: see your choices",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.rcp-item",
+   "text": "🐟",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.rcp-item",
+   "text": "🌿",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.rcp-item",
+   "text": "🫚",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.rcp-item",
+   "text": "🧄",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "p.panel-text",
+   "text": "Put your food on the plate",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "p.recipe-card-title",
+   "text": "My basket: 🐠 Braised Fish (6 coins)",
+   "fs": 16,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-icon",
+   "text": "🐟",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-name",
+   "text": "Fish 3 coins",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-icon",
+   "text": "🌿",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-name",
+   "text": "Green Onion 1 coin",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-icon",
+   "text": "🫚",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-name",
+   "text": "Ginger 1 coin",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-icon",
+   "text": "🧄",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-name",
+   "text": "Garlic 1 coin",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "p.panel-text",
+   "text": "Got 0 of 4",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "h2.popup-title",
+   "text": "Wallet & recipe",
+   "fs": 24,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "p.recipe-card-title",
+   "text": "My basket: 🐠 Braised Fish (6 coins)",
+   "fs": 16,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-icon",
+   "text": "🐟",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-name",
+   "text": "Fish 3 coins",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-icon",
+   "text": "🌿",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-name",
+   "text": "Green Onion 1 coin",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-icon",
+   "text": "🫚",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-name",
+   "text": "Ginger 1 coin",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-icon",
+   "text": "🧄",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-name",
+   "text": "Garlic 1 coin",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "p.wallet-line",
+   "text": "Got 0 of 4",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Gre­ens",
+   "fs": 15,
+   "inButton": false,
+   "inCard": true
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Pot­ato",
+   "fs": 15,
+   "inButton": false,
+   "inCard": true
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Pops­icle",
+   "fs": 15,
+   "inButton": false,
+   "inCard": true
+  },
+  {
+   "sel": "span.coins-count.coins-bump",
+   "text": "My coins: 3",
+   "fs": 24,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.cb-label",
+   "text": "for recipe",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "p.wallet-line",
+   "text": "Sprout paid 2 coins of bus fare",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "p.wallet-line",
+   "text": "Sprout paid 2 coins of bus fare",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "p.wallet-line",
+   "text": "Sprout spun Windy: \"Wind takes the hat\"",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "p.wallet-line",
+   "text": "Sprout went to talk with their parent",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "p.wallet-line",
+   "text": "OK, that is clear. Here are 1 coin.",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "p.wallet-line",
+   "text": "Maybe later: empty",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "p.wallet-line",
+   "text": "To pay later: empty",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "p.wallet-line.wallet-line--hint",
+   "text": "Recipe needs 6 more coins · bus fare 0 · 0",
+   "fs": 16,
+   "inButton": false,
+   "inCard": false
+  }
+ ]
+}

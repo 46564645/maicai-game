@@ -342,9 +342,9 @@ describe('round-2 HUD batch (source assertions)', () => {
     expect(badgeBlock.slice(0, 600)).not.toContain('text-overflow: ellipsis');
     expect(boardCss).toContain('.game-screen--phone-land .pc');
   });
-  it('R2-4 Toast：2.5s 自动消失、层级在弹窗之下', () => {
-    expect(toastTsx).toContain('TOAST_VISIBLE_MS = 2500');
-    expect(tokensCss).toContain('--toast-visible-ms: 2500ms');
+  it('R2-4 Toast：4s 自动消失、层级在弹窗之下', () => {
+    expect(toastTsx).toContain('TOAST_VISIBLE_MS = 4000');
+    expect(tokensCss).toContain('--toast-visible-ms: 4000ms');
     // R3 修复（ww 第 5 轮）：层级断言改关系式——不写死 z 数值，解析
     // 各层实际 z-index 断言相对次序：提示条必须在手机浮层（装着卡片
     // 与按钮）、右栏、站点弹窗、高光帘之下，任何一层的数值将来调整

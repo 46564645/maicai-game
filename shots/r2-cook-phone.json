@@ -1,0 +1,26 @@
+{
+  "form": "phone",
+  "feast": {
+    "title": "Dinner time",
+    "buttons": [
+      {
+        "testid": "action-primary",
+        "text": "1See where my coins went",
+        "overflow": 0,
+        "scrollWidth": 401,
+        "clientWidth": 401
+      }
+    ]
+  },
+  "reflection": {
+    "buttons": [
+      {
+        "testid": "action-primary",
+        "text": "1You did it🚌I paid the bus fare firstYou did it",
+        "overflow": 0,
+        "scrollWidth": 88,
+        "clientWidth": 88
+      }
+    ]
+  }
+}

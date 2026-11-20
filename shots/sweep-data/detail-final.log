@@ -1,0 +1,551 @@
+{
+ "cards": [
+  {
+   "card": {
+    "x": 13.9,
+    "y": 83,
+    "w": 94,
+    "h": 126,
+    "right": 107.9,
+    "bottom": 209
+   },
+   "name": {
+    "text": "Fish",
+    "rect": {
+     "x": 28.9,
+     "y": 154,
+     "w": 64,
+     "h": 20,
+     "right": 92.9,
+     "bottom": 174
+    },
+    "inFrame": true,
+    "ov": {
+     "dW": 0,
+     "dH": 0
+    }
+   },
+   "price": {
+    "text": "3",
+    "rect": {
+     "x": 24.9,
+     "y": 128,
+     "w": 22,
+     "h": 22,
+     "right": 46.9,
+     "bottom": 150
+    },
+    "inFrame": true
+   },
+   "tag": {
+    "text": "On my list",
+    "rect": {
+     "x": 24.9,
+     "y": 178,
+     "w": 72,
+     "h": 20,
+     "right": 96.9,
+     "bottom": 198
+    },
+    "inFrame": true,
+    "ov": {
+     "dW": 0,
+     "dH": 0
+    }
+   }
+  },
+  {
+   "card": {
+    "x": 125,
+    "y": 93.2,
+    "w": 98.6,
+    "h": 129.4,
+    "right": 223.6,
+    "bottom": 222.6
+   },
+   "name": {
+    "text": "Pot­ato",
+    "rect": {
+     "x": 141.6,
+     "y": 165.7,
+     "w": 66.7,
+     "h": 22.4,
+     "right": 208.3,
+     "bottom": 188.1
+    },
+    "inFrame": true,
+    "ov": {
+     "dW": 0,
+     "dH": 0
+    }
+   },
+   "price": {
+    "text": "3",
+    "rect": {
+     "x": 136.7,
+     "y": 141.4,
+     "w": 22.8,
+     "h": 22.8,
+     "right": 159.5,
+     "bottom": 164.2
+    },
+    "inFrame": true
+   },
+   "tag": {
+    "text": "Food",
+    "rect": {
+     "x": 138.5,
+     "y": 189.5,
+     "w": 74.7,
+     "h": 22.7,
+     "right": 213.2,
+     "bottom": 212.2
+    },
+    "inFrame": true,
+    "ov": {
+     "dW": 0,
+     "dH": 0
+    }
+   }
+  },
+  {
+   "card": {
+    "x": 209.9,
+    "y": 91,
+    "w": 94,
+    "h": 126,
+    "right": 303.9,
+    "bottom": 217
+   },
+   "name": {
+    "text": "Gin­ger",
+    "rect": {
+     "x": 223.9,
+     "y": 163,
+     "w": 66,
+     "h": 20,
+     "right": 289.9,
+     "bottom": 183
+    },
+    "inFrame": true,
+    "ov": {
+     "dW": 0,
+     "dH": 0
+    }
+   },
+   "price": {
+    "text": "1",
+    "rect": {
+     "x": 219.9,
+     "y": 137,
+     "w": 22,
+     "h": 22,
+     "right": 241.9,
+     "bottom": 159
+    },
+    "inFrame": true
+   },
+   "tag": {
+    "text": "On my list",
+    "rect": {
+     "x": 219.9,
+     "y": 187,
+     "w": 74,
+     "h": 20,
+     "right": 293.9,
+     "bottom": 207
+    },
+    "inFrame": true,
+    "ov": {
+     "dW": 0,
+     "dH": 0
+    }
+   }
+  },
+  {
+   "card": {
+    "x": 307.9,
+    "y": 91,
+    "w": 94,
+    "h": 126,
+    "right": 401.9,
+    "bottom": 217
+   },
+   "name": {
+    "text": "Car­rot",
+    "rect": {
+     "x": 321.9,
+     "y": 163,
+     "w": 66,
+     "h": 20,
+     "right": 387.9,
+     "bottom": 183
+    },
+    "inFrame": true,
+    "ov": {
+     "dW": 0,
+     "dH": 0
+    }
+   },
+   "price": {
+    "text": "1",
+    "rect": {
+     "x": 317.9,
+     "y": 137,
+     "w": 22,
+     "h": 22,
+     "right": 339.9,
+     "bottom": 159
+    },
+    "inFrame": true
+   },
+   "tag": {
+    "text": "Food",
+    "rect": {
+     "x": 317.9,
+     "y": 187,
+     "w": 74,
+     "h": 20,
+     "right": 391.9,
+     "bottom": 207
+    },
+    "inFrame": true,
+    "ov": {
+     "dW": 0,
+     "dH": 0
+    }
+   }
+  },
+  {
+   "card": {
+    "x": 405.9,
+    "y": 91,
+    "w": 94,
+    "h": 126,
+    "right": 499.9,
+    "bottom": 217
+   },
+   "name": {
+    "text": "Gin­ger",
+    "rect": {
+     "x": 419.9,
+     "y": 163,
+     "w": 66,
+     "h": 20,
+     "right": 485.9,
+     "bottom": 183
+    },
+    "inFrame": true,
+    "ov": {
+     "dW": 0,
+     "dH": 0
+    }
+   },
+   "price": {
+    "text": "1",
+    "rect": {
+     "x": 415.9,
+     "y": 137,
+     "w": 22,
+     "h": 22,
+     "right": 437.9,
+     "bottom": 159
+    },
+    "inFrame": true
+   },
+   "tag": {
+    "text": "On my list",
+    "rect": {
+     "x": 415.9,
+     "y": 187,
+     "w": 74,
+     "h": 20,
+     "right": 489.9,
+     "bottom": 207
+    },
+    "inFrame": true,
+    "ov": {
+     "dW": 0,
+     "dH": 0
+    }
+   }
+  },
+  {
+   "card": {
+    "x": 503.9,
+    "y": 91,
+    "w": 94,
+    "h": 126,
+    "right": 597.9,
+    "bottom": 217
+   },
+   "name": {
+    "text": "Tofu",
+    "rect": {
+     "x": 517.9,
+     "y": 163,
+     "w": 66,
+     "h": 20,
+     "right": 583.9,
+     "bottom": 183
+    },
+    "inFrame": true,
+    "ov": {
+     "dW": 0,
+     "dH": 0
+    }
+   },
+   "price": {
+    "text": "2",
+    "rect": {
+     "x": 513.9,
+     "y": 137,
+     "w": 22,
+     "h": 22,
+     "right": 535.9,
+     "bottom": 159
+    },
+    "inFrame": true
+   },
+   "tag": {
+    "text": "Food",
+    "rect": {
+     "x": 513.9,
+     "y": 187,
+     "w": 74,
+     "h": 20,
+     "right": 587.9,
+     "bottom": 207
+    },
+    "inFrame": true,
+    "ov": {
+     "dW": 0,
+     "dH": 0
+    }
+   }
+  }
+ ],
+ "buyRect": {
+  "x": 13.9,
+  "y": 267,
+  "w": 170.8,
+  "h": 48,
+  "right": 184.7,
+  "bottom": 315
+ },
+ "doneRect": {
+  "x": 13.9,
+  "y": 327,
+  "w": 584,
+  "h": 48,
+  "right": 597.9,
+  "bottom": 375
+ },
+ "mathRect": {
+  "x": 371.5,
+  "y": 276,
+  "w": 98.7,
+  "h": 30,
+  "right": 470.2,
+  "bottom": 306
+ },
+ "mathInFrame": true,
+ "cbNums": [
+  {
+   "text": "6",
+   "rect": {
+    "x": 765.8,
+    "y": 154.5,
+    "w": 9.3,
+    "h": 24,
+    "right": 775,
+    "bottom": 178.5
+   },
+   "inFrame": true,
+   "ov": {
+    "dW": 0,
+    "dH": 0
+   }
+  },
+  {
+   "text": "6",
+   "rect": {
+    "x": 765.8,
+    "y": 210,
+    "w": 9.3,
+    "h": 24,
+    "right": 775,
+    "bottom": 234
+   },
+   "inFrame": true,
+   "ov": {
+    "dW": 0,
+    "dH": 0
+   }
+  }
+ ],
+ "named": {
+  "title": {
+   "text": "② The Market",
+   "ov": {
+    "dW": 0,
+    "dH": 0
+   }
+  },
+  "guide": {
+   "text": "Tap a card. Get your recipe food first.",
+   "ov": {
+    "dW": 0,
+    "dH": 0
+   }
+  },
+  "handTag": {
+   "text": "Fish",
+   "ov": {
+    "dW": 0,
+    "dH": 0
+   }
+  },
+  "buy": {
+   "text": "1🧺Buy (3 coins)",
+   "ov": {
+    "dW": 0,
+    "dH": 0
+   }
+  },
+  "hold": {
+   "text": "2📎Maybe later",
+   "ov": {
+    "dW": 0,
+    "dH": 0
+   }
+  },
+  "skip": {
+   "text": "3Skip",
+   "ov": {
+    "dW": 0,
+    "dH": 0
+   }
+  },
+  "done": {
+   "text": "4Done with this stop",
+   "ov": {
+    "dW": 0,
+    "dH": 0
+   }
+  },
+  "math": {
+   "text": "12 − 3 → 9",
+   "ov": {
+    "dW": 0,
+    "dH": 0
+   }
+  }
+ },
+ "sweepCount": 17,
+ "sweep": [
+  {
+   "cls": "hand hand--fan hand--crowded stall-hand",
+   "text": "✓3FishOn my listFish3Pot­atoFo",
+   "dW": 0,
+   "dH": 6
+  },
+  {
+   "cls": "card-view-gem",
+   "text": "3",
+   "dW": 0,
+   "dH": 3
+  },
+  {
+   "cls": "pglow-sweep",
+   "text": "",
+   "dW": 337,
+   "dH": 13
+  },
+  {
+   "cls": "card-view-gem",
+   "text": "3",
+   "dW": 0,
+   "dH": 3
+  },
+  {
+   "cls": "pglow-sweep",
+   "text": "",
+   "dW": 337,
+   "dH": 13
+  },
+  {
+   "cls": "card-view-gem",
+   "text": "1",
+   "dW": 0,
+   "dH": 3
+  },
+  {
+   "cls": "pglow-sweep",
+   "text": "",
+   "dW": 337,
+   "dH": 13
+  },
+  {
+   "cls": "card-view-gem",
+   "text": "1",
+   "dW": 0,
+   "dH": 3
+  },
+  {
+   "cls": "pglow-sweep",
+   "text": "",
+   "dW": 337,
+   "dH": 13
+  },
+  {
+   "cls": "card-view-gem",
+   "text": "1",
+   "dW": 0,
+   "dH": 3
+  },
+  {
+   "cls": "pglow-sweep",
+   "text": "",
+   "dW": 337,
+   "dH": 13
+  },
+  {
+   "cls": "card-view-gem",
+   "text": "2",
+   "dW": 0,
+   "dH": 3
+  },
+  {
+   "cls": "pglow-sweep",
+   "text": "",
+   "dW": 337,
+   "dH": 13
+  },
+  {
+   "cls": "dz-icon",
+   "text": "🧺",
+   "dW": 0,
+   "dH": 4
+  },
+  {
+   "cls": "dz-icon",
+   "text": "📎",
+   "dW": 0,
+   "dH": 4
+  },
+  {
+   "cls": "popup-head-main",
+   "text": "② The Market🐟🌿🫚🧄",
+   "dW": 8,
+   "dH": 0
+  },
+  {
+   "cls": "popup-sub",
+   "text": "🐟🌿🫚🧄",
+   "dW": 8,
+   "dH": 0
+  }
+ ]
+}
+done

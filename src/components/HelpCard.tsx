@@ -7,9 +7,10 @@ import { strings } from '../data/strings';
 import { helpHints } from '../game/selectors';
 import { fmt } from '../game/stations/shared';
 import { gameConfig } from '../config/gameConfig';
-import { canDoLabel, cardName, stationName } from '../i18n/cardText';
+import { canDoLabel, cardName, stationGoal, stationName } from '../i18n/cardText';
 import type { GameState, PlayerId } from '../game/types';
 import { CardIcon } from './CardIcon';
+import { MetaIcon } from './cards/MetaIcon';
 import { StationPopup } from './StationPopup';
 
 export function HelpCard({
@@ -49,12 +50,37 @@ export function HelpCard({
               : hints.stationName}
           </p>
         )}
+        {/* R2-6（团队第 2 轮）：本站的「Practice: …」练习标签从站点
+            顶部挪进这张「How to play」卡里——顶部只留站名 + 一句说明，
+            练习目标想看时来这里看（当前站的 goal，stationGoal 既有口径） */}
+        {state.phase === 'station' && (
+          <p className="help-line">
+            {stationGoal(gameConfig.stations[state.stationIndex].id)}
+          </p>
+        )}
         {hints.canDo.length > 0 && (
           <p className="help-line">
             {strings.actions.helpCanDo}
             {hints.canDo.map(canDoLabel).join(', ')}
           </p>
         )}
+        {/* R6（ww Part 2.4）：类别记号图例——与卡面记号同图同名，
+            孩子在卡上看到记号，来这里能查到全名 */}
+        <div className="help-line help-legend">
+          <span className="help-legend-title">{strings.help.iconLegend}</span>
+          <span className="help-legend-item">
+            <MetaIcon kind="list" />
+            {strings.panel.tagNeeded}
+          </span>
+          <span className="help-legend-item">
+            <MetaIcon kind="food" />
+            {strings.panel.tagIngredient}
+          </span>
+          <span className="help-legend-item">
+            <MetaIcon kind="fun" />
+            {strings.panel.tagTemptation}
+          </span>
+        </div>
         <p className="help-line help-line--tip">{hints.tip}</p>
       </div>
     </StationPopup>

@@ -710,21 +710,82 @@
   /* R3 修复（必改 2）：宽度封顶 560——1024 宽下居中占 232..792，
      进不了两侧 bot 列（≤190）与顶栏动作区 */
   max-width: min(90vw, 560px);
+  /* R6 吐司回归加固（ww 复核 874 压语言开关）：≤900px 窄幅下再收一档——
+     居中条的右缘恒定停在右上动作区（语言开关左缘）之外，横向净空
+     不再只靠纵向 40px 间隔兜底。667 宽：条宽 ≤367、右缘 ≤517 <
+     开关左缘 539；874 宽：560 封顶不变、右缘 ≤717 < 开关左缘 746。
+     实测五尺寸 × 桌面/手机横屏共 7 组、每组多条吐司与开关交叠 0px² */
+  /* toast-4s：整条是关闭钮——文字+× 横排居中，点击区 ≥48px
+     （全局 button 重置也给 --tap-min-size，此处显式再钉一遍） */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min-size);
   padding: var(--space-2) var(--space-4);
   background: var(--color-ink);
   color: var(--color-bg);
   border-radius: var(--radius-button);
   font-size: var(--font-size-sm);
+  text-align: center;
   box-shadow: var(--shadow-md);
+  /* 条本体吃点击（点按即关）；stack 整层仍 pointer-events:none，
+     条外一切按钮照常可点 */
+  pointer-events: auto;
   /* R2-4：消失前 300ms 淡出（Toast.tsx 的 TOAST_FADE_MS 同值） */
   transition: opacity 300ms var(--motion-ease);
+}
+
+/* R6 加固（见 .toast 内注）：窄幅桌面下吐司宽度再封顶，右缘不进开关区 */
+@media (min-width: 641px) and (max-width: 900px) {
+  .toast {
+    max-width: min(560px, calc(100vw - 300px));
+  }
+}
+
+/* R6 N2（ww 必改）：弹窗在场时 toast 原车道（顶中 88）正撞浮在
+   舞台顶中的站名签（.popup-head，R10E），且 z 5 被弹窗（z 21）
+   压住——实测 1440 市场景 toast∩站名签 = 7285px²、消息读不清，
+   关闭 × 也被背板盖住点不到。修法分两层：
+   ① 层级：弹窗在场时 toast 升到弹窗之上（z 30，仍低于高光层
+   40）——消息永远读得到、× 点得到，不再从卡/签后「探头」；
+   ② 几何（市场景专属）：市场弹窗是全高纵列（签在顶、摊位帖在
+   底），中段是空的压暗岛面——toast 挪到 33vh 的空段，与签、
+   开关、扇上卡名零重叠（其余弹窗的签在盒内顶端、原车道实测
+   不相交，保持原位只升层级）。
+   无弹窗时（bot 回合主场景）原车道原层级不变；手机横屏 toast
+   锚在岛左下、与竖栏里的签/开关天然不相交，不走此规则 */
+.app-shell:has(.popup-backdrop):not(:has(.game-screen--phone-land)) .toast-stack {
+  z-index: 30;
+}
+.app-shell:has(.popup[data-testid='panel-market']):not(:has(.game-screen--phone-land)) .toast-stack {
+  top: 33vh;
+}
+/* R6 N2 续（实测修正）：33vh 车道在 1024/1280 遇上三行合并长吐司
+   （多条 bot 行动并成一条）时，吐司下缘仍压到扇上卡名（像素采样
+   1.06:1 的假低读数就是吐司盖名）——市场车道里吐司限宽 480px，
+   长文案折到至多 2 行，下缘与卡名留出间距；短吐司不受影响 */
+.app-shell:has(.popup[data-testid='panel-market']):not(:has(.game-screen--phone-land)) .toast {
+  max-width: 480px;
+}
+
+/* 合并条换行时行距收紧（单条仍是一行药丸的观感） */
+.toast-text {
+  line-height: 1.35;
+}
+
+.toast-x {
+  flex: none;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  opacity: 0.7;
 }
 
 .toast--leaving {
   opacity: 0;
 }
 
-/* R5：新提示轻轻落下——200ms 内，pointer-events 本就关闭不挡操作 */
+/* R5：新提示轻轻落下——200ms 内；stack 层 pointer-events 关闭不挡条外操作 */
 @media (prefers-reduced-motion: no-preference) {
   .toast {
     animation: toast-in 200ms var(--motion-ease);
@@ -796,6 +857,23 @@
 .game-right .speech-bubble::before {
   left: auto;
   right: var(--space-5);
+}
+
+/* 提议浮签在场时撤掉角落气泡（.bot-slot 只在非手机布局出现）：
+   双列槽位放不下它——底条 .board3d-overlay 吸在棋盘区底缘
+   （z2 > 列 z1 层叠），提议时整条 ~222px 高、顶缘探进列区；
+   左列下锚位气泡钉在列底，No 钮整颗被裁在底条左上缘
+   （「提议卡左列裁边」），左右两列上锚位气泡的按钮下沿同样探进
+   条顶 ~15–47px（1024×768 实测）。收槽宽/抬锚位都没有完整解：
+   列内垂直空间不够 300px 高的气泡整颗躲开底条。浮签卡是
+   ww 定稿的第一回应面（文案+两件菜图+Yes/No，键盘 1/2 键位
+   也挂到浮签按钮上），角落气泡只作同命令的冗余入口——裁边的
+   半成品不如不留，display:none 让 e2e 布局盒过滤与读屏树同时
+   略过它（手机横屏栏内气泡是流内副入口，不受影响）。 */
+@media (min-width: 901px) {
+  .game-screen:has(.board-await) .bot-slot .speech-bubble {
+    display: none;
+  }
 }
 
 .speech-bubble-actions {
@@ -924,6 +1002,14 @@
 .swap-row-name {
   font-weight: var(--font-weight-bold);
   min-width: 3em;
+}
+
+/* 伙伴站详情里的全词性格名（图标+缩写小徽已撤）：名字下方的淡色副行 */
+.swap-row-trait {
+  display: block;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-muted);
 }
 
 /* —— 天气转盘（结果由引擎先定，这里只演出）—— */

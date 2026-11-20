@@ -336,11 +336,13 @@ describe('Slice D 交付样式验收', () => {
     expect(block).toContain('translateY(-3px)');
     expect(block).toContain('var(--color-ink)');
   });
-  it('bot 性格徽标按人配色（三种 accent token 各就各位）', () => {
+  it('性格小徽已撤：常驻面无 bot-trait/think-trait，气泡只剩按人描边色', () => {
+    // R-traits 清理：图标+1–2字缩写孩子读不懂——全词性格只活在详情
+    // 层（ProfileCard pc-badge、伙伴站 swap-row-trait）；气泡保留与
+    // 棋子/头像同色的描边作「谁在说」非文字线索
+    expect(boardCss).not.toContain('.bot-trait');
+    expect(boardCss).not.toContain('.think-trait');
     for (const k of ['steady', 'impulsive', 'follower']) {
-      expect(cssBlock(boardCss, `.bot-trait--${k}`)).toContain(
-        `var(--bot-accent-${k})`,
-      );
       expect(cssBlock(boardCss, `.think-bubble--${k}`)).toContain(
         `var(--bot-accent-${k})`,
       );

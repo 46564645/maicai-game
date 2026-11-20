@@ -1,0 +1,153 @@
+  [sweep phone/charsel] overflowEls=1 leafText=1 cardTextOnArt=0px² stray=39
+    ov {"sel":"span.splash-coin","text":"🪙","dW":0,"dH":11,"leaf":true,"fs":64}
+  jump st1 ok=true
+  [sweep phone/st1-draw] overflowEls=29 leafText=24 cardTextOnArt=0px² stray=32
+    ov {"sel":"span.stop-pips","text":"","dW":0,"dH":1,"leaf":false,"fs":20}
+    ov {"sel":"span.phone-bot-avatar","text":"🛡️","dW":1,"dH":1,"leaf":true,"fs":20}
+    ov {"sel":"span.phone-bot-avatar","text":"⚡","dW":1,"dH":1,"leaf":true,"fs":20}
+    ov {"sel":"span.phone-bot-avatar","text":"🐾","dW":1,"dH":1,"leaf":true,"fs":20}
+    ov {"sel":"span.cc-col","text":"0123456789","dW":0,"dH":180,"leaf":false,"fs":20}
+    ov {"sel":"span.cc-strip","text":"0123456789","dW":0,"dH":3,"leaf":false,"fs":20}
+    ov {"sel":"span.cc-digit","text":"0","dW":0,"dH":3,"leaf":true,"fs":20}
+    ov {"sel":"span.cc-digit","text":"1","dW":0,"dH":3,"leaf":true,"fs":20}
+    ov {"sel":"span.cc-digit","text":"2","dW":0,"dH":3,"leaf":true,"fs":20}
+    ov {"sel":"span.cc-digit","text":"3","dW":0,"dH":3,"leaf":true,"fs":20}
+    ov {"sel":"span.cc-digit","text":"4","dW":0,"dH":3,"leaf":true,"fs":20}
+    ov {"sel":"span.cc-digit","text":"5","dW":0,"dH":3,"leaf":true,"fs":20}
+    ov {"sel":"span.cc-digit","text":"6","dW":0,"dH":3,"leaf":true,"fs":20}
+    ov {"sel":"span.cc-digit","text":"7","dW":0,"dH":3,"leaf":true,"fs":20}
+  jump st2 ok=true
+  [sweep phone/st2-market] overflowEls=12 leafText=8 cardTextOnArt=0px² stray=33
+    ov {"sel":"div.hand.hand--fan","text":"✓3FishOn my listFish1Car­rotFoodCarr","dW":0,"dH":6,"leaf":false,"fs":20}
+    ov {"sel":"span.card-view-gem","text":"3","dW":0,"dH":3,"leaf":true,"fs":15}
+    ov {"sel":"span.card-view-gem","text":"1","dW":0,"dH":3,"leaf":true,"fs":15}
+    ov {"sel":"span.card-view-gem","text":"1","dW":0,"dH":3,"leaf":true,"fs":15}
+    ov {"sel":"span.card-view-gem","text":"3","dW":0,"dH":3,"leaf":true,"fs":15}
+    ov {"sel":"span.card-view-gem","text":"1","dW":0,"dH":3,"leaf":true,"fs":15}
+    ov {"sel":"span.card-view-gem","text":"3","dW":0,"dH":3,"leaf":true,"fs":15}
+    ov {"sel":"span.dz-icon","text":"🧺","dW":0,"dH":4,"leaf":true,"fs":24}
+    ov {"sel":"span.dz-icon","text":"📎","dW":0,"dH":4,"leaf":true,"fs":24}
+    ov {"sel":"div.popup-head-main","text":"② The Market🐟🌿🫚🧄","dW":8,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.popup-sub","text":"🐟🌿🫚🧄","dW":8,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"span.cb-cells","text":"","dW":1,"dH":1,"leaf":false,"fs":20}
+  jump st3 ok=true
+  [sweep phone/st3-partner] overflowEls=43 leafText=27 cardTextOnArt=0px² stray=27
+    ov {"sel":"div.phone-bots","text":"Lap 1/3🛡️🛡️Ca6⚡⚡Ea3🐾Me too!🐾🐾Go","dW":0,"dH":47,"leaf":false,"fs":20}
+    ov {"sel":"span.stop-pips","text":"","dW":0,"dH":1,"leaf":false,"fs":20}
+    ov {"sel":"span.phone-bot-avatar","text":"🛡️","dW":1,"dH":1,"leaf":true,"fs":20}
+    ov {"sel":"span.phone-bot-avatar","text":"⚡","dW":1,"dH":1,"leaf":true,"fs":20}
+    ov {"sel":"span.phone-bot-wrap","text":"🐾Me too!🐾🐾Go7","dW":0,"dH":47,"leaf":false,"fs":20}
+    ov {"sel":"span.phone-bot-avatar","text":"🐾","dW":1,"dH":1,"leaf":true,"fs":20}
+    ov {"sel":"div.popup-backdrop","text":"③ Friends StopPractice: trade and sh","dW":130,"dH":3,"leaf":false,"fs":20}
+    ov {"sel":"div.popup","text":"③ Friends StopPractice: trade and sh","dW":130,"dH":3,"leaf":false,"fs":20}
+    ov {"sel":"div.popup-body","text":"Stic­kerBuy together — everyone pays","dW":138,"dH":7,"leaf":false,"fs":20}
+    ov {"sel":"div.panel-body","text":"Stic­kerBuy together — everyone pays","dW":138,"dH":7,"leaf":false,"fs":20}
+    ov {"sel":"div.tc-face.tc-face--front","text":"Stic­kerBuy together — everyone pays","dW":0,"dH":81,"leaf":false,"fs":20}
+    ov {"sel":"div.card-view","text":"Stic­kerBuy together — everyone pays","dW":0,"dH":83,"leaf":false,"fs":20}
+    ov {"sel":"div.panel-foot","text":"👍2Yes🔊👋No tha­nks","dW":138,"dH":7,"leaf":false,"fs":20}
+    ov {"sel":"div.hand.hand--fan","text":"👍2Yes🔊👋No tha­nks","dW":16,"dH":7,"leaf":false,"fs":20}
+  jump st4 ok=true
+  [sweep phone/st4-bus] overflowEls=25 leafText=16 cardTextOnArt=0px² stray=25
+    ov {"sel":"div.phone-bots","text":"Lap 1/3🛡️🛡️Ca4⚡⚡Ea1🐾Fare noted, p","dW":0,"dH":48,"leaf":false,"fs":20}
+    ov {"sel":"span.stop-pips","text":"","dW":0,"dH":1,"leaf":false,"fs":20}
+    ov {"sel":"span.phone-bot-avatar","text":"🛡️","dW":1,"dH":1,"leaf":true,"fs":20}
+    ov {"sel":"span.phone-bot-avatar","text":"⚡","dW":1,"dH":1,"leaf":true,"fs":20}
+    ov {"sel":"span.phone-bot-wrap","text":"🐾Fare noted, pay later🐾🐾Go3","dW":0,"dH":48,"leaf":false,"fs":20}
+    ov {"sel":"span.phone-bot-avatar","text":"🐾","dW":1,"dH":1,"leaf":true,"fs":20}
+    ov {"sel":"div.popup-body","text":"🚌2Bus tic­ket→🚌Put in 2 coins🔊We ","dW":5,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.panel-body","text":"🚌2Bus tic­ket→🚌Put in 2 coins🔊We ","dW":5,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.bus-stage","text":"🚌2Bus tic­ket→🚌Put in 2 coins🔊","dW":5,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"span.card-view-art","text":"🚌","dW":0,"dH":16,"leaf":false,"fs":20}
+    ov {"sel":"span.card-view-gem","text":"2","dW":0,"dH":3,"leaf":true,"fs":16}
+    ov {"sel":"span.dz-icon","text":"🚌","dW":0,"dH":4,"leaf":true,"fs":24}
+    ov {"sel":"span.cc-col.cc-col--ones","text":"0123456789","dW":0,"dH":183,"leaf":false,"fs":20}
+    ov {"sel":"span.cc-strip","text":"0123456789","dW":0,"dH":3,"leaf":false,"fs":20}
+  jump st5 ok=true
+  [sweep phone/st5-event] overflowEls=7 leafText=1 cardTextOnArt=0px² stray=14
+    ov {"sel":"div.weather-moment","text":"▼☀️🌧️🌬️It is Sunny!","dW":19,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.weather-spin","text":"▼☀️🌧️🌬️It is Sunny!","dW":19,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.weather-dial","text":"▼☀️🌧️🌬️","dW":19,"dH":3,"leaf":false,"fs":20}
+    ov {"sel":"span.weather-pointer","text":"▼","dW":0,"dH":4,"leaf":true,"fs":24}
+    ov {"sel":"div.weather-wheel","text":"☀️🌧️🌬️","dW":22,"dH":6,"leaf":false,"fs":20}
+    ov {"sel":"span.weather-wheel-item","text":"🌧️","dW":11,"dH":5,"leaf":false,"fs":20}
+    ov {"sel":"span.weather-wheel-item","text":"🌬️","dW":11,"dH":5,"leaf":false,"fs":20}
+  [sweep phone/st5-moment] overflowEls=0 leafText=0 cardTextOnArt=0px² stray=12
+  jump st6 ok=true
+  [sweep phone/st6-parent] overflowEls=18 leafText=15 cardTextOnArt=0px² stray=23
+    ov {"sel":"span.stop-pips","text":"","dW":0,"dH":1,"leaf":false,"fs":20}
+    ov {"sel":"span.phone-bot-avatar","text":"🛡️","dW":1,"dH":1,"leaf":true,"fs":20}
+    ov {"sel":"span.phone-bot-avatar","text":"⚡","dW":1,"dH":1,"leaf":true,"fs":20}
+    ov {"sel":"span.phone-bot-avatar","text":"🐾","dW":1,"dH":1,"leaf":true,"fs":20}
+    ov {"sel":"span.parent-hero-avatar","text":"👩","dW":0,"dH":1,"leaf":true,"fs":28}
+    ov {"sel":"span.cc-col.cc-col--ones","text":"0123456789","dW":0,"dH":180,"leaf":false,"fs":20}
+    ov {"sel":"span.cc-strip","text":"0123456789","dW":0,"dH":3,"leaf":false,"fs":20}
+    ov {"sel":"span.cc-digit","text":"0","dW":0,"dH":3,"leaf":true,"fs":20}
+    ov {"sel":"span.cc-digit","text":"1","dW":0,"dH":3,"leaf":true,"fs":20}
+    ov {"sel":"span.cc-digit","text":"2","dW":0,"dH":3,"leaf":true,"fs":20}
+    ov {"sel":"span.cc-digit","text":"3","dW":0,"dH":3,"leaf":true,"fs":20}
+    ov {"sel":"span.cc-digit","text":"4","dW":0,"dH":3,"leaf":true,"fs":20}
+    ov {"sel":"span.cc-digit","text":"5","dW":0,"dH":3,"leaf":true,"fs":20}
+    ov {"sel":"span.cc-digit","text":"6","dW":0,"dH":3,"leaf":true,"fs":20}
+  jump st7 ok=true
+  [sweep phone/st7-store] overflowEls=55 leafText=37 cardTextOnArt=0px² stray=37
+    ov {"sel":"div.phone-bots","text":"Lap 1/3🛡️🛡️Ca2⚡I want it! Buying i","dW":0,"dH":42,"leaf":false,"fs":20}
+    ov {"sel":"span.stop-pips","text":"","dW":0,"dH":1,"leaf":false,"fs":20}
+    ov {"sel":"span.phone-bot-avatar","text":"🛡️","dW":1,"dH":1,"leaf":true,"fs":20}
+    ov {"sel":"span.phone-bot-wrap","text":"⚡I want it! Buying it⚡⚡Ea0","dW":70,"dH":42,"leaf":false,"fs":20}
+    ov {"sel":"span.phone-bot-avatar","text":"⚡","dW":1,"dH":1,"leaf":true,"fs":20}
+    ov {"sel":"span.phone-bot-avatar","text":"🐾","dW":1,"dH":1,"leaf":true,"fs":20}
+    ov {"sel":"div.hand-item.hand-item--sel","text":"✓4FishFish","dW":10,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.tc-face.tc-face--front","text":"✓4Fish","dW":0,"dH":15,"leaf":false,"fs":20}
+    ov {"sel":"button.card-view.card-view--selected","text":"✓4Fish","dW":0,"dH":20,"leaf":false,"fs":20}
+    ov {"sel":"span.card-view-board","text":"✓4Fish","dW":0,"dH":24,"leaf":false,"fs":20}
+    ov {"sel":"span.card-view-gem","text":"4","dW":0,"dH":3,"leaf":true,"fs":15}
+    ov {"sel":"div.tc-face.tc-face--front","text":"✓2Green Onion","dW":0,"dH":18,"leaf":false,"fs":20}
+    ov {"sel":"button.card-view","text":"✓2Green Onion","dW":0,"dH":20,"leaf":false,"fs":20}
+    ov {"sel":"span.card-view-board","text":"✓2Green Onion","dW":0,"dH":24,"leaf":false,"fs":20}
+  jump st8 ok=true
+  [sweep phone/st8-cook] overflowEls=26 leafText=15 cardTextOnArt=0px² stray=30
+    ov {"sel":"span.stop-pips","text":"","dW":1,"dH":1,"leaf":false,"fs":20}
+    ov {"sel":"span.phone-bot-avatar","text":"🛡️","dW":1,"dH":1,"leaf":true,"fs":20}
+    ov {"sel":"span.phone-bot-avatar","text":"⚡","dW":1,"dH":1,"leaf":true,"fs":20}
+    ov {"sel":"span.phone-bot-avatar","text":"🐾","dW":1,"dH":1,"leaf":true,"fs":20}
+    ov {"sel":"header.popup-head","text":"⑧ Home for DinnerPractice: see your ","dW":0,"dH":2,"leaf":false,"fs":20}
+    ov {"sel":"div.popup-head-main","text":"⑧ Home for DinnerPractice: see your ","dW":0,"dH":4,"leaf":false,"fs":20}
+    ov {"sel":"div.popup-sub","text":"Practice: see your choices🐟✓🌿🫚🧄","dW":0,"dH":4,"leaf":false,"fs":20}
+    ov {"sel":"span.popup-recipe","text":"🐟✓🌿🫚🧄","dW":0,"dH":4,"leaf":false,"fs":20}
+    ov {"sel":"span.rcp-item.rcp-item--got","text":"🐟✓","dW":5,"dH":5,"leaf":false,"fs":15}
+    ov {"sel":"i.rcp-check","text":"✓","dW":0,"dH":1,"leaf":true,"fs":9.9}
+    ov {"sel":"div.popup-body","text":"Put your food on the plateFishMy bas","dW":1,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.panel-body","text":"Put your food on the plateFishMy bas","dW":1,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.cook-stage","text":"Fish","dW":1,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"span.cc-col.cc-col--ones","text":"0123456789","dW":0,"dH":180,"leaf":false,"fs":20}
+  [sweep phone/wallet] overflowEls=27 leafText=16 cardTextOnArt=0px² stray=51
+    ov {"sel":"span.stop-pips","text":"","dW":1,"dH":1,"leaf":false,"fs":20}
+    ov {"sel":"span.phone-bot-avatar","text":"🛡️","dW":1,"dH":1,"leaf":true,"fs":20}
+    ov {"sel":"span.phone-bot-avatar","text":"⚡","dW":1,"dH":1,"leaf":true,"fs":20}
+    ov {"sel":"span.phone-bot-avatar","text":"🐾","dW":1,"dH":1,"leaf":true,"fs":20}
+    ov {"sel":"header.popup-head","text":"⑧ Home for DinnerPractice: see your ","dW":0,"dH":2,"leaf":false,"fs":20}
+    ov {"sel":"div.popup-head-main","text":"⑧ Home for DinnerPractice: see your ","dW":0,"dH":4,"leaf":false,"fs":20}
+    ov {"sel":"div.popup-sub","text":"Practice: see your choices🐟✓🌿🫚🧄","dW":0,"dH":4,"leaf":false,"fs":20}
+    ov {"sel":"span.popup-recipe","text":"🐟✓🌿🫚🧄","dW":0,"dH":4,"leaf":false,"fs":20}
+    ov {"sel":"span.rcp-item.rcp-item--got","text":"🐟✓","dW":5,"dH":5,"leaf":false,"fs":15}
+    ov {"sel":"i.rcp-check","text":"✓","dW":0,"dH":1,"leaf":true,"fs":9.9}
+    ov {"sel":"div.popup-body","text":"Put your food on the plateFishMy bas","dW":1,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.panel-body","text":"Put your food on the plateFishMy bas","dW":1,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.cook-stage","text":"Fish","dW":1,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"span.cc-col.cc-col--ones","text":"0123456789","dW":0,"dH":180,"leaf":false,"fs":20}
+  [sweep phone/help] overflowEls=26 leafText=15 cardTextOnArt=0px² stray=38
+    ov {"sel":"span.stop-pips","text":"","dW":1,"dH":1,"leaf":false,"fs":20}
+    ov {"sel":"span.phone-bot-avatar","text":"🛡️","dW":1,"dH":1,"leaf":true,"fs":20}
+    ov {"sel":"span.phone-bot-avatar","text":"⚡","dW":1,"dH":1,"leaf":true,"fs":20}
+    ov {"sel":"span.phone-bot-avatar","text":"🐾","dW":1,"dH":1,"leaf":true,"fs":20}
+    ov {"sel":"header.popup-head","text":"⑧ Home for DinnerPractice: see your ","dW":0,"dH":2,"leaf":false,"fs":20}
+    ov {"sel":"div.popup-head-main","text":"⑧ Home for DinnerPractice: see your ","dW":0,"dH":4,"leaf":false,"fs":20}
+    ov {"sel":"div.popup-sub","text":"Practice: see your choices🐟✓🌿🫚🧄","dW":0,"dH":4,"leaf":false,"fs":20}
+    ov {"sel":"span.popup-recipe","text":"🐟✓🌿🫚🧄","dW":0,"dH":4,"leaf":false,"fs":20}
+    ov {"sel":"span.rcp-item.rcp-item--got","text":"🐟✓","dW":5,"dH":5,"leaf":false,"fs":15}
+    ov {"sel":"i.rcp-check","text":"✓","dW":0,"dH":1,"leaf":true,"fs":9.9}
+    ov {"sel":"div.popup-body","text":"Put your food on the plateFishMy bas","dW":1,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.panel-body","text":"Put your food on the plateFishMy bas","dW":1,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"div.cook-stage","text":"Fish","dW":1,"dH":0,"leaf":false,"fs":20}
+    ov {"sel":"span.cc-col.cc-col--ones","text":"0123456789","dW":0,"dH":180,"leaf":false,"fs":20}
+done

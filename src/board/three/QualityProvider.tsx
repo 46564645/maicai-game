@@ -105,38 +105,51 @@ function initialQuality(): Quality {
   return narrow || coarse ? 'medium' : 'high';
 }
 
+/** URL 覆盖合入 flags（Provider 与首屏预热预测共用同一口径） */
+function withUrlOverrides(flags: QualityFlags): QualityFlags {
+  const p = urlParams();
+  if (p.get('fx') === '0') {
+    flags.post = false; // 低配排查/e2e 兜底
+    flags.lens = false;
+  }
+  /* R10E（e2e 修复）：?fast=1 是 e2e/截图驱动专用标志——软渲染
+     （SwiftShader）下一帧要数秒，连续 invalidate 把主线程钉死，
+     主按钮 actionability 永远等不到而整体超时。fast 模式下按
+     low 档压成本：关后期/实时阴影/HDRI/dpr=1/疏花草，岛面照常渲染，
+     只少装饰性开销；产品真实游玩不带 ?fast=1，不受影响。 */
+  if (p.get('fast') === '1') {
+    flags.post = false;
+    flags.lens = false;
+    flags.ao = false;
+    flags.shadowMapSize = 0;
+    flags.dpr = [1, 1];
+    flags.env = false;
+    flags.flora = 0.4;
+  }
+  if (p.get('ao') === '0') flags.ao = false; // T3 接地对照：只关 N8AO，其余后期不变
+  if (p.get('env') === '0') flags.env = false;
+  const tm = p.get('tonemap');
+  if (tm === 'aces' || tm === 'neutral') flags.toneMap = tm;
+  return flags;
+}
+
+/**
+ * 预测正式棋盘会用的画质档 flags（不建 Provider、不引 three）：
+ * 首屏资源预热（src/loadAssets.ts）据此决定要不要把 HDRI /
+ * 后期链分包列入真进度——与 Provider 的初始 flags 完全同源。
+ */
+export function predictFlags(): QualityFlags {
+  return withUrlOverrides(flagsFor(initialQuality()));
+}
+
 export function QualityProvider({ children }: { children: ReactNode }) {
   const [quality, setQuality] = useState<Quality>(initialQuality);
   const value = useMemo<QualityCtx>(() => {
-    const flags = { ...flagsFor(quality) };
-    const p = urlParams();
-    if (p.get('fx') === '0') {
-      flags.post = false; // 低配排查/e2e 兜底
-      flags.lens = false;
-    }
-    /* R10E（e2e 修复）：?fast=1 是 e2e/截图驱动专用标志——软渲染
-       （SwiftShader）下一帧要数秒，连续 invalidate 把主线程钉死，
-       主按钮 actionability 永远等不到而整体超时。fast 模式下按
-       low 档压成本：关后期/实时阴影/HDRI/dpr=1/疏花草，岛面照常渲染，
-       只少装饰性开销；产品真实游玩不带 ?fast=1，不受影响。 */
-    if (p.get('fast') === '1') {
-      flags.post = false;
-      flags.lens = false;
-      flags.ao = false;
-      flags.shadowMapSize = 0;
-      flags.dpr = [1, 1];
-      flags.env = false;
-      flags.flora = 0.4;
-    }
-    if (p.get('ao') === '0') flags.ao = false; // T3 接地对照：只关 N8AO，其余后期不变
-    if (p.get('env') === '0') flags.env = false;
-    const tm = p.get('tonemap');
-    if (tm === 'aces' || tm === 'neutral') flags.toneMap = tm;
     return {
       quality,
       setQuality,
       degrade: () => setQuality((q) => lowerQuality(q)),
-      flags,
+      flags: withUrlOverrides(flagsFor(quality)),
     };
   }, [quality]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

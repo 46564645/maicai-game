@@ -1,0 +1,122 @@
+{
+ "overflow": [],
+ "cardOverlap": {
+  "max": 0,
+  "worst": null
+ },
+ "buttons": [
+  {
+   "sel": "button.lang-toggle-seg",
+   "text": "中文",
+   "w": 64,
+   "h": 48
+  },
+  {
+   "sel": "button.lang-toggle-seg.lang-toggle-seg--on",
+   "text": "EN",
+   "w": 52,
+   "h": 48
+  },
+  {
+   "sel": "button.btn.btn--primary",
+   "text": "1See where my coins we",
+   "w": 394.2,
+   "h": 48
+  },
+  {
+   "sel": "button.btn.btn--secondary",
+   "text": "2Play again",
+   "w": 212.8,
+   "h": 48
+  }
+ ],
+ "fonts": [
+  {
+   "sel": "button.lang-toggle-seg",
+   "text": "中文",
+   "fs": 20
+  },
+  {
+   "sel": "button.lang-toggle-seg.lang-toggle-seg--on",
+   "text": "EN",
+   "fs": 20
+  },
+  {
+   "sel": "h1.intro-title.intro-title--sm",
+   "text": "Dinner time",
+   "fs": 24
+  },
+  {
+   "sel": "p.screen-note",
+   "text": "3 laps done. Everyone ge",
+   "fs": 16
+  },
+  {
+   "sel": "span.plate-name",
+   "text": "Sprout",
+   "fs": 20
+  },
+  {
+   "sel": "span.plate-dish",
+   "text": "Braised Fish",
+   "fs": 16
+  },
+  {
+   "sel": "span.plate-kind",
+   "text": "Next time",
+   "fs": 16
+  },
+  {
+   "sel": "span.plate-name",
+   "text": "Steady",
+   "fs": 20
+  },
+  {
+   "sel": "span.plate-dish",
+   "text": "Pork & Potatoes",
+   "fs": 16
+  },
+  {
+   "sel": "span.plate-kind",
+   "text": "Next time",
+   "fs": 16
+  },
+  {
+   "sel": "span.plate-name",
+   "text": "Zip",
+   "fs": 20
+  },
+  {
+   "sel": "span.plate-dish",
+   "text": "Veggie Stir-Fry",
+   "fs": 16
+  },
+  {
+   "sel": "span.plate-kind",
+   "text": "Next time",
+   "fs": 16
+  },
+  {
+   "sel": "span.plate-name",
+   "text": "Tag",
+   "fs": 20
+  },
+  {
+   "sel": "span.plate-dish",
+   "text": "Tomato & Egg",
+   "fs": 16
+  },
+  {
+   "sel": "span.plate-kind",
+   "text": "Next time",
+   "fs": 16
+  }
+ ],
+ "layout": {
+  "phoneLand": false,
+  "popup": null,
+  "floatStack": null,
+  "reflectionHand": null,
+  "cards": []
+ }
+}

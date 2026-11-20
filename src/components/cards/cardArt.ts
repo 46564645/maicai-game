@@ -9,41 +9,41 @@
  * （rec-tomato-egg-2 与 rec-tomato-egg 同图）、诱惑 4、天气 3、事件 9；
  * 两张邀请卡复用对应诱惑品图（inv-popsicle→冰棍、inv-sticker→贴纸）。
  */
-import artCardBack from '../../assets/cards/card-back.webp';
-import artDishBraisedFish from '../../assets/cards/dish-braised-fish.webp';
-import artDishPotatoPork from '../../assets/cards/dish-potato-pork.webp';
-import artDishTofuSoup from '../../assets/cards/dish-tofu-soup.webp';
-import artDishTomatoEgg from '../../assets/cards/dish-tomato-egg.webp';
-import artDishVeggieStirfry from '../../assets/cards/dish-veggie-stirfry.webp';
-import artEventBagBroken from '../../assets/cards/event-bag-broken.webp';
-import artEventExtraEgg from '../../assets/cards/event-extra-egg.webp';
-import artEventHelpVendor from '../../assets/cards/event-help-vendor.webp';
-import artEventHungry from '../../assets/cards/event-hungry.webp';
-import artEventMuddyShoes from '../../assets/cards/event-muddy-shoes.webp';
-import artEventNeighborGreens from '../../assets/cards/event-neighbor-greens.webp';
-import artEventRainUmbrella from '../../assets/cards/event-rain-umbrella.webp';
-import artEventThirsty from '../../assets/cards/event-thirsty.webp';
-import artEventWindyHat from '../../assets/cards/event-windy-hat.webp';
-import artIngredientCarrot from '../../assets/cards/ingredient-carrot.webp';
-import artIngredientCucumber from '../../assets/cards/ingredient-cucumber.webp';
-import artIngredientEgg from '../../assets/cards/ingredient-egg.webp';
-import artIngredientFish from '../../assets/cards/ingredient-fish.webp';
-import artIngredientGarlic from '../../assets/cards/ingredient-garlic.webp';
-import artIngredientGinger from '../../assets/cards/ingredient-ginger.webp';
-import artIngredientGreens from '../../assets/cards/ingredient-greens.webp';
-import artIngredientMushroom from '../../assets/cards/ingredient-mushroom.webp';
-import artIngredientPork from '../../assets/cards/ingredient-pork.webp';
-import artIngredientPotato from '../../assets/cards/ingredient-potato.webp';
-import artIngredientScallion from '../../assets/cards/ingredient-scallion.webp';
-import artIngredientTofu from '../../assets/cards/ingredient-tofu.webp';
-import artIngredientTomato from '../../assets/cards/ingredient-tomato.webp';
-import artTemptationMarshmallow from '../../assets/cards/temptation-marshmallow.webp';
-import artTemptationPopsicle from '../../assets/cards/temptation-popsicle.webp';
-import artTemptationSticker from '../../assets/cards/temptation-sticker.webp';
-import artTemptationToy from '../../assets/cards/temptation-toy.webp';
-import artWeatherRainy from '../../assets/cards/weather-rainy.webp';
-import artWeatherSunny from '../../assets/cards/weather-sunny.webp';
-import artWeatherWindy from '../../assets/cards/weather-windy.webp';
+import artCardBack from '../../assets/cards/card-back.png';
+import artDishBraisedFish from '../../assets/cards/dish-braised-fish.png';
+import artDishPotatoPork from '../../assets/cards/dish-potato-pork.png';
+import artDishTofuSoup from '../../assets/cards/dish-tofu-soup.png';
+import artDishTomatoEgg from '../../assets/cards/dish-tomato-egg.png';
+import artDishVeggieStirfry from '../../assets/cards/dish-veggie-stirfry.png';
+import artEventBagBroken from '../../assets/cards/event-bag-broken.png';
+import artEventExtraEgg from '../../assets/cards/event-extra-egg.png';
+import artEventHelpVendor from '../../assets/cards/event-help-vendor.png';
+import artEventHungry from '../../assets/cards/event-hungry.png';
+import artEventMuddyShoes from '../../assets/cards/event-muddy-shoes.png';
+import artEventNeighborGreens from '../../assets/cards/event-neighbor-greens.png';
+import artEventRainUmbrella from '../../assets/cards/event-rain-umbrella.png';
+import artEventThirsty from '../../assets/cards/event-thirsty.png';
+import artEventWindyHat from '../../assets/cards/event-windy-hat.png';
+import artIngredientCarrot from '../../assets/cards/ingredient-carrot.png';
+import artIngredientCucumber from '../../assets/cards/ingredient-cucumber.png';
+import artIngredientEgg from '../../assets/cards/ingredient-egg.png';
+import artIngredientFish from '../../assets/cards/ingredient-fish.png';
+import artIngredientGarlic from '../../assets/cards/ingredient-garlic.png';
+import artIngredientGinger from '../../assets/cards/ingredient-ginger.png';
+import artIngredientGreens from '../../assets/cards/ingredient-greens.png';
+import artIngredientMushroom from '../../assets/cards/ingredient-mushroom.png';
+import artIngredientPork from '../../assets/cards/ingredient-pork.png';
+import artIngredientPotato from '../../assets/cards/ingredient-potato.png';
+import artIngredientScallion from '../../assets/cards/ingredient-scallion.png';
+import artIngredientTofu from '../../assets/cards/ingredient-tofu.png';
+import artIngredientTomato from '../../assets/cards/ingredient-tomato.png';
+import artTemptationMarshmallow from '../../assets/cards/temptation-marshmallow.png';
+import artTemptationPopsicle from '../../assets/cards/temptation-popsicle.png';
+import artTemptationSticker from '../../assets/cards/temptation-sticker.png';
+import artTemptationToy from '../../assets/cards/temptation-toy.png';
+import artWeatherRainy from '../../assets/cards/weather-rainy.png';
+import artWeatherSunny from '../../assets/cards/weather-sunny.png';
+import artWeatherWindy from '../../assets/cards/weather-windy.png';
 
 /** 牌背（Deck 顶卡与未翻卡共用） */
 export const CARD_BACK_ART: string = artCardBack;
@@ -100,57 +100,41 @@ export function cardArtFor(cardId: string): string | undefined {
 }
 
 /**
- * 卡 id → 插画自身底色（T-1 统一卡面，Thong 定稿）：卡面背景直接取
- * 插画的底色，图与卡融为一体（无框、无白板）。采样法：对每张
- * 1600×1600 原图取四角各 100×100 区块的均值，再取四角中位数——
- * v3 Coinly 扁平风底色是整幅平涂，四角离散度多在 ±4 以内；个别图
- * 主体探到角区（猪肉/冰棍）用中位数抗离群。2026-11-18 实测采样，
- * 换图时重跑同一采样更新本表。卡背另登（牌背无字，仅作 Deck 底色）。
+ * 全部已登记插画 URL（含牌背，去重）——首次打开缓冲页的「真进度」
+ * 预载清单用（src/loadAssets.ts）：逐张建 Image 拉完才算数。
  */
-const bgByCardId: Record<string, string> = {
-  'ing-tomato': '#fdedcf',
-  'ing-egg': '#fae2bf',
-  'ing-scallion': '#f9e9c8',
-  'ing-greens': '#feecd2',
-  'ing-cucumber': '#fbefd6',
-  'ing-potato': '#fcf1df',
-  'ing-carrot': '#fce7c0',
-  'ing-tofu': '#f8e0b9',
-  'ing-mushroom': '#fce8c3',
-  'ing-pork': '#f8e3bb',
-  'ing-fish': '#fce5bb',
-  'ing-ginger': '#fdeccc',
-  'ing-garlic': '#feecd0',
-  'rec-tomato-egg': '#fdeaca',
-  'rec-tomato-egg-2': '#fdeaca',
-  'rec-veggie-stirfry': '#fdeacb',
-  'rec-potato-pork': '#fde9c9',
-  'rec-tofu-soup': '#feeac6',
-  'rec-braised-fish': '#f8deb2',
-  'tmp-sticker': '#fde5b7',
-  'tmp-marshmallow': '#f2e3c2',
-  'tmp-popsicle': '#e8dcce',
-  'tmp-toy': '#fbe9cc',
-  'inv-popsicle': '#e8dcce',
-  'inv-sticker': '#fde5b7',
-  'wth-sunny': '#fbe5bc',
-  'wth-rainy': '#fcebca',
-  'wth-windy': '#f8e4be',
-  'evt-neighbor-greens': '#feeaca',
-  'evt-help-vendor': '#fee9c9',
-  'evt-extra-egg': '#fcebd0',
-  'evt-thirsty': '#fbeccc',
-  'evt-bag-broken': '#fde9c4',
-  'evt-rain-umbrella': '#f4d99d',
-  'evt-muddy-shoes': '#fceccc',
-  'evt-windy-hat': '#fee9ca',
-  'evt-hungry': '#fde8c9',
-};
+export const CARD_ART_URLS: readonly string[] = [
+  ...new Set([...Object.values(artByCardId), artCardBack]),
+];
+
+/**
+ * 卡面统一底色（Thong 2026-11-20 定稿，取代 T-1 的逐卡采样底色）：
+ * 卡片组成 = 一张纯暖白底卡 + 透明 PNG 直贴 + 下方文字区。全部卡面
+ * 共用同一暖白色 #fff6e9（Coinly 奶油白，与 tokens.css 的
+ * --card-bg-default 同值）；插画已全部换成透明底 PNG（真 alpha），
+ * 直接贴在底卡上，不再需要「底色采样与原图融合」的做法。卡背为
+ * 满版设计图（不透明），由 Deck 整幅 cover 贴上。
+ */
+export const CARD_BASE_BG = '#fff6e9';
 
 /** 牌背底色（深藏青，采样同上） */
 export const CARD_BACK_BG = '#06113f';
 
-/** 卡 id → 插画底色；无图回 undefined（调用方用默认卡面色） */
+/** 卡 id → 卡面底色；有图的卡一律回统一暖白底，无图回 undefined */
 export function cardBgFor(cardId: string): string | undefined {
-  return bgByCardId[cardId];
+  return artByCardId[cardId] ? CARD_BASE_BG : undefined;
+}
+
+/** 满幅原画的内缩比例（R6 item 8）：evt-rain-umbrella 的原画本身是
+ *  满幅构图（伞面/雨点/水洼都切到画布边），与其他事件图（主体带
+ *  留白）不同——直接铺满美术区时看起来像「整卡出血」。渲染时把
+ *  这张图缩到 0.86，四周露出卡面底色，回到标准卡面剖面（上图下文、
+ *  图含于美术区）。不改原画文件，伞尖仍是原画自身的形状 */
+const ART_INSET_BY_ID: Record<string, number> = {
+  'evt-rain-umbrella': 0.86,
+};
+
+/** 卡 id → 原画内缩比例；无条目回 undefined（不内缩） */
+export function cardArtInsetFor(cardId: string): number | undefined {
+  return ART_INSET_BY_ID[cardId];
 }

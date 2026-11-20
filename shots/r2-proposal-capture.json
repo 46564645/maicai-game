@@ -1,0 +1,30 @@
+{
+  "seed": 3,
+  "snap": {
+    "pill": true,
+    "pillText": "Zip wants your Tofu for its Tomato. Yes or No?",
+    "pillThumbs": 2,
+    "pillYes": true,
+    "pillNo": true,
+    "bubble": true,
+    "bubbleText": "Zip · Friends Stop\"My Tomato for your Tofu?\"No lending or giving coins here.1Yes2No thanks",
+    "botThinking": false,
+    "lap": 1,
+    "station": 3,
+    "replay": false,
+    "stallCards": 0,
+    "pendingChip": false
+  },
+  "check": {
+    "text": "Zip wants your Tofu for its Tomato. Yes or No?",
+    "thumbs": 2,
+    "thumbImgs": [
+      "ingredient-tofu-C5hXmw0B.webp",
+      "ingredient-tomato-I5Pj_aCr.webp"
+    ],
+    "yesH": 52,
+    "noH": 52,
+    "bubblePresent": true,
+    "anyBotThinking": false
+  }
+}

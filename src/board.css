@@ -136,6 +136,10 @@
   align-items: center;
   gap: var(--space-2);
   max-width: 100%;
+  /* 浮签能收进比它最小内容宽更窄的容器：flex 子项 min-width:auto 时
+     最小内容宽会把盒子对称撑出容器、居中容器里左半先被裁（与
+     .phone-rail .popup-head 的 R2-2③ 裁边同型）。 */
+  min-width: 0;
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-card);
   background: var(--stage-pill-bg);
@@ -191,6 +195,12 @@
   background: var(--color-ink);
   color: var(--stage-pill-fg);
   border-color: var(--color-ink);
+}
+
+/* 墨蓝底上的数字键徽标反色（同 .btn.btn--navy .key-hint 口径） */
+.board-await-no .key-hint {
+  background: var(--key-hint-bg-on-primary);
+  color: var(--key-hint-fg-on-primary);
 }
 
 /* 3D overlay 横排里浮签卡整行展开（同 .board-log 的整宽口径） */
@@ -459,7 +469,11 @@
     white-space: normal;
     overflow: visible;
     text-overflow: clip;
-    overflow-wrap: break-word;
+    /* 只在词界折行：break-word 曾把「Parent Stop」从词中间断成两行；
+       min-width 兜底最长词宽——再窄就压日志行（它有省略号），
+       状态文字绝不从词中间断、也不溢出到相邻元素 */
+    min-width: min-content;
+    overflow-wrap: normal;
   }
 }
 
@@ -587,7 +601,7 @@
 }
 
 .bot-card-avatar {
-  position: relative; /* R10D：性格小徽标锚在头像角上 */
+  position: relative;
   flex: none;
   display: inline-flex;
   align-items: center;
@@ -621,22 +635,12 @@
 
 .bot-card-name {
   font-weight: var(--font-weight-bold);
-  /* R8：名字文本节点与性格 span 之间没有空格（JSX 相邻渲染），
-     「Steady Careful」连成一个不可断的长词，在 190px（窄桌面
-     168px）列里最后一字母溢出卡外（1280×800 与 1600×1000
-     实测均有）。改 flex 可折行：放得下同排、放不下性格整词
-     折到下一行——不从词中断、不溢出，文案一字不改。 */
+  /* R8：名签可折行——名字与「正在想…」span 是同级盒，
+     窄列里放不下的整词折到下一行，不从词中断、不溢出。 */
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   column-gap: var(--space-2);
-}
-
-.bot-card-personality {
-  /* 间距改由 .bot-card-name 的 flex column-gap 提供 */
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-regular);
-  color: var(--color-muted);
 }
 
 .bot-card-line {
@@ -665,10 +669,9 @@
 
 .lap-card-order {
   color: var(--color-muted);
-  /* UI 迭代 R3：「Sprout→Steady→Zip→Tag」是无空格长串，在 190px 列里
-     放不下会整行溢出卡外甚至顶出屏幕右缘（基线截图实测）——
-     允许在任意位置折行，文案一字不改 */
-  overflow-wrap: anywhere;
+  /* 旧「Sprout→Steady→Zip→Tag」无空格长串曾靠 overflow-wrap:anywhere
+     硬折——会把词从中间断开（验收抓到过半截词）。R10D 起回合条换成
+     .order-chip 小片（下方规则），长串不再渲染，硬断行一并撤除 */
 }
 
 /* ==========================================================================
@@ -787,44 +790,10 @@
   background: var(--color-primary-soft);
 }
 
-/* —— bot 性格徽标（play #4）：图标+1–2字小片，按性格色描边——
-   色彩只是第三通道，形状/文字才是线索（小徽本身即非色彩线索） —— */
-.bot-trait {
-  display: inline-flex;
-  align-items: center;
-  gap: 1px;
-  padding: 0 4px;
-  border-radius: var(--radius-button);
-  border: 1.5px solid var(--color-line-strong);
-  background: var(--color-surface);
-  font-style: normal;
-  /* 五尺寸硬底线（Thong/ww）：文字 ≥14px——原 0.86 倍率 = 12.9px 不达标，改回 xs 15px */
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-ink);
-  line-height: 1.4;
-  white-space: nowrap;
-}
-.bot-trait--steady {
-  border-color: var(--bot-accent-steady);
-}
-.bot-trait--impulsive {
-  border-color: var(--bot-accent-impulsive);
-}
-.bot-trait--follower {
-  border-color: var(--bot-accent-follower);
-}
-/* 头像角上的徽标只留 1–2 字（图标=头像本体） */
-.bot-card-avatar > .bot-trait {
-  position: absolute;
-  right: -7px;
-  bottom: -5px;
-  padding: 0 3px;
-  box-shadow: var(--shadow-sm);
-}
-
-/* —— 心里话气泡按人配色（play #4）：描边色=该 bot 性格色；
-   气泡头的 .think-trait 小徽把「谁在说」摆成非色彩线索 —— */
+/* —— bot 性格小徽已撤（图标+1–2字缩写孩子读不懂）：全词性格只活在
+   详情层——点头像的 ProfileCard 高光卡（pc-badge）与伙伴站详情
+   （swap-row-trait）。心里话气泡保留按人描边色：与头像淡彩、3D
+   棋子同色的「谁在说」非文字线索 —— */
 .think-bubble {
   display: inline-flex;
   align-items: center;
@@ -838,23 +807,6 @@
 }
 .think-bubble--follower {
   border-color: var(--bot-accent-follower);
-}
-.think-trait {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-heavy);
-  color: var(--color-muted);
-}
-.think-bubble--steady .think-trait {
-  color: var(--bot-accent-steady);
-}
-.think-bubble--impulsive .think-trait {
-  color: var(--color-ink); /* 黄底深字对比才够——小冲片用墨字不用黄字 */
-}
-.think-bubble--follower .think-trait {
-  color: var(--bot-accent-follower);
 }
 
 
@@ -1017,4 +969,15 @@ button.bot-card:focus-visible {
   .spotlight-veil .pc {
     animation: moment-pop 140ms var(--ease-out) backwards;
   }
+}
+
+/* 缓冲期 3D 暖机容器（SceneWarmup）：全尺寸但完全隐身——
+   opacity:0 不影响 WebGL 真渲，z-index:-1 垫在壳内容之下
+   （静态 splash 本就不透底盖住）；不拦截任何指针事件 */
+.scene-warmup {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  opacity: 0;
+  pointer-events: none;
 }

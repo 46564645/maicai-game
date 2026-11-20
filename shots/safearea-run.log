@@ -1,0 +1,36 @@
+
+Running 1 test using 1 worker
+
+  ✘  1 tests/e2e/safearea.spec.ts:84:1 › 874×402 + 安全区：整局所有主按钮完整可见 (4.0m)
+
+
+  1) tests/e2e/safearea.spec.ts:84:1 › 874×402 + 安全区：整局所有主按钮完整可见 ───────────────────────────────────
+
+    Test timeout of 240000ms exceeded.
+
+    Error: locator.click: Test timeout of 240000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="action-primary"]:not([disabled])').first()
+        - locator resolved to <button data-key="1" type="button" class="deck-top" data-primary="true" data-testid="action-primary" aria-label="Tap to flip it over">…</button>
+      - attempting click action
+        - waiting for element to be visible, enabled and stable
+      - element was detached from the DOM, retrying
+
+
+       at helpers.ts:81
+
+      79 |   if ((await primary.count()) > 0) {
+      80 |     if (tap) await primary.tap();
+    > 81 |     else await primary.click();
+         |                        ^
+      82 |     return 'primary';
+      83 |   }
+      84 |   const keyed = await lastKeyed(page);
+        at stepOnce (/home/hatch/workspace/maicai-work/tests/e2e/helpers.ts:81:24)
+        at playToEnd (/home/hatch/workspace/maicai-work/tests/e2e/helpers.ts:107:5)
+        at /home/hatch/workspace/maicai-work/tests/e2e/safearea.spec.ts:99:3
+
+    Error Context: test-results/safearea-874×402-安全区：整局所有主按钮完整可见/error-context.md
+
+  1 failed
+    tests/e2e/safearea.spec.ts:84:1 › 874×402 + 安全区：整局所有主按钮完整可见 ────────────────────────────────────

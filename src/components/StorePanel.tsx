@@ -79,6 +79,7 @@ function ShelfCard({
                 name={cardName(id)}
                 price={cost}
                 mark={needed}
+                locked={!playable}
                 selected={selected}
                 disabled={disabled}
                 testid={`action-store-${id}`}
@@ -231,8 +232,15 @@ export function StorePanel({
           <p className="panel-text panel-selected" aria-live="polite">
             <span className="panel-selected-line">
               {strings.panel.selectedMark}
-              <CardIcon icon={sel.icon} /> {cardName(sel.id)} ({cost(selected!)}{' '}
-              {coinWord(cost(selected!))})
+              <CardIcon icon={sel.icon} /> {cardName(sel.id)}{' '}
+              {/* R6 S2（与 MarketPanel 同口径）：价格括注独立成片——手机
+                  竖栏内容宽有限，整行 nowrap 时长名（如 Green Onion）会把
+                  竖栏 scrollWidth 撑出 24–36px 横向溢出（⑦ 并入后复量
+                  实测）；手机档藏掉这一片（价在卡面价丸/买钮/算式三处
+                  都在），只留「Picked: 名」短句一行 */}
+              <span className="sel-price-part">
+                ({cost(selected!)} {coinWord(cost(selected!))})
+              </span>
             </span>
             <span className="panel-selected-line">
               {me.coins >= cost(selected!)

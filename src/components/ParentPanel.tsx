@@ -90,6 +90,7 @@ function OptionFan({
             <CardView
               icon={o.icon}
               name={parentOptionLabel(o)}
+              locked={locked}
               keyHint={String(i + 1)}
               dataKey={i + 1}
               primary={i === 0}

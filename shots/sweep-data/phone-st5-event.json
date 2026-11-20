@@ -1,0 +1,164 @@
+{
+ "overflow": [
+  {
+   "sel": "div.weather-moment",
+   "text": "▼☀️🌧️🌬️It is Sunny!",
+   "dW": 19,
+   "dH": 0,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "div.weather-spin",
+   "text": "▼☀️🌧️🌬️It is Sunny!",
+   "dW": 19,
+   "dH": 0,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "div.weather-dial",
+   "text": "▼☀️🌧️🌬️",
+   "dW": 19,
+   "dH": 3,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.weather-pointer",
+   "text": "▼",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "div.weather-wheel",
+   "text": "☀️🌧️🌬️",
+   "dW": 22,
+   "dH": 6,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.weather-wheel-item",
+   "text": "🌧️",
+   "dW": 11,
+   "dH": 5,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.weather-wheel-item",
+   "text": "🌬️",
+   "dW": 11,
+   "dH": 5,
+   "leaf": false,
+   "fs": 20
+  }
+ ],
+ "cardOverlap": {
+  "max": 0,
+  "worst": null
+ },
+ "stray": [
+  {
+   "sel": "button.board3d-reset",
+   "text": "Reset view",
+   "fs": 16,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "span.weather-wheel-icon",
+   "text": "☀️",
+   "fs": 32,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.weather-wheel-icon",
+   "text": "🌧️",
+   "fs": 32,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.weather-wheel-icon",
+   "text": "🌬️",
+   "fs": 32,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "p.weather-result",
+   "text": "It is Sunny!",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "button.lang-toggle-seg",
+   "text": "中文",
+   "fs": 20,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "button.lang-toggle-seg.lang-toggle-seg--on",
+   "text": "EN",
+   "fs": 20,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "p.board-log",
+   "text": "Zip is 1 coin short — into \"to pay later\"",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "h2.popup-title",
+   "text": "⑤ Surprise Stop",
+   "fs": 16,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.popup-goal",
+   "text": "Practice: leave room for surprises",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.rcp-item",
+   "text": "🐟",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.rcp-item",
+   "text": "🌿",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.rcp-item",
+   "text": "🫚",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.rcp-item",
+   "text": "🧄",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  }
+ ]
+}

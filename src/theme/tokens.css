@@ -105,6 +105,7 @@
   --font-size-xs: 0.9375rem;  /* 15px（R10C UI 副项：功能文字地板从 14px 抬到 15px） */
   --font-size-sm: 1rem;       /* 16px */
   --font-size-md: 1.25rem;    /* 20px，正文 ≥20px */
+  --font-size-price: 1.125rem; /* 18px（R6 item A：卡面价格数字地板，ww/马教授定） */
   --font-size-lg: 1.5rem;     /* 24px，按钮/站名 */
   --font-size-xl: 2rem;       /* 32px，小标题 */
   --font-size-xxl: 3rem;      /* 48px，主标题 */
@@ -146,6 +147,9 @@
   --shadow-pop: 0 2px 8px
       color-mix(in srgb, var(--color-shadow) 16%, transparent),
     0 24px 64px color-mix(in srgb, var(--color-shadow) 22%, transparent);
+  /* R6（ww Part 1.1）：全游戏可点卡共用一张投影规格——参数只此一处，
+     任何卡（含灰底卡）都引用它，不许各语境另调深浅 */
+  --shadow-card: var(--shadow-sm), var(--inset-light);
   /* 纸面「受光顶缘」：面板/横条/底栏的内嵌高光 */
   --inset-light: inset 0 1px 0
     color-mix(in srgb, var(--color-surface) 75%, transparent);
@@ -224,7 +228,7 @@
   --card-h: 144px;
   /* 无插画卡（emoji 回退）的默认卡面色：取采样底色的中枢奶油色，
      与有图卡同族（采样区间 #e8dcce–#fcf1df，中枢约 #fce9c8） */
-  --card-bg-default: #fce9c8;
+  --card-bg-default: #fff6e9;
   /* 扇形：两侧递增转角上限、弧线下沉系数、悬停时邻卡让位距离、每卡露出带 */
   --fan-deg: 10deg;
   --fan-arc-drop: 4px;
@@ -286,9 +290,9 @@
   --weather-tint-windy: color-mix(in srgb, var(--color-mint) 20%, transparent);
   /* 大卡时刻：世界中心弹出 340ms（recipe/weather/dish/story 共用） */
   --moment-pop-ms: 340ms;
-  /* R2-4：事件提示条可见时长（2.5s 后自动消失）——与 Toast.tsx 的
+  /* R2-4：事件提示条可见时长（4s 后自动消失）——与 Toast.tsx 的
      TOAST_VISIBLE_MS 同值，JS 计时读不到 CSS 变量，两处要调一起调 */
-  --toast-visible-ms: 2500ms;
+  --toast-visible-ms: 4000ms;
   /* 徽章列买到卡缩略图（迷你卡砖） */
   --thumb-w: 22px;
   --thumb-h: 30px;

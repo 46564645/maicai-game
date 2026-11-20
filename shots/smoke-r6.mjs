@@ -1,0 +1,16 @@
+import { chromium } from 'playwright';
+const BASE = 'http://localhost:4173';
+const browser = await chromium.launch();
+const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+await ctx.addInitScript(() => localStorage.setItem('maicai-lang', 'en'));
+const page = await ctx.newPage();
+page.on('pageerror', (e) => console.log('[pageerror]', String(e).slice(0, 200)));
+console.log('goto…');
+await page.goto(BASE + '/?board=3d&seed=1&fast=1&demo=1', { waitUntil: 'load', timeout: 30000 });
+console.log('loaded');
+await page.waitForTimeout(3000);
+console.log('canvas count:', await page.locator('canvas').count());
+console.log('demo buttons:', await page.locator('.demo-bar button').count().catch(() => -1));
+console.log('body testids:', await page.evaluate(() => [...document.querySelectorAll('[data-testid]')].slice(0, 12).map((e) => e.getAttribute('data-testid')).join(',')));
+await browser.close();
+console.log('SMOKE DONE');

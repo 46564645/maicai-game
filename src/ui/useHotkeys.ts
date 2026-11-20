@@ -30,7 +30,12 @@ function isTyping(target: EventTarget | null): boolean {
 }
 
 function clickFirst(selector: string): boolean {
-  const el = document.querySelector<HTMLElement>(selector);
+  /* 同键位可能有多个绑定（提议浮签与角落气泡同挂 1/2）：桌面 ≥901px
+     气泡被底条裁边而 display:none（见 hud.css）——优先点有布局盒的
+     可见面，兜底仍点首个命中保证命令可达（与 e2e helpers 的
+     getClientRects 过滤同口径）。 */
+  const els = [...document.querySelectorAll<HTMLElement>(selector)];
+  const el = els.find((e) => e.getClientRects().length > 0) ?? els[0];
   if (el) {
     el.click();
     return true;
@@ -73,7 +78,9 @@ export function useHotkeys(handlers: HotkeyHandlers) {
       }
 
       if (e.key.startsWith('Arrow')) {
-        const items = Array.from(document.querySelectorAll<HTMLElement>(ACTION_SELECTOR));
+        const items = Array.from(
+          document.querySelectorAll<HTMLElement>(ACTION_SELECTOR),
+        ).filter((el) => el.getClientRects().length > 0);
         if (items.length === 0) return;
         e.preventDefault();
         const dir = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : -1;

@@ -1,0 +1,42 @@
+{
+  "popupHead": "⑤ Surprise StopPractice: leave room for surprises🐟🌿🫚🧄",
+  "name": {
+    "sel": "[data-testid=\"weather-card\"] .card-view-name",
+    "text": "Sunny",
+    "rect": {
+      "x": 679.5764770507812,
+      "y": 288.5368347167969,
+      "w": 71.3968505859375,
+      "h": 22.86090087890625
+    },
+    "color": "rgb(30, 30, 42)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "fontSize": "20px"
+  },
+  "tap": {
+    "sel": "[data-testid=\"weather-card\"] .moment-tap",
+    "text": "Tap to go on",
+    "rect": {
+      "x": 680.7784423828125,
+      "y": 324.35760498046875,
+      "w": 73.93170166015625,
+      "h": 21.846923828125
+    },
+    "color": "rgb(30, 30, 42)",
+    "bg": "color(srgb 1 1 1 / 0.84)",
+    "fontSize": "16px"
+  },
+  "card": {
+    "sel": "[data-testid=\"weather-card\"]",
+    "text": "SunnyTap to go on",
+    "rect": {
+      "x": 659.2437744140625,
+      "y": 185.15374755859375,
+      "w": 107.324951171875,
+      "h": 161.8800048828125
+    },
+    "color": "rgb(30, 30, 42)",
+    "bg": "rgba(0, 0, 0, 0)",
+    "fontSize": "20px"
+  }
+}

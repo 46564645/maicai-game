@@ -75,8 +75,9 @@
   display: block;
   max-width: 100%;
 }
-/* 卡名：16px 不缩（S-1 口径）；放不下按音节软连字符/词界折两行，
-   不省略、不裁剪。keep-all + manual：只在词界与 &shy; 处断 */
+/* 卡名：16px 基线；只在空格处折行（R6 口径：连字符断词关闭——
+   keep-all + hyphens:none + 不插 &shy;）；放不下由 CardView 的
+   useNameFit 逐级缩字号（地板 14px、最多三行），不省略、不裁剪 */
 .card-view-banner .card-view-name {
   display: block;
   font-size: var(--font-size-sm);
@@ -87,7 +88,7 @@
   white-space: normal;
   word-break: keep-all;
   overflow-wrap: normal;
-  hyphens: manual;
+  hyphens: none;
 }
 /* 元行：价格丸 / 类别签 / 标签 / ✓ / 键位徽标的横排。
    行序受控（量测实证：无序 wrap 时 gem/tag/✓ 各占一行 = 67px，
@@ -122,13 +123,16 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  height: 22px;
+  /* R6 item A（ww/马教授）：价格数字 ≥18px——丸高 22→26、币面点
+     12→14 跟着放大一档；丸仍在元行流内，108px 卡宽下不溢出、
+     不压右侧 ✓（实测见 R10_DESIGN R6 节） */
+  height: 26px;
   padding: 0 var(--space-2);
   border: 1.5px solid var(--color-ink);
   border-radius: var(--radius-pill);
   background: var(--color-surface);
   color: var(--color-ink);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-price);
   font-weight: var(--font-weight-heavy);
   font-variant-numeric: tabular-nums;
   line-height: 1;
@@ -136,8 +140,8 @@
 .card-view-gem::before {
   content: '';
   flex: none;
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background:
     radial-gradient(circle at 35% 30%, rgb(255 255 255 / 0.55), transparent 55%),
@@ -169,31 +173,151 @@
 .card-view-tag-part {
   white-space: normal;
 }
-/* 「On my list」✓：流内薄荷圆片（不再压卡角） */
+/* 「On my list」记号：流内（不再压卡角）。R6 决策 2：文字下卡面，
+   只留 MetaIcon 'list'（绿圆白勾，22px）——容器不再自带圆片底，
+   图形由 MetaIcon 的 SVG 承担 */
 .card-view-mark {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--color-mint);
-  color: var(--color-ink);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-heavy);
+  /* 布局 28px：≤700 市场扇 zoom 降到 0.72 后渲染 ≈20.2px，
+     仍守 Part 2.1 视觉 ≥20px（26px 时只剩 ≈19.2px） */
+  width: 28px;
+  height: 28px;
   line-height: 1;
 }
-/* 买不起/不可打：美术区灰化 + 宝石转灰 + 整卡 65%（.pglow--dim 挂在
-   PlayableGlow 包裹层上，透进内层卡面；卡不 disabled——仍可点选看价） */
-.pglow--dim {
-  opacity: 0.65;
+/* 类别记号（food/fun）：与价格丸同排（order 1），不另起一行——
+   省下的整行还给美术区（R6 决策 2 口径） */
+.card-view-meta .card-view-tagicon {
+  order: 1;
+  display: inline-flex;
+  align-items: center;
 }
-.pglow--dim .card-view-art {
-  filter: grayscale(0.72) brightness(0.94);
+.card-view-tagicon {
+  line-height: 1;
 }
-.pglow--dim .card-view-gem {
-  background: var(--gem-disabled);
-  color: var(--color-muted);
+/* —— 类别记号本体 + 悬停/聚焦释义条（ww Part 2.4）——
+   记号 22px；释义条 15px（≥14），桌面 hover 记号或卡获焦时浮出，
+   在卡内（卡身 overflow:hidden，条贴记号上方、压美术区下缘，
+   不出卡界）；手机端释义走选中行 + 首访提示条 + 求助牌图例 */
+.meta-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* 布局 28px：手机市场扇整扇 zoom 0.79 后渲染 ≈22px、
+     ≤700 档 0.72 后 ≈20.2px，守住 Part 2.1 的视觉 ≥20px
+     （22px 时实测只剩 17px） */
+  width: 28px;
+  height: 28px;
+  flex: none;
+}
+.meta-icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.meta-icon::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: 50%;
+  /* 抬到美术区下缘：记号正上方就是卡名，条压名上等于把名字盖掉
+     （实测）——多抬 22px 让条落在图区，不碰文字区任何一行 */
+  bottom: calc(100% + 22px);
+  transform: translateX(-50%);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-button);
+  background: var(--color-ink);
+  color: var(--color-bg);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  z-index: 30;
+}
+/* 只在真悬停（桌面指记号）时出条——ww 口径就是 hover 出释义；
+   鼠标/触摸点选不触发（点选释义走面板选中行与图例），免得每次
+   选中都糊一条在卡上 */
+.meta-icon:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+/* 右侧 ✓ 的释义条右对齐，免出卡右界被 overflow 裁掉一半 */
+.card-view-mark .meta-icon::after {
+  left: auto;
+  right: -6px;
+  transform: none;
+}
+/* —— 可点卡的按压/悬停反馈（R6，ww Part 1.2）——
+   可点 = <button class=card-view>：悬停（真指针）抬 2px、按下抬 3px，
+   投影同步加深到 --shadow-md；过渡 100ms（口径 ≤100ms）。
+   TiltCard 内的卡不走这条：倾斜面 overflow 裁切、抬升会露底——
+   它的反馈是卡扇包装层的抬升 + 倾斜 + 可打光晕。
+   不可点的卡（<div> 或带锁）没有这组规则：不抬、不变影（Part 1.4） */
+button.card-view {
+  transition:
+    transform 100ms ease,
+    box-shadow 100ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  button.card-view:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md), var(--inset-light);
+  }
+}
+button.card-view:active {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md), var(--inset-light);
+}
+.tc-face button.card-view:hover,
+.tc-face button.card-view:active {
+  transform: none;
+  box-shadow: var(--shadow-card);
+}
+
+/* R6 N1 复核修正（实测缺陷）：选中环/抬升原先被 hover/active 影
+   盖掉——鼠标停在已选中卡上时，hover 规则特异性更高，3px 主色环
+   消失、抬升也沉回（点选 Toy 后环不见、移开才现；Part 1.3「选中
+   须明显不同」在鼠标下不成立）。选中 + 悬停/按下时环保留、抬升
+   保持选中档 -4px（按下回 -2px 的口径在 screens.css 不变） */
+button.card-view--selected:hover,
+.tc-face button.card-view--selected:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 0 0 3px var(--color-primary),
+    var(--shadow-md),
+    var(--inset-light);
+}
+button.card-view--selected:active,
+.tc-face button.card-view--selected:active {
+  box-shadow:
+    0 0 0 3px var(--color-primary),
+    var(--shadow-md),
+    var(--inset-light);
+}
+
+/* 买不起/不可打（R6，ww Part 1.4 改口径）：不再变灰、不再压透明度——
+   整卡保持原色原亮度，只是不可点不抬升，并挂一把锁（.card-view-lock，
+   ≥20px）。旧 .pglow--dim 的三条灰化规则（整卡 opacity .65 / 美术区
+   grayscale / 价格丸转灰）就此删除；.pglow--dim 类名只留作状态钩子，
+   无任何视觉效果。选中态的「恢复全亮」豁免规则随之无的放矢，一并删 */
+/* 锁记号：与类别记号同排（order 1），墨色小锁 22px */
+.card-view-meta .card-view-lock {
+  order: 1;
+  display: inline-flex;
+  align-items: center;
+}
+.card-view-lock {
+  line-height: 1;
+  color: var(--color-ink);
+}
+/* 锁同记号口径：布局 28px（手机扇 zoom 后渲染 ≥20px） */
+.card-view-lock svg {
+  width: 28px;
+  height: 28px;
+  display: block;
 }
 
 /* 刚打出：短暂薄荷绿闪（命令落地后 600ms 内挂该类） */
@@ -260,6 +384,13 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
+  /* R6 必改（item 4，ww/Prof）：光斑全强度（--glow-sweep = 88% 白）
+     停在卡面正中时把整卡连名带图冲成银灰——市场扇实测卡名像素对比
+     1.9–2.8:1（Fish/Potato/Ginger/Carrot/Tofu 全中，选中卡也中）。
+     Slice E 已为 ID 卡（.pc）把光斑压到 0.3 并注明「名字被冲成银灰
+     低对比」，普通卡面一直漏了这一档——现全卡统一 0.3，光泽保留、
+     卡名回到墨色（修复后实测 7:1 以上，见 R10_DESIGN R6 节） */
+  opacity: 0.3;
   background: radial-gradient(
     circle at var(--tc-gx, 50%) var(--tc-gy, 50%),
     var(--glow-sweep),
@@ -520,9 +651,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2);
+  gap: var(--space-1);
   min-height: var(--button-height);
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-2);
   border-radius: var(--radius-button);
   border: 3px dashed transparent;
   font-size: var(--font-size-md);
@@ -572,6 +703,14 @@
   font-size: var(--font-size-lg);
   line-height: 1;
 }
+/* R6 S1：≥1024 视口下投放区按钮文案不折行——「Buy (3 coins)」
+   「Maybe later」必须整行（1280 实测原先各折两行）。窄屏（手机）
+   行宽不够，保持可折行现状，不冒溢出险 */
+@media (min-width: 1024px) {
+  .drop-zone {
+    white-space: nowrap;
+  }
+}
 /* 打出成功：区轻弹确认（300ms 内摘除） */
 .drop-zone--pop:not(:disabled) {
   animation: dz-pop var(--motion-med) var(--ease-spring) 1;
@@ -607,7 +746,7 @@
 .deck .card-view-name {
   white-space: normal;
   word-break: keep-all;
-  hyphens: manual;
+  hyphens: none;
 }
 .deck-under,
 .deck-top {
@@ -800,10 +939,20 @@
    手机横屏紧凑档（R10C UI #3）：窄栏装不下「每卡 ≥48px 露出带」的扇，
    正式退回紧凑网格——两行不重叠，每卡完整露出（=整张点选面 ≥48px），
    无裁切、无竖排一字标签；认卡仍靠选中卡的 28px 大浮签。
+   T-1 续修：栏内扇不止市场/货架——家长图卡扇 .parent-fan（4×108+3×58
+   =282 > 栏内容宽 ~182）、换菜扇 .swap-hand、事件/邀请二选扇
+   .event-hand/.choice-hand（178 + 旋转卡外接盒再探出 ~12px）同样按
+   桌面扇几何横向溢出竖栏（实测 panel-parent 栏横向溢出 88px、卡右缘
+   x=917 越过 812 安全界）。同一套紧凑网格一并收容：折行后每卡独占
+   一行整幅可读，零旋转外接盒不再越界。
    ========================================================================== */
 
 .game-screen--phone-land .stall-hand,
-.game-screen--phone-land .store-shelf {
+.game-screen--phone-land .store-shelf,
+.game-screen--phone-land .parent-fan,
+.game-screen--phone-land .swap-hand,
+.game-screen--phone-land .event-hand,
+.game-screen--phone-land .choice-hand {
   /* T-1：卡尺寸不再缩小（统一 104×152）——窄栏靠整体等比 zoom
      （phone.css 浮层扇 0.84 / 右栏货架 0.84）与网格折行容纳 */
   --fan-push: 18px;
@@ -816,15 +965,27 @@
   overflow: visible;
 }
 .game-screen--phone-land .stall-hand .hand-item,
-.game-screen--phone-land .store-shelf .hand-item {
+.game-screen--phone-land .store-shelf .hand-item,
+.game-screen--phone-land .parent-fan .hand-item,
+.game-screen--phone-land .swap-hand .hand-item,
+.game-screen--phone-land .event-hand .hand-item,
+.game-screen--phone-land .choice-hand .hand-item {
   transform: none;
 }
 .game-screen--phone-land .stall-hand .hand-item + .hand-item,
-.game-screen--phone-land .store-shelf .hand-item + .hand-item {
+.game-screen--phone-land .store-shelf .hand-item + .hand-item,
+.game-screen--phone-land .parent-fan .hand-item + .hand-item,
+.game-screen--phone-land .swap-hand .hand-item + .hand-item,
+.game-screen--phone-land .event-hand .hand-item + .hand-item,
+.game-screen--phone-land .choice-hand .hand-item + .hand-item {
   margin-left: 0;
 }
 .game-screen--phone-land .stall-hand .hand-item--sel,
-.game-screen--phone-land .store-shelf .hand-item--sel {
+.game-screen--phone-land .store-shelf .hand-item--sel,
+.game-screen--phone-land .parent-fan .hand-item--sel,
+.game-screen--phone-land .swap-hand .hand-item--sel,
+.game-screen--phone-land .event-hand .hand-item--sel,
+.game-screen--phone-land .choice-hand .hand-item--sel {
   transform: translateY(-6px);
 }
 /* T-1：手机网格里的卡名/价格丸/内边距不再逐处收小——统一解剖
@@ -1039,10 +1200,12 @@
   height: 100%;
 }
 .card-view-speak-btn {
-  /* T-1：朗读钮从卡面右上角（压美术区）移到右下角（文字区一侧）——
-     图上零覆盖的口径对控件同样成立 */
+  /* T-1 曾移到右下（图上零覆盖），但 R6 N7 实测：右下角 51px 徽标
+     压住居中价丸右端 269px²（Yes 卡）——价是数据、图角是留白，
+     ww 口径价优先：徽标回右上角外挂（半出卡界，压到的只是
+     选择卡图的角落留白），价丸完整可见（复测 ∩ = 0） */
   position: absolute;
-  bottom: -8px;
+  top: -8px;
   right: -8px;
   z-index: 5;
   min-width: 34px;
@@ -1088,7 +1251,7 @@
 .event-weather .card-view-name {
   white-space: normal;
   word-break: keep-all;
-  hyphens: manual;
+  hyphens: none;
 }
 /* 名可用宽再腾一档：底板内边距 space-2→space-1、横幅横向内边距归零
    ——88 卡内名宽 40→64px，「Sunny」20px 全名单行放得下（实测 dW 10→0） */
@@ -1157,7 +1320,7 @@
 .event-story-art .card-view-name {
   white-space: normal;
   word-break: keep-all;
-  hyphens: manual;
+  hyphens: none;
 }
 .event-story-text {
   flex: 1 1 140px;
@@ -1310,7 +1473,7 @@
   --hand-card-w: var(--card-w);
   --hand-card-h: var(--card-h);
 }
-/* 货架卡：内边距收一档腾名宽，名 sm 号 + 允许在词/音节断点折行 */
+/* 货架卡：内边距收一档腾名宽，名 sm 号 + 只在空格处折行（R6） */
 .store-shelf .card-view {
   padding: var(--space-2);
 }
@@ -1777,7 +1940,8 @@
   flex-wrap: wrap;
 }
 /* R2-3：性格/头衔标签必须完整显示——撤掉 max-width + 省略号，
-   放不下就整片折行，绝不截断成「Care…」 */
+   放不下就整片折行，绝不截断成「Care…」；
+   折行只走词界（break-word 会把「Goes along」从词中间断开，已撤） */
 .pc-badge {
   padding: 1px var(--space-2);
   border-radius: var(--radius-button);
@@ -1787,7 +1951,7 @@
   font-weight: var(--font-weight-bold);
   color: var(--color-ink);
   white-space: normal;
-  overflow-wrap: break-word;
+  overflow-wrap: normal;
 }
 .pc-status {
   display: inline-flex;
@@ -1976,6 +2140,15 @@
   /* 字号档位实测：xl=32px 比 hero 28 还大；md=20px 才是要收的一档 */
   font-size: var(--font-size-md);
 }
+/* R6 必改（item 4）：摊位扇里卡面自带完整卡名（拥挤态横幅也显示），
+   选中/悬停时浮出的名签与卡面名一字不差地重复（Prof 实测 Fish
+   双名）——扇内禁用名签，选中卡已整张抬起、名字全露，不需要它。
+   其他手牌（感想手牌的名签是整句、与横幅短名不同）不受影响。
+   特异性抬到 (0,3,0)：压过 .hand-item--sel/:focus-within/:hover/
+   --inspect 四条 (0,2,0) 的 display:block 显示规则，不靠源码顺序 */
+.stall-hand .hand-item .hand-tag {
+  display: none;
+}
 .stall-hand.hand--crowded .card-view-banner {
   display: block;
 }
@@ -2028,20 +2201,11 @@
     translateX(calc(var(--fan-push) * -1));
 }
 
-/* 选中卡整张抬起之外还要变亮（R2-16）：即使它此刻不可打（变灰态），
-   选中也恢复全亮度 + 轻提亮，不许「选中反而变淡」 */
+/* 选中卡整张抬起之外还要变亮（R2-16）：轻提亮强化选中感。
+   R6 起不可打卡已不再变灰（Part 1.4），原「选中恢复全亮」的三条
+   .pglow--dim 豁免规则随灰化一并删除 */
 .stall-hand .hand-item--sel .card-view {
   filter: brightness(1.07) saturate(1.05);
-}
-.stall-hand .hand-item--sel .pglow--dim {
-  opacity: 1;
-}
-.stall-hand .hand-item--sel .pglow--dim .card-view-art {
-  filter: none;
-}
-.stall-hand .hand-item--sel .pglow--dim .card-view-gem {
-  background: var(--gem-gem-grad);
-  color: var(--color-surface);
 }
 
 /* —— 卡扇下方唯一说明行（R2-6）：缺菜小图标 + 一句话，浮丸底

@@ -21,8 +21,13 @@ export function SpeechBubble({
   onRespond: (accept: boolean) => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  // 竖屏下气泡在 bot 小卡下方、可能刚出视口：挂载时滚进来
+  // 竖屏下气泡在 bot 小卡下方、可能刚出视口：挂载时滚进来。
+  // 提议浮签（.board-await）在场时它是第一回应面，滚动位由 Game.tsx
+  // scrollRailToPill 统一管（滚到浮签所在的 .phone-turn 顶）——气泡是
+  // 同命令的副入口，自己再 smooth 滚一次会和浮签抢滚动位、把浮签的
+  // Yes/No 顶出栏口。
   useEffect(() => {
+    if (document.querySelector('.board-await')) return;
     ref.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }, []);
   const invite = proposal.inviteCardId

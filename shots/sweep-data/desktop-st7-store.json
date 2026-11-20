@@ -1,0 +1,923 @@
+{
+ "overflow": [
+  {
+   "sel": "span.bot-card-avatar",
+   "text": "🛡️Ca",
+   "dW": 7,
+   "dH": 5,
+   "leaf": false,
+   "fs": 24
+  },
+  {
+   "sel": "span.bot-card-avatar",
+   "text": "⚡Ea",
+   "dW": 7,
+   "dH": 5,
+   "leaf": false,
+   "fs": 24
+  },
+  {
+   "sel": "div.game-board-area",
+   "text": "Stop 7 · The Shop · Lap 1 · Sprout's",
+   "dW": 5,
+   "dH": 0,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "div.board3d-overlay",
+   "text": "Shopping townTag bought Egg at the s",
+   "dW": 24,
+   "dH": 0,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.bot-card-avatar",
+   "text": "🐾Go",
+   "dW": 7,
+   "dH": 5,
+   "leaf": false,
+   "fs": 24
+  },
+  {
+   "sel": "div.prog",
+   "text": "",
+   "dW": 0,
+   "dH": 1,
+   "leaf": false,
+   "fs": 16
+  },
+  {
+   "sel": "span.stop-pips",
+   "text": "",
+   "dW": 0,
+   "dH": 2,
+   "leaf": false,
+   "fs": 16
+  },
+  {
+   "sel": "span.sr-only",
+   "text": "Next up",
+   "dW": 58,
+   "dH": 22,
+   "leaf": true,
+   "fs": 15
+  },
+  {
+   "sel": "span.cc-col.cc-col--ones",
+   "text": "0123456789",
+   "dW": 0,
+   "dH": 216,
+   "leaf": false,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-strip",
+   "text": "0123456789",
+   "dW": 0,
+   "dH": 4,
+   "leaf": false,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "0",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "1",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "2",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "3",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "4",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "5",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "6",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "7",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "8",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-digit",
+   "text": "9",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.cc-live",
+   "text": "My coins: 3",
+   "dW": 133,
+   "dH": 35,
+   "leaf": true,
+   "fs": 24
+  },
+  {
+   "sel": "span.clip-stack",
+   "text": "–",
+   "dW": 12,
+   "dH": 4,
+   "leaf": false,
+   "fs": 16
+  },
+  {
+   "sel": "i.clip-badge",
+   "text": "–",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 15
+  },
+  {
+   "sel": "span.clip-stack",
+   "text": "–",
+   "dW": 0,
+   "dH": 4,
+   "leaf": false,
+   "fs": 16
+  },
+  {
+   "sel": "section.store-section",
+   "text": "Recipe still needs✓4FishFish✓2Green ",
+   "dW": 0,
+   "dH": 18,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "div.hand.hand--fan",
+   "text": "✓4FishFish✓2Green OnionGreen Onion✓2",
+   "dW": 0,
+   "dH": 18,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "div.tc-face.tc-face--front",
+   "text": "✓4Fish",
+   "dW": 0,
+   "dH": 13,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "button.card-view.card-view--selected",
+   "text": "✓4Fish",
+   "dW": 0,
+   "dH": 16,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-board",
+   "text": "✓4Fish",
+   "dW": 0,
+   "dH": 24,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-gem",
+   "text": "4",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "div.tc-face.tc-face--front",
+   "text": "✓2Green Onion",
+   "dW": 0,
+   "dH": 14,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "button.card-view",
+   "text": "✓2Green Onion",
+   "dW": 0,
+   "dH": 16,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-board",
+   "text": "✓2Green Onion",
+   "dW": 0,
+   "dH": 24,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-gem",
+   "text": "2",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "div.tc-face.tc-face--front",
+   "text": "✓2Gin­ger",
+   "dW": 0,
+   "dH": 14,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "button.card-view",
+   "text": "✓2Gin­ger",
+   "dW": 0,
+   "dH": 16,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-board",
+   "text": "✓2Gin­ger",
+   "dW": 0,
+   "dH": 24,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-gem",
+   "text": "2",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "div.tc-face.tc-face--front",
+   "text": "✓2Gar­lic",
+   "dW": 0,
+   "dH": 14,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "button.card-view",
+   "text": "✓2Gar­lic",
+   "dW": 0,
+   "dH": 16,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-board",
+   "text": "✓2Gar­lic",
+   "dW": 0,
+   "dH": 24,
+   "leaf": false,
+   "fs": 20
+  },
+  {
+   "sel": "span.card-view-gem",
+   "text": "2",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-gem",
+   "text": "3",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-gem",
+   "text": "4",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-gem",
+   "text": "3",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-gem",
+   "text": "3",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-gem",
+   "text": "4",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-gem",
+   "text": "2",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-gem",
+   "text": "3",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-gem",
+   "text": "3",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "span.card-view-gem",
+   "text": "4",
+   "dW": 0,
+   "dH": 3,
+   "leaf": true,
+   "fs": 16
+  },
+  {
+   "sel": "span.dz-icon",
+   "text": "🧺",
+   "dW": 0,
+   "dH": 4,
+   "leaf": true,
+   "fs": 24
+  }
+ ],
+ "cardOverlap": {
+  "max": 0,
+  "worst": null
+ },
+ "stray": [
+  {
+   "sel": "h1.game-title",
+   "text": "Let's Go Shopping",
+   "fs": 24,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "button.btn.btn--secondary",
+   "text": "⚙ Settings",
+   "fs": 20,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "button.btn.btn--secondary",
+   "text": "? How to play",
+   "fs": 20,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "button.lang-toggle-seg",
+   "text": "中文",
+   "fs": 20,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "button.lang-toggle-seg.lang-toggle-seg--on",
+   "text": "EN",
+   "fs": 20,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "i.bot-trait.bot-trait--steady",
+   "text": "Ca",
+   "fs": 12.9,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "span.bot-card-name",
+   "text": "Steady",
+   "fs": 20,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "i.bot-trait.bot-trait--impulsive",
+   "text": "Ea",
+   "fs": 12.9,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "span.bot-card-name",
+   "text": "Zip",
+   "fs": 20,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "span.bot-lap-gain",
+   "text": "+2",
+   "fs": 15,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "span.bot-thumb.bot-thumb--more",
+   "text": "+1",
+   "fs": 15,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "p.board3d-status",
+   "text": "Stop 7 · The Shop · Lap 1 · Sprout's turn",
+   "fs": 16,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "p.board-log",
+   "text": "Tag bought Egg at the shop",
+   "fs": 16,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "button.board3d-reset",
+   "text": "Reset view",
+   "fs": 16,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "i.bot-trait.bot-trait--follower",
+   "text": "Go",
+   "fs": 12.9,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "span.bot-card-name",
+   "text": "Tag",
+   "fs": 20,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "span.think-trait",
+   "text": "🐾Go",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.order-chip-name",
+   "text": "Zip",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.order-chip-gain",
+   "text": "+2",
+   "fs": 12.9,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.bot-trait.bot-trait--impulsive",
+   "text": "⚡Ea",
+   "fs": 12.9,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.order-chip-ava",
+   "text": "🐾",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.order-chip-name",
+   "text": "Tag",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.bot-trait.bot-trait--follower",
+   "text": "🐾Go",
+   "fs": 12.9,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.order-chip-ava",
+   "text": "🌾",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.order-chip-name",
+   "text": "Sprout",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.order-chip-gain",
+   "text": "+1",
+   "fs": 12.9,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.order-chip-ava",
+   "text": "🛡️",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.order-chip-name",
+   "text": "Steady",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.bot-trait.bot-trait--steady",
+   "text": "🛡️Ca",
+   "fs": 12.9,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.sr-only",
+   "text": "Next up",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.me-avatar-icon",
+   "text": "🌾",
+   "fs": 20,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "span.me-name",
+   "text": "Sprout",
+   "fs": 16,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "p.recipe-card-title",
+   "text": "My basket: 🐠 Braised Fish (6 coins)",
+   "fs": 16,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-icon",
+   "text": "🐟",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-name",
+   "text": "Fish 3 coins",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-icon",
+   "text": "🌿",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-name",
+   "text": "Green Onion 1 coin",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-icon",
+   "text": "🫚",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-name",
+   "text": "Ginger 1 coin",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-icon",
+   "text": "🧄",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.recipe-slot-name",
+   "text": "Garlic 1 coin",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.cc-live",
+   "text": "My coins: 3",
+   "fs": 24,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "span.clip-chip-sub",
+   "text": "Maybe later",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.clip-chip-sub",
+   "text": "To pay later",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.clip-chip-sub",
+   "text": "Hint",
+   "fs": 15,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "h2.popup-title",
+   "text": "⑦ The Shop",
+   "fs": 24,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.popup-goal",
+   "text": "Practice: planning matters",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.rcp-item",
+   "text": "🐟",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.rcp-item",
+   "text": "🌿",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.rcp-item",
+   "text": "🫚",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.rcp-item",
+   "text": "🧄",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "p.panel-text",
+   "text": "Missing food is all here. Each costs 1 mor",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "p.panel-subtitle",
+   "text": "Recipe still needs",
+   "fs": 16,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.hand-tag",
+   "text": "Fish",
+   "fs": 28,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "p.panel-subtitle.store-grid-label",
+   "text": "All food",
+   "fs": 16,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Tom­ato",
+   "fs": 16,
+   "inButton": true,
+   "inCard": true
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Egg",
+   "fs": 16,
+   "inButton": true,
+   "inCard": true
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Gre­ens",
+   "fs": 16,
+   "inButton": true,
+   "inCard": true
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Cucu­mber",
+   "fs": 16,
+   "inButton": true,
+   "inCard": true
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Pot­ato",
+   "fs": 16,
+   "inButton": true,
+   "inCard": true
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Car­rot",
+   "fs": 16,
+   "inButton": true,
+   "inCard": true
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Tofu",
+   "fs": 16,
+   "inButton": true,
+   "inCard": true
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Mush­room",
+   "fs": 16,
+   "inButton": true,
+   "inCard": true
+  },
+  {
+   "sel": "span.card-view-name",
+   "text": "Pork",
+   "fs": 16,
+   "inButton": true,
+   "inCard": true
+  },
+  {
+   "sel": "span.cb-label",
+   "text": "for recipe",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "p.cb-math",
+   "text": "3 − 4 → 0",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.panel-selected-line",
+   "text": "Picked: 🐟 Fish (4 coins)",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.panel-selected-line",
+   "text": "Not enough coins",
+   "fs": 20,
+   "inButton": false,
+   "inCard": false
+  },
+  {
+   "sel": "span.dz-icon",
+   "text": "🧺",
+   "fs": 24,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "button.btn-speak",
+   "text": "🔊",
+   "fs": 20,
+   "inButton": true,
+   "inCard": false
+  },
+  {
+   "sel": "p.panel-keyhelp.panel-keyhelp--kbd",
+   "text": "←→ pick a card · 1/2/3 pick an action",
+   "fs": 15,
+   "inButton": false,
+   "inCard": false
+  }
+ ]
+}

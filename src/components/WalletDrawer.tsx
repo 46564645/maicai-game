@@ -8,13 +8,14 @@ import { getRecipe } from '../data/cards';
 import { coinWord, strings } from '../data/strings';
 import { walletSummary } from '../game/selectors';
 import { fmt, marketPriceOf } from '../game/stations/shared';
-import { cardName } from '../i18n/cardText';
+import { cardName, localizeLogText } from '../i18n/cardText';
 import type { GameState, PlayerId } from '../game/types';
 import { Coins } from './Coins';
 import { MiniCardRow } from './MiniCardRow';
 import { RecipeCard } from './RecipeCard';
 import { StationPopup } from './StationPopup';
 import { CoinBar } from './cards/CoinBar';
+import { CoinCounter } from './cards/CoinCounter';
 
 export function WalletDrawer({
   state,
@@ -31,6 +32,7 @@ export function WalletDrawer({
   const total = recipe?.ingredientIds.length ?? 0;
   const clipName = me.holdClip ? cardName(me.holdClip) : null;
   const clipPrice = me.holdClip ? marketPriceOf(me.holdClip) : null;
+  const myCoinsLabel = fmt(strings.game.myCoins, { n: me.coins });
 
   return (
     <StationPopup title={strings.game.walletTitle} onClose={onClose} testid="drawer-wallet">
@@ -48,13 +50,20 @@ export function WalletDrawer({
           )}
         </section>
         <section className="wallet-col" aria-label={strings.hud.wallet}>
-          <Coins count={me.coins} label={fmt(strings.game.myCoins, { n: me.coins })} />
+          {/* 币数与全局口径一致：真金币排 + 旁边的纯数字（CoinCounter），
+              「My coins: n」整句只走读屏 aria-label，不再写出来重复读 */}
+          <Coins
+            count={me.coins}
+            label={myCoinsLabel}
+            counter={<CoinCounter value={me.coins} label={myCoinsLabel} />}
+          />
           {/* 金币条：抽象的「菜谱还差X/车费Y/自由花Z」画成三段金币格 */}
           <CoinBar coins={w.coins} missingCost={w.missingCost} busDebt={w.busDebt} />
           <div className="wallet-lines">
             {w.recentLogs.map((e) => (
               <p key={e.id} className="wallet-line">
-                {e.text}
+                {/* R2-7：同 Toast，流水里的日志也按当前语言重渲染槽位名 */}
+                {localizeLogText(e.text)}
               </p>
             ))}
             <p className="wallet-line">

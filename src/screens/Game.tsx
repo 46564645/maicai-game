@@ -98,6 +98,8 @@ export function Game({
      R2 验收修复：主操作（投放区/Done）也随卡扇进浮层——竖栏 402
      高里头+状态+三行按钮同屏放不下，Buy/Done 曾被推出帧外。 */
   const [marketHandEl, setMarketHandEl] = useState<HTMLDivElement | null>(null);
+  /* R6：类别记号首访说明条（MarketPanel 首访回调喂进来，Toast 只播一次） */
+  const [iconsNotice, setIconsNotice] = useState<{ id: string; text: string } | null>(null);
   /* R2 验收修复（ww 第 2 轮截图验收）：手机天气时刻同市场卡扇的病——
      结果卡塞在右竖栏里、棋盘不压暗、站名浮签被栏内滚动截出屏。
      同一味药：棋盘区上方再常驻一层天气浮层挂载点，EventPanel 用
@@ -323,13 +325,13 @@ export function Game({
   );
 
   /* R10D（UI #8 / play #4）：回合条换成「下一位」高亮的小头像片——
-     与选中卡同语言的上抬+描边，不识字孩子也认得出该谁了；
-     bot 片上叠性格小徽（非色彩线索）。 */
+     与选中卡同语言的上抬+描边，不识字孩子也认得出该谁了。
+     性格小徽已撤：性格只活在详情层（点头像的 ProfileCard 高光卡、
+     伙伴站详情），常驻面不再摆图标+缩写。 */
   const orderChips = (state.turn?.order ?? []).map((id) => {
     const p = state.players.find((x) => x.id === id);
     if (!p) return null;
     const gain = lapGainOf(state, p.id);
-    const trait = botTrait(p);
     const isNext = nextId === id;
     return (
       <span
@@ -358,12 +360,6 @@ export function Game({
             )}
           </span>
         </span>
-        {trait && (
-          <span className={'bot-trait bot-trait--' + trait.key} aria-hidden="true">
-            {trait.icon}
-            {trait.label}
-          </span>
-        )}
         {isNext && <span className="sr-only">{strings.hud.nextUp}</span>}
       </span>
     );
@@ -416,12 +412,6 @@ export function Game({
             }
             key={lastLog.id}
           >
-            {trait && (
-              <span className="think-trait" aria-hidden="true">
-                {trait.icon}
-                {trait.label}
-              </span>
-            )}
             {think}
           </p>
         )}
@@ -453,6 +443,9 @@ export function Game({
           state={state}
           send={send}
           handFloatEl={phoneLand ? marketHandEl : null}
+          onFirstMarketOpen={() =>
+            setIconsNotice({ id: 'icons-intro', text: strings.panel.iconsIntro })
+          }
         />
       );
       break;
@@ -796,7 +789,11 @@ export function Game({
         )}
       </div>
 
-      <Toast entries={eventVeiled ? state.log.slice(0, -1) : state.log} />
+      <Toast
+        entries={eventVeiled ? state.log.slice(0, -1) : state.log}
+        humanId={state.humanId}
+        notice={iconsNotice}
+      />
 
       {phoneLand ? (
         <>
@@ -819,7 +816,8 @@ export function Game({
               return (
                 <span className="phone-bot-wrap" key={b.id}>
                   {/* R10C：心里话气泡也贴到手机小头像上；R10D 起按圈数撤
-                      （botThink 内部判 lap），气泡带性格徽 + 按人配色 */}
+                      （botThink 内部判 lap），气泡描边按人配色（性格
+                      小徽已撤——全词性格只在点头像的高光卡里） */}
                   {(() => {
                     const t = botThinkLine(b, lastLog, state.lap);
                     return t ? (
@@ -830,11 +828,6 @@ export function Game({
                         }
                         key={lastLog.id}
                       >
-                        {trait && (
-                          <span className="think-trait" aria-hidden="true">
-                            {trait.icon}
-                          </span>
-                        )}
                         {t}
                       </span>
                     ) : null;
@@ -860,15 +853,6 @@ export function Game({
                     <span className="phone-bot-avatar" aria-hidden="true">
                       {botIcon(b)}
                     </span>
-                    {trait && (
-                      <span
-                        className={'bot-trait bot-trait--' + trait.key}
-                        aria-hidden="true"
-                      >
-                        {trait.icon}
-                        {trait.label}
-                      </span>
-                    )}
                     {/* R10E（§4）：币数画成迷你金币点；
                         R1-E4：旁边补可见数字，金币只作辅助（读屏走 aria-label）
                         R2-9：关掉溢出尾徽——「+」只表示这一圈拿到的钱 */}

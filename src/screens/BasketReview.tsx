@@ -13,6 +13,7 @@ import { Button } from '../components/Button';
 import { Coins } from '../components/Coins';
 import { MiniCardRow } from '../components/MiniCardRow';
 import { RecipeCard } from '../components/RecipeCard';
+import { CoinCounter } from '../components/cards/CoinCounter';
 
 function MiniChips({ ids }: { ids: CardId[] }) {
   if (ids.length === 0) return <span className="screen-note">—</span>;
@@ -45,7 +46,18 @@ export function BasketReview({
               ` · ${fmt(strings.panel.recipeMissing, { items: missing.map(cardName).join(', ') })}`}
           </p>
         )}
-        <Coins count={human.coins} label={fmt(strings.game.myCoins, { n: human.coins })} />
+        {/* 币数与全局口径一致：真金币排 + 旁边的纯数字（CoinCounter），
+            「My coins: n」整句只走读屏 aria-label（同 WalletDrawer） */}
+        <Coins
+          count={human.coins}
+          label={fmt(strings.game.myCoins, { n: human.coins })}
+          counter={
+            <CoinCounter
+              value={human.coins}
+              label={fmt(strings.game.myCoins, { n: human.coins })}
+            />
+          }
+        />
         <div className="basket-lines">
           <p className="wallet-line">
             {strings.hud.holdClip}:{' '}
