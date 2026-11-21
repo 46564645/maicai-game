@@ -27,7 +27,7 @@ export const SCENE = {
   foam: '#FFFFFF', // 岸白沫线（ART §9.9）
   roadBed: '#E0B36B', // 路面底带（暖沙黄，环路一眼可读）
   tilePath: '#FFF1D6', // 过渡地砖（亮奶油，在深色路带上跳得出）
-  tilePathAlt: '#F4DCAC', // 过渡地砖交替色
+  tilePathAlt: '#EFD096', // 过渡地砖交替色（opt/visual V2：#F4DCAC 再深一档，交替节奏在取景距离可读）
   tileStation: '#FFFDF6', // 站点地砖（更亮一档，像积木）
   glow: PALETTE.orange, // 当前站发光圈
   wood: '#D9A066', // 木质道具点缀（暖橙淡调）

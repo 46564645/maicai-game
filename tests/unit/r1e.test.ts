@@ -370,7 +370,10 @@ describe('round-2 HUD batch (source assertions)', () => {
     expect(toastBlock).not.toContain('display: none');
     expect(toastBlock).not.toContain('visibility: hidden');
     expect(phoneCss).toContain(':has(.phone-market-float:not(:empty)) .toast-stack');
-    expect(phoneCss).toContain('calc((100vw - var(--rail-w)) / 2)');
+    // opt/ui F2：车道改从左安全区起算（旧公式宽吐司左缘实测探进安全区
+    // 37px）；锚点仍是「棋盘区中央 + 扣栏」，只是车道左界抬到 --safe-l
+    expect(phoneCss).toContain('calc((100vw - var(--rail-w) + var(--safe-l)) / 2)');
+    expect(phoneCss).toContain('max-width: calc(100vw - var(--rail-w) - var(--safe-l) - var(--space-6))');
   });
   it('R2-6 市场浮签：定稿站名 + 金币角标 ×N + 市场顶部撤 Practice 标签', () => {
     expect(gameTsx).toContain('strings.hud.marketTitle');

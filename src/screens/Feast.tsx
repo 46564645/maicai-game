@@ -38,16 +38,33 @@ function plateNote(plate: PlateResult): string {
 export function Feast({ state, send }: { state: GameState; send: (c: Command) => unknown }) {
   const [showLedger, setShowLedger] = useState(false);
   const human = state.players.find((p) => p.isHuman)!;
-  // R10 Slice B：满盘（菜谱集齐）的盘子各迸一次 PlaySpark（§3.3 开饭高光）
-  const tableRef = useRef<HTMLDivElement | null>(null);
-  const sparkedRef = useRef(false);
-  const anyFull = (state.plates ?? []).some((p) => p.kind === 'full');
+  /* 开饭高光（手感审计 #3）：满盘逐张落定各迸一次 PlaySpark。旧版全场
+     只在桌心迸一团——最多 4 张满盘共用一次火花，全局最高潮被摊薄。
+     现按每张盘自己的落定时点触发（plate-in：stagger 60ms/张 + 260ms
+     动画），火花跟着盘子走；同屏并发由 PlaySpark 自带 ≤3 闸门兜底。
+     纯演出：不读新数据、不发命令。 */
+  const plateRefs = useRef(new Map<string, HTMLDivElement>());
+  const sparkedRef = useRef(new Set<string>());
+  const sparkTimers = useRef<number[]>([]);
+  useEffect(
+    () => () => {
+      sparkTimers.current.forEach((t) => window.clearTimeout(t));
+    },
+    [],
+  );
   useEffect(() => {
-    if (anyFull && !showLedger && !sparkedRef.current) {
-      sparkedRef.current = true;
-      playSparkAt(tableRef.current);
-    }
-  }, [anyFull, showLedger]);
+    if (showLedger) return;
+    (state.plates ?? []).forEach((plate, i) => {
+      if (plate.kind !== 'full' || sparkedRef.current.has(plate.playerId)) return;
+      sparkedRef.current.add(plate.playerId);
+      sparkTimers.current.push(
+        window.setTimeout(
+          () => playSparkAt(plateRefs.current.get(plate.playerId)),
+          i * 60 + 260,
+        ),
+      );
+    });
+  }, [state.plates, showLedger]);
 
   if (showLedger) {
     const ledger = moneyLedger(state, human.id);
@@ -125,13 +142,17 @@ export function Feast({ state, send }: { state: GameState; send: (c: Command) =>
     <main className="intro-shell" data-testid="screen-feast">
       <h1 className="intro-title intro-title--sm">{strings.feast.title}</h1>
       <p className="screen-note">{strings.feast.subtitle}</p>
-      <div className="feast-table" ref={tableRef}>
+      <div className="feast-table">
         {(state.plates ?? []).map((plate, i) => {
           const p = state.players.find((x) => x.id === plate.playerId)!;
           const recipe = p.recipeId ? getRecipe(p.recipeId) : null;
           return (
             <div
               key={plate.playerId}
+              ref={(el) => {
+                if (el) plateRefs.current.set(plate.playerId, el);
+                else plateRefs.current.delete(plate.playerId);
+              }}
               className={`plate-card plate-card--${plate.kind}${plate.kind === 'full' ? ' card-foil' : ''} plate-in`}
               style={
                 {

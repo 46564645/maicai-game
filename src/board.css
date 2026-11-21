@@ -70,7 +70,9 @@
 
 .board-station--featured .board-station-name {
   font-size: var(--font-size-md);
-  color: var(--color-primary);
+  /* opt/ui F4：主色在奶油砖上只有 2.68:1（20px 粗字也低于 3:1 大字线），
+     换同色系深橙 --color-primary-deep（实测 5.20:1） */
+  color: var(--color-primary-deep);
 }
 
 .board-pawns {
@@ -131,6 +133,7 @@
    底仍走舞台浮签的墨底 token，挂在棋盘中央状态行下（手机横屏时随
    boardOverlay 进右竖栏）。不设任何计时/自动回应，等孩子自己点。 */
 .board-await {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -152,6 +155,54 @@
 .board-await-text {
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
+}
+
+/* 手感审计 #4：到达扫光——与 PlayableGlow 同一条 pglow-sweep 关键帧、
+   同一条光带，进场只扫一次就收（不循环、不常驻）。overflow 收在浮签
+   自己的圆角里。reduced-motion 下整段不播。 */
+.board-await-sweep {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+}
+.board-await-sweep::after {
+  content: '';
+  position: absolute;
+  inset: -10% -70%;
+  background: linear-gradient(
+    105deg,
+    transparent 44%,
+    var(--glow-sweep) 50%,
+    transparent 56%
+  );
+  transform: translateX(-120%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .board-await-sweep::after {
+    animation: pglow-sweep 700ms var(--motion-ease) 1 forwards;
+  }
+}
+
+/* 手感审计 #4：提议者头像——浮签顶部一枚圆头像，进场 think-pop 弹一次
+   （与 bot 心里话气泡同一弹簧口径），把「这是在问你」落到一张脸上 */
+.board-await-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  border: 2px solid var(--color-line-strong);
+  font-size: 24px;
+  line-height: 1;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .board-await-avatar {
+    animation: think-pop var(--motion-med) var(--ease-spring) backwards;
+  }
 }
 .board-await-thumbs {
   display: inline-flex;
@@ -574,7 +625,15 @@
   font-weight: var(--font-weight-bold);
   color: var(--color-ink);
   text-align: center;
-  animation: think-pop var(--motion-med) var(--ease-spring) backwards;
+}
+/* opt/ui F5：弹出动画收进 no-preference 门（与 think-halo 同口径）——
+   reduce 下实测仍跑 300ms think-pop；三个变体（think-pop /
+   think-pop-phone / think-pop-phone-end）的时长都来自这条简写，
+   关掉简写即全关，气泡本体照常出现 */
+@media (prefers-reduced-motion: no-preference) {
+  .think-bubble {
+    animation: think-pop var(--motion-med) var(--ease-spring) backwards;
+  }
 }
 @keyframes think-pop {
   from {
@@ -843,6 +902,15 @@ button.bot-card:focus-visible {
   box-shadow: var(--shadow-md);
 }
 
+/* 手感审计 #1：bot 动作落地痕迹——整卡与新买到的迷你砖各迸一圈薄荷闪，
+   与卡面 .card-view--just-played 共用 card-played-flash 关键帧与 900ms
+   （--motion-slow），一次性、结束即静止；和角落高光（--spot 约 1s）
+   同拍出现，让孩子靠画面而不是 toast 文字追踪「它刚做了什么」 */
+.bot-card--just-played,
+.bot-thumb--just-played {
+  animation: card-played-flash var(--motion-slow) var(--motion-ease) 1;
+}
+
 /* R1-E4：金币点 + 可见数字同行（数字小号粗体、等宽数字防跳动）
    R2-5：窄列（150–190px）里整行曾溢出面板——改可折行，点排/数字/
    得币角标都留在卡内；金币点已关溢出尾徽（R2-9），不会再排出 +n */
@@ -931,7 +999,9 @@ button.bot-card:focus-visible {
   border-radius: var(--radius-button);
   background: var(--color-accent-yellow);
   border: 1px solid var(--color-line-strong);
-  font-size: calc(var(--font-size-xs) * 0.86);
+  /* opt/ui F1：旧值 ×0.86 实测 12.9px，低于 14px 地板与项目功能字 15px
+     口径（tokens.css --font-size-xs）；与同源 .bot-lap-gain 同字号 15px */
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-heavy);
   font-variant-numeric: tabular-nums;
   color: var(--color-ink);

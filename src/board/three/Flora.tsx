@@ -107,6 +107,48 @@ function scatter(density: number): FloraItem[] {
   return items;
 }
 
+/** opt/visual V1：中央草坪四角花坛——转盘禁区（r<2.9）与环路内缘
+ *  之间的四个角落口袋各一丛（8 花 + 1 灌木），让岛心不再空着一整块
+ *  平绿；密度按画质档抽稀（每坛至少留 3 件）。中心由 scatter 的
+ *  rng 续取，保证全场撒布仍可复现。 */
+const BEDS = [
+  { x: 3.6, z: 2.0 },
+  { x: -3.6, z: 2.0 },
+  { x: 3.6, z: -2.0 },
+  { x: -3.6, z: -2.0 },
+];
+
+function bedItems(density: number): FloraItem[] {
+  const rng = mulberry32(20261120);
+  const items: FloraItem[] = [];
+  for (const bed of BEDS) {
+    const cands: FloraItem[] = [];
+    for (let k = 0; k < 8; k++) {
+      const a = rng() * Math.PI * 2;
+      const rr = Math.sqrt(rng()) * 0.48;
+      cands.push({
+        kind: 'flower',
+        x: bed.x + Math.cos(a) * rr,
+        z: bed.z + Math.sin(a) * rr * 0.8,
+        rot: rng() * Math.PI * 2,
+        s: 0.9 + rng() * 0.4,
+        ci: Math.floor(rng() * 3),
+      });
+    }
+    cands.push({
+      kind: 'bush',
+      x: bed.x + (bed.x > 0 ? 0.55 : -0.55),
+      z: bed.z - 0.3,
+      rot: rng() * Math.PI * 2,
+      s: 0.85,
+      ci: 0,
+    });
+    const m = Math.max(3, Math.round(cands.length * density));
+    for (let j = 0; j < m; j++) items.push(cands[Math.floor((j * cands.length) / m)]);
+  }
+  return items;
+}
+
 /** 栅栏段：只点缀在伙伴站（③ index 2）与家门口（⑧ index 7）旁，两站各两段 */
 const FENCES = [2, 7].flatMap((si) =>
   [-0.55, 0.55].map((off, di) => {
@@ -139,7 +181,7 @@ function useInstances(
 }
 
 export function Flora({ density, shadows }: { density: number; shadows: boolean }) {
-  const items = useMemo(() => scatter(density), [density]);
+  const items = useMemo(() => [...scatter(density), ...bedItems(density)], [density]);
   const dummy = useMemo(() => new THREE.Object3D(), []);
 
   const { flowers, bushes, stones } = useMemo(

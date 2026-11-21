@@ -15,6 +15,7 @@ import { toBoardView } from '../board/boardModel';
 import { LangToggle } from '../i18n/LangToggle';
 import { cardName, localizeLogText, playerDisplayName, stationGoal, stationName } from '../i18n/cardText';
 import { awaitingHumanKind } from '../ui/awaitingHuman';
+import { coinDeltaText, useCoinDelta } from '../ui/useCoinDelta';
 import { lapGainOf } from '../ui/lapGain';
 import { botThinkLine } from '../ui/botThink';
 import { botTrait } from '../ui/botTrait';
@@ -100,6 +101,10 @@ export function Game({
   const [marketHandEl, setMarketHandEl] = useState<HTMLDivElement | null>(null);
   /* R6：类别记号首访说明条（MarketPanel 首访回调喂进来，Toast 只播一次） */
   const [iconsNotice, setIconsNotice] = useState<{ id: string; text: string } | null>(null);
+  /* 手感审计 #2：真人币数落地变化时，钱包钮旁升起增减小片（+2 / −3）——
+     车费/事件得币这类「买卡之外」的变化旧版只有数字滚动，方向大小
+     看不见。桌面币堆钮与手机钱包圆钮共用这一枚（同一时刻只渲一个布局） */
+  const walletChip = useCoinDelta(human.coins);
   /* R2 验收修复（ww 第 2 轮截图验收）：手机天气时刻同市场卡扇的病——
      结果卡塞在右竖栏里、棋盘不压暗、站名浮签被栏内滚动截出屏。
      同一味药：棋盘区上方再常驻一层天气浮层挂载点，EventPanel 用
@@ -272,6 +277,34 @@ export function Game({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [board.activePlayerId, humanPending, pd.kind, state.flags.fast]);
 
+  /* 手感审计 #1（手机侧）：bot 动作落地痕迹闩锁——最新一条带 spend 的
+     bot 日志点亮对应小头像片 900ms（与桌面 BotCard 的 trace 同口径）。
+     直接按 lastLog 渲染会被下一条日志立刻顶掉（bot 连环动作时几乎
+     看不见），闩住 900ms 才成痕迹；定时器存 ref，重渲染不打断。 */
+  const [botActed, setBotActed] = useState<{ id: PlayerId; stamp: number } | null>(
+    null,
+  );
+  const botActedTimer = useRef<number | null>(null);
+  useEffect(() => {
+    if (!lastLog?.spend || !lastLog.playerId) return;
+    const actor = state.players.find((p) => p.id === lastLog.playerId);
+    if (!actor || actor.isHuman) return;
+    const stamp = lastLog.id;
+    setBotActed({ id: actor.id, stamp });
+    if (botActedTimer.current !== null) window.clearTimeout(botActedTimer.current);
+    botActedTimer.current = window.setTimeout(
+      () => setBotActed((cur) => (cur?.stamp === stamp ? null : cur)),
+      900,
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastLog?.id]);
+  useEffect(
+    () => () => {
+      if (botActedTimer.current !== null) window.clearTimeout(botActedTimer.current);
+    },
+    [],
+  );
+
   /* R10E：高光帘吃 Esc（与点帘/点卡同义） */
   useEffect(() => {
     if (!spot) return undefined;
@@ -403,6 +436,9 @@ export function Game({
           expanded={spot?.id === b.id}
           autoSpot={spot?.id === b.id && !spot.manual}
           lapGain={lapGainOf(state, b.id)}
+          actedStamp={
+            lastLog?.playerId === b.id && lastLog.spend ? lastLog.id : null
+          }
           onOpen={openBotSpot}
         />
         {think && (
@@ -739,6 +775,11 @@ export function Game({
                 n: human.coins,
               })}
             >
+              {walletChip && (
+                <span key={walletChip.stamp} className="coin-delta-chip" aria-hidden="true">
+                  {coinDeltaText(walletChip.delta)}
+                </span>
+              )}
               <CoinDots n={human.coins} className="coin-pile-dots" hideExtra />
               <span className="coin-pile-num">
                 <CoinCounter value={human.coins} label={myCoinsLabel} />
@@ -860,6 +901,15 @@ export function Game({
                       <CoinDots n={b.coins} cap={5} className="coin-dots--xs" hideExtra />
                       <span className="phone-bot-num" aria-hidden="true">{b.coins}</span>
                     </span>
+                    {/* 手感审计 #1（手机侧）：bot 动作落地时小头像片迸一圈
+                        薄荷闪（botActed 闩锁 900ms，key 挂日志 id 重播） */}
+                    {botActed?.id === b.id && (
+                      <span
+                        className="phone-bot-acted"
+                        key={botActed.stamp}
+                        aria-hidden="true"
+                      />
+                    )}
                   </button>
                 </span>
               );
@@ -891,6 +941,11 @@ export function Game({
               onClick={onOpenWallet}
               aria-label={fmt(strings.hud.walletWithCoins, { n: human.coins })}
             >
+              {walletChip && (
+                <span key={walletChip.stamp} className="coin-delta-chip" aria-hidden="true">
+                  {coinDeltaText(walletChip.delta)}
+                </span>
+              )}
               <span aria-hidden="true">🪙</span>
               <span className="phone-fab-num">
                 <CoinCounter

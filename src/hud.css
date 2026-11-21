@@ -769,6 +769,20 @@
   max-width: 480px;
 }
 
+/* opt/ui F7（整合线实测 + 本线复测）：矮幅桌面（≤480px 高）下带
+   .coin-bar 的弹窗（市场/商店/做饭）是居中纵列，面板脚的金币条随
+   内容浮在中段，33vh 车道的 toast 正压其上——874×402 实测
+   ∩ 7519px²、667×375 实测 ∩ 11190px²、商店 874 实测 ∩ 3564px²，
+   金币条「币−花=剩」在 4s 停留期内不可读。沿用手机浮层口径
+   （phone.css 浮层在场藏条）：这类弹窗在场时藏条，board-log 日志
+   行照常可读，弹窗关掉条自然回来；4s 生命周期 / 队列 / z 层级
+   一概不动。手机横屏竖栏几何已验不相交（F2），不走此规则 */
+@media (max-height: 480px) {
+  .app-shell:has(.popup .coin-bar):not(:has(.game-screen--phone-land)) .toast-stack {
+    visibility: hidden;
+  }
+}
+
 /* 合并条换行时行距收紧（单条仍是一行药丸的观感） */
 .toast-text {
   line-height: 1.35;
@@ -1582,6 +1596,66 @@
   font-style: normal;
   color: var(--color-ink);
 }
+/* 手感审计 #2：新出现的金币点弹入——弹簧从 0.6 弹到 1（与手牌 hand-pop
+   同一 --ease-spring 口径），一次性、结束即静止。reduced-motion 不弹，
+   点直接在位（CoinDots 侧的变化方向另有增减小片交代） */
+@media (prefers-reduced-motion: no-preference) {
+  .coin-dot--new {
+    animation: coin-dot-pop var(--motion-med) var(--ease-spring) 1;
+  }
+}
+@keyframes coin-dot-pop {
+  from {
+    transform: scale(0.6);
+  }
+}
+
+/* 手感审计 #2：金币增减小片——币数落地变化时在宿主（金币条 / 钱包钮）
+   右上方升起「+2 / −3」：约 600ms 升起到位、随后淡出，全程约 1.1s，
+   一次性不循环。金黄色与 .bot-lap-gain / .coin-dots-extra 同色系；
+   本片是瞬时演出（aria-hidden），币数读屏仍走 CoinCounter。宿主须
+   position: relative（.coin-bar / .coin-pile / .phone-fab 均已是）。 */
+.coin-delta-chip {
+  position: absolute;
+  top: -12px;
+  right: 4px;
+  z-index: 6;
+  padding: 0 6px;
+  border-radius: var(--radius-button);
+  background: var(--color-accent-yellow);
+  border: 1.5px solid var(--color-line-strong);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-heavy);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+  color: var(--color-ink);
+  white-space: nowrap;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .coin-delta-chip {
+    animation: coin-delta-rise 1100ms var(--motion-ease) 1 forwards;
+  }
+}
+@keyframes coin-delta-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(-8px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-13px);
+  }
+}
+
 .coin-dots--xs .coin-dot {
   width: var(--coin-dot-size-sm);
   height: var(--coin-dot-size-sm);

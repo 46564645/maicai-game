@@ -53,21 +53,43 @@ function StreetBed() {
   );
 }
 
-/** 过渡地砖（比站砖小一号，颜色交替） */
+/** 过渡地砖（比站砖小一号，颜色交替）。
+ *  opt/visual V2：每块砖顶嵌一枚沙色小箭头（>> 形），交替色再加深
+ *  一档——不识字的孩子也能顺着箭头看出队伍往哪边走、砖与砖的节奏。
+ *  箭头朝向不用砖的 yaw 直接套：loopPoint 的 yaw 只保证砖的长轴
+ *  沿路（对称盒子无所谓正反），数值微分出的真实行进切向才是准的
+ *  （实测竖边上 yaw 与行进方向恰好相反，横边相同）。 */
 function PathTile({ t, alt, shadows }: { t: number; alt: boolean; shadows: boolean }) {
   const { x, z, yaw } = loopPoint(t);
+  const ahead = loopPoint(t + 0.004);
+  const phi = Math.atan2(-(ahead.z - z), ahead.x - x); // 局部 +X 对齐行进切向
   return (
-    <RoundedBox
-      args={[1.15, 0.22, 0.95]}
-      radius={0.08}
-      smoothness={3}
-      position={[x, 0.12, z]}
-      rotation-y={yaw}
-      castShadow={shadows}
-      receiveShadow={shadows}
-    >
-      <meshStandardMaterial color={alt ? SCENE.tilePathAlt : SCENE.tilePath} {...TOY_MAT} />
-    </RoundedBox>
+    <group position={[x, 0, z]}>
+      <RoundedBox
+        args={[1.15, 0.22, 0.95]}
+        radius={0.08}
+        smoothness={3}
+        position-y={0.12}
+        rotation-y={yaw}
+        castShadow={shadows}
+        receiveShadow={shadows}
+      >
+        <meshStandardMaterial color={alt ? SCENE.tilePathAlt : SCENE.tilePath} {...TOY_MAT} />
+      </RoundedBox>
+      {/* 箭头两臂：0.30 长薄片，绕 Y ±0.63 在 +X 侧合成尖角 */}
+      <group rotation-y={phi}>
+        {[0.63, -0.63].map((ry, i) => (
+          <mesh
+            key={i}
+            position={[-0.01, 0.238, i === 0 ? 0.08 : -0.08]}
+            rotation-y={ry}
+          >
+            <boxGeometry args={[0.3, 0.014, 0.055]} />
+            <meshStandardMaterial color={SCENE.roadBed} {...TOY_MAT} />
+          </mesh>
+        ))}
+      </group>
+    </group>
   );
 }
 

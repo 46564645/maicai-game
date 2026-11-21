@@ -246,10 +246,16 @@ export function Piece({
         </mesh>
       </group>
 
-      {/* 玩家色光环（始终脚下；active 更亮更宽） */}
+      {/* 玩家色光环（始终脚下；active 更亮更宽）。opt/visual V3：
+          环下加一层同色淡填充圆盘——四枚挤在同一站时各自留一汪颜色，
+          不再并成一团（非行动者环透明度 0.4 → 0.55 同步加强） */}
+      <mesh position-y={-BASE_Y + 0.313} rotation-x={-Math.PI / 2}>
+        <circleGeometry args={[active ? 0.36 : 0.28, 28]} />
+        <meshBasicMaterial color={color} transparent opacity={0.16} depthWrite={false} />
+      </mesh>
       <mesh position-y={-BASE_Y + 0.315} rotation-x={-Math.PI / 2}>
         <ringGeometry args={[active ? 0.27 : 0.21, active ? 0.38 : 0.29, 28]} />
-        <meshBasicMaterial color={color} transparent opacity={active ? 0.95 : 0.4} />
+        <meshBasicMaterial color={color} transparent opacity={active ? 0.95 : 0.55} />
       </mesh>
 
       {/* 低档贴片影：无实时阴影时给棋子一个柔和落点 */}

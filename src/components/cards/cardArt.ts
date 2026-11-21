@@ -108,6 +108,25 @@ export const CARD_ART_URLS: readonly string[] = [
 ];
 
 /**
+ * 开机预载分级（性能优化轮杠杆 2）：CARD_ART_URLS_BOOT 是「首局必见集」，
+ * 缓冲页闸门只等这一集（见 src/loadAssets.ts）——天气（开局先转天气盘）
+ * + 菜谱（第 1 站 Recipe Stop 抽卡）+ 食材/诱惑（第 2 站 The Market 摊位，
+ * 诱惑混在食材里；邀请卡复用诱惑图，一并在此集）+ 牌背（牌堆全程可见）。
+ * 其余卡图（事件图，最早第 5 站 Surprise Stop 才翻开）不在闸门内：
+ * 闸门放行后后台续载，未到达前 CardView 有 emoji 回退兜底。
+ */
+const BOOT_ART_ID_PREFIXES = ['wth-', 'rec-', 'ing-', 'tmp-', 'inv-'] as const;
+
+export const CARD_ART_URLS_BOOT: readonly string[] = [
+  ...new Set([
+    ...Object.entries(artByCardId)
+      .filter(([id]) => BOOT_ART_ID_PREFIXES.some((p) => id.startsWith(p)))
+      .map(([, url]) => url),
+    artCardBack,
+  ]),
+];
+
+/**
  * 卡面统一底色（Thong 2026-11-20 定稿，取代 T-1 的逐卡采样底色）：
  * 卡片组成 = 一张纯暖白底卡 + 透明 PNG 直贴 + 下方文字区。全部卡面
  * 共用同一暖白色 #fff6e9（Coinly 奶油白，与 tokens.css 的

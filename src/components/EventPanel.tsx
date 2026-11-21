@@ -30,6 +30,7 @@ import { CardView } from './CardView';
 import { WeatherSpinner } from './WeatherSpinner';
 import { Deck } from './cards/Deck';
 import { Hand } from './cards/Hand';
+import { playSparkAt } from './cards/PlaySpark';
 import { PendingChip } from './cards/PendingChip';
 import { PlayableGlow } from './cards/PlayableGlow';
 import { TiltCard } from './cards/TiltCard';
@@ -147,6 +148,16 @@ export function EventPanel({
   const reduced =
     typeof window !== 'undefined' &&
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
+
+  /* 手感审计 #5：翻牌落定的一瞬在牌堆中心迸一次 PlaySpark——旧版翻开
+     只有 event-reveal-pop 独自收尾，比同流程的天气仪式明显安静。Deck
+     的 onDraw 正好在翻牌动画结束（或跳过落定）时回调，先量牌堆位置
+     再通知 Game 揭晓（揭晓后牌堆卸载，火花挂在 body 上播完）。 */
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const handleReveal = () => {
+    playSparkAt(stageRef.current?.querySelector('.deck-top'));
+    onReveal();
+  };
 
   /* R1-E2：spin 段可点击跳过——定时器存 ref，点舞台任意处即清掉
      定时器并按「已落定」推进相位（nextWeatherPhase 的 landed 迁移），
@@ -328,7 +339,7 @@ export function EventPanel({
           momentBlock
         )
       ) : (
-        <div className="event-stage">
+        <div className="event-stage" ref={stageRef}>
           {/* 落定天气：小天气卡立在边上（wth-* 插画已入册） */}
           {weather && (
             <div className="event-weather" data-testid="event-weather">
@@ -379,7 +390,7 @@ export function EventPanel({
               face={
                 <CardView cardId={card.id} icon={card.icon} name={cardName(card.id)} />
               }
-              onDraw={onReveal}
+              onDraw={handleReveal}
             />
           )}
         </div>

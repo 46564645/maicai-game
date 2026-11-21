@@ -1020,6 +1020,7 @@ button.card-view--selected:active,
    格子警示脉动（warn）。transform/opacity only。
    ========================================================================== */
 .coin-bar {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1438,7 +1439,10 @@ button.card-view--selected:active,
 }
 .card-fly {
   position: fixed;
-  z-index: 1200;
+  /* opt/ui F6：1200 → 90，收进既有层级表（高光层 40 之上、转屏提示
+     100 之下——旧值连「盖住一切」的转屏层都压过，与 phone.css:22
+     的口径相悖）；与 .play-spark 的相对次序（spark 在上）不变 */
+  z-index: 90;
   pointer-events: none;
   animation: card-fly 420ms var(--ease-spring) forwards;
 }
@@ -1714,7 +1718,8 @@ button.card-view--selected:active,
    ========================================================================== */
 .play-spark {
   position: fixed;
-  z-index: 1300;
+  /* opt/ui F6：1300 → 95（同 .card-fly 的收编，仍在其上、转屏层下） */
+  z-index: 95;
   width: 0;
   height: 0;
   pointer-events: none;

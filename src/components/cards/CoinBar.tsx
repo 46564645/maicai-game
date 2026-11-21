@@ -6,6 +6,7 @@
  */
 import { strings } from '../../data/strings';
 import { fmt } from '../../game/stations/shared';
+import { coinDeltaText, useCoinDelta } from '../../ui/useCoinDelta';
 
 interface Cell {
   key: string;
@@ -18,6 +19,7 @@ export function CoinBar({
   missingCost,
   busDebt,
   spend = 0,
+  hideMath = false,
 }: {
   coins: number;
   /** 菜谱还差的菜价总额（walletSummary.missingCost） */
@@ -26,6 +28,8 @@ export function CoinBar({
   busDebt: number;
   /** 选中卡的单价：从自由花端点亮 spend 格，溢出段警示脉动 */
   spend?: number;
+  /** R2-14：算式不渲染在金币条下（市场站改由面板放进按钮同一行） */
+  hideMath?: boolean;
 }) {
   // 段长 clamp：币不够时菜谱段先占位，车费/自由花依次收缩
   const recipe = Math.max(0, Math.min(missingCost, coins));
@@ -47,14 +51,21 @@ export function CoinBar({
     left--;
   }
 
+  // 手感审计 #2：币数落地变化时，条旁升起一枚增减小片（+2 / −3）
+  const chip = useCoinDelta(coins);
+
   const segCells = (seg: Cell['seg']) => cells.filter((c) => c.seg === seg);
   const seg = (name: Cell['seg'], label: string) =>
     segCells(name).length > 0 && (
       <span className={`cb-seg cb-seg--${name}`} key={name}>
-        <span className="cb-cells" aria-hidden="true">
-          {segCells(name).map((c) => (
-            <i key={c.key} className={`cb-cell cb-cell--${c.lit}`} />
-          ))}
+        {/* R2-13（E4 口径）：物理金币点旁一律带等宽数字 */}
+        <span className="cb-cells-row">
+          <span className="cb-cells" aria-hidden="true">
+            {segCells(name).map((c) => (
+              <i key={c.key} className={`cb-cell cb-cell--${c.lit}`} />
+            ))}
+          </span>
+          <span className="cb-num">{segCells(name).length}</span>
         </span>
         <span className="cb-label">{label}</span>
       </span>
@@ -62,6 +73,11 @@ export function CoinBar({
 
   return (
     <div className="coin-bar">
+      {chip && (
+        <span key={chip.stamp} className="coin-delta-chip" aria-hidden="true">
+          {coinDeltaText(chip.delta)}
+        </span>
+      )}
       <div
         className="cb-segs"
         role="img"
@@ -71,7 +87,7 @@ export function CoinBar({
         {seg('bus', strings.coinbar.bus)}
         {seg('free', strings.coinbar.free)}
       </div>
-      {spend > 0 && (
+      {spend > 0 && !hideMath && (
         <p className="cb-math" aria-hidden="true">
           {fmt(strings.coinbar.math, { a: coins, b: spend, c: Math.max(0, coins - spend) })}
         </p>

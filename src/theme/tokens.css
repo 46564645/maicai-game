@@ -29,6 +29,7 @@
   /* —— 颜色（ww 临时色板【待确认】）—— */
   --color-primary: #FF6B2C;        /* 暖橙·主色（主按钮底、强调） */
   --color-primary-contrast: #ffffff;
+  --color-primary-deep: #B54407;   /* opt/ui F4：深橙·奶油底上的强调文字（目标站名）——主色 #FF6B2C 在奶油砖上实测 2.68:1，本色 5.20:1 */
   --color-accent-yellow: #FFC93C;  /* 黄·待付夹/提醒 */
   --color-blue: #5B7CFA;
   --color-mint: #7ED9B5;

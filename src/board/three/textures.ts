@@ -105,6 +105,12 @@ export function grassMaps(): SurfaceMaps {
   grass = surfaceMaps((g, size) => {
     g.fillStyle = SCENE.islandTop;
     g.fillRect(0, 0, size, size);
+    // opt/visual V1：割草条纹——6 道纵带交替微明/微暗，草皮先有大
+    // 结构再叠斑驳，中央草坪不再是一整块平绿（单幅覆盖不平铺）
+    for (let b = 0; b < 6; b++) {
+      g.fillStyle = b % 2 === 0 ? 'rgba(255,255,255,0.05)' : 'rgba(18,74,18,0.055)';
+      g.fillRect(Math.floor((b * size) / 6), 0, Math.ceil(size / 6), size);
+    }
     const tones = ['#57B843', '#6BD155', '#5CBF47', '#71D45C', '#4FAE3E'];
     for (let i = 0; i < 900; i++) {
       blotch(g, rng, size, tones[i % tones.length], 0.05 + rng() * 0.07, 8, 42);

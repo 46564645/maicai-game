@@ -177,6 +177,11 @@
   display: flex;
   align-items: flex-start;
   gap: var(--space-1);
+  /* opt/ui F3：允许换行——667 宽实测内容 481px > 盒 347px，flex 子项
+     不裁剪、横溢 134px 盖住右栏语言切换（中文片 64×48 整片被盖）。
+     换行只在溢出时发生（874 宽内容 481 ≤ 盒 542 不触发），溢出片
+     落到盒内第二行（棋盘左上），结构上不可能再进右栏 */
+  flex-wrap: wrap;
 }
 
 .phone-lap {
@@ -1070,12 +1075,15 @@
   grid-template-columns: 1fr;
 }
 
-/* —— Toast：落在小岛区域中央偏下，不压圆钮也不进竖栏 —— */
+/* —— Toast：落在小岛区域中央偏下，不压圆钮也不进竖栏 ——
+   opt/ui F2：居中车道从小岛左缘改为从左安全区起算——旧口径宽吐司
+   左缘实测探到 x=25（安全区 62 内侧 37px，点击目标落进刘海区）；
+   新口径最宽吐司左缘 = --safe-l + --space-6/2，与底边 --safe-b 同口径 */
 .app-shell--phone-land .toast-stack {
-  left: calc((100vw - var(--rail-w)) / 2);
+  left: calc((100vw - var(--rail-w) + var(--safe-l)) / 2);
   top: auto;
   bottom: calc(var(--button-height) + var(--space-5));
-  max-width: calc(100vw - var(--rail-w) - var(--space-6));
+  max-width: calc(100vw - var(--rail-w) - var(--safe-l) - var(--space-6));
 }
 
 /* ==========================================================================
@@ -1503,6 +1511,16 @@
    是「正在想」的橙描边，next 是墨描边，两态同框不撞色） */
 .phone-bot {
   position: relative;
+}
+
+/* 手感审计 #1（手机侧）：bot 动作落地时小头像片迸一圈薄荷闪——覆盖层
+   与桌面 BotCard 共用 card-played-flash 关键帧/900ms，一次性 */
+.phone-bot-acted {
+  position: absolute;
+  inset: -2px;
+  border-radius: var(--radius-button);
+  pointer-events: none;
+  animation: card-played-flash var(--motion-slow) var(--motion-ease) 1;
 }
 .phone-bot--next {
   transform: translateY(-3px);

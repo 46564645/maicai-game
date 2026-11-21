@@ -157,8 +157,10 @@ function FoamRing() {
   const far = useRef<THREE.Mesh>(null);
   useAmbient(90, (t) => {
     const k = Math.sin(t * 2.1); // ~3s 一轮呼吸
-    nearMat.opacity = 0.45 + k * 0.12;
-    farMat.opacity = 0.26 + Math.sin(t * 2.1 + 1.3) * 0.08;
+    // opt/visual V4：泡沫基线抬高（近环 0.45→0.58、远环 0.26→0.34），
+    // 岸线在取景距离不再只是一道淡晕
+    nearMat.opacity = 0.58 + k * 0.12;
+    farMat.opacity = 0.34 + Math.sin(t * 2.1 + 1.3) * 0.08;
     near.current?.scale.setScalar(1 + k * 0.012);
     far.current?.scale.setScalar(1 + Math.sin(t * 2.1 + 1.3) * 0.018);
   });
@@ -302,6 +304,12 @@ export function Island({ shadows }: { shadows: boolean }) {
     return t;
   }, []);
 
+  // opt/visual V4：水面缓漂——噪声贴图极慢偏移（整周期 ~2 分钟），
+  // 近岸与外海的 bump 一起动，水面不再是一张静止的平色
+  useAmbient(140, (t) => {
+    waterBump.offset.set((t * 0.008) % 1, (t * 0.005) % 1);
+  });
+
   return (
     <group>
       {/* 岛体（盖=草地色顶面，壁=奶油侧面）；旋转后厚度向下，顶面在 TOP_Y */}
@@ -323,6 +331,15 @@ export function Island({ shadows }: { shadows: boolean }) {
         <meshStandardMaterial attach="material-1" color={SCENE.islandSide} {...TOY_MAT} />
       </mesh>
 
+      {/* opt/visual V1：转盘广场出入口——南北各一条沙土小径从环路
+          内缘通到广场边，广场不再是空草坪正中一座孤岛 */}
+      {[2.47, -2.47].map((z) => (
+        <mesh key={z} position={[0, 0.006, z]} rotation-x={-Math.PI / 2} receiveShadow={shadows}>
+          <planeGeometry args={[1.05, 1.1]} />
+          <meshStandardMaterial color={SCENE.roadBed} {...TOY_MAT} />
+        </mesh>
+      ))}
+
       {/* 浅滩沿（岛外一圈浅色，像被水泡软的沙滩） */}
       <mesh geometry={rimGeo} rotation-x={Math.PI / 2} position-y={-0.62}>
         <meshStandardMaterial attach="material-0" color={SCENE.islandRim} {...TOY_MAT} />
@@ -343,7 +360,9 @@ export function Island({ shadows }: { shadows: boolean }) {
         />
       </mesh>
 
-      {/* 近岸浅水：渐变圆盘（近岸浅→外缘深），外缘与深水同色 → 无缝过渡 */}
+      {/* 近岸浅水：渐变圆盘（近岸浅→外缘深），外缘与深水同色 → 无缝过渡。
+          opt/visual V4：与深水共用同一张噪声 bump（repeat 14 在圆盘
+          UV 上 ≈2.3 世界单位/特征），近岸也有缓漂的波光 */}
       <mesh position-y={-0.72} rotation-x={-Math.PI / 2}>
         <circleGeometry args={[16, 48]} />
         <meshStandardMaterial
@@ -351,6 +370,8 @@ export function Island({ shadows }: { shadows: boolean }) {
           roughness={0.62}
           metalness={0}
           envMapIntensity={0.3}
+          bumpMap={waterBump}
+          bumpScale={0.08}
         />
       </mesh>
 
@@ -360,9 +381,17 @@ export function Island({ shadows }: { shadows: boolean }) {
 
       {/* 外海玩具点缀：船与浮标都在浅滩沿之外的水面上，不遮岛与站点。
           配色只用蓝/紫/奶油白——避免绿/暖色被岛屿像素分割误算进岛体
-          （测量口径 green/tan），白壳船在蓝海上反而更跳 */}
-      <ToyBoat x={-13.5} z={-8.5} ry={0.7} hull={PALETTE.cream} sail={PALETTE.cream} flag={PALETTE.blue} />
-      <ToyBoat x={15.5} z={-4} ry={-1.1} hull={PALETTE.blue} sail={PALETTE.cream} flag={PALETTE.purple} />
+          （测量口径 green/tan），白壳船在蓝海上反而更跳。
+          R2-E8 硬指标（海/岛/船三项一起判）：桌面与手机横屏各至少
+          一艘船完整可见、不被任何面板挡。旧锚点在 R2 取景下三艘都
+          滑出画面/栏后；按 solveFit 相机模型投影船体点云选点（脚本
+          shots/boat-proj-check.ts）：白船移岛左上外海——桌面投影
+          包围盒 212..290×75..138 ⊆ 自由矩形；蓝船移岛右上外海——
+          手机投影包围盒 566..601×89..122 ⊆ 自由矩形（右栏左侧）。
+          两锚点到浅滩轮廓的带符号距离 ≈1.5 ≥ 船体包围圆 1.35，
+          全船在水里、不压浅滩。 */}
+      <ToyBoat x={-8.25} z={-7.38} ry={0.7} hull={PALETTE.cream} sail={PALETTE.cream} flag={PALETTE.blue} />
+      <ToyBoat x={10} z={-5.25} ry={-1.1} hull={PALETTE.blue} sail={PALETTE.cream} flag={PALETTE.purple} />
       <ToyBoat x={-15} z={3.5} ry={1.35} hull={PALETTE.purple} sail={PALETTE.cream} flag={PALETTE.blue} />
       <Buoy x={13.5} z={-9.5} c={PALETTE.blue} />
       <Buoy x={-12.5} z={9.5} c={PALETTE.purple} />

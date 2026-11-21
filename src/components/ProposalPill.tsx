@@ -58,6 +58,13 @@ export function ProposalPill({
   const invite = proposal.inviteCardId
     ? cards.invites.find((i) => i.id === proposal.inviteCardId)
     : null;
+  /* 手感审计 #4：到达提示——提议者的头像在浮签顶部弹一下（think-pop
+     同款弹簧），告诉孩子「这是冲你来的问题」；扫光在 CSS 侧一次带过。
+     纯演出：文案/按钮/命令一字不动。 */
+  const avatar =
+    cards.characters.find((c) => c.id === from.characterId)?.icon ??
+    cards.bots.find((b) => b.id === from.characterId)?.icon ??
+    '🙂';
   const text = invite
     ? fmt(strings.bubble.proposalInvite, {
         name: playerDisplayName(from),
@@ -75,6 +82,10 @@ export function ProposalPill({
       data-testid="await-proposal"
       aria-live="polite"
     >
+      <span className="board-await-sweep" aria-hidden="true" />
+      <span className="board-await-avatar" aria-hidden="true">
+        {avatar}
+      </span>
       <p className="board-await-text">{text}</p>
       <div className="board-await-thumbs" aria-hidden="true">
         {invite ? (
