@@ -1,0 +1,186 @@
+/* ==========================================================================
+   bits.css —— React Bits 移植组件样式（WS1 按钮与交互控件）。
+   只用 tokens.css 的变量；新动效全部走 WAAPI / motion，无 @keyframes。
+   ========================================================================== */
+
+/* —— Glare Hover 移植：按钮本体挂光带扫面 ——
+   源组件把光带叠在 wrapper 上；这里收成一枚 aria-hidden 的 .bits-sheen，
+   由 PressButton 在 pointerenter / pointerdown 时用 WAAPI 推过按钮面。
+   reduced-motion 下整层不渲染动画（JS 侧同样不触发）。 */
+.bits-press {
+  position: relative;
+  overflow: hidden;
+}
+
+.bits-sheen {
+  position: absolute;
+  top: -20%;
+  bottom: -20%;
+  left: -40%;
+  width: 45%;
+  border-radius: 50%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--color-surface) 40%, transparent) 50%,
+    transparent
+  );
+  filter: blur(4px);
+  transform: translateX(-120%) skewX(-12deg);
+  pointer-events: none;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bits-sheen {
+    display: none;
+  }
+}
+
+/* —— Pill Nav 移植：轨道 + 跟随指针/焦点滑动的指示丸 ——
+   指示丸 = 玩具键「浮起 + 淡橙底」，无描边强调（owner：强调=发光+抬起） */
+.pill-nav {
+  display: inline-flex;
+  max-width: 100%;
+}
+
+.pill-nav-track {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radius-button);
+  background: var(--gradient-card);
+  border: 2px solid var(--color-line-soft);
+  box-shadow: var(--shadow-sm), var(--inset-light);
+}
+
+.pill-nav-track--vertical {
+  flex-direction: column;
+}
+
+.pill-nav-item {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-width: var(--tap-min-size);
+  min-height: var(--tap-min-size);
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-button);
+  background: transparent;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+}
+
+.pill-nav-item:disabled {
+  color: var(--color-disabled);
+}
+
+.glide-pill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 0;
+  border-radius: var(--radius-button);
+  background: color-mix(in srgb, var(--color-primary) 20%, var(--color-surface));
+  box-shadow:
+    var(--shadow-sm),
+    inset 0 -3px 0 color-mix(in srgb, var(--color-primary) 35%, transparent);
+  pointer-events: none;
+}
+
+/* —— Glide Select 移植：demo-chip 轨道 + 选中锚点指示丸 ——
+   --go / --warn chip 让指示丸染同款色 */
+.glide-track {
+  position: relative;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.glide-pill--go {
+  background: color-mix(in srgb, var(--color-primary) 38%, var(--color-surface));
+}
+
+.glide-pill--warn {
+  background: color-mix(in srgb, var(--color-warning) 55%, var(--color-surface));
+}
+
+/* —— Specular Button 移植（全场唯一：.board-enter）——
+   按钮外壳仍是 .btn 橙药丸；canvas 只在边缘画光，装饰层不吃点击 */
+.specular-pill {
+  position: relative;
+  isolation: isolate;
+}
+
+.specular-pill__light {
+  position: absolute;
+  inset: -24px;
+  z-index: 1;
+  display: block;
+  width: calc(100% + 48px);
+  height: calc(100% + 48px);
+  pointer-events: none;
+}
+
+.specular-pill__label {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: inherit;
+}
+
+/* —— Shiny Text 移植：高光扫过文字（base 渐变始终兜底） —— */
+.shiny-text {
+  position: relative;
+  display: inline-block;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* —— Bubble Menu 移植（gsap → motion）：主泡 + 向上展开托盘 ——
+   主泡/托盘都是 .phone-quick 的直子（无包裹层），托盘 absolute 不撑盒 */
+.bubble-tray {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + var(--space-2));
+  z-index: 11;
+}
+
+.bubble-tray-nav .pill-nav-track {
+  border-color: var(--color-line-strong);
+  box-shadow: var(--shadow-md), var(--inset-light);
+}
+
+.bubble-item {
+  justify-content: flex-start;
+  width: 100%;
+  min-height: var(--tap-min-size);
+  padding: 0 var(--space-3);
+  font-size: var(--font-size-md);
+}
+
+.bubble-item--help {
+  color: var(--color-muted);
+}
+
+/* 展开项上的欠费徽标：贴在动作丸右上角（同 .phone-fab-badge 口径，
+   静态不随动画） */
+.bubble-item .phone-fab-badge {
+  top: -6px;
+  right: -6px;
+}

@@ -1,8 +1,9 @@
 /**
  * board3d.spec.ts —— 3D 棋盘冒烟（DEVELOPMENT §9.5 / PLAN 4.2.4）。
  * ?board=3d（默认 auto 同路径）：<canvas> 存在、无 pageerror、无 WebGL/THREE
- * 报错、截图非空白、DOM 按钮照常驱动；?board=2d 强制 2D；
- * 拦截 WebGL 后自动回退 2D。规则正确性由单测保证，这里不做像素断言。
+ * 报错、截图非空白、DOM 按钮照常驱动；?board=2d 自 2026-11-21 起失效
+ * （2D 回退棋盘已移除，带此参数仍走 3D）；拦截 WebGL 后显示错误卡 +
+ * Try again，绝不出现 2D 棋盘。规则正确性由单测保证，这里不做像素断言。
  */
 import { expect, test } from '@playwright/test';
 import { assertClean, openGame, stepOnce } from './helpers';
@@ -39,16 +40,17 @@ test.describe('3D 棋盘', () => {
     await assertClean(page, errors);
   });
 
-  test('?board=2d：强制 2D，无 canvas', async ({ page }) => {
+  test('?board=2d：参数已失效，仍走 3D（无 2D 回退）', async ({ page }) => {
     const errors = await openGame(page, '&board=2d');
     await enterGame(page);
-    await page.waitForTimeout(800);
-    expect(await page.locator('canvas').count()).toBe(0);
+    await expect(page.locator('canvas').first()).toBeVisible({ timeout: 20_000 });
+    await expect(page.locator('[data-testid="board3d"]')).toBeVisible();
+    expect(await page.locator('section.board').count()).toBe(0);
     for (let i = 0; i < 4; i++) await stepOnce(page);
     await assertClean(page, errors);
   });
 
-  test('WebGL 不可用时自动回退 2D', async ({ page }) => {
+  test('WebGL 不可用时显示错误卡 + Try again，绝不出现 2D 棋盘', async ({ page }) => {
     await page.addInitScript(() => {
       const orig = HTMLCanvasElement.prototype.getContext;
       // @ts-expect-error 测试注入：让 WebGL 上下文创建失败
@@ -59,9 +61,11 @@ test.describe('3D 棋盘', () => {
     });
     const errors = await openGame(page, '&board=3d');
     await enterGame(page);
-    await page.waitForTimeout(800);
-    expect(await page.locator('canvas').count()).toBe(0); // 已回退 2D
-    for (let i = 0; i < 4; i++) await stepOnce(page);
+    // 错误卡出现：无 canvas、无 2D 棋盘（section.board），Try again 可见
+    await expect(page.locator('.board-error')).toBeVisible({ timeout: 20_000 });
+    await expect(page.locator('.board-retry')).toBeVisible();
+    expect(await page.locator('canvas').count()).toBe(0);
+    expect(await page.locator('section.board').count()).toBe(0);
     await assertClean(page, errors);
   });
 });

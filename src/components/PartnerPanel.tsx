@@ -6,7 +6,8 @@
  *   好呀卡带每人价宝石，币不够置灰不可打。已加入计数胶囊保留。
  * - proposeSwap：真人主动发起一换一——我方/对方赠品菜 chips 全部升级
  *   为 TiltCard 小卡扇（食材插画）；点选规则同旧 chip（点选/焦点即选中），
- *   [确认提议] 发出 PROPOSE_SWAP；[1] 走完这一站（primary）。
+ *   [确认提议] 发出 PROPOSE_SWAP。主次（交互审 U3）：没选齐时 [1] 走完
+ *   这一站（primary）；交换选齐后 [1] 换成发出交换、走完这一站降次钮。
  *   对方行名字下挂全词性格名（botPersonalityLabel）——性格信息只活在
  *   这类详情视图里（本站 + 点头像的 ProfileCard 高光卡）。
  * 不借钱、不送钱：交换只动 extras，提议由引擎判定。
@@ -300,21 +301,27 @@ export function PartnerPanel({
 
       <div className="panel-foot">
         <div className="panel-actions">
+          {/* 交互审 U3：交换选齐（ready）后本站的主动作就是发出交换——
+              「发出交换」升主按钮（键 1），「走完这一站」降次钮；没选齐
+              时维持原序（走完这一站 = 主按钮）。与市场/小卖部「本站动作
+              就绪后接管主位」的口径一致，避免孩子顺手点大按钮走掉、
+              绕过刚搭好的交换。 */}
           <Button
-            variant="primary"
-            keyHint="1"
-            data-testid="action-primary"
-            data-primary="true"
-            data-key={1}
+            variant={ready ? 'secondary' : 'primary'}
+            keyHint={ready ? '2' : '1'}
+            data-testid={ready ? 'action-2' : 'action-primary'}
+            data-primary={ready ? undefined : 'true'}
+            data-key={ready ? 2 : 1}
             onClick={() => send({ type: 'END_TURN' })}
           >
             {strings.panel.endTurn}
           </Button>
           <Button
-            variant="secondary"
-            keyHint="2"
-            data-testid="action-2"
-            data-key={2}
+            variant={ready ? 'primary' : 'secondary'}
+            keyHint={ready ? '1' : '2'}
+            data-testid={ready ? 'action-primary' : 'action-2'}
+            data-primary={ready ? 'true' : undefined}
+            data-key={ready ? 1 : 2}
             disabled={!ready}
             onClick={() =>
               ready &&
@@ -329,7 +336,8 @@ export function PartnerPanel({
             {strings.partner.swapConfirm}
           </Button>
         </div>
-        <p className="panel-keyhelp">{strings.partner.noSwap}</p>
+        {/* 消息减负审计 D3：面板底「不能换金币」规则行删除——换菜
+            面里根本没有金币选项，规则靠界面本身表达 */}
       </div>
     </div>
   );

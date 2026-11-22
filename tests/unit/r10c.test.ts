@@ -68,11 +68,14 @@ describe('finding 2：同屏常驻动画预算（至多一点在动）', () => {
     expect(block).toMatch(/animation:\s*tc-foil-sweep[^;]*\s1\s+forwards/);
     expect(block).not.toContain('infinite');
   });
-  it('bot 思考光圈只动 opacity（box-shadow 不反复重绘）', () => {
-    const halo = cssBlock(boardCss, '@keyframes think-halo');
-    expect(halo).toContain('opacity');
-    expect(halo).not.toContain('box-shadow');
-    expect(halo).not.toContain('transform');
+  it('bot 思考光圈 = 静态柔光环（glow 体系，无 animation）', () => {
+    // F33（WS5）：呼吸脉动的光圈换成 Border Glow 体系的静态柔光环——
+    // 常驻动画预算（同屏至多一个在动）本就不该花在光圈上
+    const block = cssBlock(boardCss, '.bot-card--thinking::after {');
+    expect(block).toContain('var(--glow-amber)');
+    expect(block).toContain('var(--color-ink)');
+    expect(block).not.toContain('animation');
+    expect(boardCss).not.toContain('@keyframes think-halo');
   });
 });
 

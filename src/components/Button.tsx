@@ -7,6 +7,7 @@ import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react';
 import { strings } from '../data/strings';
 import { useSpeech } from '../ui/useSpeech';
 import { KeyHint } from './KeyHint';
+import { PressButton } from './bits/PressButton';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary';
@@ -31,18 +32,17 @@ export function Button({
   const { supported, speak } = useSpeech();
   const cls = ['btn', `btn--${variant}`, className ?? ''].filter(Boolean).join(' ');
   const btn = (
-    <button type="button" className={cls} ref={innerRef} {...rest}>
+    <PressButton className={cls} ref={innerRef} {...rest}>
       {keyHint !== undefined && <KeyHint value={keyHint} />}
       {icon}
       {children}
-    </button>
+    </PressButton>
   );
   if (!speakText || !supported) return btn;
   return (
     <span className="btn-speak-wrap">
       {btn}
-      <button
-        type="button"
+      <PressButton
         className="btn-speak"
         aria-label={strings.speech.speak}
         onClick={(e) => {
@@ -51,7 +51,7 @@ export function Button({
         }}
       >
         🔊
-      </button>
+      </PressButton>
     </span>
   );
 }

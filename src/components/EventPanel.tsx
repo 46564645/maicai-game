@@ -18,7 +18,7 @@ import { availableCommands, missingCost } from '../game/selectors';
 import { fmt } from '../game/stations/shared';
 import { cardName, eventFreeLabel, eventSpendLabel, eventText } from '../i18n/cardText';
 import { eventEchoKind } from '../ui/eventEcho';
-import { bumpCoinHud } from '../ui/hudNudge';
+import { denyCoinGlow } from '../ui/hudNudge';
 import {
   nextWeatherPhase,
   weatherCardDelayMs,
@@ -27,7 +27,11 @@ import type { WeatherMomentPhase } from '../ui/weatherMoment';
 import type { CardId, Command, GameState } from '../game/types';
 import { CardIcon } from './CardIcon';
 import { CardView } from './CardView';
+/* KeyHelp 已删（审计 C5） */
 import { WeatherSpinner } from './WeatherSpinner';
+import { AnimatedContent } from './motion/AnimatedContent';
+import { FadeContent } from './motion/FadeContent';
+import { BlurText } from './BlurText';
 import { Deck } from './cards/Deck';
 import { Hand } from './cards/Hand';
 import { playSparkAt } from './cards/PlaySpark';
@@ -197,7 +201,7 @@ export function EventPanel({
   /** 「可点不可打」：买不起/后悔窗口占用中再点 → 摇+闪+币条跳，不发令 */
   const deny = (opt: 'spend' | 'free') => {
     setDenyN((d) => ({ opt, n: d.opt === opt ? d.n + 1 : 1 }));
-    bumpCoinHud();
+    denyCoinGlow();
   };
 
   const commit = (option: 'spend' | 'free') => {
@@ -279,7 +283,9 @@ export function EventPanel({
     setMoment((p) => nextWeatherPhase(p, 'tap'));
     if (sub.weatherId) onWeatherDone?.(sub.weatherId);
   };
-  /* R10E（§3）：故事卡点掉——先 220ms 下沉退场再放选项扇 */
+  /* R10E（§3）：故事卡点掉——先 220ms 下沉退场再放选项扇。
+     F31（WS5）：退场走 FadeContent 'sink'——'sinking' 翻转 show，
+     退出播完 onExitComplete 才进 'done'（reduced 照旧直切） */
   const dismissStory = () => {
     if (story !== 'open') return;
     if (reduced) {
@@ -287,7 +293,6 @@ export function EventPanel({
       return;
     }
     setStory('sinking');
-    window.setTimeout(() => setStory('done'), 220);
   };
 
   /* R2 验收修复：天气时刻整块抽成变量——手机横屏走 portal 浮到
@@ -305,24 +310,30 @@ export function EventPanel({
         />
       ) : (
         weather && (
-          <button
-            type="button"
-            className="moment-card"
-            data-testid="weather-card"
-            data-key={1}
-            data-primary="true"
-            aria-label={cardName(weather.id)}
-            onClick={dismissWeather}
-          >
-            <CardView
-              cardId={weather.id}
-              icon={weather.icon}
-              name={cardName(weather.id)}
-            />
-            <span className="moment-tap" aria-hidden="true">
-              {strings.event.cardTap}
-            </span>
-          </button>
+          /* F29（WS5）：大卡时刻入场收编为 AnimatedContent 'moment' */
+          <AnimatedContent variant="moment">
+            <button
+              type="button"
+              className="moment-card"
+              data-testid="weather-card"
+              data-key={1}
+              data-primary="true"
+              aria-label={cardName(weather.id)}
+              onClick={dismissWeather}
+            >
+              <CardView
+                cardId={weather.id}
+                icon={weather.icon}
+                name={cardName(weather.id)}
+              />
+              {/* WS4 D14：大卡标题（天气名）从柔焦里 resolve 出来——
+                  收编 BlurText；按钮 aria-label 已带名，视觉标题纯装饰 */}
+              <BlurText text={cardName(weather.id)} className="moment-title" />
+              <span className="moment-tap" aria-hidden="true">
+                {strings.event.cardTap}
+              </span>
+            </button>
+          </AnimatedContent>
         )
       )}
     </div>
@@ -342,13 +353,21 @@ export function EventPanel({
         <div className="event-stage" ref={stageRef}>
           {/* 落定天气：小天气卡立在边上（wth-* 插画已入册） */}
           {weather && (
-            <div className="event-weather" data-testid="event-weather">
+            /* F12（WS5）：落定天气卡的滑入由 AnimatedContent 'slide'
+               承担——延迟与转盘节奏同走 weatherCardDelayMs */
+            <AnimatedContent
+              variant="slide"
+              distance={14}
+              delay={weatherCardDelayMs(reduced)}
+              className="event-weather"
+              testid="event-weather"
+            >
               <CardView
                 cardId={weather.id}
                 icon={weather.icon}
                 name={cardName(weather.id)}
               />
-            </div>
+            </AnimatedContent>
           )}
           {revealed ? (
             story === 'done' ? null : (
@@ -356,9 +375,16 @@ export function EventPanel({
                  展示（左图右文），「Tap to go on」是说明文字下方一颗
                  真按钮（≥48px、全宽一行）。旧版把提示丸挤在正文右侧，
                  窄栏下正文被压成细条、丸还只有 44px 高。键盘 1 键与
-                 data-testid="event-card" 都落在新按钮上，行为不变 */
-              <div
-                className={'event-story' + (story === 'sinking' ? ' event-story--out' : '')}
+                 data-testid="event-card" 都落在新按钮上，行为不变。
+                 F31：'sinking' 由 FadeContent 'sink' 播退场（enter=false
+                 ——入场仍走自身 event-reveal-pop），播完回调 done */
+              <FadeContent
+                show={story === 'open'}
+                variant="sink"
+                enter={false}
+                duration={220}
+                className="event-story"
+                onExitComplete={() => setStory('done')}
               >
                 <span className="event-story-art">
                   <CardView
@@ -379,7 +405,7 @@ export function EventPanel({
                 >
                   {strings.event.cardTap}
                 </button>
-              </div>
+              </FadeContent>
             )
           ) : (
             <Deck
@@ -422,7 +448,7 @@ export function EventPanel({
               items={[spendCard, freeCard]}
               ariaLabel={strings.event.choose}
             />
-            <p className="panel-keyhelp panel-keyhelp--kbd">{strings.panel.keyHelp}</p>
+            {/* 消息减负审计 C5：键盘帮助行删除（统一进指南第 2 页） */}
           </div>
         </>
       )}

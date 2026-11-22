@@ -1,19 +1,43 @@
 /**
- * BoardMount.tsx —— 棋盘挂载口（DEVELOPMENT §9.1）：
- * ?board=2d|3d|auto 选择 + WebGL 检测 + React.lazy 分包 + Suspense +
- * ErrorBoundary + 首帧看门狗（~4s 无 onCreated 判失败）+ webglcontextlost，
- * 任何失败都自动回退 Board2D（永久兜底，不删）。未带 ?board= 时默认 auto：
- * WebGL 可用即 3D，不可用即 2D；?board=2d 强制 2D（M4.5.3 起）。
+ * BoardMount.tsx —— 棋盘挂载口（DEVELOPMENT §9.1，2026-11-21 改版）：
+ * 棋盘永远挂载 3D。2D 回退棋盘已按 Thong 拍板整体移除——旧版的
+ * 「暖机失败标记 / ?board=2d / 检测不过 / 首帧超时 / context 丢失」
+ * 五条直落 2D 的路径全部取消（线上实证：Edge 打开 3121d2c 时暖机
+ * 阶段一次 context 丢失就把整局毒化成 2D，孩子全程看不到 3D）。
+ *
+ * 现在的失败呈现只有一种：儿童友好的英文错误卡 + Try again
+ * （沿用 T-2 缓冲页错误卡模式：短句 + ≥48px 按钮，样式见 board.css
+ * 的 .board-error）。触发条件：WebGL 两次探测都无 / 3D 分包加载
+ * 失败 / 渲染报错 / 首帧 10s 看门狗超时 / webglcontextlost。
+ * Try again = 重新探测 WebGL + 全新 lazy 分包 + 全新 Canvas 重挂
+ * （新 context 本身就是对 context 丢失的一次真恢复尝试），
+ * 不再有任何路径渲染出可玩的 2D 棋盘。
+ *
+ * R1-E6 不变量延续：Suspense 占位与错误卡都不带 children——
+ * children 里的全场唯一主按钮只随 Board3D 本体出现一份。
  */
-import { Component, lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { Component, lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
-import { Board2D } from './Board2D';
 import type { BoardViewProps } from './BoardView';
-import { board3DFailed, boardMode, detectWebGL } from './three/webgl';
-
-const LazyBoard3D = lazy(() => import('./three/Board3D'));
+import { detectWebGL } from './three/webgl';
+import { PressButton } from '../components/bits/PressButton';
+import { FadeContent } from '../components/motion/FadeContent';
 
 type Props = BoardViewProps & { children?: ReactNode };
+
+/** 3D 棋盘失败卡：与缓冲页错误卡同一模式（英文短句 + Try again）。
+    WS4 D8：卡的进场改走收编 FadeContent（淡入+轻柔焦落定）；
+    文案、重试流程、.board-retry 按钮样式一概不动（按钮归 WS1） */
+function BoardError({ onRetry }: { onRetry: () => void }) {
+  return (
+    <FadeContent className="board-error" role="alert" blur={6} show>
+      <p className="board-error-text">Oops! The board didn&rsquo;t start. Tap Try again.</p>
+      <PressButton className="board-retry" onClick={onRetry}>
+        Try again
+      </PressButton>
+    </FadeContent>
+  );
+}
 
 class Boundary extends Component<
   { fallback: ReactNode; onError: () => void; children: ReactNode },
@@ -26,7 +50,7 @@ class Boundary extends Component<
   }
 
   componentDidCatch(err: Error, info: ErrorInfo) {
-    console.warn('Board3D 渲染失败，回退 2D：', err, info.componentStack);
+    console.warn('Board3D 渲染失败，显示错误卡：', err, info.componentStack);
     this.props.onError();
   }
 
@@ -36,54 +60,69 @@ class Boundary extends Component<
 }
 
 export function BoardMount(props: Props) {
-  const [mode] = useState(boardMode);
-  // 首屏暖机已判 3D 不可用（SceneWarmup 首帧超时/报错）→ 直落 2D，
-  // 不再等本组件自己的 10s 首帧看门狗白耗一轮
-  const [webglOk] = useState(
-    () => mode !== '2d' && detectWebGL() && !board3DFailed(),
-  );
+  const [attempt, setAttempt] = useState(0);
+  const [glOk, setGlOk] = useState(() => detectWebGL());
   const [failed, setFailed] = useState(false);
   const readyRef = useRef(false);
-  const use3d = webglOk && !failed;
+  /* 每次 Try again 换一个全新的 lazy 包装：旧包装缓存了分包的
+     reject 结果，不换包装重试永远解不开分包加载失败 */
+  const LazyBoard3D = useMemo(
+    () => lazy(() => import('./three/Board3D')),
+    [attempt],
+  );
 
-  // 首帧看门狗：Canvas 超时未创建（WebGL 慢/卡死）→ 回退 2D。
-  // 4s → 10s（R5）：桌面 high 档懒加载 Effects 子分包 + 首次着色器编译
-  // 在软件渲染/低端机上可超过 4s，看门狗误杀把能用的 3D 打回 2D。
-  // 等待期间 Suspense 已在渲染 Board2D 占位（不带 children，见下方
-  // R1-E6 注），用户看到的是棋盘本体，观感与立即回退接近；
-  // 真无 WebGL 由 detectWebGL 前置拦截，不走到这里。
   useEffect(() => {
-    if (!use3d || readyRef.current) return;
+    readyRef.current = false;
+  }, [attempt]);
+
+  /* 首帧看门狗：Canvas 10s 未创建（WebGL 慢/卡死）→ 错误卡。
+     旧版在这里回退 2D；R5 把 4s 放宽到 10s 的理由不变——桌面 high
+     档懒加载 Effects 子分包 + 首次着色器编译在软件渲染/低端机上
+     本来就慢，10s 仍无首帧才判真失败，且失败后有 Try again。 */
+  useEffect(() => {
+    if (!glOk || failed) return;
     const t = window.setTimeout(() => {
       if (!readyRef.current) {
-        console.warn('Board3D 首帧超时，回退 2D');
+        console.warn('Board3D 首帧超时，显示错误卡');
         setFailed(true);
       }
     }, 10_000);
     return () => clearTimeout(t);
-  }, [use3d]);
+  }, [glOk, failed, attempt]);
 
-  if (!use3d) return <Board2D {...props} />;
+  const retry = () => {
+    setGlOk(detectWebGL());
+    setFailed(false);
+    setAttempt((a) => a + 1);
+  };
+
+  if (!glOk || failed) return <BoardError onRetry={retry} />;
 
   const onReady = () => {
     readyRef.current = true;
   };
 
-  /* R1-E6（结构修复）：外层 Boundary / Suspense 的 fallback 必须是
-     「不带 children」的 Board2D。children 里有全场唯一的可交互主按钮
-     （boardOverlay 的 action-primary）——旧写法 fallback 与 Board3D
-     渲染同一份 children：Board3D 内部 GLTF 挂起冒泡到这层时，React
-     把已亮出的 Board3D 藏起（display:none，按钮变 0×0 仍留在 DOM）
-     再挂一份 fallback，于是同一颗主按钮在 DOM 里出现两份（一隐一显），
-     真机上孩子点到的可能是隐身那份 = 点不动。fallback 只画棋盘格
-     本体作占位，DOM 里永远只有一份带 children 的棋盘。画布内的挂起
-     已由 Scene.tsx 内部的 Suspense 边界就地拦截（fallback=null）。 */
-  const fallbackBoard = <Board2D {...props} children={undefined} />;
+  /* 加载占位：只占棋盘全屏区域的一块空地，不带 children（R1-E6）；
+     缓冲页已把 3D 分包预载完，正式棋盘挂载时这里通常一闪而过 */
+  const placeholder = <div className="board-loading" aria-hidden="true" />;
 
   return (
-    <Boundary fallback={fallbackBoard} onError={() => setFailed(true)}>
-      <Suspense fallback={fallbackBoard}>
-        <LazyBoard3D {...props} onReady={onReady} onContextLost={() => setFailed(true)} />
+    <Boundary
+      key={attempt}
+      fallback={<BoardError onRetry={retry} />}
+      onError={() => setFailed(true)}
+    >
+      <Suspense fallback={placeholder}>
+        <LazyBoard3D
+          {...props}
+          onReady={onReady}
+          onContextLost={() => {
+            /* 不再降级 2D：错误卡 + Try again 重挂新 Canvas——
+               新 context 即是对 GPU 进程重置类丢失的真恢复 */
+            console.warn('Board3D context 丢失，显示错误卡');
+            setFailed(true);
+          }}
+        />
       </Suspense>
     </Boundary>
   );

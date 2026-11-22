@@ -1,0 +1,509 @@
+/* reactbits.css —— WS2 移植/适配 React Bits 的共享样式。
+ * 约定（跨工作流协调）：本文件**不得包含任何 @keyframes**（WS5 独占），
+ * 所有动效只用 transition / WAAPI / rAF 直写 transform；全部效果在
+ * prefers-reduced-motion 下必须退化为静止（见文件末尾统一兜底）。
+ * JS 端也已做 reduced-motion 判断，这里是双保险。 */
+
+/* —— GlareHover（B4，React Bits "Glare Hover" 裁剪移植）—— */
+/* 光层贴在卡面内部：卡根自带 overflow:hidden + 圆角，光带不溢出。
+   仅装饰：pointer-events 不穿卡，文字对比度不受光带影响
+   （峰值不透明度低 + 走 transform 不压暗底）。 */
+.rb-gh {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 4;
+}
+.rb-gh-band {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  will-change: transform;
+}
+
+/* —— SpotlightCard（B8/B22，React Bits "Spotlight Card" 移植）—— */
+/* 光斑层的 background/opacity 每帧由 JS 引擎直写（rAF 仅激活期）。
+   z-index:-1 压在卡内容之下、卡底之上——宿主必须 isolation:isolate。 */
+.rb-spot {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  z-index: -1;
+}
+/* 光斑宿主（贴层用）：定位 + 独立层叠上下文，纯加性、无视觉改动。
+   .bot-card 原本只在 --thinking 态给 position:relative，这里常驻补齐。 */
+.bot-card,
+.stat-card,
+.rb-spot-card {
+  position: relative;
+  isolation: isolate;
+}
+.rb-spot-card {
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+/* —— AnimatedList（B7/B19/B23/B25，React Bits "Animated List" 移植）—— */
+/* 列表骨架不动现有排版：item 只是透明容器，行内样式照旧由旧类负责。
+   入场姿态由 JS 以 transition 驱动（无 @keyframes）。 */
+.rb-alist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--al-gap, 8px);
+}
+/* 横排（MiniCardRow）：沿用宿主 .mini-cards 的 inline-flex 口径 */
+.rb-alist--row {
+  display: inline-flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.rb-alist {
+  position: relative;
+}
+.rb-al-item {
+  position: relative;
+  min-width: 0;
+  z-index: 1;
+}
+/* 滑行高亮环（gliding selection）：JS 写 --al-gx/y/w/h 量测值，
+   transition（linear() 弹簧曲线，见 AnimatedList.tsx 同源）滑过去 */
+.rb-al-glide {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--al-gw, 0px);
+  height: var(--al-gh, 0px);
+  transform: translate(var(--al-gx, 0px), var(--al-gy, 0px));
+  border-radius: var(--radius-s, 10px);
+  border: 2.5px solid var(--amber, #f4b942);
+  background: color-mix(in srgb, var(--amber, #f4b942) 14%, transparent);
+  opacity: var(--al-glide-on, 0);
+  pointer-events: none;
+  transition:
+    transform 0.42s cubic-bezier(0.34, 1.4, 0.64, 1),
+    width 0.42s cubic-bezier(0.34, 1.4, 0.64, 1),
+    height 0.42s cubic-bezier(0.34, 1.4, 0.64, 1),
+    opacity 0.3s ease;
+  transition:
+    transform 0.42s linear(0, 0.0603, 0.2033, 0.3821, 0.5633, 0.7258, 0.8584, 0.9574, 1.0242, 1.0634, 1.0809, 1.0828, 1.0747, 1.0613, 1.046, 1.0313, 1.0186, 1.0085, 1.0012, 0.9965, 0.994, 0.9931, 0.9933, 0.9941, 0.9953, 0.9966, 0.9978, 0.9988, 1),
+    width 0.42s linear(0, 0.0603, 0.2033, 0.3821, 0.5633, 0.7258, 0.8584, 0.9574, 1.0242, 1.0634, 1.0809, 1.0828, 1.0747, 1.0613, 1.046, 1.0313, 1.0186, 1.0085, 1.0012, 0.9965, 0.994, 0.9931, 0.9933, 0.9941, 0.9953, 0.9966, 0.9978, 0.9988, 1),
+    height 0.42s linear(0, 0.0603, 0.2033, 0.3821, 0.5633, 0.7258, 0.8584, 0.9574, 1.0242, 1.0634, 1.0809, 1.0828, 1.0747, 1.0613, 1.046, 1.0313, 1.0186, 1.0085, 1.0012, 0.9965, 0.994, 0.9931, 0.9933, 0.9941, 0.9953, 0.9966, 0.9978, 0.9988, 1),
+    opacity 0.3s ease;
+  z-index: 0;
+}
+
+/* —— Stepper（B13/B20，React Bits "Stepper" 移植，无 motion 依赖）—— */
+/* 只保留「读得懂的步轨」：圆点步标 + 连接条 + 滑行指示块 + 内容换页
+   + 上一步/下一步按钮。滑行块走 transform 弹簧缓动。 */
+.rb-stepper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+.rb-step-track {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.rb-step-ind {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  padding: 4px 6px;
+  margin: 0;
+  /* 可点步标（B20 求助牌）：≥48px 触击目标 */
+  min-height: 48px;
+  min-width: 48px;
+  cursor: default;
+  font: inherit;
+  color: inherit;
+}
+button.rb-step-ind {
+  cursor: pointer;
+}
+button.rb-step-ind:focus-visible {
+  outline: 2px solid var(--amber, #f4b942);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+.rb-step-dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--step-dot, 30px);
+  height: var(--step-dot, 30px);
+  border-radius: 50%;
+  background: var(--card-warm, #fff6e9);
+  border: 2px solid color-mix(in srgb, var(--text-warm, #5a4632) 45%, transparent);
+  color: var(--text-warm, #5a4632);
+  font-size: 14px;
+  font-weight: 800;
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1.5, 0.36, 1),
+    background 0.25s ease,
+    border-color 0.25s ease;
+}
+.rb-step-ind--done .rb-step-dot {
+  background: var(--mint, #bfe8c9);
+  border-color: var(--mint-deep, #3e9c5f);
+}
+.rb-step-ind--current .rb-step-dot {
+  transform: scale(1.12);
+}
+.rb-step-conn {
+  position: relative;
+  flex: 1;
+  height: 4px;
+  margin: 0 4px;
+  align-self: center;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--text-warm, #5a4632) 20%, transparent);
+  overflow: hidden;
+}
+.rb-step-conn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--mint-deep, #3e9c5f);
+  transform: scaleX(var(--conn-fill, 0));
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+/* 滑行指示：贴底的糖块色小条，随当前步滑过去 */
+.rb-step-glide {
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  height: 5px;
+  width: 26px;
+  border-radius: 3px;
+  background: var(--amber, #f4b942);
+  transform: translateX(var(--glide-x, 0px));
+  transition: transform 0.34s cubic-bezier(0.22, 1.5, 0.36, 1);
+  z-index: 3;
+  pointer-events: none;
+}
+.rb-step-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-warm, #5a4632);
+  line-height: 1.1;
+  text-align: center;
+  max-width: 76px;
+}
+/* 内容换页：JS transition（位移+淡入），无 @keyframes */
+.rb-step-panes {
+  position: relative;
+  overflow: hidden;
+}
+.rb-step-pane {
+  transition:
+    transform 0.32s cubic-bezier(0.25, 0.9, 0.3, 1),
+    opacity 0.28s ease;
+}
+.rb-step-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+.rb-step-btn {
+  min-height: 48px;
+  min-width: 96px;
+  padding: 8px 16px;
+  border-radius: var(--radius-s, 10px);
+  border: 2px solid color-mix(in srgb, var(--text-warm, #5a4632) 45%, transparent);
+  background: var(--card-warm, #fff6e9);
+  color: var(--text-warm, #5a4632);
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    transform 0.14s ease,
+    box-shadow 0.14s ease;
+  box-shadow: var(--shadow-card);
+}
+.rb-step-btn:hover {
+  transform: translateY(-2px);
+}
+.rb-step-btn:active {
+  transform: translateY(0);
+}
+.rb-step-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+  transform: none;
+}
+.rb-step-btn--next {
+  background: var(--amber, #f4b942);
+  border-color: color-mix(in srgb, var(--amber, #f4b942) 60%, #8a5a1d);
+}
+
+/* —— TearTicket（B12，React Bits "Tear Ticket" 自包含改写）—— */
+/* 票根撕离：全程 CSS transition（无 @keyframes）；打孔线用
+   repeating-linear-gradient 点列 + 径向半圆缺口。 */
+.rb-tt {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  width: var(--tt-w, 236px);
+  min-height: var(--tt-h, 112px);
+  filter: drop-shadow(0 3px 4px rgba(90, 62, 32, 0.25));
+}
+.rb-tt-body,
+.rb-tt-stub {
+  background: var(--card-warm, #fff6e9);
+  border: 2px solid color-mix(in srgb, var(--text-warm, #5a4632) 55%, transparent);
+}
+.rb-tt-body {
+  flex: 1;
+  border-radius: 12px 4px 4px 12px;
+  border-right: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 8px 10px 8px 12px;
+  position: relative;
+}
+/* 撕缝线：竖排打孔点 */
+.rb-tt-body::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  right: -1px;
+  width: 2px;
+  background: repeating-linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--text-warm, #5a4632) 55%, transparent) 0 4px,
+    transparent 4px 8px
+  );
+}
+.rb-tt-stub {
+  width: 62px;
+  flex: none;
+  border-radius: 4px 12px 12px 4px;
+  border-left: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 6px;
+  transform-origin: left center;
+  transition:
+    transform 0.46s cubic-bezier(0.5, -0.1, 0.7, 0.4),
+    opacity 0.46s ease;
+}
+/* 撕离态：票根向下向外飞走渐隐；票身留一抖（左移 2px） */
+.rb-tt--torn .rb-tt-stub {
+  transform: translate(34px, 46px) rotate(16deg);
+  opacity: 0;
+}
+.rb-tt--torn .rb-tt-body {
+  transform: translateX(-2px);
+  transition: transform 0.2s ease;
+}
+/* 上下半圆缺口（撕线两端的检票口） */
+.rb-tt-notch {
+  position: absolute;
+  right: 56px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--panel-bg, #f7ead6);
+  border: 2px solid color-mix(in srgb, var(--text-warm, #5a4632) 55%, transparent);
+  z-index: 2;
+}
+.rb-tt-notch--top {
+  top: -9px;
+}
+.rb-tt-notch--bottom {
+  bottom: -9px;
+}
+.rb-tt-fare {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--text-warm, #5a4632);
+}
+.rb-tt-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text-warm, #5a4632);
+}
+.rb-tt-sub {
+  font-size: 14px;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--text-warm, #5a4632) 80%, transparent);
+}
+/* 车票本体 = 原生按钮（点按即撕/贴回）：去按钮铬，留 ≥48px 触击与焦点环 */
+.rb-tt-btn {
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  min-width: 48px;
+  min-height: 48px;
+  border-radius: 12px;
+}
+.rb-tt-btn:focus-visible {
+  outline: 2px solid var(--amber, #f4b942);
+  outline-offset: 3px;
+}
+/* 票身车型图标（替原卡面 emoji 位） */
+.rb-tt-ico {
+  font-size: 22px;
+  line-height: 1;
+}
+/* 横版车票后，拖拽壳由卡尺寸回内容自适应（cards.css 原 var(--card-w/h) 废止） */
+.bus-ticket-drag {
+  width: auto;
+  height: auto;
+}
+
+/* —— Stack（B5，React Bits "Stack" 裁剪移植：拖/甩穿牌堆）—— */
+/* 顶卡按钮是常驻透明 hitbox——卡面铬（边/底/影）挪到 .rb-stack-visual，
+   拖/甩只动视觉层，点按主路径任何时刻都落在按钮上（叠在摞位）。 */
+.rb-stack {
+  position: relative;
+}
+.rb-stack-top {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: none;
+  box-shadow: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  touch-action: none;
+}
+.rb-stack-top:focus-visible {
+  outline: 2px solid var(--amber, #f4b942);
+  outline-offset: 3px;
+  border-radius: var(--radius-card);
+}
+.rb-stack-visual {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border: 2px solid var(--color-line);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  will-change: transform;
+}
+/* 拖动顶卡时底卡向前挪一档：中间的 b 平铺到顶位，底下的 a 占 b 位
+   （React Bits Stack「next card comes forward」预演） */
+.rb-stack .deck-under {
+  transition: transform 0.3s ease;
+}
+.rb-stack--drag .deck-under--a {
+  transform: rotate(4deg) translate(4px, 3px);
+}
+.rb-stack--drag .deck-under--b {
+  transform: none;
+}
+
+/* —— PixelCard（B11，React Bits "Pixel Card" 裁剪移植：慢速按压萤火）—— */
+/* canvas 像素层贴在卡面上；密度/速度全部由 JS 控制，
+   reduced-motion 下组件直接不渲染（JS 端判断）。 */
+.rb-pixel-host {
+  position: relative;
+}
+.rb-pixel {
+  position: absolute;
+  inset: 0;
+  /* 宿主是无圆角的定位壳；像素按卡面圆角裁剪，角上不探出 */
+  border-radius: var(--radius-card, 12px);
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 3;
+}
+.rb-pixel canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* —— TextType（B16，React Bits "Text Type" 自包含改写）—— */
+/* 逐字出现的家长回复：打字光标用 CSS 透明度 transition 的
+   opacity 阶跃由 JS 控制；无 @keyframes 闪烁光标——用小竖线
+   静态显示在打字中即可，完成后消失。 */
+.rb-tt-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 1px;
+  vertical-align: -0.12em;
+  background: currentColor;
+  opacity: 0.8;
+}
+/* 打字中整句可点（tap-to-complete）：块级撑满气泡、指针与焦点环 */
+.rb-tt-typing {
+  display: block;
+  cursor: pointer;
+  outline: none;
+  border-radius: 6px;
+}
+.rb-tt-typing:focus-visible {
+  outline: 2px solid var(--amber, #f4b942);
+  outline-offset: 2px;
+}
+
+/* —— JellyRadio（B21，React Bits "Jelly Radio" 自包含弹簧改写）—— */
+/* 选中块膨胀 + 邻位让位：transform 弹簧缓动，JS 计算位移。
+   卡片本体样式不动，外层包一个透明 wrapper。 */
+.rb-jelly {
+  display: contents;
+}
+/* cell 撑起 grid 项的盒子（span 默认 inline 不吃 transform） */
+.rb-jelly-cell {
+  display: grid;
+}
+.rb-jelly > * {
+  transition: transform 0.34s cubic-bezier(0.22, 1.6, 0.36, 1);
+  will-change: transform;
+}
+
+/* —— reduced-motion 统一兜底：以上所有动效归零 —— */
+@media (prefers-reduced-motion: reduce) {
+  .rb-gh-band,
+  .rb-spot,
+  .rb-al-glide,
+  .rb-step-dot,
+  .rb-step-conn::after,
+  .rb-step-glide,
+  .rb-step-pane,
+  .rb-tt-stub,
+  .rb-tt-body,
+  .rb-step-btn,
+  .rb-jelly > * {
+    transition: none !important;
+  }
+  .rb-gh,
+  .rb-pixel,
+  .rb-tt-caret {
+    display: none !important;
+  }
+}

@@ -15,9 +15,12 @@ import { cardName } from '../i18n/cardText';
 import type { Command, GameState } from '../game/types';
 import { Button } from './Button';
 import { CardView } from './CardView';
+import { CardIcon } from './CardIcon';
 import { playSparkAt } from './cards/PlaySpark';
 import { cardArtFor } from './cards/cardArt';
+import { AnimatedContent } from './motion/AnimatedContent';
 import { RecipeCard } from './RecipeCard';
+import { StepTrack } from './reactbits/Stepper';
 
 const FLY_MS = 220; // 单张飞锅时长
 const STAGGER_MS = 50; // 逐张错峰（5 张全落锅 ≈ 420ms < 500ms 预算）
@@ -94,7 +97,8 @@ export function CookPanel({
 
   return (
     <div className="panel-body">
-      <p className="panel-text">{strings.panel.cookPut}</p>
+      {/* 消息减负审计 D13：「把菜放进盘子」说明行删除——盘子与菜卡
+          本身就是说明 */}
 
       <div
         className={
@@ -103,9 +107,14 @@ export function CookPanel({
         data-testid="cook-stage"
         onClick={skipDishWait}
       >
-        {/* 大锅/盘：食材卡飞进来，成品菜从这里长出来 */}
+        {/* 无描绘舞台：食材卡飞进来，成品菜从这里长出来——只展示
+            菜品图本身（业主令 2026-11-22：去掉画的盘子） */}
         <div className="cook-pan" ref={panRef} aria-hidden="true">
-          <span
+          {/* F16（WS5）：成品菜入场收编为 AnimatedContent 'scale'，
+              延迟照吃 dishDelay（食材全落锅后弹出来） */}
+          <AnimatedContent
+            variant="scale"
+            delay={dishDelay}
             className={`cook-dish${complete ? ' card-foil' : ''}`}
             style={{ '--dish-delay': `${dishDelay}ms` } as CSSProperties}
           >
@@ -114,7 +123,7 @@ export function CookPanel({
             ) : (
               <span className="cook-dish-icon">{recipe?.icon ?? '🍲'}</span>
             )}
-          </span>
+          </AnimatedContent>
           <span className="cook-steam cook-steam--a" style={{ '--dish-delay': `${dishDelay}ms` } as CSSProperties} />
           <span className="cook-steam cook-steam--b" style={{ '--dish-delay': `${dishDelay}ms` } as CSSProperties} />
         </div>
@@ -140,39 +149,59 @@ export function CookPanel({
       <div ref={recipeRef}>
         <RecipeCard recipeId={me.recipeId} collected={me.collected} />
       </div>
+      {/* B13（React Bits "Stepper" 移植，与 B20 共用 StepTrack）：
+          「Got a of b」换成读得懂的食材步轨——每味食材一格：进锅打勾、
+          下一味滑行指示停在那里、未收为空圈。做饭流程/顺序/飞锅
+          演出不变；进度文字保留在步轨 aria-label 供读屏 */}
       {recipe && (
-        <p className="panel-text">
-          {fmt(strings.screens.progress, {
+        <StepTrack
+          ariaLabel={fmt(strings.screens.progress, {
             a: me.collected.length,
             b: recipe.ingredientIds.length,
           })}
-        </p>
+          current={(() => {
+            const missing = recipe.ingredientIds.findIndex(
+              (id) => !me.collected.includes(id),
+            );
+            // 全收齐时滑块停在最后一格（每格都打勾）
+            return missing < 0 ? recipe.ingredientIds.length : missing + 1;
+          })()}
+          dotPx={34}
+          steps={recipe.ingredientIds.map((id) => ({
+            key: id,
+            icon: <CardIcon icon={getIngredient(id)?.icon ?? '❔'} />,
+            done: me.collected.includes(id),
+          }))}
+        />
       )}
 
       {/* R10E（§3）：成品大卡时刻——菜出锅弹到世界中心等孩子点掉，
           期间 OK 不出场（避免两颗「主按钮」抢戏） */}
       {complete && dishPop === 'show' && (
         <div className="moment-pop-wrap">
-          <button
-            type="button"
-            className="moment-card"
-            data-testid="dish-card"
-            data-key={1}
-            data-primary="true"
-            aria-label={strings.panel.dishReady}
-            onClick={() => setDishPop('done')}
-          >
-            <span className="card-foil">
-              <CardView
-                cardId={recipe!.id}
-                icon={recipe!.icon}
-                name={cardName(recipe!.id)}
-              />
-            </span>
-            <span className="moment-tap" aria-hidden="true">
-              {strings.panel.dishReady}
-            </span>
-          </button>
+          {/* F29（WS5）：成品大卡入场收编为 AnimatedContent 'moment' */}
+          <AnimatedContent variant="moment">
+            <button
+              type="button"
+              className="moment-card"
+              data-testid="dish-card"
+              data-key={1}
+              data-primary="true"
+              aria-label={strings.panel.dishReady}
+              onClick={() => setDishPop('done')}
+            >
+              <span className="card-foil">
+                <CardView
+                  cardId={recipe!.id}
+                  icon={recipe!.icon}
+                  name={cardName(recipe!.id)}
+                />
+              </span>
+              <span className="moment-tap" aria-hidden="true">
+                {strings.panel.dishReady}
+              </span>
+            </button>
+          </AnimatedContent>
         </div>
       )}
 

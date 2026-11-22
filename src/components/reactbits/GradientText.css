@@ -1,0 +1,47 @@
+/* GradientText.css —— React Bits「Gradient Text」的纯 CSS 移植样式
+ * （E1，WS2）。单独成文件而非并入 reactbits.css：那里约定不含任何
+ * @keyframes（归 WS5），本文件自带全新且唯一命名的 rb-gtext-drift。
+ * 组件变量 --rb-gt-gradient/--rb-gt-size/--rb-gt-ms 由 TSX 注入。 */
+
+.rb-gtext {
+  display: inline-block;
+  max-width: 100%;
+  /* 兜底色：不支持 background-clip:text 的环境退化为深橙实字
+     （奶油底上 5.18:1，依然可读） */
+  color: var(--color-primary-deep);
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .rb-gtext {
+    background-image: var(--rb-gt-gradient);
+    /* 宽背景 + 位置漂移 = 原版的「色带流过文字」；repeat 防极端
+       scale 下扫到边缘露底 */
+    background-size: var(--rb-gt-size, 300%) 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    /* 慢漂：ease-in-out + alternate = 原版 yoyo 的余弦缓动往返，
+       无端点跳变 */
+    animation: rb-gtext-drift var(--rb-gt-ms, 10s) ease-in-out infinite
+      alternate;
+    will-change: background-position;
+  }
+}
+
+/* 全新 keyframe（WS2 自有命名，不碰既有动画块）：渐变片缓慢横扫 */
+@keyframes rb-gtext-drift {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 100% 50%;
+  }
+}
+
+/* reduced-motion：动画归零，文字停在静止渐变切片上（无运动） */
+@media (prefers-reduced-motion: reduce) {
+  .rb-gtext {
+    animation: none !important;
+  }
+}

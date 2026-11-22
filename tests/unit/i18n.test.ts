@@ -19,6 +19,8 @@ import { getLang, setLang } from '../../src/i18n/store';
 import { strings, coinWord } from '../../src/data/strings';
 import {
   cardName,
+  joinCardNames,
+  localizeLogText,
   parentQuestionText,
   playerDisplayName,
   reflectionOptionLabel,
@@ -32,7 +34,9 @@ import { Feast } from '../../src/screens/Feast';
 import { boot, jumpTo, patchPlayer, run } from './helpers';
 
 /* localStorage 替身（node 测试环境无 window；store 对缺失环境有降级，
-   这里装上替身以验证持久化读写路径） */
+   这里装上替身以验证持久化读写路径）。WS5：motion（framer-motion 的
+   ProjectionNode）在 SSR 渲染时会给 window 挂 resize 监听——替身再补
+   一组 no-op 事件口，renderToStaticMarkup 走通即可 */
 const storageData = new Map<string, string>();
 (globalThis as { window?: unknown }).window = {
   localStorage: {
@@ -40,6 +44,8 @@ const storageData = new Map<string, string>();
     setItem: (k: string, v: string) => void storageData.set(k, v),
     removeItem: (k: string) => void storageData.delete(k),
   },
+  addEventListener: () => () => undefined,
+  removeEventListener: () => undefined,
 };
 
 afterEach(() => {
@@ -101,7 +107,10 @@ describe('R6 中英文切换', () => {
     expect(coinWord(3)).toBe('币');
     html = renderToStaticMarkup(React.createElement(Intro, { send: noop }));
     expect(html).toContain('一起去买菜');
-    expect(html).toContain('每张菜谱总价');
+    /* 消息减负审计 A5：开局数字卡已从 Intro 迁入新手指南第 3 页，
+       Intro 不再渲染该标签；样本键改在字典层断言（指南 Stepper 静态
+       渲染只挂当前页，第 3 页的数字片走字典同一键） */
+    expect(strings.intro.statCards.recipeTotal.label).toBe('每张菜谱总价');
     html = renderToStaticMarkup(React.createElement(CharacterSelect, { send: noop }));
     expect(html).toContain('选一个你喜欢的角色');
     expect(html).toContain('小禾');
@@ -123,7 +132,9 @@ describe('R6 中英文切换', () => {
     expect(html).toContain('Buy');
     setLang('zh');
     html = renderToStaticMarkup(React.createElement(MarketPanel, { state: s, send: noop }));
-    expect(html).toContain('翻开 6 张卡：食材和诱惑混在一起。点一张，再选怎么做。');
+    /* 消息减负审计 C7：市场导引句（stallIntro）已删——原 R2-6 的
+       在场断言改为缺席断言；按钮中文样本断言不变 */
+    expect(html).not.toContain('点一张卡，先买菜谱上的菜。');
     expect(html).toContain('先等等');
     expect(html).toContain('买下');
     expect(html).not.toContain('Maybe later');
@@ -149,7 +160,7 @@ describe('R6 中英文切换', () => {
     expect(html).toContain('简单的菜');
     expect(html).toContain('番茄炒蛋');
     expect(html).toContain('小禾');
-    expect(html).toContain('看看钱花到哪了');
+    expect(html).toContain('我的钱');
     expect(html).not.toContain('Full plate');
   });
 
@@ -166,6 +177,38 @@ describe('R6 中英文切换', () => {
     expect(reflectionOptionLabel('rho-4', 'x')).toBe('我先付了车费');
     const human = boot().players.find((p) => p.isHuman)!;
     expect(playerDisplayName(human)).toBe('小禾');
+  });
+
+  it('R2-7 joinCardNames：英文逗号拼接、中文顿号拼接', () => {
+    const ids = ['ing-scallion', 'ing-ginger', 'ing-garlic'];
+    expect(joinCardNames(ids)).toBe('Green Onion, Ginger, Garlic');
+    setLang('zh');
+    expect(joinCardNames(ids)).toBe('葱、姜、蒜');
+  });
+
+  it('R2-7 localizeLogText：中文界面把日志槽位的英文名换成中文名', () => {
+    setLang('zh');
+    /* 中文模板 + 英文槽位（同语言局内烘焙） */
+    expect(localizeLogText('Sprout买了Fish')).toBe('小禾买了鱼');
+    expect(localizeLogText('Steady在小卖部买了Sticker')).toBe('小稳在小卖部买了贴纸');
+    /* 英文模板整句（切语言前烘焙）→ 按中文模板重渲染；
+       holdBought/storeBought 不得被短模板 bought 截胡 */
+    expect(localizeLogText('Tag bought Sticker')).toBe('小跟买了贴纸');
+    expect(localizeLogText('Zip bought Fish at the old price')).toBe('小冲按原价买下鱼');
+    expect(localizeLogText('Sprout traded food with Zip')).toBe('小禾和小冲换了菜');
+    expect(localizeLogText('Sprout spun Sunny: "Heavy rain"')).toBe(
+      '小禾转到晴天：「大雨」',
+    );
+    /* 匹配不上日志模板的条目（家长台词/自由文本）原样返回 */
+    expect(localizeLogText('好，说清楚了，给你 3 个币。')).toBe('好，说清楚了，给你 3 个币。');
+  });
+
+  it('R2-7 localizeLogText：英文界面保持英文整句', () => {
+    expect(localizeLogText('Sprout bought Fish')).toBe('Sprout bought Fish');
+    expect(localizeLogText('Sprout买了Fish')).toBe('Sprout bought Fish');
+    expect(localizeLogText('Zip bought Fish at the old price')).toBe(
+      'Zip bought Fish at the old price',
+    );
   });
 
   it('localStorage 持久化：写入 + 新会话读回 + 无记录默认 en', async () => {

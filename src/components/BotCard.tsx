@@ -13,7 +13,10 @@ import { playerDisplayName } from '../i18n/cardText';
 import type { CardId, Player, PlayerId } from '../game/types';
 import { CardIcon } from './CardIcon';
 import { CoinDots } from './CoinDots';
+import { CountUp } from './bits/CountUp';
 import { cardArtFor } from './cards/cardArt';
+import { StatusMark } from './StatusMark';
+import { SpotlightLayer } from './reactbits/SpotlightCard';
 
 function cardIcon(id: CardId): string {
   return (
@@ -63,6 +66,9 @@ export function BotCard({
 }) {
   const bot = cards.bots.find((b) => b.id === player.characterId);
   const bought = [...player.collected, ...player.extras, ...player.temptations];
+  // B8（React Bits "Spotlight Card"）：按压柔光只加在卡壳层——
+  // lap-gain 徽标与「正在想…」指示器的标记/类名/行为一律不动
+  const cardRef = useRef<HTMLButtonElement>(null);
 
   /* —— 手感审计 #1：动作落地痕迹 ——
      prevBoughtRef 记上一次提交的买到清单，actedStamp 变化时做多重集
@@ -103,9 +109,24 @@ export function BotCard({
   const traceIdx =
     trace && trace.cardId ? bought.lastIndexOf(trace.cardId) : -1;
 
+  /* WS4 D10：「正在想…」改走收编 StatusMark——环底常驻、轮到它转
+     进度弧，想完弧收成对勾亮一拍（800ms）再收。只动 .bot-card-thinking
+     这一块；think-pop 弹跳归 WS5 不动。 */
+  const [doneBeat, setDoneBeat] = useState(false);
+  const wasThinkingRef = useRef(thinking);
+  useEffect(() => {
+    const was = wasThinkingRef.current;
+    wasThinkingRef.current = thinking;
+    if (!was || thinking) return undefined;
+    setDoneBeat(true);
+    const t = window.setTimeout(() => setDoneBeat(false), 800);
+    return () => window.clearTimeout(t);
+  }, [thinking]);
+
   return (
     <button
       type="button"
+      ref={cardRef}
       className={
         'bot-card' +
         (thinking ? ' bot-card--thinking' : '') +
@@ -121,14 +142,20 @@ export function BotCard({
       aria-expanded={expanded}
       onClick={onOpen ? () => onOpen(player.id) : undefined}
     >
+      {/* B8：按压聚光（触屏 pointerdown 点亮、跟随、松手渐隐；
+          键盘 focus-visible 在卡中心点亮；reduced-motion 直亮不滑） */}
+      <SpotlightLayer host={cardRef} size={110} intensity={0.55} />
       <span className="bot-card-avatar" aria-hidden="true">
         {bot?.icon ?? '●'}
       </span>
       <span className="bot-card-body">
         <span className="bot-card-name">
           {playerDisplayName(player)}
-          {thinking && (
-            <span className="bot-card-thinking">{strings.game.thinking}</span>
+          {(thinking || doneBeat) && (
+            <span className="bot-card-thinking">
+              <StatusMark status={thinking ? 'running' : 'done'} />
+              {thinking && strings.game.thinking}
+            </span>
           )}
         </span>
         {/* R1-E4：金币点只作辅助，旁边一直有可见数字（读屏仍走按钮 aria-label）
@@ -139,7 +166,10 @@ export function BotCard({
           <CoinDots n={player.coins} cap={8} hideExtra />
           <span className="bot-coin-num" aria-hidden="true">{player.coins}</span>
           {lapGain !== undefined && lapGain > 0 && (
-            <span className="bot-lap-gain" aria-hidden="true">+{lapGain}</span>
+            <span className="bot-lap-gain" aria-hidden="true">
+              {/* WS3 C7：得币角标数字走 vendored Count Up——gain 变化即滚动 */}
+              +<CountUp to={lapGain} duration={0.5} />
+            </span>
           )}
         </span>
         {bought.length > 0 && (

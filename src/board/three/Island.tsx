@@ -172,32 +172,62 @@ function FoamRing() {
   );
 }
 
-/** 玩具小帆船：胡桃壳船体 + 三角帆 + 小旗，轻轻起伏（外海点缀，R5） */
+/** 外海航线：绕岛椭圆闭环（rx 11.69 / rz 10.58），约 120 秒一圈。
+ *  航线逐点按 boat-proj-check 的浅滩带符号距离校验：全程最小
+ *  1.43 ≥ 船体包围圆 1.35 —— 全船始终在水里、不压浅滩不压岛；
+ *  浮标（距原点 ≈16.5）在航线之外，不相撞。 */
+const BOAT_LOOP = { rx: 11.69, rz: 10.58, omega: (Math.PI * 2) / 120 };
+
+/** 航向角：船头为局部 +x（小三角帆在 +x 侧），恒朝速度切线方向 */
+function boatHeading(th: number): number {
+  return Math.atan2(-Math.cos(th) * BOAT_LOOP.rz, -Math.sin(th) * BOAT_LOOP.rx);
+}
+
+/** 玩具小帆船：胡桃壳船体 + 三角帆 + 小旗（外海点缀，R5）。
+ *  业主令（2026-11-22）：船要一直动——原地起伏改为沿 BOAT_LOOP
+ *  绕岛持续航行、永不停，船头随切线平滑转向；起伏/摇摆保留。
+ *  phase = 起始航位角（取原 R2-E8 锚点方位，开局构图不变，见
+ *  Island 底部调用处注释）；航位角按 tick 积分（dt 钳 0.5s）。 */
 function ToyBoat({
-  x,
-  z,
-  ry,
+  phase,
   hull,
   sail,
   flag,
 }: {
-  x: number;
-  z: number;
-  ry: number;
+  phase: number;
   hull: string;
   sail: string;
   flag: string;
 }) {
   const g = useRef<THREE.Group>(null);
-  const phase = x * 0.9 + z * 1.4;
+  const ang = useRef(phase);
+  const lastT = useRef(-1);
+  const bob = phase * 2.7 + 1.3; // 起伏相位种子（原由锚点坐标派生）
   useAmbient(110, (t) => {
     if (!g.current) return;
-    g.current.position.y = -0.66 + Math.sin(t * 1.05 + phase) * 0.045;
-    g.current.rotation.z = Math.sin(t * 0.8 + phase * 1.3) * 0.05;
-    g.current.rotation.x = Math.sin(t * 0.62 + phase) * 0.03;
+    const dt = lastT.current < 0 ? 0 : Math.min(t - lastT.current, 0.5);
+    lastT.current = t;
+    ang.current += BOAT_LOOP.omega * dt;
+    const th = ang.current;
+    g.current.position.set(
+      Math.cos(th) * BOAT_LOOP.rx,
+      -0.66 + Math.sin(t * 1.05 + bob) * 0.045,
+      Math.sin(th) * BOAT_LOOP.rz,
+    );
+    g.current.rotation.y = boatHeading(th);
+    g.current.rotation.z = Math.sin(t * 0.8 + bob * 1.3) * 0.05;
+    g.current.rotation.x = Math.sin(t * 0.62 + bob) * 0.03;
   });
   return (
-    <group ref={g} position={[x, -0.66, z]} rotation-y={ry}>
+    <group
+      ref={g}
+      position={[
+        Math.cos(phase) * BOAT_LOOP.rx,
+        -0.66,
+        Math.sin(phase) * BOAT_LOOP.rz,
+      ]}
+      rotation-y={boatHeading(phase)}
+    >
       {/* 胡桃壳船体：压扁的圆球，上半露出水面 */}
       <mesh scale={[1.35, 0.5, 0.62]} castShadow={false}>
         <sphereGeometry args={[0.62, 16, 12]} />
@@ -389,10 +419,16 @@ export function Island({ shadows }: { shadows: boolean }) {
           包围盒 212..290×75..138 ⊆ 自由矩形；蓝船移岛右上外海——
           手机投影包围盒 566..601×89..122 ⊆ 自由矩形（右栏左侧）。
           两锚点到浅滩轮廓的带符号距离 ≈1.5 ≥ 船体包围圆 1.35，
-          全船在水里、不压浅滩。 */}
-      <ToyBoat x={-8.25} z={-7.38} ry={0.7} hull={PALETTE.cream} sail={PALETTE.cream} flag={PALETTE.blue} />
-      <ToyBoat x={10} z={-5.25} ry={-1.1} hull={PALETTE.blue} sail={PALETTE.cream} flag={PALETTE.purple} />
-      <ToyBoat x={-15} z={3.5} ry={1.35} hull={PALETTE.purple} sail={PALETTE.cream} flag={PALETTE.blue} />
+          全船在水里、不压浅滩。
+          2026-11-22 起三船沿 BOAT_LOOP 绕岛航行（业主令：船要一直
+          动）：phase 取原锚点方位，起始点与原锚点相差 ≤0.15，同一
+          脚本复核起始构图不破硬指标——白船起始 (−8.31,−7.44) 桌面
+          包围盒 210..288×73..136 ⊆ 自由矩形；蓝船起始 (10.11,−5.31)
+          手机包围盒 569..603×91..123 ⊆ 自由矩形；紫船起始
+          (−11.32,2.64，原锚点在画外，航行后会绕进画面）。 */}
+      <ToyBoat phase={-2.362} hull={PALETTE.cream} sail={PALETTE.cream} flag={PALETTE.blue} />
+      <ToyBoat phase={-0.526} hull={PALETTE.blue} sail={PALETTE.cream} flag={PALETTE.purple} />
+      <ToyBoat phase={2.889} hull={PALETTE.purple} sail={PALETTE.cream} flag={PALETTE.blue} />
       <Buoy x={13.5} z={-9.5} c={PALETTE.blue} />
       <Buoy x={-12.5} z={9.5} c={PALETTE.purple} />
     </group>

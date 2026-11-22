@@ -12,12 +12,10 @@ export const enStrings = {
   board: {
     resetView: 'Reset view',
   },
-  tagline: 'Shop with friends, then cook a meal together',
-
-  /* 开场 */
+  /* 开场（消息减负审计 A4/A6：tagline 与 startHint 已删——开场只剩
+     标题 + 开始钮，玩法说明统一进新手指南） */
   intro: {
     startButton: 'Start',
-    startHint: 'Tap to go!',
     todoHint: 'Full play comes later',
     statCards: {
       startCoins: { label: 'Coins you start with', suffix: 'coins' },
@@ -40,7 +38,7 @@ export const enStrings = {
     buy: 'Buy',
     hold: 'Maybe later',
     skip: 'Skip',
-    done: 'Done with this stop',
+    done: 'All done',
     agree: 'Yes',
     decline: 'No thanks',
     help: 'Hint',
@@ -49,23 +47,19 @@ export const enStrings = {
 
   /* 常驻元素 */
   hud: {
-    lapLabel: 'Lap {lap}',
+    /* lapLabel 已删（审计 B3：状态行删除后无引用） */
     lapOf: 'Lap {lap} of {laps}',
-    stationLabel: 'Stop {n} · {name}',
+    /* stationLabel 已删（审计 B3） */
     /* R2-6：市场站浮签站名定稿（与 stationName 的通用名分开，只用于浮签） */
     marketTitle: 'The Market',
     orderLabel: 'Order: ',
     wallet: 'My wallet',
     basket: 'My basket',
-    help: 'Hint',
-    helpAnytime: 'anytime',
     holdClip: 'Maybe later',
     busDebt: 'To pay later',
     empty: 'empty',
-    howTo: 'How to play',
-    settings: 'Settings',
     coin: 'coins',
-    lapCompact: 'Lap {lap}/{laps}',
+    /* lapCompact 已删（审计 B5） */
     botChip: '{name}, {n} coins — tap for details',
     walletWithCoins: 'My wallet, {n} coins',
     /* R10D: a11y names for the pictorial progress cluster + "next up" */
@@ -86,19 +80,18 @@ export const enStrings = {
 
   /* 棋盘与游戏主界面 */
   game: {
-    townAlt: 'Shopping town',
+    /* townAlt 已删（审计 B2）；botTurn 已删（审计 B3） */
     pawnAt: 'at "{name}"',
     yourTurn: 'Your turn',
-    botTurn: "{name}'s turn",
     thinking: 'Thinking…',
     enterStation: 'Go to this stop',
-    enterStationKbd: ' (Enter / Space)',
+    /* enterStationKbd 已删（审计 C6） */
     enterStationHint: 'Go to this stop (Enter / Space)',
     myCoins: 'My coins: {n}',
     botCoins: 'Coins: {n}',
     bought: 'Got',
     walletTitle: 'Wallet & recipe',
-    walletHint: 'Recipe needs {a} more coins · bus fare {b} · {c} free to use',
+    /* walletHint 已删（审计 E5） */
     freeCoins: '{n} coins free to use',
     debtLeft: 'Bus fare still owed: {n}',
   },
@@ -106,7 +99,6 @@ export const enStrings = {
   /* 屏幕 */
   screens: {
     chooseTitle: 'Pick a character you like',
-    chooseHint: 'The other three will be your friends',
     basketTitle: 'My basket',
     basketNext: 'Next lap',
     others: "Friends' baskets",
@@ -124,39 +116,34 @@ export const enStrings = {
   actions: {
     enter: 'Go to this stop',
     ok: 'OK',
-    drawRecipe: 'Draw a recipe card',
-    buy: 'Buy {item} ({n} coins)',
+    drawRecipe: 'Draw a card',
+    buy: 'Buy {item}',
     hold: '{item}: maybe later',
-    holdBuy: 'Buy {item} at the old price',
+    holdBuy: 'Buy {item}',
     holdDrop: 'Skip {item}',
-    endTurn: 'Done with this stop',
+    endTurn: 'All done',
     swap: 'Trade my {give} for {name}\'s {want}',
     yes: 'Yes',
     no: 'No thanks',
-    payBus: 'Put in {n} coins',
-    busDebt: 'Put it in "to pay later"',
-    busFreeDone: 'I already have my ticket',
+    payBus: 'Pay {n} coins',
+    busDebt: 'Pay later',
+    busFreeDone: 'Got my ticket',
     sayIt: 'Say it',
-    storeBuy: 'Buy {item} ({n} coins)',
+    storeBuy: 'Buy {item}',
     chooseChar: 'Pick {name}',
     restart: 'Play again',
     demoJump: 'Jump to a stop',
     demoPersonality: 'Change bot style',
     setFlag: 'Toggle',
     close: 'Close',
-    helpTitle: 'Little hint',
-    helpMissing: 'Still missing: ',
-    helpCoins: 'My coins: {n}',
-    helpDebt: 'To pay later: {n}',
-    helpCanDo: 'You can: ',
     noRecipe: 'No recipe yet',
   },
 
-  /* 求助牌 */
+  /* 求助牌（HelpCard 已被新手指南取代并删除，审计 §4；title 仍供
+     describeCommand 的 TOGGLE_HELP 描述用，stationTips/gentleAdvice
+     仍供引擎 helpHints 用——三者保留；图例标题随卡删除） */
   help: {
     title: 'Little hint',
-    /* R6：求助牌里的类别记号图例标题 */
-    iconLegend: 'Card marks',
     gentleAdvice: 'Buy your recipe food first. Then look at fun stuff.',
     /* 各站一句话提示（helpHints 用） */
     stationTips: {
@@ -171,16 +158,34 @@ export const enStrings = {
     },
   },
 
+  /* 新手指南（消息减负审计 §4：开局弹一次 + 右上角重开，共 4 页；
+     每页一个大视觉 + 最多一句短句；步点不带文字标签） */
+  guide: {
+    open: 'Guide',
+    title: 'Guide',
+    back: 'Back',
+    next: 'Next',
+    done: "Let's go",
+    jobTitle: 'Your job',
+    jobLine: 'Follow your recipe and buy all its food.',
+    buyTitle: 'Tap and buy',
+    buyLine: 'Tap a card, then tap Buy.',
+    coinsTitle: 'Watch coins',
+    coinsLine: 'The bar does the math; clips can help.',
+    marksTitle: 'Card marks',
+    marksLine: 'Marks tell you what each card is.',
+  },
+
   /* 公交站 */
   bus: {
-    announced: 'We said the fare at the start. It is not a punishment.',
+    /* announced 已删（审计 D4） */
     paidDebt: 'Paid the bus fare first',
   },
 
   /* 站点面板（M3.2 正式面板） */
   panel: {
     /* R2-6（ww 定稿）：卡扇下方唯一一句说明（原长句+教练句已撤） */
-    stallIntro: 'Tap a card. Get your recipe food first.',
+    /* stallIntro 已删（审计 C7） */
     /* R10D: lap-2 short form; the line is gone entirely on lap 3 */
     stallIntroShort: 'Tap a card, then pick',
     selected: 'Picked: {item} {n} coins',
@@ -192,19 +197,18 @@ export const enStrings = {
     boughtBadge: 'Bought',
     buyPriced: 'Buy ({n} coins)',
     skipCard: 'Skip',
-    endTurn: 'Done with this stop',
+    endTurn: 'All done',
     holdClipLine: 'In your "maybe later" clip: {item} ({n} coins)',
-    holdBuyPrice: 'Buy at old price',
+    holdBuyPrice: 'Buy it',
     holdDropBtn: 'Let it go',
     tagNeeded: 'On my list',
     tagIngredient: 'Food',
     tagTemptation: 'Fun stuff',
     /* R6：第一次进市场时提示条播一遍类别记号的意思（仅一次） */
-    iconsIntro: 'Card marks: green check = On my list · carrot = Food · star = Fun stuff',
+    /* iconsIntro 已删（审计 B10：记号图例迁入指南第 4 页） */
     /* R6：锁记号的读屏名（暂时拿不到的卡） */
     lockedLabel: "Can't get this yet",
-    keyHelp: '←→ pick a card · 1/2/3 pick an action',
-    lookTitle: 'Look at your recipe card',
+    /* keyHelp 已删（审计 C5）；lookTitle 已删（审计 D7） */
     recipeMissing: 'Still need: {items}',
     recipeDone: 'Your recipe is all set!',
     busTicket: 'Bus ticket',
@@ -214,7 +218,7 @@ export const enStrings = {
     storeMissing: 'Recipe still needs',
     storeAll: 'All food',
     storeHoldLine: '"Maybe later" clip: {item} ({n} coins)',
-    cookPut: 'Put your food on the plate',
+    /* cookPut 已删（审计 D13） */
     /* R10E: pop moments — recipe card tap aria + dish pop hint */
     pocketRecipe: 'Pocket it',
     dishReady: 'Fresh out of the pot!',
@@ -234,21 +238,13 @@ export const enStrings = {
     math: '{a} − {b} → {c}',
   },
 
-  /* bot 心里话（R10C：贴着 bot 卡冒出的短理由气泡） */
-  think: {
-    steady: 'Recipe food first',
-    impulsiveHold: 'Want it… into "maybe later"',
-    impulsiveBuy: 'I want it! Buying it',
-    follower: 'Me too!',
-    busDebt: 'Fare noted, pay later',
-    eventSpend: 'A surprise costs coins… think',
-  },
+  /* bot 心里话字符串已删（消息减负审计 B11：气泡与 botThink 一并退役） */
 
   /* bot 提议气泡（G4） */
   bubble: {
     swapAsk: '"My {give} for your {want}?"',
     inviteAsk: '"{name} — want to join?"',
-    note: 'No lending or giving coins here.',
+    /* note 已删（审计 C3） */
     fromSuffix: ' · Friends Stop',
     /* 等真人回应提议时浮签卡的完整提议句（团队第 2 轮 ww 定稿）：
        写清谁想用哪件（give=对方的）换你的哪件（want=你的） */
@@ -278,7 +274,7 @@ export const enStrings = {
     swapHint: 'Tap my food, then tap the food you want',
     swapPicked: 'Trade my {give} for {name}\'s {want}',
     swapConfirm: 'Offer a trade',
-    noSwap: 'No lending or giving coins — only trade extra food',
+    /* noSwap 已删（审计 D3） */
   },
 
   /* 随机事件站（05） */
@@ -313,6 +309,11 @@ export const enStrings = {
     hearQ: 'Hear the question',
     clearedMark: '✓ Clear!',
     settleGo: 'Keep answering',
+    /* 交互审 U7：结算钮只留命令本身（≤3 词），+1 币的事实挪到钮上方
+       一行平铺文字（settleFact）。卡面原文含「(get 1 coin)」在
+       cards.json（红线区）里不动，朗读仍用卡面全句 */
+    settleBtn: "That's all",
+    settleFact: 'You get 1 coin.',
     statusLive: 'Live chat',
     statusOffline: 'Offline script',
     ruleNote:
@@ -320,23 +321,21 @@ export const enStrings = {
     /* R10C：对话优先——家长形象名 + 示范对话 + 句首启口片 */
     parentName: 'Grown-up',
     echoLine: '{item} ✓ Clear!',
-    demoTag: 'Example',
-    demoTip: 'Say it like this',
-    demoSkip: 'Skip the example',
+    /* demoTag/demoTip/demoSkip 已删（审计 E2） */
     starters: ['I want to buy…', 'I still need…', 'Next time I will…'],
   },
 
   /* 结局：开饭 + 流水 + 反思 */
   feast: {
     title: 'Dinner time',
-    subtitle: '3 laps done. Everyone gets a plate on the table.',
+    /* subtitle 已删（审计 E8） */
     plateFull: 'Full plate',
     plateSimple: 'Simple plate',
     plateShadow: 'Next time',
     noteFull: 'All food bought',
     noteSimple: '{n} still missing',
     noteShadow: 'Still missing after lap 3',
-    ledgerBtn: 'See where my coins went',
+    ledgerBtn: 'My coins',
     ledgerBack: 'Back to the table',
     toReflection: 'Tell us a choice',
   },
@@ -388,7 +387,7 @@ export const enStrings = {
     waitingBots: 'Waiting for friends…',
     everyoneSaid: 'Everyone has shared',
     /* R10C: options she actually did sort first + get a small badge */
-    personalHint: 'Pick one thing you really did today',
+    /* personalHint 已删（审计 E12） */
     didIt: 'You did it',
     /* R10D: lap-3 forward-looking stem — only for a child who finished the recipe */
     forwardPrompt: 'Next time you shop, what will you do first?',

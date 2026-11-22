@@ -19,6 +19,9 @@ import type { Command, GameState } from '../game/types';
 import { Button } from './Button';
 import { CardView } from './CardView';
 import { Deck } from './cards/Deck';
+import { AnimatedContent } from './motion/AnimatedContent';
+import { FadeContent } from './motion/FadeContent';
+import { FlipCard } from './motion/FlipCard';
 import { RecipeCard } from './RecipeCard';
 
 export function DrawTaskPanel({
@@ -39,17 +42,27 @@ export function DrawTaskPanel({
     price: number | undefined;
   }>(null);
 
-  /** 收进篮子：留下 480ms 缩飞残影（ghost），同时派发命令 */
+  /* 收进篮子：F30——残影走 FadeContent 'pocket'（左下 -34vw/30vh 缩
+     飞退场，480ms），fly 置位 → 一拍后清 show 触发退出动画，
+     AnimatePresence 播完才真卸载（内容态靠最后一次提交帧保留） */
   const pocket = (r: NonNullable<typeof fly>) => {
     setFly(r);
     send({ type: 'DRAW_RECIPE' });
-    window.setTimeout(() => setFly(null), 520);
+    window.setTimeout(() => setFly(null), 80);
   };
 
-  const ghost = fly && (
-    <div className="moment-card moment-card--pocket" aria-hidden="true">
-      <CardView cardId={fly.id} icon={fly.icon} name={fly.name} price={fly.price} />
-    </div>
+  const ghost = (
+    <FadeContent
+      show={fly !== null}
+      variant="pocket"
+      duration={480}
+      className="moment-card moment-card--pocket"
+      ariaHidden
+    >
+      {fly && (
+        <CardView cardId={fly.id} icon={fly.icon} name={fly.name} price={fly.price} />
+      )}
+    </FadeContent>
   );
 
   if (pd.kind === 'drawRecipe') {
@@ -87,26 +100,29 @@ export function DrawTaskPanel({
           <div className="deck-stage">
             {pop ? (
               /* R10E（§3）：翻开的菜谱以「大卡」停在舞台——
-                 点一下「收进篮子」，整卡缩飞向篮子位才派发 */
-              <button
-                type="button"
-                className="moment-card"
-                data-testid="action-primary"
-                data-key={1}
-                data-primary="true"
-                aria-label={`${r.name} · ${strings.panel.pocketRecipe}`}
-                onClick={() => pocket(r)}
-              >
-                <CardView
-                  cardId={recipe.id}
-                  icon={recipe.icon}
-                  name={r.name}
-                  price={r.price}
-                />
-                <span className="moment-tap" aria-hidden="true">
-                  {strings.panel.pocketRecipe}
-                </span>
-              </button>
+                 点一下「收进篮子」，整卡缩飞向篮子位才派发。
+                 F29：入场收编为 AnimatedContent 'moment' */
+              <AnimatedContent variant="moment">
+                <button
+                  type="button"
+                  className="moment-card"
+                  data-testid="action-primary"
+                  data-key={1}
+                  data-primary="true"
+                  aria-label={`${r.name} · ${strings.panel.pocketRecipe}`}
+                  onClick={() => pocket(r)}
+                >
+                  <CardView
+                    cardId={recipe.id}
+                    icon={recipe.icon}
+                    name={r.name}
+                    price={r.price}
+                  />
+                  <span className="moment-tap" aria-hidden="true">
+                    {strings.panel.pocketRecipe}
+                  </span>
+                </button>
+              </AnimatedContent>
             ) : (
               <Deck
                 testid="action-primary"
@@ -135,10 +151,15 @@ export function DrawTaskPanel({
     <>
       {ghost}
       <div className="panel-body">
-        <p className="panel-text">{strings.panel.lookTitle}</p>
-        <div className="card-reveal">
-          <RecipeCard recipeId={me.recipeId} collected={me.collected} />
-        </div>
+        {/* 消息减负审计 D7：确认分支的「看一眼你的任务卡」标题行删除
+            ——任务卡本体 + 主按钮已经说清这一步 */}
+        {/* F23（WS5）：任务卡翻面亮出收编为 FlipCard reveal
+            （motion + SPRING_FLIP，原 card-flip keyframe 删除） */}
+        <FlipCard
+          reveal
+          className="card-reveal"
+          front={<RecipeCard recipeId={me.recipeId} collected={me.collected} />}
+        />
         <p className="panel-text">
           {missing.length > 0
             ? fmt(strings.panel.recipeMissing, { items: missing.map(cardName).join(', ') })

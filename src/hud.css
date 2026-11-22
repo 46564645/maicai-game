@@ -165,14 +165,18 @@
   color: var(--color-muted);
 }
 
-.clip-chip--debt {
-  background: var(--color-warning);
-  color: var(--color-warning-contrast);
-  border-color: var(--color-line-strong);
-}
-
-.clip-chip--debt .clip-chip-sub {
-  color: var(--color-warning-contrast);
+/* 交互审 U5：待付注记——纯状态信息，平铺呈现：无卡面渐变、无边框、
+   无阴影、无悬停浮起，只留卡夹图样 + 弱化小字。只有真按钮才像按钮 */
+.clip-note {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-4);
+  white-space: nowrap;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
 }
 
 .clip-chip--help {
@@ -180,6 +184,11 @@
 }
 
 /* —— 弹窗（StationPopup 壳）—— */
+/* G3：vendored GradualBlur 的装饰层只吃 backdrop-filter，绝不拦点 */
+.gradual-blur {
+  pointer-events: none;
+}
+
 .popup-backdrop {
   position: fixed;
   inset: 0;
@@ -197,7 +206,9 @@
 }
 
 /* R10E（§2 天气布景）：落定天气给遮罩/岛面洗一层同色
-   （--weather-wash 由 .game-screen.weather--* 挂；::before 不拦点） */
+   （--weather-wash 由 .game-screen.weather--* 挂；::before 不拦点）。
+   F38（WS5）：洗色交叉淡化按 FadeContent 'fade' 变体同口径——
+   backdrop 层只做 700ms 颜色/透明淡化，无位移；reduced 下瞬时到位 */
 .popup-backdrop::before {
   content: '';
   position: absolute;
@@ -214,17 +225,30 @@
 
 @media (prefers-reduced-motion: no-preference) {
   /* ART_3D §8.7：面板从下往上滑出（背后是压暗的 3D 场景）
-     R10D（interaction #8）：时长收进 --popup-in-ms + ease-out */
+     R10D（interaction #8）：时长收进 --popup-in-ms + ease-out
+     F22：与 AnimatedContent 'slide' 变体同口径（y26 + 淡入）——
+     WS4/StationPopup 收编时直接换包装器，位移量保持一致 */
   .popup {
     animation: popup-rise var(--popup-in-ms) var(--ease-out);
   }
-  /* ART_3D §8.5：币数变化时数字跟着跳一下 */
-  .coins-bump {
-    animation: coin-bump var(--motion-med) var(--motion-ease);
-  }
-  /* ART_3D §8.8：任务卡翻面亮出 */
-  .card-reveal {
-    animation: card-flip 560ms var(--motion-ease);
+}
+
+/* F23：.card-reveal 的 card-flip 动画已收编为 DrawTaskPanel 里的
+   FlipCard reveal 包装器（motion + SPRING_FLIP ≈560ms）——CSS 段删除 */
+
+/* F24/F20 拒付第三通道：「钱不够」时币数 HUD 一圈柔红晕脉冲——
+   与卡面 .card-deny 同族 pglow-warn-pulse、同色系；hudNudge 往
+   .me-coins（桌面币堆）/ 手机左下钱包圆钮挂这个类。
+   旧 coin-bump 缩放跳删（F24 → Count Up：数字变化本身就是动画，
+   C4 由 WS3 把读数换成滚动计数）。 */
+.hud-deny-glow {
+  animation: pglow-warn-pulse var(--motion-slow) var(--motion-ease) 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hud-deny-glow {
+    animation: none;
+    box-shadow: 0 0 0 3px var(--glow-warn);
+    border-radius: var(--radius-button);
   }
 }
 
@@ -233,7 +257,10 @@
 .popup-shell {
   display: contents;
 }
-/* 退场 ~160ms：弹窗下沉淡出 + 遮罩同步淡（transform/opacity only） */
+/* 退场 ~160ms：弹窗下沉淡出 + 遮罩同步淡（transform/opacity only）。
+   F22（WS5）：退场与 FadeContent 变体同口径——.popup 的下沉淡出 =
+   'fade-down'（y 短距 + 透明），.popup-backdrop 的同步淡 = 'fade'；
+   WS4/StationPopup 收编换包装器后本段 keyframe 即删 */
 @media (prefers-reduced-motion: no-preference) {
   .popup-out .popup {
     animation: popup-out var(--popup-out-ms) var(--ease-in-out) forwards;
@@ -256,24 +283,15 @@
 }
 
 @keyframes popup-rise {
+  /* F22：起点与 AnimatedContent 'slide' 隐藏态一致（opacity 0 + y26） */
   from {
     transform: translateY(26px);
-    opacity: 0.55;
+    opacity: 0;
   }
 }
 
-@keyframes coin-bump {
-  40% {
-    transform: scale(1.3);
-  }
-}
-
-@keyframes card-flip {
-  from {
-    transform: perspective(720px) rotateY(75deg) translateY(-22px);
-    opacity: 0.25;
-  }
-}
+/* F24：@keyframes coin-bump 删除——币数变化改走 Count Up 读数动画
+   （WS3-C4）；拒付提示走 .hud-deny-glow 的柔红晕脉冲 */
 
 /* R10E（§1 去框）：.popup 不再是白底圆角盒子——整只壳变透明舞台，
    内容（牌堆/卡扇/气泡/投放区）自带卡影直接浮在压暗的棋盘上；
@@ -601,6 +619,136 @@
   box-shadow: var(--shadow-lg), var(--inset-light);
 }
 
+/* 新手指南（消息减负审计 §4）：每页 = 标题 + 一句 + 一个大视觉带；
+   正文与旧求助牌同舞台（白卡面），视觉件全部非交互 */
+.popup .guide-page {
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 2px solid var(--color-line-soft);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-lg), var(--inset-light);
+}
+.guide-page-title {
+  margin: 0 0 var(--space-1);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+}
+.guide-line {
+  margin: 0 0 var(--space-3);
+  font-size: var(--font-size-md);
+  color: var(--color-ink);
+}
+.guide-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.guide-visual--col {
+  flex-direction: column;
+  align-items: stretch;
+}
+.guide-card {
+  width: 92px;
+  flex: none;
+}
+.guide-card .card-view {
+  width: 100%;
+}
+.guide-arrow {
+  font-size: var(--font-size-xl);
+  color: var(--color-muted);
+}
+.guide-sample-btn {
+  pointer-events: none;
+}
+.guide-kbd-row {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+}
+.guide-kbd-group {
+  display: inline-flex;
+  gap: var(--space-1);
+}
+.guide-kbd-group kbd {
+  min-width: 34px;
+  padding: var(--space-1) var(--space-2);
+  text-align: center;
+  font: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+  background: var(--color-bg);
+  border: 2px solid var(--color-line);
+  border-bottom-width: 4px;
+  border-radius: 10px;
+}
+.guide-stats {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-top: var(--space-3);
+}
+.guide-stat {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg);
+  border: 2px solid var(--color-line-soft);
+  border-radius: var(--radius-card);
+}
+.guide-stat b {
+  font-size: var(--font-size-lg);
+  color: var(--color-ink);
+}
+.guide-stat i {
+  font-style: normal;
+  font-size: var(--font-size-sm);
+  color: var(--color-muted);
+}
+.guide-clips {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+.guide-clip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--tap-min-size);
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+  background: var(--color-surface);
+  border: 2px solid var(--color-line);
+  border-radius: 999px;
+}
+.guide-clip--debt {
+  background: color-mix(in srgb, var(--color-accent-yellow) 22%, var(--color-surface));
+}
+.guide-legend {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.guide-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+}
+
 /* 菜市场：6 卡横排（竖屏 3×2） */
 .stall-grid {
   display: grid;
@@ -694,11 +842,16 @@
   top: calc(var(--space-5) + var(--button-height) + var(--space-2));
   left: 50%;
   transform: translateX(-50%);
-  /* R2-4 + R3 修复（必改 2）：层级排在站点弹窗（.popup-backdrop z 20）、
-     高光帘（z 22）、手机竖栏（z 8）与手机浮层（z 7）之下——提示条永远
-     在卡片/面板下层，任何状态都不盖按钮；手机浮层打开时另有让位规则
-     （phone.css :has 段）直接藏条 */
-  z-index: 5;
+  /* owner F1（Thong 2026-11-21，覆盖 R2-4/R3「提示条压在卡片/面板下层」
+     口径）：「dark UI always on top」——可见吐司不再被卡片/面板盖字。
+     实测层梯：站点弹窗背板 z20 → 高光帘 z22 → 时刻卡 z26 → 大浮签/兜卡
+     z40 → 语言开关 z60 → 飞卡 z90 → 迸币 z95 → 竖屏旋转门 z100。
+     取 96：高于全部内容层（含瞬时飞卡/迸币），只低于旋转门——竖屏门
+     是「请旋转手机」全屏挡板，本就该盖过一切（含提示条），故停其下。
+     toast 与 .popup-backdrop 同 stacking 域（实测 z30 已压过背板 20），
+     提到 96 后弹窗开/关、bot 回合、全部视口均在上层；手机浮层打开时
+     的 :has 藏条规则（phone.css）与矮幅 coin-bar 藏条规则（F7）不变 */
+  z-index: 96;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -743,21 +896,13 @@
   }
 }
 
-/* R6 N2（ww 必改）：弹窗在场时 toast 原车道（顶中 88）正撞浮在
-   舞台顶中的站名签（.popup-head，R10E），且 z 5 被弹窗（z 21）
-   压住——实测 1440 市场景 toast∩站名签 = 7285px²、消息读不清，
-   关闭 × 也被背板盖住点不到。修法分两层：
-   ① 层级：弹窗在场时 toast 升到弹窗之上（z 30，仍低于高光层
-   40）——消息永远读得到、× 点得到，不再从卡/签后「探头」；
-   ② 几何（市场景专属）：市场弹窗是全高纵列（签在顶、摊位帖在
-   底），中段是空的压暗岛面——toast 挪到 33vh 的空段，与签、
-   开关、扇上卡名零重叠（其余弹窗的签在盒内顶端、原车道实测
-   不相交，保持原位只升层级）。
-   无弹窗时（bot 回合主场景）原车道原层级不变；手机横屏 toast
-   锚在岛左下、与竖栏里的签/开关天然不相交，不走此规则 */
-.app-shell:has(.popup-backdrop):not(:has(.game-screen--phone-land)) .toast-stack {
-  z-index: 30;
-}
+/* R6 N2（ww 必改）→ owner F1 覆盖：层级不再随弹窗切换。F1 起
+   .toast-stack 恒 z 96（见上注：高于一切内容层、仅低于旋转门），
+   原「弹窗在场升到 30」的规则撤除——留着会反向把弹窗态的 toast
+   压回 96 之下。保留几何规则：市场弹窗是全高纵列（签在顶、摊位
+   在底、中段空），toast 挪到 33vh 空段并限宽 480px，与站名签、
+   语言开关、扇上卡名零重叠；手机横屏 toast 锚在岛左下、与竖栏
+   天然不相交，不走此规则 */
 .app-shell:has(.popup[data-testid='panel-market']):not(:has(.game-screen--phone-land)) .toast-stack {
   top: 33vh;
 }
@@ -799,16 +944,19 @@
   opacity: 0;
 }
 
-/* R5：新提示轻轻落下——200ms 内；stack 层 pointer-events 关闭不挡条外操作 */
+/* R5 + F27 → Swipe Toast 入场：顶缘滑入 + 弹簧落定（--ease-spring
+   一次轻过冲回定，--motion-med 档）；toast 组件本体是 WS4-D1 的
+   收编点，本段只交付入场 keyframe 的弹簧口径。
+   stack 层 pointer-events 关闭不挡条外操作 */
 @media (prefers-reduced-motion: no-preference) {
   .toast {
-    animation: toast-in 200ms var(--motion-ease);
+    animation: toast-in var(--motion-med) var(--ease-spring);
   }
 }
 
 @keyframes toast-in {
   from {
-    transform: translateY(-10px);
+    transform: translateY(-14px);
     opacity: 0;
   }
 }
@@ -1001,9 +1149,14 @@
 }
 
 .chip--selected {
-  border-color: var(--color-primary);
-  border-width: 3px;
+  /* owner F2（Thong 2026-11-21）：与 .card-view--selected 同口径——撤除
+     橙色描边强调，边框转透明，改柔光圈（双层原色晕 + 原底影） */
+  border-color: transparent;
   background: var(--color-primary-soft);
+  box-shadow:
+    0 0 14px 4px var(--glow-primary),
+    0 0 34px 10px var(--glow-primary-soft),
+    var(--shadow-sm);
 }
 
 .swap-row {
@@ -1427,6 +1580,11 @@
     padding-right: var(--space-2);
   }
 
+  .clip-note {
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
+  }
+
   .recipe-card {
     padding: var(--space-2) var(--space-3);
   }
@@ -1485,54 +1643,21 @@
   font-weight: var(--font-weight-bold);
   color: var(--color-ink);
 }
-@keyframes moment-pop {
-  from {
-    opacity: 0;
-    transform: translateY(26px) scale(0.6) rotate(-4deg);
-  }
-}
-@media (prefers-reduced-motion: no-preference) {
-  .moment-card {
-    animation: moment-pop var(--moment-pop-ms) var(--ease-spring) backwards;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .moment-card {
-    animation: moment-pop 140ms var(--ease-out) backwards;
-  }
-}
+/* F29/F30/F31（WS5）：moment-pop / moment-pocket / story-sink 全部
+   收编为 motion 包装器——大卡入场 = AnimatedContent 'moment'，
+   收进篮子退场 = FadeContent 'pocket'，故事卡下沉 = FadeContent
+   'sink'（EventPanel/DrawTaskPanel/CookPanel 侧已接线） */
 
-/* 收进篮子：点完后整卡缩飞向左下（菜谱「收进篮子」/ 天气卡退场共用） */
-@keyframes moment-pocket {
-  to {
-    opacity: 0;
-    transform: translate(-50%, -50%) translate(-34vw, 30vh) scale(0.25)
-      rotate(14deg);
-  }
-}
+/* 收进篮子残影壳：FadeContent 'pocket' 的退场出口。translate 属性
+   留 -50% -50% 居心——motion 只写 inline transform，两者按序叠加，
+   终态 = 旧 keyframe 的 translate(-50%,-50%) + (-34vw,30vh) 同款 */
 .moment-card--pocket {
   position: fixed;
   left: 50%;
   top: 42%;
   z-index: 40;
   pointer-events: none;
-  animation: moment-pocket 480ms var(--ease-in-out) forwards;
-}
-@media (prefers-reduced-motion: reduce) {
-  .moment-card--pocket {
-    animation-duration: 120ms;
-  }
-}
-
-/* 故事卡点完下沉退场（options 扇随即上屏） */
-@keyframes story-sink {
-  to {
-    opacity: 0;
-    transform: translateY(40px) scale(0.85);
-  }
-}
-.event-story--out {
-  animation: story-sink 220ms var(--ease-in-out) forwards !important;
+  translate: -50% -50%;
 }
 
 /* R3 修复（必改 3b）：故事卡不再整卡是按钮（EventPanel 已改 div +
@@ -1557,8 +1682,17 @@
   inset: 0;
   z-index: 1;
   background: var(--weather-wash, transparent);
+  /* F38：与 .popup-backdrop::before 同一 FadeContent 'fade' 口径 */
   transition: background 700ms var(--ease-in-out);
   pointer-events: none;
+}
+/* F38：reduced-motion 下洗色瞬时到位（FadeContent duration:0 等价） */
+@media (prefers-reduced-motion: reduce) {
+  .popup-backdrop::before,
+  .board3d::after,
+  .board::after {
+    transition: none;
+  }
 }
 .board {
   position: relative;
@@ -1596,19 +1730,9 @@
   font-style: normal;
   color: var(--color-ink);
 }
-/* 手感审计 #2：新出现的金币点弹入——弹簧从 0.6 弹到 1（与手牌 hand-pop
-   同一 --ease-spring 口径），一次性、结束即静止。reduced-motion 不弹，
-   点直接在位（CoinDots 侧的变化方向另有增减小片交代） */
-@media (prefers-reduced-motion: no-preference) {
-  .coin-dot--new {
-    animation: coin-dot-pop var(--motion-med) var(--ease-spring) 1;
-  }
-}
-@keyframes coin-dot-pop {
-  from {
-    transform: scale(0.6);
-  }
-}
+/* 手感审计 #2 + F25：新金币点的弹入已收编为 CoinDots.tsx 里的
+   motion 弹簧（共享 SPRING_POP，scale 0.6→1；reduce 直渲）——
+   原 coin-dot-pop keyframe 删除；.coin-dot--new 只作状态钩子 */
 
 /* 手感审计 #2：金币增减小片——币数落地变化时在宿主（金币条 / 钱包钮）
    右上方升起「+2 / −3」：约 600ms 升起到位、随后淡出，全程约 1.1s，
@@ -1632,29 +1756,9 @@
   white-space: nowrap;
   pointer-events: none;
 }
-@media (prefers-reduced-motion: no-preference) {
-  .coin-delta-chip {
-    animation: coin-delta-rise 1100ms var(--motion-ease) 1 forwards;
-  }
-}
-@keyframes coin-delta-rise {
-  0% {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  15% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  55% {
-    opacity: 1;
-    transform: translateY(-8px);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-13px);
-  }
-}
+/* F26：升起 + 淡出的运动实现已收编进 motion/DeltaChip.tsx（同轨迹
+   1.1s 关键帧曲线；reduce 静态停驻后淡出）——原 coin-delta-rise
+   keyframe 删除。芯片样式本体仍是 .coin-delta-chip（WS3-C5 收编）。 */
 
 .coin-dots--xs .coin-dot {
   width: var(--coin-dot-size-sm);
@@ -1801,4 +1905,98 @@
   top: 44%;
   transform: translate(-50%, -50%);
   z-index: 26;
+}
+
+/* ==========================================================================
+   WS4 D1：收编 SwipeToast（React Bits，MIT + Commons Clause）的附加样式——
+   全部为新增块；.toast-stack / .toast 既有规则（层级、投影、点按即关、
+   300ms 淡出、F7 矮幅藏条）一概不动（层级/发光归 toastglow 流，
+   @keyframes 归 WS5）。
+
+   结构：.toast-stack > .swipe-toast（车道内包装）
+                       > .swipe-toast__gate（入场升起层，motion 内联驱动）
+                         > .swipe-toast__lift（纵向拖拽层 + 引线宿主）
+                            ├─ .toast（既有条本体——点按即关不变）
+                            └─ .swipe-toast__fuse（4s 燃烧引线）
+   ========================================================================== */
+.swipe-toast {
+  display: flex;
+  justify-content: center;
+  max-width: 100%;
+}
+.swipe-toast__gate,
+.swipe-toast__lift {
+  display: flex;
+  justify-content: center;
+  max-width: 100%;
+}
+.swipe-toast__lift {
+  position: relative;
+  /* 纵向滑甩：竖向拖拽手势全交给组件（横向仍放行页面横滚）；
+     点击事件不另开——.toast 本体的 pointer-events:auto 照旧负责 */
+  touch-action: pan-x;
+  cursor: grab;
+}
+.swipe-toast__lift:active {
+  cursor: grabbing;
+}
+/* 燃烧引线：条底一条 3px 亮线，JS 驱动 scaleX(1→0)、时长与 4s dwell
+   同值（Toast.tsx duration prop）——把「还有多久自动收」画给孩子看。
+   它是信息不是装饰：reduced-motion 下照常燃烧。 */
+.swipe-toast__fuse {
+  position: absolute;
+  left: var(--space-4);
+  right: var(--space-4);
+  bottom: 5px;
+  height: 3px;
+  border-radius: var(--radius-button);
+  background: var(--color-accent-yellow);
+  transform-origin: left center;
+  pointer-events: none;
+}
+/* F27 交接：旧 toast-in 入场关键帧与新组件的 motion 入场会双播——
+   在新车道里关掉旧入场（不动 @keyframes 本体，WS5 所有） */
+@media (prefers-reduced-motion: no-preference) {
+  .swipe-toast .toast {
+    animation: none;
+  }
+}
+
+/* ==========================================================================
+   WS4 D14：收编 BlurText（React Bits，MIT + Commons Clause）的天气大卡
+   标题——只新增。大天气名在卡面下方再从柔焦里 resolve 一遍
+   （motion 内联驱动逐词 blur/位移，reduced-motion 整行直出）。
+   与 .moment-tap 同口径：不透明白衬底浮丸，浮在压暗岛面上仍可读。
+   ========================================================================== */
+.moment-title {
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-button);
+  background: var(--color-surface);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+}
+/* 逐词 resolve 的单词盒：行内块，保留词内不断行 */
+.blur-text__word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   WS4 D4：收编 RotatingText（React Bits，MIT + Commons Clause）的附加样式
+   ——只新增。按键提示/说明短语整块轮换：定高单行窗、词块在窗内上下滑
+   交叠（motion 内联驱动 y/opacity，mode="wait" 逐条进出不并宽）。
+   prefers-reduced-motion 由组件给第一条常驻，这里不另写媒体查询。
+   ========================================================================== */
+.rotating-text {
+  display: inline-flex;
+  align-items: center;
+  /* 单行窗：滑出词不露出窗缘；1.35em 与 .toast-text 行高同口径 */
+  height: 1.35em;
+  overflow: hidden;
+  vertical-align: middle;
+}
+.rotating-text__word {
+  display: inline-block;
+  white-space: nowrap;
 }

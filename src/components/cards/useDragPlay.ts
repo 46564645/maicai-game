@@ -5,7 +5,10 @@
  * 位移实时写 transform（rAF 不需要——pointermove 本来就按帧来），命中投放区
  * （getBoundingClientRect 矩形命中）且该区 accepts → 松手调用 onDrop；
  * 未命中/被拒/中途取消 → 弹簧弹回手牌位（CSS transition，reduced-motion 120ms）。
- * 桌面指针叠加 Magnet 吸附：指针进入投放区外扩 pad 范围内，卡被轻吸向区心。
+ * 桌面指针叠加 Magnet 吸附：指针进入投放区外扩 pad 范围内，卡被轻吸向区心；
+ * F7/F8（WS5 Magnet 口径）：命中「拒收」区时卡被弹簧拽住——位移打 0.55
+ * 折扣（想塞塞不进去的阻力感），配合投放区灰虚线提示；旧 drag-shake
+ * 横摇与 dz-pop keyframe 全部删除（观众规则不摇）。
  * 拖拽之外永远保留「点选—点目标」tap-tap 等价路径（本 hook 不处理点按，
  * 点按由底层 <button> 的原生 click 走既有选中→动作流程）。
  *
@@ -30,7 +33,7 @@ export interface RectLike {
 export interface ZoneRect {
   id: string;
   rect: RectLike;
-  /** false = 命中也算无效投放（弹回 + 轻 shake） */
+  /** false = 命中也算无效投放（弹簧拽引阻力 + 弹回） */
   accepts: boolean;
 }
 
@@ -153,13 +156,12 @@ export interface UseDragPlay {
   style: CSSProperties;
   dragging: boolean;
   returning: boolean;
-  /** 回弹落地后的轻 shake（≤200ms，不弹文字） */
-  shaking: boolean;
 }
 
 const RETURN_MS = 420;
 const RETURN_MS_RM = 120;
-const SHAKE_MS = 180;
+/* F7：命中拒收区时的弹簧拽引折扣——位移 ×0.55，卡被「顶住」 */
+const RESIST = 0.55;
 
 function prefersReducedMotion(): boolean {
   return (
@@ -194,7 +196,6 @@ export function useDragPlay<T>(opts: UseDragPlayOptions<T>): UseDragPlay {
   const elRef = useRef<HTMLElement | null>(null);
   const [dragging, setDragging] = useState(false);
   const [returning, setReturning] = useState(false);
-  const [shaking, setShaking] = useState(false);
   const stateRef = useRef({
     active: false,
     moved: false,
@@ -252,7 +253,7 @@ export function useDragPlay<T>(opts: UseDragPlayOptions<T>): UseDragPlay {
         optsRef.current.onDrop(payload, verdict.id);
         return;
       }
-      // 无效投放：弹簧弹回 + （命中但拒收时）轻 shake
+      // 无效投放：弹簧弹回（拒收阻力已在拖动中体现，松手即回）
       setReturning(true);
       setDragging(false);
       resetTransform(true);
@@ -262,10 +263,6 @@ export function useDragPlay<T>(opts: UseDragPlayOptions<T>): UseDragPlay {
           setReturning(false);
           const el = elRef.current;
           if (el) el.style.transition = '';
-          if (verdict.kind === 'reject') {
-            setShaking(true);
-            timersRef.current.push(window.setTimeout(() => setShaking(false), SHAKE_MS));
-          }
         }, back + 20),
       );
     },
@@ -306,6 +303,11 @@ export function useDragPlay<T>(opts: UseDragPlayOptions<T>): UseDragPlay {
           ox += m.dx;
           oy += m.dy;
         }
+      }
+      /* F7 Magnet 拒收拽引：命中但该区不收 → 位移打折，卡被弹簧「顶住」 */
+      if (hit && !hit.accepts) {
+        ox *= RESIST;
+        oy *= RESIST;
       }
       applyTransform(ox, oy);
       e.preventDefault();
@@ -416,5 +418,5 @@ export function useDragPlay<T>(opts: UseDragPlayOptions<T>): UseDragPlay {
       ? { willChange: 'transform', position: 'relative', zIndex: 30 }
       : { position: 'relative' };
 
-  return { ref, style, dragging, returning, shaking };
+  return { ref, style, dragging, returning };
 }

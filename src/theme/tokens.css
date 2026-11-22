@@ -212,7 +212,7 @@
   --hand-raise-ms: 180ms;
   --popup-in-ms: 180ms;
   --popup-out-ms: 160ms;
-  --shake-ms: 180ms;
+
 
   /* —— R10 卡片化（R10_DESIGN §3/§4；全部派生自现有色板，未改旧值）—— */
   /* T-1 统一卡面（Thong 2026-11-19）：全站唯一卡尺寸 104×152——图占
@@ -241,6 +241,15 @@
   --glow-ring: color-mix(in srgb, var(--color-accent-yellow) 55%, transparent);
   --glow-amber: color-mix(in srgb, var(--color-accent-yellow) 42%, transparent);
   --glow-sweep: color-mix(in srgb, var(--color-surface) 88%, transparent);
+  /* owner F2（Thong 2026-11-21）：选中/强调态的「柔光圈」——两层大范围
+     原色晕叠出无硬边 halo，配 -4px 抬升 + scale 1.03 取代旧 3px 橙环。
+     React Bits 已查：ElectricBorder 电弧火花、StarBorder 星星描边动效、
+     BorderGlow 指针追踪，全不合「常驻、平静、无需指针」的选中态，
+     故不 vendor、纯 CSS 静态实现（无动画，天然免 reduced-motion） */
+  --glow-primary: color-mix(in srgb, var(--color-primary) 55%, transparent);
+  --glow-primary-soft: color-mix(in srgb, var(--color-primary) 26%, transparent);
+  /* WS5：警示/拒付用的柔红晕（Border Glow warn/deny 脉冲同色系） */
+  --glow-warn: color-mix(in srgb, var(--color-deny) 45%, transparent);
   /* 价格宝石（炉石法力水晶的「形」）：橙渐变底白字 + 内嵌小金币点 */
   --gem-size: 26px;
   --gem-coin-size: 8px;

@@ -1,5 +1,28 @@
 /* App.css —— 占位壳样式，只用 tokens.css 变量 */
 
+/* WS6 背景层基座：壳成堆叠上下文后，z-index 为负的背景层
+   （G1 颗粒 = -1）才能落在「奶油渐变之上、全部内容之下」。
+   relative 不圈 fixed 子层，弹窗/Toast 不受影响 */
+.app-shell {
+  position: relative;
+  z-index: 0;
+}
+
+/* G1（React Bits Noise 设计适配）：静态单层细颗粒铺奶油渐变上——
+   对齐卡面 riso 印刷纹理。动画颗粒 = 闪光，项目禁用：无动画、无 rAF、
+   无位移，一块冻结 feTurbulence SVG 瓦片；pointer-events:none 垫在所有
+   内容之下（壳堆叠上下文内 z-index:-1，在 body 渐变之上） */
+.app-shell::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  background-size: 240px 240px;
+  opacity: 0.05;
+}
+
 .intro-shell {
   display: flex;
   flex-direction: column;
@@ -197,4 +220,35 @@
   top: max(var(--space-2), env(safe-area-inset-top));
   right: max(var(--space-3), env(safe-area-inset-right));
   z-index: 60;
+}
+
+/* ==========================================================================
+   WS4 E7：收编 RubberSegment（React Bits，MIT + Commons Clause）的附加
+   样式——全部新增；.lang-toggle* 既有规则一概不动（轨道外框、段尺寸、
+   字号字色仍由它们管）。橡皮拇指 = 唯一选中指示层：SVG 胶囊 path 垫在
+   透明段之下，切换时按弹簧形变游走（motion/JS 驱动 d 属性）。
+   ========================================================================== */
+.rubber-segment {
+  position: relative;
+}
+.rubber-segment__item {
+  position: relative;
+  z-index: 1;
+}
+/* 拇指层垫在段之下：段底透明（.lang-toggle-seg 一贯 transparent），
+   选中橙由这颗游走的胶囊提供而不是段自画 */
+.rubber-segment__thumb {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.rubber-segment__thumb-path {
+  /* 与段自画时代同款主色橙（SVG fill 不能吃渐变 token，用纯色基色） */
+  fill: var(--color-primary);
+}
+/* 选中段只翻字色——橙底由游走拇指承担（原 .lang-toggle-seg--on 的
+   段自画橙底让位给拇指；规则本体不删，归既有块） */
+.rubber-segment__item--on {
+  color: var(--color-primary-contrast);
 }

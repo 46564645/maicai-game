@@ -437,6 +437,12 @@
   display: none;
 }
 
+/* G3 的全屏遮罩缘模糊是弹窗四缘用的；栏内弹窗走 G5 竖栏端缘版，
+   同一枚 GradualBlur，这里关掉弹窗自带的四缘层 */
+.phone-rail .popup-backdrop > .gradual-blur {
+  display: none;
+}
+
 /* R10E：栏内头丸缩小一档（仍是半透明墨丸） */
 /* R2-2 ③：桌面 .popup-head 是 align-self:center 的内容宽浮丸——
    栏内内容区只有 ~182px，丸的最小内容宽（站名 + 不换行的目标小片
@@ -512,35 +518,12 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* R6 N3：浮层栈内选中/算式专行与导引句站名段——只在 ≤700 浮层里
-   出现（701+ 时栏内 foot 的选中块/算式行就是正主，栈内这份隐藏；
-   站名段同理，只补 ≤700 让位后缺的那一份） */
-.panel-selected--float {
-  display: none;
-}
+/* 导引句站名段：只补 ≤700 让位后缺的那一份（701+ 栏内标题是正主）。
+   原 R6 N3 的浮层「Picked」专行已随交互审 U1 删除。 */
 .stall-guide-station {
   display: none;
 }
 @media (max-width: 700px) {
-  .phone-float-stack .panel-selected--float {
-    /* 一行制：Picked 短句 + 算式同行（算式的结果就是「买后剩」，
-       不再单起一行）——栈高预算 ≤335 里只占 ~36px */
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-3);
-    white-space: nowrap;
-    background: var(--color-surface);
-    border: 2px solid var(--color-line);
-    border-radius: var(--radius-card);
-    padding: var(--space-1) var(--space-3);
-  }
-  .phone-float-stack .cb-math--float {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-bold);
-    font-variant-numeric: tabular-nums;
-  }
   .phone-float-stack .stall-guide-station {
     display: inline;
     font-weight: var(--font-weight-bold);
@@ -629,19 +612,12 @@
 /* R2-2 ①：心里话气泡（.think-bubble--phone）在 board.css 里以头像片
    为中心绝对定位 + nowrap——最右一片的气泡会横跨进右竖栏，盖住
    「轮到你了」。最后一片改右缘锚定：气泡右缘与头像片右缘齐平，
-   结构上不可能越过竖栏左缘；入场动画换无横移的一版配套。 */
+   结构上不可能越过竖栏左缘。F32：入场收编为 AnimatedContent 'pop'
+   （无横移档）——think-pop-phone-end keyframe 删除 */
 .game-screen--phone-land .phone-bot-wrap:last-child .think-bubble--phone {
   left: auto;
   right: 0;
   transform: none;
-  animation-name: think-pop-phone-end;
-}
-
-@keyframes think-pop-phone-end {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
 }
 
 /* ==========================================================================
@@ -1468,6 +1444,44 @@
   z-index: 2;
 }
 
+/* 消息减负审计 §6：竖栏顶行 = 指南 ? 钮 + 语言钮（指南在语言钮左侧）；
+   整行接管原语言钮的 sticky 口径（弹窗在场时改随栏滚动，与语言钮
+   旧规则同因：避免压住滑到栏顶的内容）；? 钮 48px 圆钮 ≥ 点按下限 */
+.game-screen--phone-land .phone-rail .phone-rail-top {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+.game-screen--phone-land:has(.popup) .phone-rail .phone-rail-top {
+  position: static;
+}
+.game-screen--phone-land .phone-rail .phone-rail-top .lang-toggle {
+  /* 不能用 static：语言钮的橡皮筋拇指 svg 是 absolute 定位，靠钮
+     本体作包含块（App.css .rubber-segment 的 relative）；改 static
+     会让拇指锚到 .phone-rail-top 上、橙胶囊盖住左边的指南 ? 钮
+     （截图实测）。relative 无偏移、版式等同 static，且恢复包含块 */
+  position: relative;
+  align-self: center;
+}
+.phone-guide-btn {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid var(--color-line);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+}
+
 /* R6 N2 续：弹窗在场时竖栏必滚动，sticky 开关会压住滑到栏顶的
    内容——实测市场景栏 scrollTop 70 时开关盖住回合卡里的行动日志
    「Tag bought Sticker」右段（∩ ≈ 90×19px）。弹窗期间开关改回
@@ -1513,14 +1527,14 @@
   position: relative;
 }
 
-/* 手感审计 #1（手机侧）：bot 动作落地时小头像片迸一圈薄荷闪——覆盖层
-   与桌面 BotCard 共用 card-played-flash 关键帧/900ms，一次性 */
+/* 手感审计 #1（手机侧）：bot 动作落地时小头像片迸一圈柔光脉冲——
+   F4 改造：覆盖层与桌面 BotCard 共用 pglow-pulse 关键帧/900ms，一次性 */
 .phone-bot-acted {
   position: absolute;
   inset: -2px;
   border-radius: var(--radius-button);
   pointer-events: none;
-  animation: card-played-flash var(--motion-slow) var(--motion-ease) 1;
+  animation: pglow-pulse var(--motion-slow) var(--motion-ease) 1;
 }
 .phone-bot--next {
   transform: translateY(-3px);
@@ -1540,4 +1554,17 @@
 /* 格子卡在窄栏里继承「整幅 contain + 美术区最小高」之外再收一档内距 */
 .game-screen--phone-land .store-grid .card-view-art {
   min-height: 56px;
+}
+
+/* ==========================================================================
+   WS4 D2：提议浮签包装层接回栏内语境（全部为新增附加规则，不改既有块）。
+   .phone-turn .board-await 的拉伸与「浮签藏随行日志」等效挪到
+   .board-await-wrap。 */
+.game-screen--phone-land .phone-turn .board-await-wrap,
+.phone-turn .board-await-wrap {
+  align-self: stretch;
+  min-width: 0;
+}
+.phone-turn .board-await-wrap + .board-log {
+  display: none;
 }

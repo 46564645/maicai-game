@@ -346,6 +346,16 @@ function renderLogTemplate(tpl: string, values: Partial<Record<LogSlot, string>>
   return out.replace(/\b1 coins\b/g, '1 coin');
 }
 
+/** 一条引擎日志文本命中的模板键（中英两套模板都试，与 localizeLogText
+ *  同一匹配器/同一优先级）；不命中任何模板（家长 AI 自由文本等）返回
+ *  null。消息减负审计 §5 的 Toast 白名单按此键过滤 */
+export function logTemplateKey(text: string): string | null {
+  for (const m of logMatchers) {
+    if (m.re.exec(text)) return m.key;
+  }
+  return null;
+}
+
 /** 把一条引擎日志文本按当前语言重渲染（名字/物品/天气换当前语言显示名） */
 export function localizeLogText(text: string): string {
   for (const m of logMatchers) {

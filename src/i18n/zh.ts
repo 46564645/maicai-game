@@ -18,11 +18,9 @@ export const zhStrings: StringsDict = {
     resetView: '回默认视角',
   },
 
-  tagline: '和伙伴一起去买菜，最后一起做一桌饭',
-
+  /* 开场（消息减负审计 A4/A6：tagline 与 startHint 已删） */
   intro: {
     startButton: '开始',
-    startHint: '点一下就出发！',
     todoHint: '完整玩法马上就来',
     statCards: {
       startCoins: { label: '每人起始', suffix: '币' },
@@ -51,23 +49,19 @@ export const zhStrings: StringsDict = {
   },
 
   hud: {
-    lapLabel: '第 {lap} 圈',
+    /* lapLabel 已删（审计 B3） */
     lapOf: '第 {lap} 圈 / 共 {laps} 圈',
-    stationLabel: '第 {n} 站 · {name}',
+    /* stationLabel 已删（审计 B3） */
     /* R2-6：市场站浮签站名定稿（stationName 通用名是「菜市场摊位」，浮签用「菜市场」） */
     marketTitle: '菜市场',
     orderLabel: '顺序：',
     wallet: '我的钱包',
     basket: '我的篮子',
-    help: '求助牌',
-    helpAnytime: '随时可举',
     holdClip: '先等等',
     busDebt: '待付夹',
     empty: '空',
-    howTo: '玩法',
-    settings: '设置',
     coin: '币',
-    lapCompact: '第{lap}/{laps}圈',
+    /* lapCompact 已删（审计 B5） */
     botChip: '{name}，{n} 币 — 点开看详情',
     walletWithCoins: '我的钱包，{n} 币',
     /* R10D：HUD 图形进度簇（圈点 + 站点格）与「下一位」的无障碍名 */
@@ -87,26 +81,25 @@ export const zhStrings: StringsDict = {
   },
 
   game: {
-    townAlt: '买菜小镇',
+    /* townAlt 已删（审计 B2）；botTurn 已删（审计 B3） */
     pawnAt: '在「{name}」',
     yourTurn: '轮到你了',
-    botTurn: '轮到{name}了',
     thinking: '正在想…',
     enterStation: '进入这一站',
-    enterStationKbd: '（Enter / 空格）',
+    /* enterStationKbd 已删（审计 C6） */
     enterStationHint: '进入这一站（Enter / 空格）',
     myCoins: '我的钱：{n} 币',
     botCoins: '钱：{n} 币',
     bought: '已买',
     walletTitle: '钱包和菜谱',
-    walletHint: '菜谱还差 {a} 币 · 车费 {b} 币 · 还能自由花 {c} 币',
+    /* walletHint 已删（审计 E5） */
     freeCoins: '还能自由花 {n} 币',
     debtLeft: '还欠车费：{n} 币',
   },
 
   screens: {
     chooseTitle: '选一个你喜欢的角色',
-    chooseHint: '其他三个角色会变成你的小伙伴',
+    /* chooseHint 已删（审计 A9） */
     basketTitle: '我的篮子',
     basketNext: '下一圈',
     others: '小伙伴的篮子',
@@ -123,38 +116,31 @@ export const zhStrings: StringsDict = {
   actions: {
     enter: '进入这一站',
     ok: '好的',
-    drawRecipe: '抽一张菜谱卡',
-    buy: '买下{item}（{n} 币）',
+    drawRecipe: '抽菜谱卡',
+    buy: '买下{item}',
     hold: '{item}：先等等',
-    holdBuy: '按原价买下{item}',
+    holdBuy: '买下{item}',
     holdDrop: '不买{item}了',
     endTurn: '走完这一站',
     swap: '拿我的{give}换{name}的{want}',
     yes: '好呀',
     no: '不用了',
     payBus: '投 {n} 币',
-    busDebt: '先记在待付夹里',
-    busFreeDone: '我已经有车票了',
+    busDebt: '记待付夹',
+    busFreeDone: '有车票了',
     sayIt: '说出来',
-    storeBuy: '买下{item}（{n} 币）',
+    storeBuy: '买下{item}',
     chooseChar: '选{name}',
     restart: '再玩一局',
     demoJump: '跳到某一站',
     demoPersonality: '换电脑性格',
     setFlag: '开关',
     close: '关闭',
-    helpTitle: '小提示',
-    helpMissing: '还缺：',
-    helpCoins: '我的钱：{n} 币',
-    helpDebt: '待付夹：{n} 币',
-    helpCanDo: '你可以：',
     noRecipe: '还没有菜谱',
   },
 
   help: {
     title: '小提示',
-    /* R6：求助牌里的类别记号图例标题 */
-    iconLegend: '卡上的记号',
     gentleAdvice: '先买菜谱上的菜，再看小玩意。',
     stationTips: {
       drawTask: '记住菜谱上要买的菜。',
@@ -168,14 +154,32 @@ export const zhStrings: StringsDict = {
     },
   },
 
+  /* 新手指南（消息减负审计 §4：开局弹一次 + 右上角重开，共 4 页；
+     每页一个大视觉 + 最多一句短句；步点不带文字标签） */
+  guide: {
+    open: '指南',
+    title: '指南',
+    back: '上一步',
+    next: '下一步',
+    done: '出发啦',
+    jobTitle: '你的任务',
+    jobLine: '照着菜谱，把要买的菜买齐。',
+    buyTitle: '点卡买菜',
+    buyLine: '先点一张卡，再点买下。',
+    coinsTitle: '看好金币',
+    coinsLine: '金币条会算账，两个夹子能帮忙。',
+    marksTitle: '卡上记号',
+    marksLine: '记号会告诉你这是什么卡。',
+  },
+
   bus: {
-    announced: '车费一开始就说过啦，不是惩罚。',
+    /* announced 已删（审计 D4） */
     paidDebt: '先付了车费',
   },
 
   panel: {
     /* R2-6（ww 定稿）：卡扇下方唯一一句说明（原长句+教练句已撤） */
-    stallIntro: '点一张卡，先买菜谱上的菜。',
+    /* stallIntro 已删（审计 C7） */
     /* R10D：第 2 圈起说明收成短句；第 3 圈整句撤掉 */
     stallIntroShort: '点卡，再选怎么做',
     selected: '选中：{item} {n} 币',
@@ -195,11 +199,10 @@ export const zhStrings: StringsDict = {
     tagIngredient: '食材',
     tagTemptation: '诱惑',
     /* R6：第一次进市场时提示条播一遍类别记号的意思（仅一次） */
-    iconsIntro: '卡上的记号：绿勾 = 菜谱里有 · 胡萝卜 = 食材 · 星星 = 诱惑',
+    /* iconsIntro 已删（审计 B10） */
     /* R6：锁记号的读屏名（暂时拿不到的卡） */
     lockedLabel: '暂时拿不到',
-    keyHelp: '←→ 选卡 · 1/2/3 选操作',
-    lookTitle: '看一眼你的菜谱卡',
+    /* keyHelp 已删（审计 C5）；lookTitle 已删（审计 D7） */
     recipeMissing: '还缺：{items}',
     recipeDone: '菜谱买齐啦！',
     busTicket: '车票',
@@ -209,7 +212,7 @@ export const zhStrings: StringsDict = {
     storeMissing: '菜谱还缺的',
     storeAll: '全部食材',
     storeHoldLine: '先等等夹：{item}（{n} 币）',
-    cookPut: '把你的菜放进盘子',
+    /* cookPut 已删（审计 D13） */
     /* R10E：弹出时刻——菜谱卡点按提示 + 成品出锅提示 */
     pocketRecipe: '收进篮子',
     dishReady: '菜出锅啦！',
@@ -229,20 +232,12 @@ export const zhStrings: StringsDict = {
     math: '{a} − {b} → {c}',
   },
 
-  /* bot 心里话（R10C：贴着 bot 卡冒出的短理由气泡） */
-  think: {
-    steady: '先买菜谱里的菜',
-    impulsiveHold: '好想要…先放先等等吧',
-    impulsiveBuy: '好想要！就买它',
-    follower: '我也要！',
-    busDebt: '车费先记着，待会还',
-    eventSpend: '惊喜要花币…想想再定',
-  },
+  /* bot 心里话字符串已删（消息减负审计 B11） */
 
   bubble: {
     swapAsk: '「我的{give}换你的{want}，好吗？」',
     inviteAsk: '「{name}，一起来吗？」',
-    note: '这里不能借钱，也不能送钱。',
+    /* note 已删（审计 C3） */
     fromSuffix: ' · 伙伴站',
     /* 等真人回应提议时浮签卡的完整提议句（团队第 2 轮 ww 定稿）：
        写清谁想用哪件（give=对方的）换你的哪件（want=你的） */
@@ -269,7 +264,7 @@ export const zhStrings: StringsDict = {
     swapHint: '先点我多出来的菜，再点你想换的菜',
     swapPicked: '拿我的{give}换{name}的{want}',
     swapConfirm: '发出交换',
-    noSwap: '不能借钱、不能送钱 — 只能交换多出来的菜',
+    /* noSwap 已删（审计 D3） */
   },
 
   event: {
@@ -300,28 +295,29 @@ export const zhStrings: StringsDict = {
     hearQ: '听一听问题',
     clearedMark: '✓ 说清楚了',
     settleGo: '继续回答',
+    /* 交互审 U7（与 en 同步）：结算钮只留命令，+1 币事实平铺一行 */
+    settleBtn: '就这样',
+    settleFact: '停下来可以拿 1 币。',
     statusLive: '真对话',
     statusOffline: '离线脚本',
     ruleNote: '说清多少、做什么 → 得 1 币；再说清花到哪、下次怎么做 → 得 2 币',
     /* R10C：对话优先——家长形象名 + 示范对话 + 句首启口片 */
     parentName: 'AI 家长',
     echoLine: '{item} ✓ 说清楚了',
-    demoTag: '示范',
-    demoTip: '像这样说，就可以',
-    demoSkip: '跳过示范',
+    /* demoTag/demoTip/demoSkip 已删（审计 E2） */
     starters: ['我想买…', '我还差…', '下次我先…'],
   },
 
   feast: {
     title: '一起开饭',
-    subtitle: '3 圈结束，没有人被淘汰，每个人都有一盘菜上桌',
+    /* subtitle 已删（审计 E8） */
     plateFull: '完整的菜',
     plateSimple: '简单的菜',
     plateShadow: '下次补上',
     noteFull: '买齐了',
     noteSimple: '差 {n} 样',
     noteShadow: '第 3 圈后还没买齐',
-    ledgerBtn: '看看钱花到哪了',
+    ledgerBtn: '我的钱',
     ledgerBack: '回到桌边',
     toReflection: '说说你的决定',
   },
@@ -369,7 +365,7 @@ export const zhStrings: StringsDict = {
     waitingBots: '等小伙伴说完…',
     everyoneSaid: '大家都说完啦',
     /* R10C：选项按她今天真做到的事排前 + 小标，提示句引导挑真的那件 */
-    personalHint: '挑一件你今天真做过的事说',
+    /* personalHint 已删（审计 E12） */
     didIt: '做到了',
     /* R10D：第 3 圈菜谱已买齐的孩子——问句换成向前看的一句 */
     forwardPrompt: '下次去买菜，你会先做哪一步？',

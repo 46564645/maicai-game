@@ -8,6 +8,10 @@
  * - 点按即关：整条是一个 button（≥48px 点击区、可键盘 Enter/空格），
  *   点了走同一段 300ms 淡出再卸载；.toast-stack 仍 pointer-events:none，
  *   只有条本体吃点击，不挡条外操作。
+ * - WS4 D1/A11：条本体仍走既有 .toast 样式与淡出路径，外包收编的
+ *   SwipeToast（React Bits）提供：① 入场轻落下；② 底部燃烧引线把
+ *   4s dwell 画成倒计时；③ 新增上下滑甩关断（与点按走同一条
+ *   dismiss() 淡出路径）。层级/投影/选中发光一概不动（并行流所有）。
  * - aria-live 供读屏；层级排在站点弹窗之下（hud.css .toast-stack
  *   z-index < .popup-backdrop），有卡片弹出时不得盖住卡片。
  *   时长常量 TOAST_VISIBLE_MS 与 tokens.css 的 --toast-visible-ms
@@ -18,6 +22,7 @@ import type { LogEntry, PlayerId } from '../game/types';
 import { localizeLogText } from '../i18n/cardText';
 import { strings } from '../data/strings';
 import { enqueueToastEntries, type ToastItem } from '../ui/toastQueue';
+import { SwipeToast } from './SwipeToast';
 
 /** 提示条可见时长（ms）：定稿 4s（含末尾淡出段） */
 export const TOAST_VISIBLE_MS = 4000;
@@ -29,13 +34,9 @@ const JOIN_SEP = ' · ';
 export function Toast({
   entries,
   humanId,
-  notice,
 }: {
   entries: LogEntry[];
   humanId?: PlayerId;
-  /** R6：一次性 UI 说明条（类别记号首访说明）——id 变了才入队，
-   *  同一条只播一次；走同一队列同一 4s 口径，不叠条 */
-  notice?: { id: string; text: string } | null;
 }) {
   const [items, setItems] = useState<ToastItem[]>([]);
   const [leavingId, setLeavingId] = useState<string | null>(null);
@@ -58,16 +59,8 @@ export function Toast({
     setItems((prev) => enqueueToastEntries(base ?? prev, fresh, humanId));
   }, [entries, humanId]);
 
-  /* 一次性说明条入队（key -1 与日志 id 永不撞；raw 直渲染） */
-  const noticeSeenRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (!notice || noticeSeenRef.current === notice.id) return;
-    noticeSeenRef.current = notice.id;
-    setItems((prev) => [
-      ...prev,
-      { key: -1, rev: 0, texts: [notice.text], mergeable: false, raw: true },
-    ]);
-  }, [notice]);
+  /* 消息减负审计 B10：一次性说明条（notice）通道已删——记号图例
+     迁入新手指南，Toast 只剩日志队列一条来源 */
 
   const current = items[0];
   /* key+rev 合一作条实例标识：并入新内容 rev 变 → 视作新实例重计 4s */
@@ -116,24 +109,28 @@ export function Toast({
   if (!current) return null;
   return (
     <div className="toast-stack" data-testid="toast-log" aria-live="polite">
-      <button
-        type="button"
-        className={'toast' + (leaving ? ' toast--leaving' : '')}
-        onClick={dismiss}
-      >
-        <span className="toast-text">
-          {/* R2-7：引擎烘焙的日志槽位是英文原文名，显示层按当前语言重渲染；
-              合并条的 bot 动作原文各自本地化后以间隔点连成一行。
-              raw 条（UI 说明）已是成品文案，直出 */}
-          {current.raw
-            ? current.texts.join(JOIN_SEP)
-            : current.texts.map(localizeLogText).join(JOIN_SEP)}
-        </span>
-        <span className="toast-x" aria-hidden="true">
-          ×
-        </span>
-        <span className="sr-only">{strings.actions.close}</span>
-      </button>
+      {/* WS4 D1：收编 SwipeToast 包装条——key 用条实例标识（并入新内容
+          rev 变 → 视作新实例：重播入场、引线重烧、4s 重计，三处同源） */}
+      <SwipeToast key={itemId} duration={TOAST_VISIBLE_MS} onSwipe={dismiss}>
+        <button
+          type="button"
+          className={'toast' + (leaving ? ' toast--leaving' : '')}
+          onClick={dismiss}
+        >
+          <span className="toast-text">
+            {/* R2-7：引擎烘焙的日志槽位是英文原文名，显示层按当前语言重渲染；
+                合并条的 bot 动作原文各自本地化后以间隔点连成一行。
+                raw 条（UI 说明）已是成品文案，直出 */}
+            {current.raw
+              ? current.texts.join(JOIN_SEP)
+              : current.texts.map(localizeLogText).join(JOIN_SEP)}
+          </span>
+          <span className="toast-x" aria-hidden="true">
+            ×
+          </span>
+          <span className="sr-only">{strings.actions.close}</span>
+        </button>
+      </SwipeToast>
     </div>
   );
 }

@@ -2,8 +2,8 @@
  * r10d.test.ts —— R10 Slice D 五镜头优化轮单测。
  *
  * 教育层：
- *   education #5  脚手架随圈数退场（supportLevel/panelHintFor/botBubbleAllowed
- *                 + botThinkLine 按圈撤气泡）
+ *   education #5  脚手架随圈数退场（supportLevel/panelHintFor/botBubbleAllowed；
+ *                 botThinkLine 气泡已按消息减负审计 B11 整体删除）
  *   education #7  事件「后果回声」分支判定（eventEchoKind）
  *   education #6  扇里相邻同卡的 ×2 徽标（adjacentDupCounts）
  * 交互层：
@@ -22,8 +22,7 @@ import { describe, expect, it } from 'vitest';
 // @ts-expect-error —— vitest 运行时是 node，内置模块无类型声明
 import { readFileSync } from 'node:fs';
 import { cards } from '../../src/data/cards';
-import { strings } from '../../src/data/strings';
-import type { GameState, LogEntry, Player } from '../../src/game/types';
+import type { GameState } from '../../src/game/types';
 import {
   botBubbleAllowed,
   panelHintFor,
@@ -39,7 +38,6 @@ import {
 } from '../../src/components/cards/pressInspect';
 import { nextActorId } from '../../src/ui/nextActor';
 import { botTrait } from '../../src/ui/botTrait';
-import { botThinkLine } from '../../src/ui/botThink';
 import { boot } from './helpers';
 
 const readSrc = (rel: string) => readFileSync(`src/${rel}`, 'utf8');
@@ -91,47 +89,9 @@ describe('botBubbleAllowed（education #5：bot 心里话气泡撤扶持）', ()
   });
 });
 
-describe('botThinkLine 按圈撤气泡', () => {
-  const bot: Player = {
-    id: 'p1',
-    seatIndex: 1,
-    characterId: 'bot-xiaowen',
-    name: '小稳',
-    isHuman: false,
-    personality: 'steady',
-    coins: 10,
-    recipeId: null,
-    collected: [],
-    extras: [],
-    temptations: [],
-    holdClip: null,
-    busDebt: 0,
-    paidEventCount: 0,
-    parentUsed: false,
-  };
-  const buyEntry: LogEntry = {
-    id: 1,
-    text: '小稳 买了 白菜',
-    playerId: 'p1',
-    spend: { kind: 'ingredient', coins: 2 },
-  };
-  it('第 1 圈：买菜短理由照冒', () => {
-    expect(botThinkLine(bot, buyEntry, 1)).toBe(strings.think.steady);
-  });
-  it('第 2/3 圈：买菜短理由撤掉', () => {
-    expect(botThinkLine(bot, buyEntry, 2)).toBeNull();
-    expect(botThinkLine(bot, buyEntry, 3)).toBeNull();
-  });
-  it('第 2/3 圈：「先等等」气泡仍冒（跟按钮同词的那条）', () => {
-    const heldFrag = strings.log.held.split('{item}')[1]!;
-    const holdEntry: LogEntry = { id: 2, text: `先等等${heldFrag}`, playerId: 'p1' };
-    expect(botThinkLine(bot, holdEntry, 2)).toBe(strings.think.impulsiveHold);
-    expect(botThinkLine(bot, holdEntry, 3)).toBe(strings.think.impulsiveHold);
-  });
-  it('默认 lap=1 保持旧行为（不传圈数=全量气泡）', () => {
-    expect(botThinkLine(bot, buyEntry)).toBe(strings.think.steady);
-  });
-});
+/* 消息减负审计 B11：botThinkLine 与心里话气泡已整体删除（botThink.ts
+   退役）——本 describe 随面移除；botBubbleAllowed 的圈数口径仍由
+   supportLevel 的 describe 覆盖（上文） */
 
 /* ============ education #7：事件「后果回声」分支判定 ============ */
 describe('eventEchoKind（education #7）', () => {
@@ -305,11 +265,17 @@ describe('Slice D 交付样式验收', () => {
     expect(block).toContain('position: absolute');
     expect(block).toContain('pointer-events: none');
   });
-  it('「可点不可打」：180ms 横摇 + 价格宝石红闪（opacity-only）', () => {
-    expect(cssBlock(cardsCss, '.card-deny {')).toContain('card-deny-shake');
-    const gem = cssBlock(cardsCss, '.card-deny .card-view-gem::before');
-    expect(gem).toContain('var(--color-deny)');
-    expect(gem).toMatch(/animation:\s*gem-deny-flash[^;]*forwards/);
+  it('「可点不可打」：拒付 = 卡面+价格宝石单次柔红晕脉冲（不摇不闪）', () => {
+    // F20/F21（WS5）：横摇与红闪撤除，换成 Border Glow warn 变体的
+    // 单次柔红晕脉冲——卡面一圈 + 价格宝石一圈，同脉冲同色系
+    const deny = cssBlock(cardsCss, '.card-deny {');
+    expect(deny).toContain('pglow-warn-pulse');
+    expect(deny).not.toContain('shake');
+    const gem = cssBlock(cardsCss, '.card-deny .card-view-gem {');
+    expect(gem).toContain('pglow-warn-pulse');
+    // 旧的横摇/红闪 keyframe 已移除
+    expect(cardsCss).not.toContain('card-deny-shake');
+    expect(cardsCss).not.toContain('gem-deny-flash');
   });
   it('事件后果回声行：正常态薄荷底 / 缺口态警示底', () => {
     expect(cssBlock(cardsCss, '.panel-echo {')).toContain('var(--color-mint)');

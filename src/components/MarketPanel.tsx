@@ -19,11 +19,12 @@ import { cardName } from '../i18n/cardText';
 import { adjacentDupCounts } from '../ui/dupBadges';
 import type { CardId, Command, GameState } from '../game/types';
 import { Button } from './Button';
-import { CardIcon } from './CardIcon';
+/* CardIcon 随 MissingIcon 退役（审计 C8） */
 import { CardView } from './CardView';
+/* KeyHelp 已删（审计 C5） */
 import { KeyHint } from './KeyHint';
-import { CoinBar } from './cards/CoinBar';
-import { cardArtFor } from './cards/cardArt';
+import { CoinBar, CoinMath } from './cards/CoinBar';
+/* cardArtFor 随 MissingIcon 退役（审计 C8） */
 import { Hand } from './cards/Hand';
 import { MetaIcon, metaIconLabel, type MetaIconKind } from './cards/MetaIcon';
 import { PendingChip } from './cards/PendingChip';
@@ -44,21 +45,7 @@ function cardInfo(id: CardId) {
   };
 }
 
-/** 缺菜小图标（R2-6）：卡扇下方说明句左边的缩略——有插画用插画，
- *  没有回退图标圆衬（与 CardView 美术区同一口径），不再文字列缺菜名 */
-function MissingIcon({ id }: { id: CardId }) {
-  const info = cardInfo(id);
-  const art = cardArtFor(id);
-  return (
-    <span className="stall-guide-icon" title={info.name}>
-      {art ? (
-        <img src={art} alt="" draggable={false} />
-      ) : (
-        <CardIcon icon={info.icon} />
-      )}
-    </span>
-  );
-}
+/* MissingIcon 缺菜小图标已随审计 C8 删除（只服务于已删的图标排） */
 
 /** 一张摊卡：drag 层 + PlayableGlow + TiltCard(检视倾斜/glare) + CardView */
 function StallCard({
@@ -94,9 +81,7 @@ function StallCard({
     zones,
     onDrop,
   });
-  const dragCls =
-    `hand-drag${drag.dragging ? ' hand-drag--up' : ''}` +
-    `${drag.shaking ? ' hand-drag--shake' : ''}`;
+  const dragCls = `hand-drag${drag.dragging ? ' hand-drag--up' : ''}`;
   return (
     <>
       <div className={dragCls} ref={drag.ref} style={drag.style}>
@@ -145,25 +130,22 @@ export function MarketPanel({
   state,
   send,
   handFloatEl,
-  onFirstMarketOpen,
 }: {
   state: GameState;
   send: (c: Command) => unknown;
   /** R2-1：手机横屏时卡扇的浮层挂载点（Game 在棋盘区上方提供）；
    *  给了就用 portal 把卡扇送过去浮在压暗棋盘上，桌面不传、原地渲染 */
   handFloatEl?: HTMLElement | null;
-  /** R6（ww 建议）：玩家第一次进市场时回调一次（Game 借此让提示条
-   *  播一遍三枚类别记号的意思）；一次性标记在本组件内落 localStorage */
-  onFirstMarketOpen?: () => void;
 }) {
   const me = state.players.find((p) => p.isHuman)!;
   const sub = state.turn?.sub;
   const stall = state.market.stall;
   const cmds = availableCommands(state);
   const missing = missingIngredients(me);
-  const [selected, setSelected] = useState<CardId | null>(
-    () => stall.find((x): x is CardId => x !== null) ?? null,
-  );
+  // 交互审 U2：开局不预选——旧版默认选中第一张摊卡、Buy 直接待命，
+  // 孩子没做任何选择点一下大按钮就买走第一张。与小卖部同口径：
+  // 先点一张卡，Buy 才待命（导引行本来就写着「Tap a card」）。
+  const [selected, setSelected] = useState<CardId | null>(null);
   // R10C 后悔窗口：买下先挂起 ~1.5s，撤销片/飞行卡点一下就收回（interaction #2）
   const pending = usePending();
   // 投放区元素（拖拽命中现取 rect；tap-tap 时它们就是普通按钮）
@@ -175,21 +157,9 @@ export function MarketPanel({
     if (selected !== null && !stall.includes(selected)) setSelected(null);
   }, [stall, selected]);
 
-  // R6（ww 建议，马教授准）：第一次进市场 → 让提示条播一遍三枚
-  // 类别记号的意思，仅此一次。标记与语言选择同法存 localStorage
-  // （键 maicai-icons-seen）；存不上（隐私模式等）就每次进市场
-  // 都播——降级为多播，不报错
-  useEffect(() => {
-    if (!onFirstMarketOpen) return;
-    let seen = false;
-    try {
-      seen = window.localStorage.getItem('maicai-icons-seen') === '1';
-      if (!seen) window.localStorage.setItem('maicai-icons-seen', '1');
-    } catch { /* 存储不可用：按未看过处理 */ }
-    if (!seen) onFirstMarketOpen();
-    // 只在面板挂载时判一次
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  /* 消息减负审计 B10：第一次进市场的记号说明 Toast 已删（图例迁入
+     新手指南第 4 页，开局弹一次）——首访回调与 maicai-icons-seen
+     localStorage 标记一并退役 */
 
   // 买下一张后清空选中：摊位可能还摆着同名的一张，留着选中会让人再点一次「买下」
   // 就多买一份（马教授 M3.7 反馈「买了 鱼」出现两次）。再买必须重新点一张卡。
@@ -301,7 +271,7 @@ export function MarketPanel({
   const w = walletSummary(state, me.id);
 
   const stallHand = (
-    <Hand className="stall-hand" items={handItems} ariaLabel={strings.panel.stallIntro} />
+    <Hand className="stall-hand" items={handItems} ariaLabel={strings.hud.marketTitle} />
   );
 
   // R2-6（ww 定稿）：面板顶部文字层全撤（原说明长句/短句、教练句、
@@ -321,28 +291,21 @@ export function MarketPanel({
   const selName = sel?.name ?? '';
   const stallGuide = (
     <div className="stall-guide">
-      {/* R6 N3：≤700 浮层里栏内弹窗头签让位隐藏，站名由导引句带
+      {/* R6 N3：≤700 浮层里栏内弹窗头签让位隐藏，站名由导引行带
           （.stall-guide-station 只在 ≤700 浮层中显示，CSS 控制；
           站名与 Game 头签同源 strings.hud.marketTitle + 圈号 ②） */}
       <span className="stall-guide-station" aria-hidden="true">
         {'\u2461'} {strings.hud.marketTitle} ·{' '}
       </span>
-      {missing.length > 0 && (
-        <span className="stall-guide-icons" aria-hidden="true">
-          {missing.map((id) => (
-            <MissingIcon key={id} id={id} />
-          ))}
+      {/* 消息减负审计 C7/C8（§7 风险项，独立提交）：未选卡时的
+          stallIntro 导引句删除（开局指南第 2 页已讲「先点一张卡」，
+          面板里再说一遍是复读）；缺菜图标排删除（与弹窗头菜谱
+          进度条同一信息）。选中读数（C9）保留：记号 + 卡名 + 类别 */}
+      {selCatIcon && (
+        <span className="stall-guide-text">
+          <MetaIcon kind={selCatIcon} /> {selName} — {metaIconLabel(selCatIcon)}
         </span>
       )}
-      <span className="stall-guide-text">
-        {selCatIcon ? (
-          <>
-            <MetaIcon kind={selCatIcon} /> {selName} — {metaIconLabel(selCatIcon)}
-          </>
-        ) : (
-          strings.panel.stallIntro
-        )}
-      </span>
     </div>
   );
 
@@ -406,15 +369,14 @@ export function MarketPanel({
             </span>
             {strings.buttons.hold}
           </button>
-          {/* R2-14：算式从金币条下挪到卡片下方、与按钮同一行，不压卡片 */}
+          {/* R2-14：算式从金币条下挪到卡片下方、与按钮同一行，不压卡片
+              WS3 C2：结果位走 CoinMath（CoinCounter 滚动） */}
           {sel && (
-            <span className="cb-math cb-math--inrow" aria-hidden="true">
-              {fmt(strings.coinbar.math, {
-                a: me.coins,
-                b: sel.price,
-                c: Math.max(0, me.coins - sel.price),
-              })}
-            </span>
+            <CoinMath
+              coins={me.coins}
+              spend={sel.price}
+              className="cb-math--inrow"
+            />
           )}
           <Button
             variant="secondary"
@@ -490,25 +452,9 @@ export function MarketPanel({
         ? createPortal(
             <div className="phone-float-stack">
               {stallFanBlock}
-              {/* R6 N3：≤700 时栏内选中块随弹窗让位隐藏，栈内这份
-                  专行接棒（Picked 行 + 算式；CSS 只在 ≤700 显示，
-                  701+ 栏内 foot 的选中块/算式行是正主） */}
-              {sel && (
-                <div className="panel-selected panel-selected--float">
-                  <span className="panel-selected-line">
-                    {strings.panel.selectedMark}
-                    <CardIcon icon={sel.icon} /> {sel.name} ({sel.price}{' '}
-                    {coinWord(sel.price)})
-                  </span>
-                  <span className="cb-math cb-math--float" aria-hidden="true">
-                    {fmt(strings.coinbar.math, {
-                      a: me.coins,
-                      b: sel.price,
-                      c: Math.max(0, me.coins - sel.price),
-                    })}
-                  </span>
-                </div>
-              )}
+              {/* 交互审 U1：浮层里的「Picked: …」信息丸已撤——选中卡由
+                  导引行点名、价由投放行/栏内算式（CoinMath）显示，
+                  信息不再穿按钮的衣服重复一遍 */}
               {actionBlock}
             </div>,
             handFloatEl,
@@ -531,41 +477,24 @@ export function MarketPanel({
             hideMath
           />
         </div>
-        {sel && (
-          <p className="panel-text panel-selected" aria-live="polite">
-            <span className="panel-selected-line">
-              {strings.panel.selectedMark}
-              <CardIcon icon={sel.icon} /> {sel.name}{' '}
-              {/* R6 S2：价格括注独立成片——手机竖栏只有 ~166px 内容宽，
-                  整行必折成残片；手机档藏掉这一片（价在卡面价丸/买钮/
-                  算式三处都在），只留「Picked: 名」短句一行 */}
-              <span className="sel-price-part">
-                ({sel.price} {coinWord(sel.price)})
-              </span>
-            </span>
-            <span className="panel-selected-line">
-              {me.coins >= sel.price
-                ? fmt(strings.panel.afterBuy, { n: me.coins - sel.price })
-                : strings.panel.noCoins}
-            </span>
-          </p>
-        )}
+        {/* 交互审 U1：「Picked: X（N 币）/ After you buy: …」信息丸
+            已删——同一笔减法金币条算式已经在同屏给出，选中卡由导引行
+            点名；信息不进按钮形状的元素（业主明令） */}
         {/* R6 N6：手机档算式改在此独占一行（行内式在手机隐藏，
             CSS 见 phone.css .cb-math--foot）；桌面不渲染这一份 */}
         {sel && (
-          <span className="cb-math cb-math--foot" aria-hidden="true">
-            {fmt(strings.coinbar.math, {
-              a: me.coins,
-              b: sel.price,
-              c: Math.max(0, me.coins - sel.price),
-            })}
-          </span>
+          <CoinMath
+            coins={me.coins}
+            spend={sel.price}
+            className="cb-math--foot"
+          />
         )}
 
         {/* 桌面：主操作原地接在状态行之后（与旧版顺序一致）；
             手机横屏：已随卡扇 portal 到浮层，这里不再重复渲染 */}
         {!handFloatEl && actionBlock}
-        <p className="panel-keyhelp panel-keyhelp--kbd">{strings.panel.keyHelp}</p>
+        {/* 消息减负审计 C5：面板底键盘帮助行删除——键盘操作统一
+            在新手指南第 2 页讲一次 */}
       </div>
     </div>
   );

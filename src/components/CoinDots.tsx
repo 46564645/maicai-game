@@ -4,7 +4,9 @@
  * 读屏不数点：整条 aria-hidden，币数走宿主按钮/容器的 aria-label。
  */
 import { useEffect, useRef } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 import { coinDots } from '../ui/coinDots';
+import { SPRING_POP } from './motion/springs';
 
 export function CoinDots({
   n,
@@ -22,20 +24,33 @@ export function CoinDots({
   hideExtra?: boolean;
 }) {
   const { dots, extra } = coinDots(n, cap);
-  /* 手感审计 #2：新出现的金币点弹入（coin-dot--new）——旧版点数变化
-     是瞬间增减，孩子看不见「多了几枚」。prevRef 记上一次的点数，
-     只有下标 ≥ 旧点数的新点带弹入类；首帧 prevRef 就等于当前点数，
-     挂载不弹。减少时点直接消失（方向由宿主的增减小片交代）。 */
+  /* 手感审计 #2 + F25：新出现的金币点弹入（coin-dot--new）——旧版点数
+     变化是瞬间增减，孩子看不见「多了几枚」。prevRef 记上一次的点数，
+     只有下标 ≥ 旧点数的新点走弹入；首帧 prevRef 就等于当前点数，
+     挂载不弹。减少时点直接消失（方向由宿主的增减小片交代）。
+     F25 → Magnet 弹簧口径：弹入用共享 SPRING_POP（scale 0.6→1），
+     点本体仍是自定义样式（计划 C3 口径不变）；reduce 直渲。 */
   const prevRef = useRef(dots);
   const prev = prevRef.current;
+  const reduce = useReducedMotion();
   useEffect(() => {
     prevRef.current = dots;
   }, [dots]);
   return (
     <span className={`coin-dots ${className}`.trim()} aria-hidden="true">
-      {Array.from({ length: dots }, (_, i) => (
-        <i key={i} className={'coin-dot' + (i >= prev ? ' coin-dot--new' : '')} />
-      ))}
+      {Array.from({ length: dots }, (_, i) =>
+        i >= prev ? (
+          <motion.i
+            key={i}
+            className="coin-dot coin-dot--new"
+            initial={reduce ? false : { scale: 0.6 }}
+            animate={{ scale: 1 }}
+            transition={reduce ? { duration: 0 } : SPRING_POP}
+          />
+        ) : (
+          <i key={i} className="coin-dot" />
+        ),
+      )}
       {!hideExtra && extra > 0 && <i className="coin-dots-extra">+{extra}</i>}
     </span>
   );

@@ -1,8 +1,9 @@
 /**
  * Hand.tsx —— React Bits「BounceCards」改造（MIT + Commons Clause，署名见
- * THIRD_PARTY_NOTICES.md）。原版是 GSAP 的弹簧散开图片扇；这里换成纯 CSS：
- * 每张卡按扇形变量（--fan-deg / --fan-arc-drop）旋转+下沉，新卡入场
- * 弹入（scale 0.6→1 + 轻回弹，逐卡错 40ms）。
+ * THIRD_PARTY_NOTICES.md）。原版是 GSAP 的弹簧散开图片扇；扇形摆位走纯 CSS
+ * 变量（--fan-deg / --fan-arc-drop 旋转+下沉），新卡入场改挂
+ * AnimatedContent 弹簧（WS5 F5/F6：普通卡 'pop' 弹入、任务卡 'quest'
+ * 翻落入手，逐卡错 40ms——原 hand-pop / quest-land keyframe 的收编）。
  *
  * 交互（R10_DESIGN §4.2）：
  *  - hover/focus-within：该卡「立直 + 上浮 + 放大 6%」，左右邻卡让位
@@ -25,12 +26,15 @@ import type { CSSProperties, PointerEvent as ReactPointerEvent, ReactNode, Synth
 import { useEffect, useRef, useState } from 'react';
 import { useSpeech } from '../../ui/useSpeech';
 import { LONG_PRESS_MS, inspectCancelled } from './pressInspect';
+import { AnimatedContent } from '../motion/AnimatedContent';
 
 export interface HandItem {
   key: string;
   node: ReactNode;
   /** 透传到该手牌位（如 'hand-item--sel'） */
   className?: string;
+  /** F5/F6：新卡入场变体（默认 'pop'；任务卡给 'quest' 翻落入手） */
+  entrance?: 'pop' | 'quest';
   /** 该卡宽度（默认 --card-w；free 档忽略） */
   width?: number;
   /** R10D：选中/检视时浮在卡上方的 28px 大浮签文本（旧各面板自渲，归口这里） */
@@ -181,7 +185,6 @@ export function Hand({
               {
                 '--fan-rot': `${rot.toFixed(2)}deg`,
                 '--fan-drop': `${drop.toFixed(1)}px`,
-                '--fan-i': i,
               } as CSSProperties
             }
             onPointerDown={onItemDown(it)}
@@ -195,7 +198,19 @@ export function Hand({
                 {it.badge}
               </span>
             )}
-            {it.node}
+            {/* F5/F6：新 key 的卡由 AnimatedContent 接管入场（弹簧弹入/
+                任务卡翻落）；已见过的 key 直渲，重排不重演 */}
+            {newKeys.has(it.key) ? (
+              <AnimatedContent
+                variant={it.entrance ?? 'pop'}
+                delay={i * 40}
+                className="hand-item-in"
+              >
+                {it.node}
+              </AnimatedContent>
+            ) : (
+              it.node
+            )}
             {/* R10D：大浮签归口扇层——选中/聚焦/hover 照旧显示，
                 长按检视（.hand-item--inspect）同样浮出 */}
             {it.name && (

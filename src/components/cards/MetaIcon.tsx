@@ -5,9 +5,12 @@
  * - list：绿圆 + 白勾——只给「菜谱里有」（On my list），别处禁用；
  * - food：橙色胡萝卜（食材）；
  * - fun：紫色星星（趣味/诱惑品）。
- * 每枚记号带 aria-label（全名）+ data-tip（桌面悬停/聚焦时出
- * 14px 提示条，样式在 cards.css）；图例在求助牌（HelpCard），
- * 第一次进市场时提示条会把三枚记号的意思播一遍（仅一次）。
+ * 每枚记号带 aria-label（全名）。消息减负审计 B20（§7 风险项，
+ * 独立提交）：点按/悬停的可见全名提示泡（WS3 C11 暖组提示条）
+ * 删除——它是全游戏最后一处「点小图标出说明文字」的隐藏面。
+ * 全名改由三处明面承载：新手指南第 4 页图例、市场选中读数
+ * （记号 + 卡名 + 类别全名）、读屏 aria-label。注意：这推翻了
+ * ww Part 2 验收条件里「点按记号出全名」一条，交付时须点名。
  * 视觉尺寸：布局 26px——手机市场卡扇整扇 zoom 0.79（T-1 口径），
  * 26×0.79≈20.5px 渲染，桌面 26px，都 ≥20px（Part 2.1）。
  * 配色按 Part 2.3 定：记号主色 vs 最浅卡底（#fcf1df）对比 ≥3:1
@@ -15,6 +18,7 @@
  * 逐卡实测见 R10_DESIGN R6 节）。
  */
 import { strings } from '../../data/strings';
+/* WarmTooltip 已随审计 B20 删除（其唯一消费者就是本组件） */
 
 export type MetaIconKind = 'list' | 'food' | 'fun';
 
@@ -34,7 +38,6 @@ export function MetaIcon({ kind }: { kind: MetaIconKind }) {
       className={`meta-icon meta-icon--${kind}`}
       role="img"
       aria-label={label}
-      data-tip={label}
     >
       {kind === 'list' && (
         <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
@@ -79,6 +82,7 @@ export function MetaIcon({ kind }: { kind: MetaIconKind }) {
           />
         </svg>
       )}
+      {/* 审计 B20：原 C11 暖组释义条（WarmTipBubble）已删除 */}
     </span>
   );
 }

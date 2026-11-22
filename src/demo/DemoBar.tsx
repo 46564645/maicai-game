@@ -17,6 +17,7 @@ import { fmt, marketPriceOf } from '../game/stations/shared';
 import { botPersonalityLabel, cardName, stationName } from '../i18n/cardText';
 import type { BotPersonality, GameState } from '../game/types';
 import type { SendCommand } from '../ui/useGame';
+import { GlideTrack } from '../components/bits/GlideTrack';
 
 /* R6：label 在渲染时按当前语言解析（模块级捕获会冻住英文） */
 const PERSONALITIES: { id: BotPersonality; botId: string }[] = cards.bots.map((b) => ({
@@ -96,39 +97,48 @@ export function DemoBar({
 
       <div className="demo-group" role="group" aria-label={strings.demo.jumpTitle}>
         <span className="demo-label">{strings.demo.jumpTitle}</span>
-        {Array.from({ length: gameConfig.laps }, (_, i) => i + 1).map((l) => (
+        {/* WS1 A15：圈数/站点/动作各一条 Glide Select 轨道——选中项底下
+            伏一条滑动指示丸，悬停/按下/聚焦滑走，离开滑回（go/warn 丸
+            染变体色）。chip 的类名/testid/命令一字不动 */}
+        <GlideTrack>
+          {Array.from({ length: gameConfig.laps }, (_, i) => i + 1).map((l) => (
+            <button
+              key={l}
+              type="button"
+              className={'demo-chip' + (lap === l ? ' demo-chip--on' : '')}
+              aria-pressed={lap === l}
+              data-testid={`demo-lap-${l}`}
+              onClick={() => setLap(l)}
+            >
+              {fmt(strings.demo.lapShort, { n: l })}
+            </button>
+          ))}
+        </GlideTrack>
+        <GlideTrack>
+          {gameConfig.stations.map((st, i) => (
+            <button
+              key={st.id}
+              type="button"
+              className={'demo-chip' + (station === i + 1 ? ' demo-chip--on' : '')}
+              aria-pressed={station === i + 1}
+              aria-label={`${i + 1} ${stationName(st.id)}`}
+              data-testid={`demo-station-${i + 1}`}
+              onClick={() => setStation(i + 1)}
+            >
+              {i + 1}
+            </button>
+          ))}
+        </GlideTrack>
+        <GlideTrack>
           <button
-            key={l}
             type="button"
-            className={'demo-chip' + (lap === l ? ' demo-chip--on' : '')}
-            aria-pressed={lap === l}
-            data-testid={`demo-lap-${l}`}
-            onClick={() => setLap(l)}
+            className="demo-chip demo-chip--go"
+            data-testid="demo-jump"
+            onClick={() => send({ type: 'DEMO_JUMP', lap, stationIndex: station - 1 })}
           >
-            {fmt(strings.demo.lapShort, { n: l })}
+            {strings.demo.jump}
           </button>
-        ))}
-        {gameConfig.stations.map((st, i) => (
-          <button
-            key={st.id}
-            type="button"
-            className={'demo-chip' + (station === i + 1 ? ' demo-chip--on' : '')}
-            aria-pressed={station === i + 1}
-            aria-label={`${i + 1} ${stationName(st.id)}`}
-            data-testid={`demo-station-${i + 1}`}
-            onClick={() => setStation(i + 1)}
-          >
-            {i + 1}
-          </button>
-        ))}
-        <button
-          type="button"
-          className="demo-chip demo-chip--go"
-          data-testid="demo-jump"
-          onClick={() => send({ type: 'DEMO_JUMP', lap, stationIndex: station - 1 })}
-        >
-          {strings.demo.jump}
-        </button>
+        </GlideTrack>
       </div>
 
       <div className="demo-group" role="group" aria-label={strings.demo.personalityTitle}>
@@ -136,60 +146,64 @@ export function DemoBar({
         {bots.map((b) => (
           <span key={b.id} className="demo-bot">
             <span className="demo-label">{cardName(b.characterId ?? '')}</span>
-            {PERSONALITIES.map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                className={'demo-chip' + (b.personality === p.id ? ' demo-chip--on' : '')}
-                aria-pressed={b.personality === p.id}
-                data-testid={`demo-per-${b.id}-${p.id}`}
-                onClick={() =>
-                  send({ type: 'DEMO_SET_PERSONALITY', playerId: b.id, personality: p.id })
-                }
-              >
-                {botPersonalityLabel(cards.bots.find((x) => x.id === p.botId)!)}
-              </button>
-            ))}
+            <GlideTrack>
+              {PERSONALITIES.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  className={'demo-chip' + (b.personality === p.id ? ' demo-chip--on' : '')}
+                  aria-pressed={b.personality === p.id}
+                  data-testid={`demo-per-${b.id}-${p.id}`}
+                  onClick={() =>
+                    send({ type: 'DEMO_SET_PERSONALITY', playerId: b.id, personality: p.id })
+                  }
+                >
+                  {botPersonalityLabel(cards.bots.find((x) => x.id === p.botId)!)}
+                </button>
+              ))}
+            </GlideTrack>
           </span>
         ))}
       </div>
 
       <div className="demo-group">
-        <button
-          type="button"
-          className="demo-chip"
-          data-testid="demo-fast"
-          aria-pressed={state.flags.fast}
-          onClick={() => send({ type: 'SET_FLAG', flag: 'fast', value: !state.flags.fast })}
-        >
-          {strings.demo.fast}: {state.flags.fast ? strings.demo.on : strings.demo.off}
-        </button>
-        <button
-          type="button"
-          className="demo-chip"
-          data-testid="demo-restart"
-          onClick={() => send({ type: 'RESTART' })}
-        >
-          {strings.demo.restart}
-        </button>
-        <button
-          type="button"
-          className="demo-chip demo-chip--warn"
-          data-testid="demo-spend-all"
-          title={strings.demo.spendAllHint}
-          aria-label={`${strings.demo.spendAll}: ${strings.demo.spendAllHint}`}
-          onClick={() => spendAllCoins(send)}
-        >
-          {strings.demo.spendAll}
-        </button>
-        <button
-          type="button"
-          className="demo-chip"
-          data-testid="demo-close"
-          onClick={onClose}
-        >
-          {strings.demo.close}
-        </button>
+        <GlideTrack>
+          <button
+            type="button"
+            className="demo-chip"
+            data-testid="demo-fast"
+            aria-pressed={state.flags.fast}
+            onClick={() => send({ type: 'SET_FLAG', flag: 'fast', value: !state.flags.fast })}
+          >
+            {strings.demo.fast}: {state.flags.fast ? strings.demo.on : strings.demo.off}
+          </button>
+          <button
+            type="button"
+            className="demo-chip"
+            data-testid="demo-restart"
+            onClick={() => send({ type: 'RESTART' })}
+          >
+            {strings.demo.restart}
+          </button>
+          <button
+            type="button"
+            className="demo-chip demo-chip--warn"
+            data-testid="demo-spend-all"
+            title={strings.demo.spendAllHint}
+            aria-label={`${strings.demo.spendAll}: ${strings.demo.spendAllHint}`}
+            onClick={() => spendAllCoins(send)}
+          >
+            {strings.demo.spendAll}
+          </button>
+          <button
+            type="button"
+            className="demo-chip"
+            data-testid="demo-close"
+            onClick={onClose}
+          >
+            {strings.demo.close}
+          </button>
+        </GlideTrack>
       </div>
     </div>
   );

@@ -42,6 +42,8 @@
 }
 
 .demo-chip {
+  position: relative;
+  z-index: 1; /* 坐在 Glide Select 指示丸之上 */
   min-height: var(--tap-min-size);
   padding: var(--space-1) var(--space-3);
   background: var(--color-surface);
@@ -51,10 +53,15 @@
   color: var(--color-text);
 }
 
+/* WS1 A15：选中语义由 Glide Select 指示丸承担——chip 本体只留
+   「发光 + 微抬起」（owner 口径：强调 = glow+lift，不用描边） */
 .demo-chip--on {
-  border-color: var(--color-primary);
-  border-width: 3px;
+  border-color: var(--color-line-strong);
   font-weight: var(--font-weight-bold);
+  transform: translateY(-1px);
+  box-shadow:
+    var(--shadow-sm),
+    0 3px 12px color-mix(in srgb, var(--color-primary) 45%, transparent);
 }
 
 .demo-chip--go {

@@ -2,8 +2,8 @@
  * Feast.tsx —— 一起开饭（G6）。
  * 一张浅色长桌上并排 4 张盘子卡：圆盘图 + 名字 + 菜名 + 结局标签
  * （完整的菜 / 简单的菜 / 下次补上，顺序固定为座位顺序，不排序、不比较）。
- * 按钮：① 看看钱花到哪了（真人自己的流水，分组小计）→ 一起说决定；
- *       ② 再玩一局（RESTART）。
+ * 按钮：① 我的钱（真人自己的流水，分组小计）→ 一起说决定。
+ * （交互审 U8：桌旁不再放「再玩一局」——重开只在反思页终点与演示条。）
  * 竖屏 2×2 盘子网格、按钮纵向全宽（媒体查询）。
  */
 import { useEffect, useRef, useState } from 'react';
@@ -18,7 +18,11 @@ import { Button } from '../components/Button';
 import { CardIcon } from '../components/CardIcon';
 import { cardArtFor, cardBgFor } from '../components/cards/cardArt';
 import { CoinCounter } from '../components/cards/CoinCounter';
+import { AnimatedList } from '../components/bits/AnimatedList';
+import { CountUp } from '../components/bits/CountUp';
+import { BlurText } from '../components/text/BlurText';
 import { playSparkAt } from '../components/cards/PlaySpark';
+import { AnimatedContent } from '../components/motion/AnimatedContent';
 
 /* R6：不能放模块级 —— 语言切换时要按当前语言现取（模块级会冻住英文） */
 function kindLabel(kind: PlateResult['kind']): string {
@@ -40,9 +44,9 @@ export function Feast({ state, send }: { state: GameState; send: (c: Command) =>
   const human = state.players.find((p) => p.isHuman)!;
   /* 开饭高光（手感审计 #3）：满盘逐张落定各迸一次 PlaySpark。旧版全场
      只在桌心迸一团——最多 4 张满盘共用一次火花，全局最高潮被摊薄。
-     现按每张盘自己的落定时点触发（plate-in：stagger 60ms/张 + 260ms
-     动画），火花跟着盘子走；同屏并发由 PlaySpark 自带 ≤3 闸门兜底。
-     纯演出：不读新数据、不发命令。 */
+     现按每张盘自己的落定时点触发（AnimatedContent 'pop' 错峰：
+     60ms/张 + SPRING_POP），火花跟着盘子走；同屏并发由 PlaySpark
+     自带 ≤3 闸门兜底。纯演出：不读新数据、不发命令。 */
   const plateRefs = useRef(new Map<string, HTMLDivElement>());
   const sparkedRef = useRef(new Set<string>());
   const sparkTimers = useRef<number[]>([]);
@@ -70,7 +74,8 @@ export function Feast({ state, send }: { state: GameState; send: (c: Command) =>
     const ledger = moneyLedger(state, human.id);
     return (
       <main className="intro-shell" data-testid="screen-feast">
-        <h1 className="intro-title intro-title--sm">{strings.ledger.title}</h1>
+        {/* WS3 C15：屏幕级标题——错峰 + Blur Text 焦点回落 */}
+        <BlurText as="h1" className="intro-title intro-title--sm" text={strings.ledger.title} />
         <div className="ledger" data-testid="ledger">
           <p className="ledger-line ledger-line--start">
             {fmt(strings.ledger.start, { n: ledger.startCoins })}
@@ -81,21 +86,36 @@ export function Feast({ state, send }: { state: GameState; send: (c: Command) =>
                 <p className="ledger-group-title">
                   {g.label}
                   <span className="ledger-group-total">
-                    {fmt(strings.ledger.groupTotal, { n: g.total })}
+                    {/* WS3 C20：分组小计走 vendored Count Up 滚动（与
+                        ledger-left 的 CoinCounter 同口径分句） */}
+                    {strings.ledger.groupTotal.split('{n}')[0]}
+                    <CountUp to={g.total} duration={0.6} />
+                    {strings.ledger.groupTotal.split('{n}')[1]}
                   </span>
                 </p>
-                {g.lines.map((l) => (
-                  <p key={l.id} className="ledger-line">
-                    {g.kind === 'gain' ? '+' : '−'}
-                    {l.coins} {coinWord(l.coins)} ·{' '}
-                    {l.lap !== undefined && (
-                      <span className="ledger-line-lap">
-                        {fmt(strings.ledger.lapTag, { n: l.lap })} ·{' '}
-                      </span>
-                    )}
-                    {l.text}
-                  </p>
-                ))}
+                {/* WS3 C20：明细行弹入 = vendored Animated List（行弹簧
+                    错峰入场；reduced-motion 静态直出） */}
+                <AnimatedList
+                  className="ledger-lines"
+                  itemClassName="ledger-line"
+                  animation="pop"
+                  stagger={0.045}
+                  items={g.lines.map((l) => ({
+                    key: `${g.kind}-${l.id}`,
+                    node: (
+                      <>
+                        {g.kind === 'gain' ? '+' : '−'}
+                        {l.coins} {coinWord(l.coins)} ·{' '}
+                        {l.lap !== undefined && (
+                          <span className="ledger-line-lap">
+                            {fmt(strings.ledger.lapTag, { n: l.lap })} ·{' '}
+                          </span>
+                        )}
+                        {l.text}
+                      </>
+                    ),
+                  }))}
+                />
               </section>
             ))}
           </div>
@@ -140,28 +160,29 @@ export function Feast({ state, send }: { state: GameState; send: (c: Command) =>
 
   return (
     <main className="intro-shell" data-testid="screen-feast">
-      <h1 className="intro-title intro-title--sm">{strings.feast.title}</h1>
-      <p className="screen-note">{strings.feast.subtitle}</p>
+      {/* WS3 C15：屏幕级标题——错峰 + Blur Text 焦点回落 */}
+      <BlurText as="h1" className="intro-title intro-title--sm" text={strings.feast.title} />
+      {/* 消息减负审计 E8：标题下副标题行删除——四只盘子 + 账本
+          本身就是这一屏的内容 */}
       <div className="feast-table">
         {(state.plates ?? []).map((plate, i) => {
           const p = state.players.find((x) => x.id === plate.playerId)!;
           const recipe = p.recipeId ? getRecipe(p.recipeId) : null;
           return (
-            <div
+            <AnimatedContent
               key={plate.playerId}
               ref={(el) => {
                 if (el) plateRefs.current.set(plate.playerId, el);
                 else plateRefs.current.delete(plate.playerId);
               }}
-              className={`plate-card plate-card--${plate.kind}${plate.kind === 'full' ? ' card-foil' : ''} plate-in`}
+              variant="pop"
+              delay={i * 60}
+              className={`plate-card plate-card--${plate.kind}${plate.kind === 'full' ? ' card-foil' : ''}`}
               style={
-                {
-                  '--stagger': `${i * 60}ms`,
-                  // T-1：盘卡底色 = 菜品插画底色（与 CardView 同口径）
-                  ...(recipe ? { '--card-bg': cardBgFor(recipe.id) } : {}),
-                } as CSSProperties
+                // T-1：盘卡底色 = 菜品插画底色（与 CardView 同口径）
+                (recipe ? { '--card-bg': cardBgFor(recipe.id) } : {}) as CSSProperties
               }
-              data-testid={`plate-${plate.playerId}`}
+              testid={`plate-${plate.playerId}`}
             >
               <span className={`plate-disc plate-disc--${plate.kind}`} aria-hidden="true">
                 {recipe && cardArtFor(recipe.id) ? (
@@ -174,7 +195,7 @@ export function Feast({ state, send }: { state: GameState; send: (c: Command) =>
               <span className="plate-dish">{recipe ? cardName(recipe.id) : '—'}</span>
               <span className="plate-kind">{kindLabel(plate.kind)}</span>
               <span className="plate-note">{plateNote(plate)}</span>
-            </div>
+            </AnimatedContent>
           );
         })}
       </div>
@@ -189,15 +210,9 @@ export function Feast({ state, send }: { state: GameState; send: (c: Command) =>
         >
           {strings.feast.ledgerBtn}
         </Button>
-        <Button
-          variant="secondary"
-          keyHint="2"
-          data-testid="action-2"
-          data-key={2}
-          onClick={() => send({ type: 'RESTART' })}
-        >
-          {strings.buttons.replay}
-        </Button>
+        {/* 交互审 U8：「再玩一局」已撤——盛宴桌是全班看结果的时刻，
+            一键重开会把刚端上桌的四盘菜瞬间清掉；重开留在反思页
+            终点与演示条里（老师掌控的时刻） */}
       </div>
     </main>
   );

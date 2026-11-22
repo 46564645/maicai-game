@@ -43,6 +43,7 @@ import { useSpeech } from '../ui/useSpeech';
 import type { ParentTurn } from '../parent/parentLive';
 import { Button } from './Button';
 import { CardView } from './CardView';
+import { TextType } from './reactbits/TextType';
 import { Hand } from './cards/Hand';
 import { PendingChip } from './cards/PendingChip';
 import { PlayableGlow } from './cards/PlayableGlow';
@@ -117,21 +118,9 @@ function ParentHero() {
   );
 }
 
-/** R9 状态点（仅展示）：真对话进行中绿点「Live chat/真对话」，
- *  离线脚本（未注入 key / 失败回退后）灰点「Offline script/离线脚本」。
- *  家长站每个渲染分支都挂在面板顶部，方便一眼分辨当前走的是哪条路。 */
-function ParentStatus({ live }: { live: boolean }) {
-  return (
-    <p
-      className={'parent-status' + (live ? ' parent-status--live' : '')}
-      data-testid="parent-status"
-      data-live={live ? 'on' : 'off'}
-    >
-      <span className="parent-status-dot" aria-hidden="true" />
-      {live ? strings.parent.statusLive : strings.parent.statusOffline}
-    </p>
-  );
-}
+/* 交互审 U4：原 R9 状态点（「Live chat / Offline script」）已撤——
+   那是给开发者看的管线状态，孩子不需要知道背后走真对话还是脚本；
+   i18n 的 statusLive/statusOffline 键保留未用，管线逻辑不变。 */
 
 export function ParentPanel({
   state,
@@ -176,9 +165,9 @@ export function ParentPanel({
   } | null>(null);
   const flyTimer = useRef<number | null>(null);
   /* R10C（play #3 / education #2）：离线脚本里「已说清」那条要回声孩子
-     自己的答句（发令时记下展示句）；示范对话可跳过（demoOff） */
+     自己的答句（发令时记下展示句）。示范对话（demoOff）已随审计
+     E2 整体删除 */
   const [echoes, setEchoes] = useState<Record<number, string>>({});
-  const [demoOff, setDemoOff] = useState(false);
   // 最新版 liveAnswer 的引用：飞行结束时回调仍用点击后的新闭包
   const liveAnswerRef = useRef<
     ((answer: ParentAnswer, displayText: string) => void) | null
@@ -268,11 +257,6 @@ export function ParentPanel({
       <PendingChip label={fly.label} onCancel={cancelFly} />
     ) : null;
 
-  /* R9 状态点取色：live 会话在 = 绿；还没启动过（parentUse 阶段或
-     开场瞬间）按 key 预判——有 key 即将会话真对话 = 绿；一旦启动过
-     而 live 落空（任一失败回退）= 灰；无 key 永远 = 灰。 */
-  const statusLive = live !== null || (parentLiveAvailable() && !liveCtl.current.started);
-
   // 对话打开且本地有 key → 开一场真对话（每场只开一次；失败后 started
   // 保持 true，本局内不再重试，面板回退到离线脚本）。对话关闭 → 复位。
   useEffect(() => {
@@ -316,10 +300,11 @@ export function ParentPanel({
   if (pd.kind === 'parentUse') {
     return (
       <div className="panel-body">
-        <ParentStatus live={statusLive} />
         <ParentHero />
         <div className="chat">
-          <p className="chat-bubble chat-bubble--ai">{parentIntro()}</p>
+          <p className="chat-bubble chat-bubble--ai">
+            <TextType text={parentIntro()} />
+          </p>
         </div>
         <div className="panel-actions">
           <Button
@@ -421,19 +406,24 @@ export function ParentPanel({
 
     return (
       <div className="panel-body">
-        <ParentStatus live={statusLive} />
         <ParentHero />
         <div className="chat" data-testid="parent-chat" ref={liveChatRef}>
-          <p className="chat-bubble chat-bubble--ai">{parentIntro()}</p>
-          <p className="chat-bubble chat-bubble--ai">{parentQuestionText(questions[0])}</p>
+          {/* B16（React Bits "Text Type" 自包含改写）：家长（AI）气泡
+              逐字定速显出，点一下立即看全句；孩子自己的话/系统行
+              不进打字机，照旧直出 */}
+          <p className="chat-bubble chat-bubble--ai">
+            <TextType text={parentIntro()} />
+          </p>
+          <p className="chat-bubble chat-bubble--ai">
+            <TextType text={parentQuestionText(questions[0])} />
+          </p>
+          {/* 消息减负审计 E1：系统行（chat-system）不再渲染——那是
+              日志口吻的复述，与 Toast/日志同源；聊天区只留家长与
+              孩子两个说话人。sys 气泡在此直接跳过 */}
           {live.bubbles.map((b, i) =>
-            b.who === 'sys' ? (
-              <p key={i} className="chat-system">
-                {b.text}
-              </p>
-            ) : (
+            b.who === 'sys' ? null : (
               <p key={i} className={`chat-bubble chat-bubble--${b.who}`}>
-                {b.text}
+                {b.who === 'ai' ? <TextType text={b.text} /> : b.text}
               </p>
             ),
           )}
@@ -447,8 +437,10 @@ export function ParentPanel({
           {fmt(strings.parent.questionOf, {
             a: Math.min(live.turns + 1, questions.length),
             b: questions.length,
-          })}{' '}
-          · {strings.parent.pickHint}
+          })}
+          {/* 消息减负审计 E3：「点一张卡回答」只在第一题出现，
+              之后每题复读删除；进度（第几问）保留 */}
+          {live.turns === 0 && <> · {strings.parent.pickHint}</>}
         </p>
         <div ref={fanRef}>
           <OptionFan
@@ -515,7 +507,8 @@ export function ParentPanel({
   // 绝不放进 AI 气泡，单独用居中小字灰行展示（ADAPTATION 第 8 条）
   const mine = state.log.filter((e) => e.playerId === me.id);
   const lastAi = [...mine].reverse().find((e) => e.asAi)?.text;
-  const lastSystem = [...mine].reverse().find((e) => !e.asAi)?.text;
+  /* 消息减负审计 E1：系统行（lastSystem）不再取——ChatHistory 的
+     chat-system 渲染已删，日志复述不进聊天区 */
 
   const submitText = (e: FormEvent) => {
     e.preventDefault();
@@ -530,9 +523,12 @@ export function ParentPanel({
   if (pd.kind === 'parentSettle') {
     return (
       <div className="panel-body">
-        <ParentStatus live={statusLive} />
         <ParentHero />
-        <ChatHistory d={d} aiText={lastAi} systemText={lastSystem} echoes={echoes} />
+        <ChatHistory d={d} aiText={lastAi} echoes={echoes} />
+        {/* 交互审 U7：卡面结算钮原文「That's all (get 1 coin)」把命令
+            和报酬塞进一只按钮——钮面只留命令（parent.settleBtn），
+            +1 币的事实平铺成钮上方一行普通文字；朗读仍用卡面全句 */}
+        <p className="panel-text">{strings.parent.settleFact}</p>
         <div className="panel-actions">
           <Button
             variant="primary"
@@ -543,7 +539,7 @@ export function ParentPanel({
             speakText={parentSettleLabel()}
             onClick={() => send({ type: 'PARENT_SETTLE' })}
           >
-            {parentSettleLabel()}
+            {strings.parent.settleBtn}
           </Button>
           <Button
             variant="secondary"
@@ -562,21 +558,14 @@ export function ParentPanel({
   /* —— 问答（图卡 + 打字 + 语音占位）—— */
   return (
     <div className="panel-body">
-      <ParentStatus live={statusLive} />
       <ParentHero />
       <div ref={offlineChatRef}>
-        <ChatHistory
-          d={d}
-          aiText={lastAi}
-          systemText={lastSystem}
-          echoes={echoes}
-          demo={d.step === 0 && !d.offerSettle && !demoOff}
-          onDemoSkip={() => setDemoOff(true)}
-        />
+        <ChatHistory d={d} aiText={lastAi} echoes={echoes} />
       </div>
       <p className="panel-subtitle">
-        {fmt(strings.parent.questionOf, { a: step + 1, b: questions.length })} ·{' '}
-        {strings.parent.pickHint}
+        {fmt(strings.parent.questionOf, { a: step + 1, b: questions.length })}
+        {/* 消息减负审计 E3：pickHint 只在第一题出现 */}
+        {d.step === 0 && <> · {strings.parent.pickHint}</>}
       </p>
       <div ref={fanRef}>
         <OptionFan
@@ -648,23 +637,17 @@ function StarterChips({ onUse }: { onUse: (s: string) => void }) {
 }
 
 /** 聊天气泡：AI 家长提问在左，已答清的问题右侧回孩子的答句 + ✓；
- *  系统提示（如「小禾 去找 AI 家长聊了聊」）走居中小字灰行，不进气泡；
- *  R10C：Q1 前插一段可跳过的「示范」对话（家长问 → 孩子这样答） */
+ *  系统提示不进聊天区（消息减负审计 E1：原居中小字灰行已删）；
+ *  R10C 的 Q1 示范对话已随审计 E2 删除 */
 function ChatHistory({
   d,
   aiText,
-  systemText,
   echoes = {},
-  demo = false,
-  onDemoSkip,
 }: {
   d: ParentDialog;
   aiText?: string;
-  systemText?: string;
   /** 每步孩子自己的答句（面板侧记，引擎不改） */
   echoes?: Record<number, string>;
-  demo?: boolean;
-  onDemoSkip?: () => void;
 }) {
   const questions = cards.parentStation.questions;
   const upto = Math.min(d.step, questions.length - 1);
@@ -676,34 +659,21 @@ function ChatHistory({
   }, [d.step, d.offerSettle, aiText]);
   return (
     <div className="chat" data-testid="parent-chat" ref={ref}>
-      {systemText && (
-        <p className="chat-system" data-testid="chat-system" aria-live="polite">
-          {systemText}
-        </p>
-      )}
-      <p className="chat-bubble chat-bubble--ai">{parentIntro()}</p>
+      {/* 消息减负审计 E1：原 chat-system 系统行渲染已删 */}
+      <p className="chat-bubble chat-bubble--ai">
+        <TextType text={parentIntro()} />
+      </p>
       {questions.slice(0, upto + 1).map((qq, i) => (
         <span key={qq.id} className="chat-pair">
-          <p className="chat-bubble chat-bubble--ai">{parentQuestionText(qq)}</p>
-          {/* 示范：第一问还没答时，先演一遍「像这样说，就可以」 */}
-          {demo && i === 0 && (
-            <span className="chat-demo">
-              <span className="chat-demo-tag">{strings.parent.demoTag}</span>
-              <p className="chat-bubble chat-bubble--me chat-bubble--demo">
-                {parentOptionLabel(qq.options[0])}
-              </p>
-              <span className="chat-demo-tip">{strings.parent.demoTip}</span>
-              {onDemoSkip && (
-                <button
-                  type="button"
-                  className="chat-demo-skip"
-                  onClick={onDemoSkip}
-                >
-                  {strings.parent.demoSkip}
-                </button>
-              )}
-            </span>
-          )}
+          {/* B16：家长问句同样走打字机定速显出（tap-to-complete 可点） */}
+          <p className="chat-bubble chat-bubble--ai">
+            <TextType text={parentQuestionText(qq)} />
+          </p>
+          {/* 消息减负审计 E2（§7 风险项，独立提交）：第一问前的
+              「示范」对话块（示范标签 + 示范答句 + 提示 + 跳过钮，
+              共 4 个消息件）整体删除——第一题的题面 + 选项卡 +
+              pickHint 已经把「点一张卡回答」说清，示范是在孩子
+              回答前先替他答一遍，属可删的教学冗余 */}
           {(i < upto || (i === upto && d.offerSettle)) && (
             <p className="chat-bubble chat-bubble--me">
               {echoes[i] !== undefined
@@ -715,7 +685,7 @@ function ChatHistory({
       ))}
       {aiText && (
         <p className="chat-bubble chat-bubble--ai" aria-live="polite">
-          {aiText}
+          <TextType text={aiText} />
         </p>
       )}
     </div>

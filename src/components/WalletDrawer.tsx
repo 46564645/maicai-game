@@ -15,7 +15,7 @@ import { MiniCardRow } from './MiniCardRow';
 import { RecipeCard } from './RecipeCard';
 import { StationPopup } from './StationPopup';
 import { CoinBar } from './cards/CoinBar';
-import { CoinCounter } from './cards/CoinCounter';
+import { AnimatedList } from './reactbits/AnimatedList';
 
 export function WalletDrawer({
   state,
@@ -50,38 +50,55 @@ export function WalletDrawer({
           )}
         </section>
         <section className="wallet-col" aria-label={strings.hud.wallet}>
-          {/* 币数与全局口径一致：真金币排 + 旁边的纯数字（CoinCounter），
-              「My coins: n」整句只走读屏 aria-label，不再写出来重复读 */}
-          <Coins
-            count={me.coins}
-            label={myCoinsLabel}
-            counter={<CoinCounter value={me.coins} label={myCoinsLabel} />}
-          />
+          {/* 币数与全局口径一致：真金币排 + 旁边的数字（WS3 C4 起走
+              Count Up 滚动；「My coins: n」整句只走读屏 aria-label） */}
+          <Coins count={me.coins} label={myCoinsLabel} />
           {/* 金币条：抽象的「菜谱还差X/车费Y/自由花Z」画成三段金币格 */}
           <CoinBar coins={w.coins} missingCost={w.missingCost} busDebt={w.busDebt} />
-          <div className="wallet-lines">
-            {w.recentLogs.map((e) => (
-              <p key={e.id} className="wallet-line">
-                {/* R2-7：同 Toast，流水里的日志也按当前语言重渲染槽位名 */}
-                {localizeLogText(e.text)}
-              </p>
-            ))}
-            <p className="wallet-line">
-              {strings.hud.holdClip}:{' '}
-              {clipName ? `${clipName} (${clipPrice} ${coinWord(clipPrice ?? 0)})` : strings.hud.empty}
-            </p>
-            <p className="wallet-line">
-              {strings.hud.busDebt}:{' '}
-              {me.busDebt > 0 ? `${me.busDebt} ${coinWord(me.busDebt)}` : strings.hud.empty}
-            </p>
-            <p className="wallet-line wallet-line--hint">
-              {fmt(strings.game.walletHint, {
-                a: w.missingCost,
-                b: w.busDebt,
-                c: Math.max(0, w.freeEstimate),
-              })}
-            </p>
-          </div>
+          {/* B19（React Bits "Animated List"）：流水/先等等夹/待付夹/提示
+              各行错峰弹入——内容与 .wallet-lines 版式不变，只加入场动效；
+              不引入删除/划删语义（游戏无删除） */}
+          <AnimatedList
+            className="wallet-lines"
+            animation="pop"
+            staggerMs={55}
+            items={[
+              ...w.recentLogs.map((e) => ({
+                key: `log-${e.id}`,
+                node: (
+                  <p className="wallet-line">
+                    {/* R2-7：同 Toast，流水里的日志也按当前语言重渲染槽位名 */}
+                    {localizeLogText(e.text)}
+                  </p>
+                ),
+              })),
+              {
+                key: 'hold-clip',
+                node: (
+                  <p className="wallet-line">
+                    {strings.hud.holdClip}:{' '}
+                    {clipName
+                      ? `${clipName} (${clipPrice} ${coinWord(clipPrice ?? 0)})`
+                      : strings.hud.empty}
+                  </p>
+                ),
+              },
+              {
+                key: 'bus-debt',
+                node: (
+                  <p className="wallet-line">
+                    {strings.hud.busDebt}:{' '}
+                    {me.busDebt > 0
+                      ? `${me.busDebt} ${coinWord(me.busDebt)}`
+                      : strings.hud.empty}
+                  </p>
+                ),
+              },
+              /* 消息减负审计 E5：钱包底的算式复述行（wallet-hint）
+                 删除——同一屏已有金币条三段 + 逐行日志，第三次复述
+                 同一笔账删；日志/夹/欠费行保留（E6） */
+            ]}
+          />
         </section>
       </div>
     </StationPopup>

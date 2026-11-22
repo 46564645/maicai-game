@@ -12,13 +12,13 @@
  *   - 站点道具 + 棋子 GLB（Scene/StationProps/Piece 用到的整表）→ fetch
  *   - HDRI 环境图 → fetch（预测会开 env 反光才列，见 predictFlags）
  *   - 桌面高档后期链分包（predictFlags().post 才会被 Scene 渲染才列）
- * 走 2D 兜底的设备（?board=2d 或 WebGL 不可用）跳过全部 3D 条目。
+ * WebGL 探不到的设备跳过全部 3D 条目（棋盘侧显示错误卡，不走 2D）。
  * GLB/HDR 只拉字节做进度与预热（HTTP 缓存命中留给场景内
  * GLTFLoader/RGBELoader 二次取用）；解析/着色器编译由 SceneWarmup
  * 实渲首帧时真正完成。
  */
 import { predictFlags } from './board/three/QualityProvider';
-import { boardMode, detectWebGL } from './board/three/webgl';
+import { detectWebGL } from './board/three/webgl';
 import { CARD_ART_URLS, CARD_ART_URLS_BOOT } from './components/cards/cardArt';
 
 /** 后台续载集 = 全部卡图（CARD_ART_URLS）− 首局必见集（目前只有事件图） */
@@ -57,9 +57,10 @@ const MODEL_FILES = [
 const ENV_URL = './env/spruit_sunrise_512.hdr';
 const CONCURRENCY = 6;
 
-/** 本局会走 3D 棋盘吗（?board=2d 或无 WebGL → 2D，3D 资源不必预载） */
+/** 本局会走 3D 棋盘吗（棋盘永远走 3D；仅 WebGL 探不到时不预载 3D 资源，
+ *  棋盘侧的失败呈现是错误卡 + Try again，见 BoardMount） */
 export function wants3DBoard(): boolean {
-  return boardMode() !== '2d' && detectWebGL();
+  return detectWebGL();
 }
 
 interface Task {

@@ -45,6 +45,13 @@
   gap: var(--space-3);
 }
 
+/* 消息减负审计 B1 后：顶栏标题已删，动作区是唯一子元素——
+   space-between 下单子元素会落到左端，指南入口必须钉在右上角
+   （审计 §6），故动作区左边距自动吃满 */
+.game-topbar-actions {
+  margin-left: auto;
+}
+
 .game-topbar-actions {
   display: flex;
   gap: var(--space-3);

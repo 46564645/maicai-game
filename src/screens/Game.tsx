@@ -2,7 +2,7 @@
  * Game.tsx —— G1 主界面：顶条 + 8 站环路棋盘 + bot 左2右1 + 圈序卡 +
  * 底部真人区（菜谱/钱包/先等等/待付/求助牌）+ 站点弹窗宿主。
  * 弹窗按 pendingDecision 分派正式面板（DrawTask/Market/Bus/Cook/Store），
- * 未做面板的站回退 AutoPanel；bot→真人提议用 SpeechBubble 锚在对应小卡下。
+ * 未做面板的站回退 AutoPanel；bot→真人提议只走 ProposalPill 浮签。
  */
 import { useEffect, useRef, useState } from 'react';
 import { cards, getIngredient, getRecipe } from '../data/cards';
@@ -11,14 +11,19 @@ import { strings } from '../data/strings';
 import { fmt, marketPriceOf } from '../game/stations/shared';
 import type { CardId, Command, GameState, Player, PlayerId } from '../game/types';
 import { BoardMount } from '../board/BoardMount';
+import { GradualBlur } from '../components/StationPopup';
 import { toBoardView } from '../board/boardModel';
 import { LangToggle } from '../i18n/LangToggle';
-import { cardName, localizeLogText, playerDisplayName, stationGoal, stationName } from '../i18n/cardText';
+import { cardName, logTemplateKey, playerDisplayName, stationName } from '../i18n/cardText';
 import { awaitingHumanKind } from '../ui/awaitingHuman';
 import { coinDeltaText, useCoinDelta } from '../ui/useCoinDelta';
+import { AnimatedContent as AnimatedSpan } from '../components/bits/AnimatedContent';
+import { GlideRing } from '../components/bits/GlideRing';
+/* SplitText 顶栏标题已删（消息减负审计 B1：标题在开场页说过） */
 import { lapGainOf } from '../ui/lapGain';
-import { botThinkLine } from '../ui/botThink';
-import { botTrait } from '../ui/botTrait';
+/* botThink 心里话气泡已删（消息减负审计 B11：bot 动作改由卡上
+   actedStamp + 钱包/日志抽屉承载） */
+/* botTrait 随心里话气泡描边退役（B11）；性格全词仍在 ProfileCard */
 import { nextActorId } from '../ui/nextActor';
 import { spotlightInfo } from '../ui/spotlight';
 import { fastForwardBotTurn } from '../ui/botTiming';
@@ -27,7 +32,6 @@ import { usePhoneMode } from '../ui/usePhoneMode';
 import { AutoPanel } from '../components/AutoPanel';
 import { BotCard } from '../components/BotCard';
 import { BusPanel } from '../components/BusPanel';
-import { Button } from '../components/Button';
 import { CardView } from '../components/CardView';
 import { CoinDots } from '../components/CoinDots';
 import { CookPanel } from '../components/CookPanel';
@@ -38,14 +42,22 @@ import { ParentPanel } from '../components/ParentPanel';
 import { PartnerPanel } from '../components/PartnerPanel';
 import { ProposalPill } from '../components/ProposalPill';
 import { RecipeCard } from '../components/RecipeCard';
-import { SpeechBubble } from '../components/SpeechBubble';
+/* SpeechBubble 已删（消息减负审计 C4：提议只由 ProposalPill 承载） */
+import { FadeContent } from '../components/motion/FadeContent';
+/* RotatingText 随进站钮键位后缀退役（C6）；vendored 件保留在库中 */
 import { PopupOutlet, StationPopup } from '../components/StationPopup';
 import type { RecipeStripItem } from '../components/StationPopup';
 import { StorePanel } from '../components/StorePanel';
 import { Toast } from '../components/Toast';
+import { CountUp } from '../components/bits/CountUp';
 import { CoinCounter } from '../components/cards/CoinCounter';
+import { PillNav } from '../components/bits/PillNav';
+import { SpecularPill } from '../components/bits/SpecularPill';
+import { ShinyText } from '../components/bits/ShinyText';
+import { BubbleMenu } from '../components/bits/BubbleMenu';
 import { Hand } from '../components/cards/Hand';
 import { ProfileCard } from '../components/cards/ProfileCard';
+import { AnimatedContent } from '../components/motion/AnimatedContent';
 
 function playerIcon(characterId: string | null): string {
   return cards.characters.find((c) => c.id === characterId)?.icon ?? '🙂';
@@ -63,15 +75,28 @@ function avatarIcon(p: Player): string {
 /** 站点编号圈字（G2：「② 菜市场摊位」） */
 const CIRCLED = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧'];
 
+/* 消息减负审计 §5：Toast 白名单——只有「面板关掉后才揭晓、且是
+   共享结果」的日志模板才进 Toast 队列：拼单成败/退款、换菜结果。
+   真人自己的动作（面板刚显示过）、bot 例行播报（买了/夹了/付车费/
+   抽卡…）、家长站与事件卡日志一律不进；state.log 本身与钱包抽屉
+   的全量日志回看不动，过滤只发生在表现层入口 */
+const TOAST_WHITELIST: ReadonlySet<string> = new Set([
+  'inviteDone',
+  'inviteFail',
+  'inviteRefund',
+  'swapDone',
+  'swapNo',
+]);
+
 export function Game({
   state,
   send,
-  onOpenHelp,
+  onOpenGuide,
   onOpenWallet,
 }: {
   state: GameState;
   send: (c: Command) => unknown;
-  onOpenHelp: () => void;
+  onOpenGuide: () => void;
   onOpenWallet: () => void;
 }) {
   const board = toBoardView(state);
@@ -99,8 +124,8 @@ export function Game({
      R2 验收修复：主操作（投放区/Done）也随卡扇进浮层——竖栏 402
      高里头+状态+三行按钮同屏放不下，Buy/Done 曾被推出帧外。 */
   const [marketHandEl, setMarketHandEl] = useState<HTMLDivElement | null>(null);
-  /* R6：类别记号首访说明条（MarketPanel 首访回调喂进来，Toast 只播一次） */
-  const [iconsNotice, setIconsNotice] = useState<{ id: string; text: string } | null>(null);
+  /* 消息减负审计 B10：类别记号首访说明 Toast 已删（记号图例迁入
+     新手指南第 4 页）——MarketPanel 首访回调与 Toast notice 通道一并退役 */
   /* 手感审计 #2：真人币数落地变化时，钱包钮旁升起增减小片（+2 / −3）——
      车费/事件得币这类「买卡之外」的变化旧版只有数字滚动，方向大小
      看不见。桌面币堆钮与手机钱包圆钮共用这一枚（同一时刻只渲一个布局） */
@@ -112,6 +137,10 @@ export function Game({
      棋盘上；站名浮签留在竖栏弹窗头里（浮层不进栏、栏不再滚动，
      浮签自然整颗入镜）。 */
   const [weatherFloatEl, setWeatherFloatEl] = useState<HTMLDivElement | null>(null);
+  /* WS3 C8/C9：Animated List「滑动选中」/ Stepper「当前步指示」的目标元素
+     ——顺序条 next 片、站点珠 here 珠，GlideRing 用 motion 滑上去 */
+  const [nextChipEl, setNextChipEl] = useState<HTMLElement | null>(null);
+  const [herePipEl, setHerePipEl] = useState<HTMLElement | null>(null);
   const openSpot = (id: PlayerId) => setSpot({ id, manual: true });
   const closeSpot = () => setSpot(null);
   /* R1-E3 快进入口：点「正在行动的 bot」的角落小卡 = 先给它的回合
@@ -171,11 +200,9 @@ export function Game({
     const rail = railRef.current;
     if (!rail) return;
     // 有提议浮签时滚到浮签（ww 定稿的第一回应面：文案+两件菜图+
-    // Yes/No）；没有浮签时滚到气泡；否则钉到栏底露出主按钮
+    // Yes/No）；否则钉到栏底露出主按钮（C4 后气泡分支已无对象）
     if (!scrollRailToPill(rail)) {
-      const bubble = rail.querySelector('.speech-bubble');
-      if (bubble) bubble.scrollIntoView({ block: 'end' });
-      else rail.scrollTop = rail.scrollHeight;
+      rail.scrollTop = rail.scrollHeight;
     }
     lastScrollHeight.current = rail.scrollHeight;
   }, [railKey]);
@@ -224,12 +251,19 @@ export function Game({
   const humanPending = state.turn?.turnPhase === 'act' && pendingPid === state.humanId;
   const lastLog = state.log[state.log.length - 1];
   // R10C：人类玩家的事件卡还盖着时，最后一条日志就是剧透——
-  // toast 与 board-log 一律跳过它（引擎 log 本身不动）
+  // toast 一律跳过它（引擎 log 本身不动）。消息减负审计 B6：
+  // board-log 常驻行已删，shownLog 随之退役，防剧透只剩 Toast 一路
   const eventVeiled =
     humanPending && pd.kind === 'eventOption' && !eventRevealed;
-  const shownLog = eventVeiled
-    ? (state.log[state.log.length - 2] ?? null)
-    : lastLog;
+  /* Toast 实际入队集合：先按防剧透口径去掉未揭晓的事件日志，
+     再按 §5 白名单按模板键过滤（logTemplateKey 复用日志本地化
+     的同一套匹配器，中英模板都认） */
+  const toastEntries = (eventVeiled ? state.log.slice(0, -1) : state.log).filter(
+    (e) => {
+      const key = logTemplateKey(e.text);
+      return key !== null && TOAST_WHITELIST.has(key);
+    },
+  );
   const sub = state.turn?.sub;
 
   /* R10E（§2 天气布景）：新一次天气时刻开始先清布景——
@@ -340,9 +374,13 @@ export function Game({
         ))}
       </span>
       <span className="stop-pips" aria-hidden="true">
+        {/* WS3 C9：Stepper 当前步指示——指示环 motion 滑到脚下这站
+            （轨线走 .stop-pips::before / .lap-dots::before） */}
+        <GlideRing className="pip-glider" target={herePipEl} outset={2} />
         {gameConfig.stations.map((s, i) => (
           <i
             key={s.id}
+            ref={i === state.stationIndex ? setHerePipEl : undefined}
             className={
               'stop-pip' +
               (i < state.stationIndex
@@ -369,6 +407,7 @@ export function Game({
     return (
       <span
         key={id}
+        ref={isNext ? setNextChipEl : undefined}
         className={
           'order-chip' + (isNext ? ' order-chip--next' : '')
         }
@@ -388,7 +427,8 @@ export function Game({
             <span className="order-chip-num" aria-hidden="true">{p.coins}</span>
             {gain > 0 && (
               <span className="order-chip-gain" aria-hidden="true">
-                +{gain}
+                {/* WS3 C7：与角落卡同源 lapGainOf——gain 变化走 Count Up 滚动 */}
+                +<CountUp to={gain} duration={0.5} />
               </span>
             )}
           </span>
@@ -422,12 +462,15 @@ export function Game({
     ? state.players.find((p) => p.id === awaitProposal.from)
     : proposalFrom;
 
+  /* 交互审 U6 → 消息减负审计 C4：浮签卡（ProposalPill）是唯一的
+     回应面——角落气泡（SpeechBubble）已整体删除，不再有「浮签未
+     挂载时气泡作副入口」的第二路径；原 pillMounted 闩锁随气泡的
+     最后一个消费者一并退役，浮签渲染直接用 await 三件套判据 */
+
   const renderBotSlot = (b: (typeof bots)[number]) => {
-    // R10C（education #3）：bot 心里话气泡——最新一条日志归它时，
-    // 用 spend.kind + 性格映成一句短理由（复用日志时序，不加事件）
-    // R10D（education #5）：第 2 圈起气泡只留「先等等」（botThink 内判）
-    const think = botThinkLine(b, lastLog, state.lap);
-    const trait = botTrait(b);
+    /* 消息减负审计 B11：bot 心里话气泡删除——它复读日志原文，bot
+       刚做了什么改由 BotCard 的 actedStamp（卡图+币数）与 Toast
+       白名单承载；trait 变量随气泡描边一并退役 */
     return (
       <div className="bot-slot" key={b.id}>
         <BotCard
@@ -441,29 +484,8 @@ export function Game({
           }
           onOpen={openBotSpot}
         />
-        {think && (
-          <p
-            className={
-              'think-bubble' + (trait ? ` think-bubble--${trait.key}` : '')
-            }
-            key={lastLog.id}
-          >
-            {think}
-          </p>
-        )}
-        {proposal && proposalFrom?.id === b.id && (
-          <SpeechBubble
-            from={proposalFrom}
-            proposal={proposal}
-            onRespond={(accept) =>
-              send(
-                proposal.kind === 'swap'
-                  ? { type: 'RESPOND_SWAP', proposalId: proposal.id, accept }
-                  : { type: 'RESPOND_INVITE', proposalId: proposal.id, accept },
-              )
-            }
-          />
-        )}
+        {/* 消息减负审计 C4：角落提议气泡删除——提议只有 ProposalPill
+            一个回应面（桌面挂棋盘中央、手机随 boardOverlay 进竖栏） */}
       </div>
     );
   };
@@ -479,9 +501,6 @@ export function Game({
           state={state}
           send={send}
           handFloatEl={phoneLand ? marketHandEl : null}
-          onFirstMarketOpen={() =>
-            setIconsNotice({ id: 'icons-intro', text: strings.panel.iconsIntro })
-          }
         />
       );
       break;
@@ -522,40 +541,40 @@ export function Game({
   // 提议气泡自带两个按钮，不再开站点弹窗
   const showPopup = humanPending && pd.kind !== 'swapResponse';
 
-  // 「进入这一站 + 最近一条日志」——桌面/平板放进棋盘 overlay；
-  // 手机横屏放进右竖栏顶部。
+  /* 消息减负审计 C6：进站钮上的 (Enter / Space) 键位后缀删除——
+     键盘操作统一在新手指南第 2 页讲一次，钮面只剩行动词 */
+
+  // 「进入这一站」——桌面/平板放进棋盘 overlay；手机横屏放进右竖栏顶部。
   // R2-12（团队第 2 轮）：同一句话一个画面只说一次——轮到谁只标在
   // 该玩家的角落卡（高光/thinking 态），这里不再有 Your turn /
-  // Zip's turn 轮次文字；事件只走浮签/提示条，日志行保留一行且与
-  // Toast 同口径本地化（R2 一致性）。「Go to this stop」保留为底部
-  // 居中橙色浮动药丸（.board-enter，见 board.css）。
+  // Zip's turn 轮次文字。「Go to this stop」保留为底部居中橙色浮动
+  // 药丸（.board-enter，见 board.css）。消息减负审计 B2：两处分支头
+  // 的 .board-town 小镇说明行已删（3D 小镇自明）。
   const boardOverlay = introPhase ? (
     <>
-      <p className="board-town">{strings.game.townAlt}</p>
       {pendingPid === state.humanId && (
-        <Button
-          variant="primary"
-          className="board-enter"
+        /* WS1 A8：全场唯一 Specular 光丸——边缘镜面流光跟着指针走；
+           WebGL2 不可用退回普通橙丸，reduced-motion 只出静态帧。
+           文案/键位/点击行为与旧 Button 版一字不动。 */
+        <SpecularPill
+          className="btn btn--primary board-enter"
           data-testid="action-primary"
           data-primary="true"
           data-key={1}
           onClick={() => send({ type: 'ACK' })}
         >
-          {/* R1-E7：主文案与 kbd 提示拆成两个同级盒——旧结构把提示
-              内联在文案 span 里，手机栏隐藏提示后文案的折行盒仍按
-              「文案+提示」一起算，曾量到文字 76 > 按钮 72 的溢出；
-              拆开后手机栏内只剩主文案一个盒（提示在 .phone-turn 里
-              直接 display:none，见 phone.css），折行只由主文案决定 */}
-          <span className="board-enter-label">{strings.game.enterStation}</span>
-          <span className="btn-kbd-hint" aria-hidden="true">
-            {strings.game.enterStationKbd}
+          {/* R1-E7 的拆盒结构保留（主文案独立成盒，折行只由主文案
+              决定）；C6 后钮内只剩主文案一个盒 */}
+          <span className="board-enter-label">
+            <ShinyText color="#1E1E2A" shineColor="#ffffff">
+              {strings.game.enterStation}
+            </ShinyText>
           </span>
-        </Button>
+        </SpecularPill>
       )}
     </>
   ) : (
     <>
-      <p className="board-town">{strings.game.townAlt}</p>
       {awaitKind && awaitFrom && awaitProposal && (
         /* 等真人回应提议的浮签卡（团队第 2 轮 ww 定稿）：写清提议
            内容 + 两件菜图 + Yes/No 药丸按钮，挂在棋盘中央（手机横屏
@@ -572,30 +591,16 @@ export function Game({
           }
         />
       )}
-      {shownLog && (
-        <p className="board-log" aria-live="polite">
-          {/* 与 Toast 同口径：引擎烘焙的英文槽位名按当前语言重渲染 */}
-          {localizeLogText(shownLog.text)}
-        </p>
-      )}
+      {/* 消息减负审计 B6：board-log 常驻日志行删除——事件只走
+          Toast（白名单）与钱包抽屉全量日志，棋盘上方不再常驻一行字 */}
     </>
   );
 
-  const proposalEl = proposal && proposalFrom && (
-    <SpeechBubble
-      from={proposalFrom}
-      proposal={proposal}
-      onRespond={(accept) =>
-        send(
-          proposal.kind === 'swap'
-            ? { type: 'RESPOND_SWAP', proposalId: proposal.id, accept }
-            : { type: 'RESPOND_INVITE', proposalId: proposal.id, accept },
-        )
-      }
-    />
-  );
+  /* 消息减负审计 C4：手机竖栏里的第二份提议气泡（proposalEl）随
+     SpeechBubble 一并删除——手机端提议走 boardOverlay 内的浮签 */
 
-  // R10D（education #6）：弹窗头部副行——学习目标小片 + 迷你菜谱进度条
+  // R10D（education #6）：弹窗头部副行——迷你菜谱进度条（B17 后
+  // 只剩进度条：图标 + ✓ 的行动信息，保留）
   const recipeStrip: RecipeStripItem[] | undefined = human.recipeId
     ? getRecipe(human.recipeId)?.ingredientIds.map((id) => ({
         id,
@@ -606,9 +611,9 @@ export function Game({
 
   /* R2-6（团队第 2 轮）：市场站浮签定稿——站名用定稿短名
      （② The Market / ② 菜市场），右边挂金币角标 ×N（N = 还能买的
-     张数，取 market 子状态既有 buysLeft，不新造计数）；「Practice:
-     notice temptations」练习标签从顶部撤掉，挪进「How to play」
-     （HelpCard 已加当前站练习行）。其他站浮签维持原口径不动。 */
+     张数，取 market 子状态既有 buysLeft，不新造计数）。消息减负
+     审计 B17：其余站头部的「练 · …」目标小片一并删除（见
+     StationPopup），浮签只剩站名 + 市场角标。 */
   const isMarket = station.id === 'market';
   const marketBuysLeft = sub?.kind === 'market' ? sub.buysLeft : null;
 
@@ -619,7 +624,6 @@ export function Game({
       <StationPopup
         title={`${CIRCLED[state.stationIndex] ?? state.stationIndex + 1} ${isMarket ? strings.hud.marketTitle : stationName(station.id)}`}
         testid={`panel-${station.id}`}
-        goal={isMarket ? undefined : stationGoal(station.id)}
         recipe={recipeStrip}
         badge={
           isMarket && marketBuysLeft !== null ? (
@@ -629,7 +633,15 @@ export function Game({
               aria-label={fmt(strings.panel.buysLeft, { n: marketBuysLeft })}
             >
               <i className="popup-coin-badge-dot" aria-hidden="true" />
-              <span aria-hidden="true">×{marketBuysLeft}</span>
+              {/* WS3 C14：角标数字与 C2 同走 CoinCounter 滚动位
+                  （外圈 role=img + aria-label 读屏口径不变） */}
+              <span aria-hidden="true">
+                ×
+                <CoinCounter
+                  value={marketBuysLeft}
+                  label={fmt(strings.panel.buysLeft, { n: marketBuysLeft })}
+                />
+              </span>
             </span>
           ) : undefined
         }
@@ -660,7 +672,7 @@ export function Game({
       ? [
           {
             key: `recipe-${human.recipeId}`,
-            className: 'hand-item--quest',
+            entrance: 'quest' as const,
             node: (
               <RecipeCard recipeId={human.recipeId} collected={human.collected} />
             ),
@@ -689,6 +701,11 @@ export function Game({
   const spotPlayer = spot
     ? state.players.find((p) => p.id === spot.id)
     : null;
+  /* WS4 D3/G4：帘收时 FadeContent 播退场淡出——期间 spotPlayer 已空，
+     用 ref 留住最后一位玩家让卡随帘一起淡完再卸载 */
+  const lastSpotPlayerRef = useRef<Player | null>(null);
+  if (spotPlayer) lastSpotPlayerRef.current = spotPlayer;
+  const veilPlayer = spotPlayer ?? lastSpotPlayerRef.current;
   const dress = weatherDressFor(weatherDress);
 
   return (
@@ -702,14 +719,24 @@ export function Game({
     >
       {!phoneLand && (
         <header className="game-topbar">
-          <h1 className="game-title">{strings.title}</h1>
+          {/* 消息减负审计 B1：顶栏游戏标题删除——标题只在开场页出现
+              一次，顶栏只剩右上角动作区（指南入口 + 语言钮） */}
           <div className="game-topbar-actions">
-            <Button variant="secondary" disabled aria-label={strings.hud.settings}>
-              {'⚙ ' + strings.hud.settings}
-            </Button>
-            <Button variant="secondary" onClick={onOpenHelp} aria-label={strings.hud.howTo}>
-              {'? ' + strings.hud.howTo}
-            </Button>
+            {/* 消息减负审计 A13/A14/§6：指南入口全游戏唯一、只在右上角。
+                禁用「设置」占位项删（点了没反应的钮比没有更糟）；旧
+                「玩法」项换成 Guide / 指南，点开新手指南（'help' 层） */}
+            <PillNav
+              ariaLabel="Game actions"
+              items={[
+                {
+                  key: 'guide',
+                  label: '? ' + strings.guide.open,
+                  ariaLabel: strings.guide.open,
+                  attrs: { 'data-testid': 'btn-guide' },
+                  onClick: onOpenGuide,
+                },
+              ]}
+            />
             <LangToggle />
           </div>
         </header>
@@ -735,7 +762,12 @@ export function Game({
             <div className="lap-card">
               {progressCluster}
               {orderChips.length > 0 && (
-                <span className="order-strip">{orderChips}</span>
+                <span className="order-strip">
+                  {/* WS3 C8：Animated List 滑动选中——指示环 motion 滑到
+                      「下一个」片；片本身的抬升/描边保持原样 */}
+                  <GlideRing className="order-strip-glider" target={nextChipEl} />
+                  {orderChips}
+                </span>
               )}
             </div>
           </aside>
@@ -776,18 +808,35 @@ export function Game({
               })}
             >
               {walletChip && (
-                <span key={walletChip.stamp} className="coin-delta-chip" aria-hidden="true">
+                /* WS3 C5：升起+淡出由 AnimatedContent（motion）驱动；
+                   animation:none 摘掉对 CSS 关键帧的依赖（F26 归 WS5 收编） */
+                <AnimatedSpan
+                  key={walletChip.stamp}
+                  className="coin-delta-chip"
+                  style={{ animation: 'none' }}
+                  aria-hidden="true"
+                  distance={4}
+                  duration={0.17}
+                  disappearAfter={0.44}
+                  disappearDuration={0.5}
+                  exitDistance={-13}
+                >
                   {coinDeltaText(walletChip.delta)}
-                </span>
+                </AnimatedSpan>
               )}
               <CoinDots n={human.coins} className="coin-pile-dots" hideExtra />
               <span className="coin-pile-num">
                 <CoinCounter value={human.coins} label={myCoinsLabel} />
               </span>
             </button>
-            {/* R10E（§4）：先等等=迷你卡夹（两片卡影 + 角徽） */}
-            <div
+            {/* 交互审 U5：暂存夹升为真按钮——点了开钱包抽屉，暂存的菜
+                就在抽屉里（原为不可点的 div，却穿着整套按钮制服）。
+                R10E（§4）：迷你卡夹视觉（两片卡影 + 角徽）不变 */}
+            <button
+              type="button"
               className="clip-chip clip-chip--hold"
+              data-testid="btn-hold"
+              onClick={onOpenWallet}
               aria-label={fmt(strings.hud.holdClipAria, {
                 item: holdClipInfo ? cardName(human.holdClip!) : strings.hud.empty,
               })}
@@ -798,10 +847,12 @@ export function Game({
                 <i className="clip-badge">{human.holdClip ? '1' : '–'}</i>
               </span>
               <span className="clip-chip-sub">{strings.hud.holdClip}</span>
-            </div>
-            {/* R10E（§4）：待付=卡夹 + 一枚 IOU 代币 */}
+            </button>
+            {/* 交互审 U5：待付只是状态信息——脱下按钮制服（无边框/
+                阴影/悬停），平铺成一条状态注记。只有真按钮才像按钮。
+                R10E（§4）：卡夹 + IOU 代币图样保留 */}
             <div
-              className="clip-chip clip-chip--debt"
+              className="clip-note"
               aria-label={fmt(strings.hud.busDebtAria, { n: human.busDebt })}
             >
               <span className="clip-stack" aria-hidden="true">
@@ -813,28 +864,13 @@ export function Game({
               </span>
               <span className="clip-chip-sub">{strings.hud.busDebt}</span>
             </div>
-            {/* R10E（§4）：求助牌=一张小求助卡 */}
-            <button
-              type="button"
-              className="clip-chip clip-chip--help"
-              data-testid="btn-help"
-              onClick={onOpenHelp}
-              aria-label={strings.hud.help}
-            >
-              <span className="help-card-btn" aria-hidden="true">
-                ?
-              </span>
-              <span className="clip-chip-sub">{strings.hud.help}</span>
-            </button>
+            {/* 消息减负审计 A14：底部求助卡入口删——指南入口只留
+                右上角一处（顶栏 Guide / 手机竖栏 ? 钮） */}
           </footer>
         )}
       </div>
 
-      <Toast
-        entries={eventVeiled ? state.log.slice(0, -1) : state.log}
-        humanId={state.humanId}
-        notice={iconsNotice}
-      />
+      <Toast entries={toastEntries} humanId={state.humanId} />
 
       {phoneLand ? (
         <>
@@ -846,33 +882,15 @@ export function Game({
           <div className="phone-weather-float" ref={setWeatherFloatEl} />
           {/* 左上：一圈小头像排（第几圈 + 3 个电脑人，点头像展开详情） */}
           <div className="phone-bots">
-            <span className="phone-lap">
-              {fmt(strings.hud.lapCompact, { lap: state.lap, laps: gameConfig.laps })}
-            </span>
+            {/* 消息减负审计 B5：phone-lap「第X/Y圈」文字删除——与桌面
+                同口径，圈数只看旁边的进度簇（圈点 + 站点格） */}
             {/* R10D（UI #8）：圈点 + 站点格进度簇，贴在小头像排前 */}
             {progressCluster}
             {bots.map((b) => {
-              const trait = botTrait(b);
               const isNext = nextId === b.id;
               return (
                 <span className="phone-bot-wrap" key={b.id}>
-                  {/* R10C：心里话气泡也贴到手机小头像上；R10D 起按圈数撤
-                      （botThink 内部判 lap），气泡描边按人配色（性格
-                      小徽已撤——全词性格只在点头像的高光卡里） */}
-                  {(() => {
-                    const t = botThinkLine(b, lastLog, state.lap);
-                    return t ? (
-                      <span
-                        className={
-                          'think-bubble think-bubble--phone' +
-                          (trait ? ` think-bubble--${trait.key}` : '')
-                        }
-                        key={lastLog.id}
-                      >
-                        {t}
-                      </span>
-                    ) : null;
-                  })()}
+                  {/* 消息减负审计 B11：手机小头像上的心里话气泡一并删除 */}
                   <button
                     type="button"
                     className={
@@ -926,48 +944,114 @@ export function Game({
                 el.scrollHeight - el.scrollTop - el.clientHeight < 16;
             }}
           >
-            <LangToggle />
+            {/* G5（React Bits GradualBlur）：竖栏上下端缘渐进模糊，
+                柔化栏与场景的分界；fixed 钉栏区右缘，不随内容滚动，
+                pointer-events:none 不拦点 */}
+            <GradualBlur
+              position="top"
+              target="page"
+              height="14%"
+              strength={1}
+              layers={5}
+              zIndex={6}
+              style={{ left: 'auto', right: 0, width: 'var(--rail-w)' }}
+            />
+            <GradualBlur
+              position="bottom"
+              target="page"
+              height="14%"
+              strength={1}
+              layers={5}
+              zIndex={6}
+              style={{ left: 'auto', right: 0, width: 'var(--rail-w)' }}
+            />
+            {/* 消息减负审计 §6：手机端指南入口 = 竖栏顶部、语言钮左侧
+                的 48px 圆 ? 钮（全游戏唯一指南入口，只在右上角）；
+                与语言钮同排同 sticky 口径，弹窗期间一起随栏滚动 */}
+            <div className="phone-rail-top">
+              <button
+                type="button"
+                className="phone-guide-btn"
+                data-testid="btn-guide"
+                aria-label={strings.guide.open}
+                onClick={onOpenGuide}
+              >
+                ?
+              </button>
+              <LangToggle />
+            </div>
             <div className="phone-turn">{boardOverlay}</div>
-            {proposalEl}
             {popupEl}
           </aside>
 
-          {/* 左下：钱包（永远显示币数）+ 求助牌 两个圆钮 */}
+          {/* 左下：Bubble Menu 泡菜单——主泡是钱包面（币数+欠费徽
+              永远显示），点开向上展开 Pill Nav 托盘：钱包一个快操
+              动作（指南入口已按消息减负审计 §6 收回竖栏顶部） */}
           <div className="phone-quick">
-            <button
-              type="button"
-              className="phone-fab"
-              data-testid="btn-wallet"
-              onClick={onOpenWallet}
-              aria-label={fmt(strings.hud.walletWithCoins, { n: human.coins })}
-            >
-              {walletChip && (
-                <span key={walletChip.stamp} className="coin-delta-chip" aria-hidden="true">
-                  {coinDeltaText(walletChip.delta)}
-                </span>
-              )}
-              <span aria-hidden="true">🪙</span>
-              <span className="phone-fab-num">
-                <CoinCounter
-                  value={human.coins}
-                  label={fmt(strings.hud.walletWithCoins, { n: human.coins })}
-                />
-              </span>
-              {human.busDebt > 0 && (
-                <span className="phone-fab-badge" aria-label={strings.hud.busDebt}>
-                  {human.busDebt}
-                </span>
-              )}
-            </button>
-            <button
-              type="button"
-              className="phone-fab phone-fab--help"
-              data-testid="btn-help"
-              onClick={onOpenHelp}
-              aria-label={strings.hud.help}
-            >
-              <span aria-hidden="true">?</span>
-            </button>
+            <BubbleMenu
+              mainClassName="phone-fab"
+              menuAriaLabel="Quick actions"
+              mainAttrs={{
+                'data-testid': 'btn-wallet',
+                'aria-label': fmt(strings.hud.walletWithCoins, { n: human.coins }),
+              }}
+              main={
+                <>
+                  {walletChip && (
+                    /* WS3 C5：同桌面钱包——motion 驱动的升起+淡出，弃用 CSS 关键帧 */
+                    <AnimatedSpan
+                      key={walletChip.stamp}
+                      className="coin-delta-chip"
+                      style={{ animation: 'none' }}
+                      aria-hidden="true"
+                      distance={4}
+                      duration={0.17}
+                      disappearAfter={0.44}
+                      disappearDuration={0.5}
+                      exitDistance={-13}
+                    >
+                      {coinDeltaText(walletChip.delta)}
+                    </AnimatedSpan>
+                  )}
+                  <span aria-hidden="true">🪙</span>
+                  <span className="phone-fab-num">
+                    <CoinCounter
+                      value={human.coins}
+                      label={fmt(strings.hud.walletWithCoins, { n: human.coins })}
+                    />
+                  </span>
+                  {human.busDebt > 0 && (
+                    <span className="phone-fab-badge" aria-label={strings.hud.busDebt}>
+                      {human.busDebt}
+                    </span>
+                  )}
+                </>
+              }
+              items={[
+                {
+                  key: 'wallet',
+                  ariaLabel: fmt(strings.hud.walletWithCoins, { n: human.coins }),
+                  onClick: onOpenWallet,
+                  attrs: { role: 'menuitem', 'data-testid': 'btn-wallet-open' },
+                  label: (
+                    <>
+                      <span aria-hidden="true">🪙</span>
+                      <span>{strings.hud.wallet}</span>
+                      <span className="phone-fab-num" aria-hidden="true">
+                        {human.coins}
+                      </span>
+                      {human.busDebt > 0 && (
+                        <span className="phone-fab-badge" aria-label={strings.hud.busDebt}>
+                          {human.busDebt}
+                        </span>
+                      )}
+                    </>
+                  ),
+                },
+                /* 消息减负审计 A14：泡菜单里的求助项删——指南入口
+                   只留竖栏顶部的 ? 钮（右上角唯一） */
+              ]}
+            />
           </div>
         </>
       ) : (
@@ -977,29 +1061,39 @@ export function Game({
       {/* R10E（§3 高光时刻）：ProfileCard 全屏卡——点帘/点卡/Esc 都收；
           R1-E3：全屏卡只给 manual（孩子点徽章/小头像亲手开的）；
           bot 的 auto 高光改走角落小卡 --spot 态（见上方 effect），
-          不再用全屏帘挡住下方操作 */}
-      {spotPlayer && spot?.manual && (
-        <div className="spotlight-veil" onClick={closeSpot}>
-          <ProfileCard
-            player={spotPlayer}
-            info={spotlightInfo(
-              spotPlayer,
-              board.activePlayerId === spotPlayer.id,
-            )}
-            contact={
-              spotPlayer.isHuman ? strings.hud.spotlightBasket : undefined
-            }
-            onContact={
-              spotPlayer.isHuman
-                ? () => {
-                    closeSpot();
-                    onOpenWallet();
-                  }
-                : undefined
-            }
-            onDismiss={closeSpot}
-          />
-        </div>
+          不再用全屏帘挡住下方操作。
+          WS4 D3/G4：帘层改走收编 FadeContent——开帘淡入+柔焦落定，
+          收帘同一段淡出（veilPlayer ref 保卡随帘一起退场） */}
+      {veilPlayer && (
+        <FadeContent
+          className="spotlight-veil"
+          show={!!(spot?.manual && spotPlayer)}
+          blur={6}
+          onClick={closeSpot}
+        >
+          {/* F29（WS5）：高光大卡入场收编为 AnimatedContent 'moment' */}
+          <AnimatedContent variant="moment">
+            <ProfileCard
+              player={veilPlayer}
+              info={spotlightInfo(
+                veilPlayer,
+                board.activePlayerId === veilPlayer.id,
+              )}
+              contact={
+                veilPlayer.isHuman ? strings.hud.spotlightBasket : undefined
+              }
+              onContact={
+                veilPlayer.isHuman
+                  ? () => {
+                      closeSpot();
+                      onOpenWallet();
+                    }
+                  : undefined
+              }
+              onDismiss={closeSpot}
+            />
+          </AnimatedContent>
+        </FadeContent>
       )}
     </div>
   );

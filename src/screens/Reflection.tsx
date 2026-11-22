@@ -4,8 +4,9 @@
  * bot 回合由 useBotDriver 自动提交，台词直接出现在列表里；
  * 全部说完（phase='finished'）：「再玩一局」。
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
+import { useReducedMotion } from 'motion/react';
 import { cards } from '../data/cards';
 import { strings } from '../data/strings';
 import { missingIngredients } from '../game/selectors';
@@ -15,9 +16,12 @@ import { supportLevel } from '../ui/supportLevel';
 import type { Command, GameState, Player } from '../game/types';
 import { Button } from '../components/Button';
 import { CardView } from '../components/CardView';
+import { AnimatedList } from '../components/reactbits/AnimatedList';
+import { BlurText } from '../components/text/BlurText';
 import { Hand } from '../components/cards/Hand';
 import { TiltCard } from '../components/cards/TiltCard';
 import type { HandItem } from '../components/cards/Hand';
+import { fireJellyPick } from '../components/bits/jellyPick';
 
 /** 自写选项 id（cards.json reflections.humanOptions 最后一项 rho-6） */
 const FREE_OPTION_ID = 'rho-6';
@@ -59,6 +63,10 @@ export function Reflection({
      发 CHOOSE_REFLECTION。旧版点卡即交，卡面又被扇叠住看不清，
      孩子没机会看清自己选了哪句。命令与选项数据一字未动。 */
   const [pickedId, setPickedId] = useState<string | null>(null);
+  /* WS1 A17：Jelly Radio——选中项果冻挤压、相邻项轻让（WAAPI 脉冲，
+     独立于 --sel 的静态抬升；reduced-motion 不触发） */
+  const optionsRef = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion() ?? false;
   // 换一位说（bot 先后说完/重开一局）→ 选中态清掉，不带到下一位
   const pendingPlayer = pd.kind === 'reflection' ? pd.playerId : null;
   useEffect(() => {
@@ -82,8 +90,16 @@ export function Reflection({
     options.filter((o) => o.id !== FREE_OPTION_ID),
     done,
   );
-  const anyDone = preset.some((o) => done[o.id]);
+  /* anyDone 随 personalHint 行退役（审计 E12，它唯一的消费者） */
   const free = options.find((o) => o.id === FREE_OPTION_ID);
+  useEffect(() => {
+    if (!pickedId) return;
+    fireJellyPick(
+      optionsRef.current,
+      preset.findIndex((o) => o.id === pickedId),
+      reduceMotion,
+    );
+  }, [pickedId]);
   // 卡片顺序 = 开饭页座位顺序（players 即座位序，真人 p0 固定左上）；
   // 引擎按座位序依次提问，reflections 本来就是前缀，这里再按 players 显式排
   const said = new Map(state.reflections.map((r) => [r.playerId, r]));
@@ -140,32 +156,56 @@ export function Reflection({
 
   return (
     <main className="intro-shell" data-testid="screen-reflection">
-      <h1 className="intro-title intro-title--sm">{prompt}</h1>
+      {/* WS3 C15：屏幕级标题——错峰 + Blur Text 焦点回落 */}
+      <BlurText as="h1" className="intro-title intro-title--sm" text={prompt} />
 
+      {/* B25（React Bits "Animated List" 改写）：逐人感想卡按弹簧错峰
+          入场 + 滑行高亮环贴到最新一张（说一张滑过去一张）；选项行与
+          账本区不属于本项，保持不动。aria-live 朗读语义保留 */}
       <section className="reflection-list" aria-live="polite">
-        {state.players.map((p) => {
-          const r = said.get(p.id);
-          if (!r) return null;
+        {(() => {
+          const saidItems = state.players
+            .filter((p) => said.has(p.id))
+            .map((p) => ({
+              key: p.id,
+              node: (
+                <p className="reflection-card" data-testid={`reflection-card-${p.id}`}>
+                  <span className="reflection-avatar" aria-hidden="true">
+                    {avatarOf(p)}
+                  </span>
+                  <span className="reflection-text">
+                    <span className="reflection-name">{playerDisplayName(p)}:</span>{' '}
+                    {reflectionEntryText(said.get(p.id)!)}
+                  </span>
+                </p>
+              ),
+            }));
+          const items = [
+            ...saidItems,
+            ...(!finished && !humanPending
+              ? [
+                  {
+                    key: 'waiting-bots',
+                    node: (
+                      <p className="reflection-line reflection-line--muted">
+                        {strings.reflection.waitingBots}
+                      </p>
+                    ),
+                  },
+                ]
+              : []),
+          ];
+          const lastSpeaker = state.reflections[state.reflections.length - 1]?.playerId;
+          const highlight = saidItems.findIndex((it) => it.key === lastSpeaker);
           return (
-            <p
-              key={p.id}
-              className="reflection-card"
-              data-testid={`reflection-card-${p.id}`}
-            >
-              <span className="reflection-avatar" aria-hidden="true">
-                {avatarOf(p)}
-              </span>
-              <span className="reflection-text">
-                <span className="reflection-name">{playerDisplayName(p)}:</span> {reflectionEntryText(r)}
-              </span>
-            </p>
+            <AnimatedList
+              animation="pop"
+              staggerMs={80}
+              items={items}
+              highlightIndex={highlight}
+            />
           );
-        })}
-        {!finished && !humanPending && (
-          <p className="reflection-line reflection-line--muted">
-            {strings.reflection.waitingBots}
-          </p>
-        )}
+        })()}
       </section>
 
       {finished && (
@@ -186,10 +226,9 @@ export function Reflection({
         </Button>
       ) : (
         humanPending && (
-          <div className="reflection-options">
-            {anyDone && (
-              <p className="reflection-personal">{strings.reflection.personalHint}</p>
-            )}
+          <div className="reflection-options" ref={optionsRef}>
+            {/* 消息减负审计 E12：个人提示行删除——反思题面 + 选项
+                卡已经把这一步说清 */}
             <Hand
               className="reflection-hand"
               items={optionItems}

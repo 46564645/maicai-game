@@ -13,11 +13,156 @@
  * 注：简报原写 240ms/150ms，Devin 落地为 180ms/160ms 并由 r10d.test.ts
  * 锁死（进出双时长断言）；PM 验收接受该偏差，差异记入 R10_DESIGN.md。
  */
-import { useEffect, useRef, useState } from 'react';
-import type { ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { strings } from '../data/strings';
 import { useFocusTrap } from '../ui/useFocusTrap';
 import { CardIcon } from './CardIcon';
+import { SplitText } from './text/SplitText';
+
+/* —— GradualBlur：React Bits by David Haz（MIT + Commons Clause，
+   THIRD_PARTY_NOTICES.md 已登记）逐层遮罩渐进模糊——vendored & 裁剪：
+   只留静态叠层核心（分层 backdrop-filter + 渐层 mask），去掉
+   滚动/悬停联动。供 G3 弹窗遮罩四缘、G5 手机竖栏端缘复用 —— */
+const GB_CURVES = {
+  linear: (t: number) => t,
+  bezier: (t: number) => t * t * (3 - 2 * t),
+  'ease-in': (t: number) => t * t,
+  'ease-out': (t: number) => 1 - (1 - t) * (1 - t),
+  'ease-in-out': (t: number) =>
+    t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2,
+} as const;
+const GB_DIRECTIONS = {
+  top: 'to top',
+  bottom: 'to bottom',
+  left: 'to left',
+  right: 'to right',
+} as const;
+const gbClamp01 = (v: number) => Math.min(Math.max(v, 0), 1);
+const gbLen = (v: number | string | undefined) =>
+  typeof v === 'number' ? `${v}px` : v;
+
+export function GradualBlur({
+  position = 'bottom',
+  target = 'parent',
+  height = '6rem',
+  width,
+  strength = 2,
+  layers = 8,
+  curve = 'linear',
+  exponential = true,
+  opacity = 1,
+  saturation = 1,
+  tint = 'transparent',
+  zIndex = 1,
+  className = '',
+  style,
+}: {
+  position?: keyof typeof GB_DIRECTIONS;
+  target?: 'parent' | 'page';
+  height?: number | string;
+  width?: number | string;
+  strength?: number;
+  layers?: number;
+  curve?: keyof typeof GB_CURVES;
+  exponential?: boolean;
+  opacity?: number;
+  saturation?: number;
+  tint?: string;
+  zIndex?: number;
+  className?: string;
+  style?: CSSProperties;
+}) {
+  const edge = GB_DIRECTIONS[position] ? position : 'bottom';
+  const vertical = edge === 'top' || edge === 'bottom';
+
+  const stack = useMemo(() => {
+    const count = Math.min(Math.max(Math.round(layers) || 1, 1), 16);
+    const shape = GB_CURVES[curve] || GB_CURVES.linear;
+    const maxBlur = Math.max(strength, 0) * 12;
+    const level = (u: number) => {
+      const t = shape(gbClamp01(u));
+      return maxBlur * (exponential ? (Math.pow(2, 4 * t) - 1) / 15 : t);
+    };
+    const boost = Math.pow(Math.max(saturation, 0), 1 / count);
+    const direction = GB_DIRECTIONS[edge];
+    const steps: CSSProperties[] = [];
+    for (let i = 0; i < count; i++) {
+      const from = level(i / count);
+      const to = level((i + 1) / count);
+      const radius = Math.sqrt(Math.max(to * to - from * from, 0));
+      const filter = [
+        `blur(${radius.toFixed(3)}px)`,
+        boost !== 1 ? `saturate(${boost.toFixed(4)})` : '',
+      ]
+        .filter(Boolean)
+        .join(' ');
+      const mask = `linear-gradient(${direction}, transparent ${((i / count) * 100).toFixed(2)}%, #000 ${(((i + 1) / count) * 100).toFixed(2)}%)`;
+      steps.push({
+        position: 'absolute',
+        inset: 0,
+        backdropFilter: filter,
+        WebkitBackdropFilter: filter,
+        maskImage: mask,
+        WebkitMaskImage: mask,
+        opacity,
+      });
+    }
+    let wash: CSSProperties | null = null;
+    if (tint && tint !== 'transparent') {
+      const stops = Array.from({ length: 9 }, (_, k) => {
+        const u = k / 8;
+        const t = shape(u);
+        const a = t * t * t * (t * (t * 6 - 15) + 10);
+        return `rgba(0, 0, 0, ${a.toFixed(3)}) ${(u * 100).toFixed(1)}%`;
+      }).join(', ');
+      wash = {
+        position: 'absolute',
+        inset: 0,
+        background: tint,
+        maskImage: `linear-gradient(${direction}, ${stops})`,
+        WebkitMaskImage: `linear-gradient(${direction}, ${stops})`,
+      };
+    }
+    return { steps, wash };
+  }, [layers, curve, strength, exponential, saturation, edge, opacity, tint]);
+
+  const depth = gbLen(vertical ? height : width ?? height);
+  const span = vertical && width != null ? gbLen(width) : null;
+  const rounded = target !== 'page' && !span;
+  const corner = (a: string, b: string) =>
+    rounded && (edge === a || edge === b) ? 'inherit' : undefined;
+
+  const rootStyle: CSSProperties = {
+    position: target === 'page' ? 'fixed' : 'absolute',
+    zIndex,
+    borderTopLeftRadius: corner('top', 'left'),
+    borderTopRightRadius: corner('top', 'right'),
+    borderBottomLeftRadius: corner('bottom', 'left'),
+    borderBottomRightRadius: corner('bottom', 'right'),
+    top: edge === 'bottom' ? undefined : 0,
+    bottom: edge === 'top' ? undefined : 0,
+    left: edge === 'right' ? undefined : 0,
+    right: edge === 'left' ? undefined : 0,
+    height: vertical ? depth : undefined,
+    width: vertical ? span ?? undefined : depth,
+    marginInline: span ? 'auto' : undefined,
+    ...style,
+  };
+
+  return (
+    <div
+      className={`gradual-blur ${className}`.trim()}
+      style={rootStyle}
+      aria-hidden="true"
+    >
+      {stack.steps.map((layer, i) => (
+        <div key={i} style={layer} />
+      ))}
+      {stack.wash && <div style={stack.wash} />}
+    </div>
+  );
+}
 
 /** 菜谱进度条的一项（调用方用既有 selector 数据拼好递进来） */
 export interface RecipeStripItem {
@@ -30,7 +175,7 @@ export function StationPopup({
   title,
   tag,
   aside,
-  goal,
+  badge,
   recipe,
   onClose,
   testid,
@@ -39,9 +184,11 @@ export function StationPopup({
   title: string;
   tag?: string;
   aside?: string;
-  /** R10D：站点学习目标小片（「练 · …」） */
-  goal?: string;
-  /** R10D：迷你菜谱进度条（食材图标 + 买到 ✓ / 还缺口） */
+  /** R2-6：浮签右边的内容角标（如市场「金币 ×N」），渲染在头部右侧 */
+  badge?: ReactNode;
+  /** R10D：迷你菜谱进度条（食材图标 + 买到 ✓ / 还缺口）。
+   *  消息减负审计 B17：原「练 · …」学习目标小片（goal）已删——
+   *  目标文案是给老师看的元信息，孩子在站里要做的事由面板正文说 */
   recipe?: RecipeStripItem[];
   onClose?: () => void;
   testid?: string;
@@ -50,6 +197,12 @@ export function StationPopup({
   const ref = useFocusTrap<HTMLDivElement>(true);
   return (
     <div className="popup-backdrop">
+      {/* G3（React Bits GradualBlur）：遮罩四缘渐进模糊——只加边缘
+          处理，dim 颜色/透明度不变；手机竖栏内由 phone.css 隐藏 */}
+      <GradualBlur position="top" height="12%" strength={1.1} layers={5} />
+      <GradualBlur position="bottom" height="12%" strength={1.1} layers={5} />
+      <GradualBlur position="left" width="7%" strength={1.1} layers={5} />
+      <GradualBlur position="right" width="7%" strength={1.1} layers={5} />
       <div
         ref={ref}
         className="popup"
@@ -61,10 +214,11 @@ export function StationPopup({
       >
         <header className="popup-head">
           <div className="popup-head-main">
-            <h2 className="popup-title">{title}</h2>
-            {(goal || (recipe && recipe.length > 0)) && (
+            {/* WS3 C15：弹窗标题逐字错峰入场（Split Text 改写，motion；
+                key=text 在 SplitText 内部——换站重播） */}
+            <SplitText as="h2" className="popup-title" text={title} />
+            {recipe && recipe.length > 0 && (
               <div className="popup-sub">
-                {goal && <span className="popup-goal">{goal}</span>}
                 {recipe && recipe.length > 0 && (
                   <span
                     className="popup-recipe"
@@ -89,6 +243,7 @@ export function StationPopup({
             )}
           </div>
           {tag && <span className="popup-tag">{tag}</span>}
+          {badge}
           {aside && <span className="popup-aside">{aside}</span>}
           {onClose && (
             <button type="button" className="popup-close" onClick={onClose} aria-label={strings.actions.close}>

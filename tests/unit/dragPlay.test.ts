@@ -1,6 +1,6 @@
 /**
  * dragPlay.test.ts —— useDragPlay 纯函数层单测（node 环境，无 DOM）。
- * 命中测试、投放判定（accept/reject/miss → 分别对应打出/弹回+shake/弹回）、
+ * 命中测试、投放判定（accept/reject/miss → 分别对应打出/拽引+弹回/弹回）、
  * Magnet 吸附、拖拽阈值——这些是「命中吸附/无效弹回」手感四件的核心判定。
  */
 import { describe, expect, it } from 'vitest';
@@ -70,7 +70,7 @@ describe('resolveDrop（松手判定：accept=打出 / reject·miss=弹回）', 
     const v = resolveDrop({ x: 50, y: 30 }, [zone('basket', 0, 0, 100, 60)]);
     expect(v).toEqual({ kind: 'accept', id: 'basket' });
   });
-  it('命中拒收区（买不起/不可留）→ reject（弹回 + 轻 shake）', () => {
+  it('命中拒收区（买不起/不可留）→ reject（拽引阻力 + 弹簧弹回）', () => {
     const v = resolveDrop({ x: 50, y: 30 }, [
       zone('basket', 0, 0, 100, 60, false),
     ]);

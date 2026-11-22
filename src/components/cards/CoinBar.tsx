@@ -7,11 +7,39 @@
 import { strings } from '../../data/strings';
 import { fmt } from '../../game/stations/shared';
 import { coinDeltaText, useCoinDelta } from '../../ui/useCoinDelta';
+import { AnimatedContent } from '../bits/AnimatedContent';
+import { CoinCounter } from './CoinCounter';
 
 interface Cell {
   key: string;
   seg: 'recipe' | 'bus' | 'free';
   lit: 'idle' | 'spend' | 'warn';
+}
+
+/** WS3 C2：算式「12 − 3 → 9」的结果位换成 CoinCounter 滚动数字——
+    教学格式与前两位静态不变，三处 .cb-math 共用同一段；父级已
+    aria-hidden（读屏口径不变），label 仍供 CoinCounter 的 live 文案 */
+export function CoinMath({
+  coins,
+  spend,
+  className = '',
+}: {
+  coins: number;
+  spend: number;
+  className?: string;
+}) {
+  const after = Math.max(0, coins - spend);
+  const [pre, post] = strings.coinbar.math.split('{c}');
+  return (
+    <span className={`cb-math ${className}`.trim()} aria-hidden="true">
+      {fmt(pre, { a: coins, b: spend })}
+      <CoinCounter
+        value={after}
+        label={fmt(strings.coinbar.math, { a: coins, b: spend, c: after })}
+      />
+      {post}
+    </span>
+  );
 }
 
 export function CoinBar({
@@ -74,9 +102,21 @@ export function CoinBar({
   return (
     <div className="coin-bar">
       {chip && (
-        <span key={chip.stamp} className="coin-delta-chip" aria-hidden="true">
+        /* WS3 C5：同钱包小片——AnimatedContent（motion）升起+淡出，
+           animation:none 摘掉对 CSS 关键帧的依赖（F26 归 WS5 收编） */
+        <AnimatedContent
+          key={chip.stamp}
+          className="coin-delta-chip"
+          style={{ animation: 'none' }}
+          aria-hidden="true"
+          distance={4}
+          duration={0.17}
+          disappearAfter={0.44}
+          disappearDuration={0.5}
+          exitDistance={-13}
+        >
           {coinDeltaText(chip.delta)}
-        </span>
+        </AnimatedContent>
       )}
       <div
         className="cb-segs"
@@ -87,11 +127,7 @@ export function CoinBar({
         {seg('bus', strings.coinbar.bus)}
         {seg('free', strings.coinbar.free)}
       </div>
-      {spend > 0 && !hideMath && (
-        <p className="cb-math" aria-hidden="true">
-          {fmt(strings.coinbar.math, { a: coins, b: spend, c: Math.max(0, coins - spend) })}
-        </p>
-      )}
+      {spend > 0 && !hideMath && <CoinMath coins={coins} spend={spend} />}
     </div>
   );
 }

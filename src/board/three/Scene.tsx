@@ -1,6 +1,6 @@
 /**
  * Scene.tsx —— 3D 场景组装：斜阳长影 + 半球光补环境、岛、街道环路、棋子、
- * 球簇树/石头/花点缀、中央天气转盘（M4.5.3）、相机、画质桥、HDRI 环境反光、
+ * 岛缘树（Nature Kit GLB）/石头/花点缀、中央天气转盘（M4.5.3）、相机、画质桥、HDRI 环境反光、
  * 花草灌木撒布（M4.5.7 Flora）、桌面后期链（Effects，React.lazy 子包）。
  * 风格：织梦岛塑料玩具感（ART_3D §9），场景内不放文字。
  */
@@ -22,6 +22,7 @@ import type { SpinCtl } from './WeatherSpinner3D';
 import { CoinFly } from './CoinFly';
 import { CameraRig } from './CameraRig';
 import { Flora } from './Flora';
+import { Model } from './gltf';
 import { useQuality } from './QualityProvider';
 import { fastMode, reducedMotion, useAmbient } from './ambient';
 
@@ -85,42 +86,67 @@ function EnvironmentLite({ url }: { url: string }) {
   return null;
 }
 
-/** 岛缘球簇树（ART §9.8 一切都圆润：树像一团团球），塑料光泽、轻轻摇 */
-function Tree({ x, z, s = 1, shadows }: { x: number; z: number; s?: number; shadows: boolean }) {
-  const crown = useRef<THREE.Group>(null);
+/**
+ * 岛缘树（Kenney Nature Kit GLB，原球簇树已退役）：四角各一款不重样。
+ * k = 按原球簇树总高（≈1.47）反推的标定系数（各款建模高度不一）；
+ * 整树轻轻摇（绕根部小角度，等效原树冠摆幅约 ±4cm）。
+ * 模型 y 下限 −0.05（根部略入土），按 k·s 抬回地面。
+ */
+const TREE_KIND = {
+  oak: { path: 'tree-oak.glb', k: 1.2 }, // 高 1.23 → 1.48
+  pine: { path: 'tree-pine.glb', k: 0.95 }, // 高 1.55 → 1.47
+  default: { path: 'tree-default.glb', k: 0.86 }, // 高 1.71 → 1.47
+  detailed: { path: 'tree-detailed.glb', k: 1.11 }, // 高 1.33 → 1.48
+} as const;
+
+function Tree({
+  x,
+  z,
+  s = 1,
+  kind,
+  shadows,
+}: {
+  x: number;
+  z: number;
+  s?: number;
+  kind: keyof typeof TREE_KIND;
+  shadows: boolean;
+}) {
+  const sway = useRef<THREE.Group>(null);
   const phase = x * 0.7 + z * 1.3;
   useAmbient(80, (t) => {
-    if (crown.current) {
-      crown.current.rotation.z = Math.sin(t * 0.9 + phase) * 0.05;
-      crown.current.rotation.x = Math.sin(t * 0.7 + phase * 1.3) * 0.03;
+    if (sway.current) {
+      sway.current.rotation.z = Math.sin(t * 0.9 + phase) * 0.028;
+      sway.current.rotation.x = Math.sin(t * 0.7 + phase * 1.3) * 0.018;
     }
   });
+  const { path, k } = TREE_KIND[kind];
+  const eff = k * s;
   return (
-    <group position={[x, 0, z]} scale={s}>
-      <mesh position-y={0.3} castShadow={shadows}>
-        <cylinderGeometry args={[0.09, 0.13, 0.6, 10]} />
-        <meshPhysicalMaterial color={SCENE.trunk} {...PLASTIC} />
-      </mesh>
-      <group ref={crown}>
-        <mesh position-y={0.95} castShadow={shadows}>
-          <sphereGeometry args={[0.52, 16, 12]} />
-          <meshPhysicalMaterial color={SCENE.leaf} {...PLASTIC} />
-        </mesh>
-        <mesh position={[0.34, 0.7, 0.12]} castShadow={shadows}>
-          <sphereGeometry args={[0.3, 14, 10]} />
-          <meshPhysicalMaterial color={SCENE.leaf} {...PLASTIC} />
-        </mesh>
-        <mesh position={[-0.3, 0.74, -0.1]} castShadow={shadows}>
-          <sphereGeometry args={[0.26, 14, 10]} />
-          <meshPhysicalMaterial color={SCENE.bush} {...PLASTIC} />
-        </mesh>
+    <group position={[x, 0, z]}>
+      <group ref={sway}>
+        <Model
+          path={path}
+          position={[0, 0.05 * eff, 0]}
+          rotation-y={phase}
+          scale={eff}
+          shadows={shadows}
+        />
       </group>
     </group>
   );
 }
 
-/** 小云朵：棉花糖状，慢慢漂（ART_3D §8.6）。
- *  R10E：drift=风天加速（tint=雨天染灰）由天气布景驱动 */
+/** 小云朵：棉花糖状，匀速横漂、绕回重入（ART_3D §8.6）。
+ *  R10E：drift=风天加速（tint=雨天染灰）由天气布景驱动。
+ *  业主令（2026-11-22）：云要一直动——原地正弦摆动（±1.3 内往返）
+ *  改为持续单向漂移：以 CLOUD_SPEED×drift 匀速向 +x 漂，越过
+ *  +CLOUD_WRAP 从 −CLOUD_WRAP 绕回重入，永不停；高度仍是小幅
+ *  正弦浮沉，大小/相对位置不变。漂移量按 tick 积分（dt 钳 0.5s
+ *  防卡顿跳步），天气切换只改漂速、不跳位。 */
+const CLOUD_WRAP = 20; // 天空横界：x ∈ [−20, 20)，跨度 40
+const CLOUD_SPEED = 0.3; // 基础漂速（世界单位/秒，约 133 秒横穿）
+
 function Cloud({
   p,
   s,
@@ -133,11 +159,17 @@ function Cloud({
   tint?: string;
 }) {
   const g = useRef<THREE.Group>(null);
+  const off = useRef(0);
+  const lastT = useRef(-1);
   useAmbient(110, (t) => {
-    if (g.current) {
-      g.current.position.x = p[0] + Math.sin(t * 0.1 * drift + p[2]) * 1.3 * drift;
-      g.current.position.y = p[1] + Math.sin(t * 0.16 * drift + p[0]) * 0.3;
-    }
+    if (!g.current) return;
+    const dt = lastT.current < 0 ? 0 : Math.min(t - lastT.current, 0.5);
+    lastT.current = t;
+    off.current += dt * CLOUD_SPEED * drift;
+    const span = CLOUD_WRAP * 2;
+    const raw = p[0] + off.current + CLOUD_WRAP;
+    g.current.position.x = (((raw % span) + span) % span) - CLOUD_WRAP;
+    g.current.position.y = p[1] + Math.sin(t * 0.16 * drift + p[0]) * 0.3;
   });
   return (
     <group ref={g} position={[p[0], p[1], p[2]]} scale={[s, s * 0.62, s]}>
@@ -367,11 +399,15 @@ export function Scene({
         quick={board.weatherQuick ?? false}
       />
 
-      {/* 岛缘球簇树 + 石头（花草灌木撒布交给 Flora，不堆满） */}
-      <Tree x={-6.7} z={-4.4} s={1.05} shadows={shadows} />
-      <Tree x={6.8} z={-4.6} s={0.85} shadows={shadows} />
-      <Tree x={-6.6} z={4.6} s={0.9} shadows={shadows} />
-      <Tree x={6.7} z={4.5} s={1.15} shadows={shadows} />
+      {/* 岛缘树 + 石头（花草灌木撒布交给 Flora，不堆满）。
+          树走 GLB：挂起必须拦在本边界内（同上方 StationProps 的教训），
+          模型未就绪时岛面照常渲染，树好了再进 */}
+      <Suspense fallback={null}>
+        <Tree x={-6.7} z={-4.4} s={1.05} kind="oak" shadows={shadows} />
+        <Tree x={6.8} z={-4.6} s={0.85} kind="pine" shadows={shadows} />
+        <Tree x={-6.6} z={4.6} s={0.9} kind="default" shadows={shadows} />
+        <Tree x={6.7} z={4.5} s={1.15} kind="detailed" shadows={shadows} />
+      </Suspense>
       <mesh position={[-5.9, 0.16, 5.0]} castShadow={shadows}>
         <sphereGeometry args={[0.22, 12, 10]} />
         <meshPhysicalMaterial color={SCENE.stone} {...PLASTIC} />
@@ -384,7 +420,7 @@ export function Scene({
       {/* 地面花草灌木栅栏（ART §9.7：沿路撒满、不留大片空白） */}
       <Flora density={flags.flora} shadows={shadows} />
 
-      {/* 两朵小云：压扁的圆球拼的棉花糖云，慢慢漂给天空一点活气。
+      {/* 两朵小云：压扁的圆球拼的棉花糖云，匀速横漂绕回给天空一点活气。
           R10E：风天漂快三倍 + 追加一朵低掠云；雨天云染灰 */}
       <Cloud
         p={[-10.5, 5.2, -8]}

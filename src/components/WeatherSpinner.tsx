@@ -8,6 +8,7 @@ import { cards } from '../data/cards';
 import { strings } from '../data/strings';
 import { fmt } from '../game/stations/shared';
 import { cardName } from '../i18n/cardText';
+/* ShinyTextOnce 随结果文字行退役（审计 D10） */
 import type { CardId } from '../game/types';
 
 export function WeatherSpinner({ weatherId }: { weatherId: CardId | null }) {
@@ -50,7 +51,9 @@ export function WeatherSpinner({ weatherId }: { weatherId: CardId | null }) {
           ))}
         </div>
       </div>
-      <p className="weather-result">{fmt(strings.event.spunTo, { name: landed ? cardName(landed.id) : '' })}</p>
+      {/* 消息减负审计 D10：转盘下的结果文字行删除——落点天气由
+          转盘高亮 + 随后的天气布景说清；读屏口径保留在根节点
+          aria-label（上方 spunTo） */}
     </div>
   );
 }

@@ -30,19 +30,20 @@
 button.card-view--selected,
 .card-view--selected {
   /* 「抬起」：选中的卡浮起来一点（ww M4.5.6b：菜市场/小卖部选中态一致）
-     T-1 无边框后选中描边改走外圈光环（box-shadow 环，不占卡面）
-     R6（ww Part 1.3）：选中必须与「只是可点」明显不同——抬升加倍
-     （-4px > hover 的 -2px）+ 3px 粗环，不靠颜色单独区分 */
+     F37（WS5）→ Star Border：选中信号 = 巡游光带（cards.css 里
+     ::before/::after 的 sb-travel）+ 一圈柔光晕 + 抬起；旧 3px 主色
+     硬环删除——不再是描边信号。抬升加倍（-4px > hover 的 -2px）保留 */
   transform: translateY(-4px);
   box-shadow:
-    0 0 0 3px var(--color-primary),
+    0 0 14px 2px var(--glow-ring),
+    0 0 24px 4px var(--glow-amber),
     var(--shadow-md),
     var(--inset-light);
 }
 
-/* R6：选中卡按下仍保持抬起（-2px），不沉回平面 */
+/* R6：选中卡按下仍保持抬起（-2px），不沉回平面；选中放大保留 */
 button.card-view--selected:not(:disabled):active {
-  transform: translateY(-2px);
+  transform: translateY(-2px) scale(1.03);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -246,6 +247,14 @@ button.card-view--selected:not(:disabled):active {
   gap: var(--space-1);
   padding-bottom: var(--space-2);
   border-bottom: 1px solid var(--color-line);
+}
+
+/* WS3 C20：明细行容器（vendored AnimatedList 弹入行）——
+   行距与原直排 gap 保持一致 */
+.ledger-lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
 }
 
 .ledger-group-title {
@@ -489,6 +498,11 @@ button.card-view--selected:not(:disabled):active {
   }
 
   .clip-chip {
+    flex: 1 1 0;
+  }
+
+  /* 交互审 U5：待付注记与夹子钮同排等分（只是不再穿按钮制服） */
+  .clip-note {
     flex: 1 1 0;
   }
 }

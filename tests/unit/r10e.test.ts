@@ -152,10 +152,14 @@ describe('de-panel CSS', () => {
     expect(b).not.toContain('border-radius');
     expect(b).not.toContain('box-shadow');
   });
-  it('.popup-backdrop 压暗 + 毛玻璃；天气时刻放轻', () => {
+  it('.popup-backdrop 压暗 + 毛玻璃；R2-11 天气时刻同层压暗（不再放轻）', () => {
     const b = cssBlock(hudCss, '.popup-backdrop {');
+    expect(b).toContain('background: var(--color-backdrop)');
     expect(b).toContain('backdrop-filter: blur(var(--stage-blur))');
-    expect(hudCss).toContain('.popup-backdrop:has(.weather-moment)');
+    /* 团队第 2 轮 R2-11：天气 spin/card 与其它卡同一 --color-backdrop 口径，
+       旧的 :has(.weather-moment) 稀释（42%）+ 去模糊覆盖必须不存在 */
+    expect(hudCss).not.toContain('.popup-backdrop:has(.weather-moment)');
+    expect(hudCss).not.toContain('var(--color-backdrop) 42%');
   });
   it('头丸=半透明墨底（--stage-pill-* token）', () => {
     const b = cssBlock(hudCss, '.popup-head {');
@@ -183,13 +187,19 @@ describe('de-panel CSS', () => {
 
 /* ============ §2 大卡时刻 + 天气布景 ============ */
 describe('moment & weather dress CSS', () => {
-  it('大卡按钮/moment-pop/收进篮子 keyframe 齐', () => {
+  it('大卡按钮/收进篮子壳层齐（F29-F31：keyframe 收编为 motion 包装器）', () => {
     expect(hudCss).toContain('.moment-card {');
-    expect(hudCss).toContain('@keyframes moment-pop');
-    expect(hudCss).toContain('@keyframes moment-pocket');
     expect(hudCss).toContain('.weather-moment {');
     expect(hudCss).toContain('.moment-pop-wrap {');
-    expect(hudCss).toContain('.event-story--out');
+    /* F29/F30/F31（WS5）：moment-pop/moment-pocket/story-sink 三个
+       keyframe 与 .event-story--out 类已删——入场走 AnimatedContent
+       'moment'，收篮走 FadeContent 'pocket'，下沉走 'sink' */
+    expect(hudCss).not.toContain('@keyframes moment-pop');
+    expect(hudCss).not.toContain('@keyframes moment-pocket');
+    expect(hudCss).not.toContain('@keyframes story-sink');
+    expect(hudCss).not.toContain('.event-story--out');
+    /* 收进篮子残影壳仍在（FadeContent 'pocket' 的定位出口） */
+    expect(hudCss).toContain('.moment-card--pocket');
   });
   it('天气洗色三态挂在 .game-screen.weather--*', () => {
     for (const k of ['sunny', 'rainy', 'windy']) {

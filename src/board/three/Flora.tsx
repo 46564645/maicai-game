@@ -1,18 +1,20 @@
 /**
  * Flora.tsx —— 地面花草灌木栅栏撒布（M4.5.7 织梦岛风，ART_3D §9.7：
  * 「地面上点缀花丛、灌木、栅栏、石头，不留大片空白」，每两站之间 3–6 件）。
- * 全部 InstancedMesh 实例化：花头（亮黄/粉/蓝三色）+ 花茎 + 灌木球 + 石头
- * + 栅栏段（只在伙伴站与家门口点缀几段），实例化几百棵也不卡（§10）。
+ * 花头（亮黄/粉/蓝三色）+ 花茎 + 灌木球 + 石头走 InstancedMesh 实例化，
+ * 实例化几百棵也不卡（§10）；栅栏只有 4 段，改用 Nature Kit 整段模型
+ * （双横杆），不再实例化拼柱+横杆。
  * 位置由固定种子序列在相邻站间草地带取点（mulberry32，可复现），
  * 剔除与转盘（岛心 r<2.9）、站点地砖、道具锚点、岛缘树石重叠的点；
  * 密度由画质档缩放（high ×1.0 / medium ×0.6 / low ×0.4），
  * 每站段内按等距取舍（减密度 = 均匀抽稀，不整体重摆）。
  */
-import { useLayoutEffect, useMemo, useRef } from 'react';
+import { Suspense, useLayoutEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useThree } from '@react-three/fiber';
 import { loopPoint, propAnchor, stationAnchor, stationT } from './positions';
 import { FLOWER_COLORS, PLASTIC, SCENE } from './materials';
+import { Model } from './gltf';
 
 /** mulberry32 固定种子：撒布可复现，不依赖引擎 rng */
 function mulberry32(seed: number) {
@@ -206,8 +208,6 @@ export function Flora({ density, shadows }: { density: number; shadows: boolean 
   const flowerStemRef = useRef<THREE.InstancedMesh>(null);
   const bushRef = useRef<THREE.InstancedMesh>(null);
   const stoneRef = useRef<THREE.InstancedMesh>(null);
-  const postRef = useRef<THREE.InstancedMesh>(null);
-  const railRef = useRef<THREE.InstancedMesh>(null);
 
   const headMats = useMemo(() => matsOf(flowers, 0.13), [flowers, dummy]);
   const stemMats = useMemo(() => matsOf(flowers, 0.055), [flowers, dummy]);
@@ -233,33 +233,10 @@ export function Flora({ density, shadows }: { density: number; shadows: boolean 
     [bushes],
   );
 
-  const { postMats, railMats } = useMemo(() => {
-    const posts: THREE.Matrix4[] = [];
-    const rails: THREE.Matrix4[] = [];
-    for (const f of FENCES) {
-      const c = Math.cos(f.yaw);
-      const s = Math.sin(f.yaw);
-      for (const off of [-0.32, 0.32]) {
-        dummy.position.set(f.x + c * off, 0.16, f.z - s * off);
-        dummy.rotation.set(0, 0, 0);
-        dummy.scale.setScalar(1);
-        dummy.updateMatrix();
-        posts.push(dummy.matrix.clone());
-      }
-      dummy.position.set(f.x, 0.22, f.z);
-      dummy.rotation.set(0, f.yaw, 0);
-      dummy.updateMatrix();
-      rails.push(dummy.matrix.clone());
-    }
-    return { postMats: posts, railMats: rails };
-  }, [dummy]);
-
   useInstances(flowerHeadRef, headMats, headColors);
   useInstances(flowerStemRef, stemMats);
   useInstances(bushRef, bushMats, bushColors);
   useInstances(stoneRef, stoneMats);
-  useInstances(postRef, postMats);
-  useInstances(railRef, railMats);
 
   return (
     <group>
@@ -294,23 +271,17 @@ export function Flora({ density, shadows }: { density: number; shadows: boolean 
         <dodecahedronGeometry args={[0.13, 0]} />
         <meshPhysicalMaterial color={SCENE.stone} {...PLASTIC} />
       </instancedMesh>
-      {/* 栅栏：短柱 + 横杆（伙伴站/家门口各两段） */}
-      <instancedMesh
-        ref={postRef}
-        args={[undefined, undefined, postMats.length]}
-        castShadow={shadows}
-      >
-        <cylinderGeometry args={[0.035, 0.045, 0.32, 8]} />
-        <meshPhysicalMaterial color={SCENE.wood} {...PLASTIC} />
-      </instancedMesh>
-      <instancedMesh
-        ref={railRef}
-        args={[undefined, undefined, railMats.length]}
-        castShadow={shadows}
-      >
-        <boxGeometry args={[0.72, 0.055, 0.045]} />
-        <meshPhysicalMaterial color={SCENE.wood} {...PLASTIC} />
-      </instancedMesh>
+      {/* 栅栏：Nature Kit 整段模型（双横杆木栅栏，伙伴站/家门口各两段）。
+          模型几何中心偏在 z=-0.465、底 y=-0.05：内层 position 先归心落
+          地，再由外层 group 定位/朝向/缩放（0.8 → 段长 0.8、总高 0.28，
+          原拼段为 0.72 长 / 柱高 0.32）。挂起拦在本边界内（同 Scene 教训） */}
+      <Suspense fallback={null}>
+        {FENCES.map((f) => (
+          <group key={f.key} position={[f.x, 0, f.z]} rotation-y={f.yaw} scale={0.8}>
+            <Model path="fence-simple.glb" position={[0, 0.05, 0.465]} shadows={shadows} />
+          </group>
+        ))}
+      </Suspense>
     </group>
   );
 }

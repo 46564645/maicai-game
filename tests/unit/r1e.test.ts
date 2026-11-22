@@ -6,7 +6,7 @@
  *   weatherMoment  E3 bot 天气简版换布景等待（400ms，远小于真人整圈）
  *   Deck           E2 翻牌时长（560 / reduced 120）
  * 源码/CSS 断言（沿 r10e 体例，readFileSync）：
- *   E6 BoardMount 外层 fallback 不带 children
+ *   E6 BoardMount 无 2D 回退（2026-11-21 改版：占位不带 children + 失败落错误卡）
  *   E2 EventPanel spin 可点跳过 / CookPanel 等待段可点 / CameraRig reduced 兜底
  *   E3 Scene bot 简版不推近 + Game 自动高光 ~1s 角落态 + 快进信号接线
  *   E4 bot 三处可见数字（BotCard / order-chip / phone-bot）
@@ -171,14 +171,28 @@ describe('deckFlipMs (E2)', () => {
   });
 });
 
-/* ============ E6：BoardMount fallback 不带 children ============ */
-describe('BoardMount fallback (E6)', () => {
-  it('外层 Boundary/Suspense 共用不带 children 的 fallbackBoard', () => {
-    expect(boardMount).toContain('children={undefined}');
-    expect(boardMount).toContain('fallback={fallbackBoard}');
-    expect(boardMount).toContain('<Suspense fallback={fallbackBoard}>');
-    // 带 children 的 Board2D 只剩「真回退」一条路径（!use3d）
-    expect(boardMount).toContain('if (!use3d) return <Board2D {...props} />');
+/* ============ E6 改版（2026-11-21）：BoardMount 无 2D 回退 ============
+   旧 E6 断言的是「外层 fallback 用不带 children 的 Board2D 占位 +
+   !use3d 时渲染带 children 的 Board2D 真回退」。2D 棋盘整体移除后
+   改为断言新不变量：BoardMount 永不渲染 Board2D、占位仍不带
+   children（主按钮全场一份）、失败只落错误卡 + Try again。 */
+describe('BoardMount no-2D-fallback (E6 revised)', () => {
+  it('不再 import/渲染 Board2D，也不再读暖机失败标记与 board 模式', () => {
+    expect(boardMount).not.toContain('Board2D');
+    expect(boardMount).not.toContain('board3DFailed');
+    expect(boardMount).not.toContain('boardMode');
+  });
+  it('Suspense 占位不带 children（R1-E6 不变量延续）', () => {
+    expect(boardMount).toContain('<Suspense fallback={placeholder}>');
+    expect(boardMount).toContain('className="board-loading"');
+  });
+  it('失败一律落错误卡 + Try again，不落可玩棋盘', () => {
+    expect(boardMount).toContain('className="board-error"');
+    expect(boardMount).toContain('role="alert"');
+    expect(boardMount).toContain('Try again');
+    expect(boardMount).toContain(
+      'if (!glOk || failed) return <BoardError onRetry={retry} />',
+    );
   });
 });
 
@@ -254,9 +268,11 @@ describe('phone primary buttons (E7)', () => {
   it('.phone-turn 内 kbd 提示不渲染盒', () => {
     expect(phoneCss).toContain('.phone-turn .btn-kbd-hint {\n  display: none;\n}');
   });
-  it('Game：board-enter 主文案与 kbd 提示已拆成同级盒', () => {
+  it('Game：board-enter 主文案独立成盒（消息减负 C6：kbd 后缀已删）', () => {
     expect(gameTsx).toContain('board-enter-label');
-    expect(gameTsx).toContain('strings.game.enterStationKbd');
+    /* 审计 C6：进站钮的 (Enter / Space) 后缀删除，键盘说明统一进
+       新手指南第 2 页——原 enterStationKbd 在场断言随面退役 */
+    expect(gameTsx).not.toContain('enterStationKbd');
   });
 });
 
@@ -342,13 +358,13 @@ describe('round-2 HUD batch (source assertions)', () => {
     expect(badgeBlock.slice(0, 600)).not.toContain('text-overflow: ellipsis');
     expect(boardCss).toContain('.game-screen--phone-land .pc');
   });
-  it('R2-4 Toast：4s 自动消失、层级在弹窗之下', () => {
+  it('R2-4 Toast：4s 自动消失、层级压过一切卡片/面板（owner F1）', () => {
     expect(toastTsx).toContain('TOAST_VISIBLE_MS = 4000');
     expect(tokensCss).toContain('--toast-visible-ms: 4000ms');
-    // R3 修复（ww 第 5 轮）：层级断言改关系式——不写死 z 数值，解析
-    // 各层实际 z-index 断言相对次序：提示条必须在手机浮层（装着卡片
-    // 与按钮）、右栏、站点弹窗、高光帘之下，任何一层的数值将来调整
-    // 都不该让提示条爬到卡片/按钮上面去
+    // owner F1（Thong 2026-11-21，覆盖 R3「提示条在卡片/面板下层」口径）：
+    // 「dark UI always on top」——关系式断言改为提示条高于手机浮层、右栏、
+    // 站点弹窗、高光帘、瞬时飞卡与迸币；只保留竖屏旋转门在其上（全屏挡板
+    // 本就盖过一切）。任何一层的数值将来调整都不该让卡片/面板盖到提示条上
     const zOf = (css: string, selector: string): number => {
       const i = css.indexOf(selector);
       expect(i, `selector ${selector}`).toBeGreaterThanOrEqual(0);
@@ -357,10 +373,14 @@ describe('round-2 HUD batch (source assertions)', () => {
       return Number(m![1]);
     };
     const toastZ = zOf(hudCss, '.toast-stack {');
-    expect(toastZ).toBeLessThan(zOf(phoneCss, '.phone-market-float,'));
-    expect(toastZ).toBeLessThan(zOf(phoneCss, '.phone-rail {'));
-    expect(toastZ).toBeLessThan(zOf(hudCss, '.popup-backdrop {'));
-    expect(toastZ).toBeLessThan(zOf(boardCss, '.spotlight-veil {'));
+    expect(toastZ).toBeGreaterThan(zOf(phoneCss, '.phone-market-float,'));
+    expect(toastZ).toBeGreaterThan(zOf(phoneCss, '.phone-rail {'));
+    expect(toastZ).toBeGreaterThan(zOf(hudCss, '.popup-backdrop {'));
+    expect(toastZ).toBeGreaterThan(zOf(boardCss, '.spotlight-veil {'));
+    const cardsCss = readSrc('components/cards/cards.css');
+    expect(toastZ).toBeGreaterThan(zOf(cardsCss, '.card-fly {'));
+    expect(toastZ).toBeGreaterThan(zOf(cardsCss, '.play-spark {'));
+    expect(toastZ).toBeLessThan(zOf(phoneCss, '.rotate-gate {'));
     // (b) 提示条不拦点击：整层 pointer-events: none，按钮照常可点
     const toastBlock = hudCss.slice(hudCss.indexOf('.toast-stack {'), hudCss.indexOf('.toast-stack {') + 1500);
     expect(toastBlock).toContain('pointer-events: none');
@@ -382,9 +402,12 @@ describe('round-2 HUD batch (source assertions)', () => {
     expect(enDict).toContain("marketTitle: 'The Market'");
     expect(zhDict).toContain("marketTitle: '菜市场'");
   });
-  it('R2-12 单一信息源：overlay 不再有轮次文字，board-log 与 Toast 同口径本地化', () => {
+  it('R2-12 单一信息源：overlay 不再有轮次文字（消息减负 B6：board-log 常驻行已删）', () => {
     expect(gameTsx).not.toContain('board-status');
-    expect(gameTsx).toContain('localizeLogText(shownLog.text)');
+    /* 审计 B6：board-log 删除——事件只走 Toast/钱包日志抽屉，
+       原「board-log 与 Toast 同口径本地化」断言随面退役（断言渲染
+       元件本身消失；源码注释里仍会提到该类名作沿革说明） */
+    expect(gameTsx).not.toContain('className="board-log"');
     expect(gameTsx).toContain('data-testid="action-primary"');
   });
   it('提议浮签（R2 定稿）：文案写清提议内容 + Yes/No 按钮走既有回应命令', () => {

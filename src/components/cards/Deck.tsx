@@ -1,20 +1,21 @@
 /**
- * Deck.tsx —— 自研轻量牌堆（React Bits 无对应组件）。视觉：3 张牌背略错位
- * 叠放成一小摞，顶卡是按钮；点按/Enter/Space → 顶卡绕 Y 轴翻 180°
- * 露出正面（菜谱任务卡），翻牌动画结束后回调 onDraw（派发 DRAW_RECIPE）。
+ * Deck.tsx —— 抽牌堆：3 张牌背略错位叠成一小摞，顶卡是按钮；
+ * 点按/Enter/Space → 顶卡绕 Y 轴翻 180° 露出正面（菜谱任务卡），
+ * 翻牌动画结束后回调 onDraw（派发 DRAW_RECIPE）。
  *
- * 顶卡正面/背面都是传入的 ReactNode 面——背面默认用 PM 生成的牌背图
- * （CARD_BACK_ART），正面由 DrawTaskPanel 传入菜谱卡面。翻面引擎复用
- * TiltCard（tilt 关闭——牌堆不倾斜，只翻）。
- *
- * 时序（R10_DESIGN §4.2 抽牌仪式）：点牌 → 560ms 翻 → onDraw →
- * 引擎 state 更新、弹窗换成任务卡确认条（牌堆随 popup 内容切换退场）。
- * reduced-motion：翻牌缩到 120ms。
+ * B5（React Bits "Stack" 裁剪移植，见 reactbits/Stack.tsx）：顶卡
+ * 还可按住拖动/甩——拖时底卡向前挪一档，小位移松手弹回，大位移
+ * 「甩穿牌堆」（飞出后从摞底弹回）。**点按抽牌永远是主路径**——
+ * 位移不过阈值/tap-rescue 一律走原生 click，拖甩只是增强；
+ * 一年级孩子不用拖也能玩。命令时序照旧：点牌 → 560ms 翻 → onDraw。
+ * deck-lift/deck-bob @keyframes 归 WS5 所有，本层不动。
+ * reduced-motion：翻牌缩到 120ms，甩/弹瞬移归位。
  */
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { CARD_BACK_ART } from './cardArt';
 import { TiltCard } from './TiltCard';
+import { Stack } from '../reactbits/Stack';
 
 export interface DeckProps {
   /** 顶卡翻开后显示的面（菜谱任务卡卡面） */
@@ -76,21 +77,9 @@ export function Deck({ face, onDraw, disabled, ariaLabel, testid, dataKey, hint 
   // R10C：等待期的牌堆轻轻浮动（deck--idle）——同屏唯一的持续动画位
   const idle = !disabled && !flipping;
   return (
-    <div className={`deck${flipping ? ' deck--flipping' : ''}${idle ? ' deck--idle' : ''}`}>
-      {hint && <p className="deck-hint">{hint}</p>}
-      {/* 底层两张 = 纯装饰错位牌背 */}
-      <i className="deck-under deck-under--a" aria-hidden="true" />
-      <i className="deck-under deck-under--b" aria-hidden="true" />
-      <button
-        type="button"
-        className="deck-top"
-        disabled={disabled}
-        onClick={draw}
-        aria-label={ariaLabel}
-        data-testid={testid}
-        data-key={dataKey}
-        data-primary="true"
-      >
+    <Stack
+      className={`deck${flipping ? ' deck--flipping' : ''}${idle ? ' deck--idle' : ''}`}
+      top={
         <TiltCard
           className="deck-card"
           tilt={false}
@@ -106,7 +95,21 @@ export function Deck({ face, onDraw, disabled, ariaLabel, testid, dataKey, hint 
           }
           back={face}
         />
-      </button>
-    </div>
+      }
+      topAriaLabel={ariaLabel}
+      topTestId={testid}
+      topDataKey={dataKey}
+      topPrimary
+      topDisabled={disabled}
+      topClassName="deck-top"
+      onTopTap={draw}
+      unders={[
+        /* 底层两张 = 纯装饰错位牌背（视觉类名沿用 cards.css 既有档） */
+        <i key="a" className="deck-under deck-under--a" aria-hidden="true" />,
+        <i key="b" className="deck-under deck-under--b" aria-hidden="true" />,
+      ]}
+    >
+      {hint && <p className="deck-hint">{hint}</p>}
+    </Stack>
   );
 }

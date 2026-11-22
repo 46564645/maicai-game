@@ -1,15 +1,15 @@
 /**
  * Board3D.tsx —— 3D 棋盘视图（BoardView 接口的 R3F 实现，与 Board2D 同签名）。
- * Canvas 铺底（aria-hidden，读屏走 DOM 层）；children（「轮到你了 / 进入这一站」
- * + 动作日志）以 DOM overlay 盖在画布中下部；右上角 DOM「回默认视角」按钮；
- * 画布下有一行 .board3d-status 文字状态（第几圈第几站、轮到谁）供读屏。
+ * Canvas 铺底（aria-hidden，读屏走 DOM 层）；children（「进入这一站」等）
+ * 以 DOM overlay 盖在画布中下部；右上角 DOM「回默认视角」按钮。
+ * 消息减负审计 B3：画布下的 .board3d-status 文字状态行已删——圈数看
+ * 进度簇、站名看弹窗标题浮签、轮到谁看角落卡高光，同屏不第三次复读。
  * 由 BoardMount 以 React.lazy 分包加载，首屏不阻塞。
  */
 import { useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import type { ReactNode } from 'react';
 import { strings } from '../../data/strings';
-import { fmt } from '../../game/stations/shared';
 import type { BoardViewProps } from '../BoardView';
 import { QualityProvider, useQuality } from './QualityProvider';
 import { Scene } from './Scene';
@@ -40,8 +40,6 @@ export default function Board3D(
   },
 ) {
   const [resetKey, setResetKey] = useState(0);
-  const station = props.stations[props.stationIndex];
-  const active = props.pawns.find((p) => p.playerId === props.activePlayerId);
 
   return (
     <QualityProvider>
@@ -67,17 +65,8 @@ export default function Board3D(
         <PhoneLens />
       </div>
 
-      <p className="board3d-status">
-        {fmt(strings.hud.stationLabel, {
-          n: props.stationIndex + 1,
-          name: station?.name ?? '',
-        })}{' '}
-        · {fmt(strings.hud.lapLabel, { lap: props.lap })}
-        {active ? ` · ${fmt(strings.game.botTurn, { name: active.name })}` : ''}
-      </p>
-
-      {/* 浮层移出 fixed 画布：桌面 fixed 吸底，手机回文档流（在状态行下、
-          bot 列上），永远不被其它浮层盖住「进入这一站」主按钮 */}
+      {/* 浮层移出 fixed 画布：桌面 fixed 吸底，手机回文档流，
+          永远不被其它浮层盖住「进入这一站」主按钮 */}
       <div className="board3d-overlay">
         {props.children}
         <button

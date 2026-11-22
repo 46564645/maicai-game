@@ -1,8 +1,9 @@
 /**
  * StationProps.tsx —— 8 站道具（ART_3D §1）：摆在站点「街外侧」草地上、面向街道，
- * 菜市场体量最大最显眼。Mini Shop / Food Kit GLB + 同风格程序化几何体混拼，
- * 缺口（公交站牌/小面包车/大手机/小房子/棚子）一律程序化，不混第三套画风。
- * 场景内不放文字。
+ * 菜市场体量最大最显眼。全部 Kenney CC0 GLB（Mini Shop / Food Kit / Car Kit /
+ * City Kit Suburban / Nature Kit / Fantasy Town / Furniture Kit，同一画风家族）
+ * + 少量同风格程序化几何体；仅专属道具（公交站牌、AI 家长大手机）保留程序化，
+ * 不混第三套画风。场景内不放文字。
  */
 import { useRef } from 'react';
 import * as THREE from 'three';
@@ -56,47 +57,13 @@ function Pole({ p, h, c = SCENE.wood, r = 0.045 }: { p: V3; h: number; c?: strin
   );
 }
 
-/** 条纹棚顶：slatCount 根横条交替色，轻斜面向街道，轻轻随风飘（§8.6） */
-function Awning({ w, d, y, colors }: { w: number; d: number; y: number; colors: [string, string] }) {
-  const n = Math.max(3, Math.round(d / 0.3));
-  const g = useRef<THREE.Group>(null);
-  useAmbient(85, (t) => {
-    if (g.current) g.current.rotation.x = 0.16 + Math.sin(t * 1.35 + w) * 0.028;
-  });
-  return (
-    <group ref={g} position-y={y} rotation-x={0.16}>
-      {Array.from({ length: n }, (_, i) => (
-        <RoundedBox
-          key={i}
-          args={[w, 0.055, (d / n) * 1.06]}
-          radius={0.025}
-          smoothness={3}
-          position={[0, Math.sin((i / (n - 1)) * Math.PI) * 0.03, -d / 2 + (i + 0.5) * (d / n)]}
-          castShadow
-        >
-          <meshPhysicalMaterial color={colors[i % 2]} {...PLASTIC} />
-        </RoundedBox>
-      ))}
-    </group>
-  );
-}
-
-/** 棒棒糖树（Mini Forest 未下载，同风格程序化） */
+/** 伙伴站小树（Kenney Nature Kit 橡树 GLB，原棒棒糖树已退役）：
+ *  标定 1.15 → 高 ≈1.41（原拼树总高 ≈1.53·s，此处 s=0.9 调用 → ≈1.27） */
 function LollyTree({ p, s = 1 }: { p: V3; s?: number }) {
+  const eff = 1.15 * s;
   return (
-    <group position={p} scale={s}>
-      <mesh position-y={0.42} castShadow>
-        <cylinderGeometry args={[0.08, 0.11, 0.85, 10]} />
-        <meshPhysicalMaterial color={SCENE.trunk} {...PLASTIC} />
-      </mesh>
-      <mesh position-y={1.05} castShadow>
-        <sphereGeometry args={[0.48, 16, 12]} />
-        <meshPhysicalMaterial color={SCENE.leaf} {...PLASTIC} />
-      </mesh>
-      <mesh position={[0.3, 0.78, 0.12]} castShadow>
-        <sphereGeometry args={[0.26, 14, 10]} />
-        <meshPhysicalMaterial color={SCENE.leaf} {...PLASTIC} />
-      </mesh>
+    <group position={p}>
+      <Model path="tree-oak.glb" position={[0, 0.05 * eff, 0]} rotation-y={0.7} scale={eff} />
     </group>
   );
 }
@@ -127,17 +94,27 @@ function DrawTaskProps() {
   );
 }
 
-/** ② 菜市场：彩色布棚 + Mini Shop 货架 + Food Kit 食材（体量最大） */
+/** 市场摊位（Kenney Fantasy Town 红棚摊 GLB）：整摊随风极轻微晃，
+ *  找回原条板棚顶的飘动感（幅度远小于布棚，木结构不该大晃） */
+function Stall({ x, phase }: { x: number; phase: number }) {
+  const g = useRef<THREE.Group>(null);
+  useAmbient(85, (t) => {
+    if (g.current) g.current.rotation.x = Math.sin(t * 1.35 + phase) * 0.01;
+  });
+  return (
+    <group ref={g} position={[x, 0, -0.15]}>
+      <Model path="stall-red.glb" scale={1.15} />
+    </group>
+  );
+}
+
+/** ② 菜市场：双红棚摊 + 前柜台食材（体量最大）。原四杆条板棚与三座
+ *  Mini Shop 陈列架已退役——陈列职能由摊位自带柜台接替，前柜台不变 */
 function MarketProps() {
   return (
     <group>
-      {([-1.06, 1.06] as const).map((x) =>
-        ([-0.6, 0.6] as const).map((z) => <Pole key={`${x}${z}`} p={[x, 0, z]} h={1.42} />),
-      )}
-      <Awning w={2.5} d={1.5} y={1.44} colors={[PALETTE.orange, SCENE.tileStation]} />
-      <Model path="display-fruit.glb" position={[-0.62, 0, 0.02]} scale={1.15} />
-      <Model path="display-bread.glb" position={[0.62, 0, 0.02]} scale={1.15} />
-      <Model path="display-small.glb" position={[0.95, 0, -0.4]} rotation-y={-0.35} />
+      <Stall x={-0.6} phase={0} />
+      <Stall x={0.6} phase={2.1} />
       {/* 前柜台：散装食材 + 收银机 + 购物篮 */}
       <B args={[1.05, 0.4, 0.42]} p={[0, 0.2, 0.62]} c={SCENE.wood} />
       <Model path="tomato.glb" position={[-0.3, 0.4, 0.62]} scale={1.4} />
@@ -183,7 +160,7 @@ function PartnerProps() {
   );
 }
 
-/** ④ 公交站：站牌 + 橙色小面包车（Car Kit 未下载，方块拼一辆） */
+/** ④ 公交站：站牌 + 小面包车（Kenney Car Kit GLB，原方块拼车身已退役） */
 function BusProps() {
   return (
     <group>
@@ -193,26 +170,14 @@ function BusProps() {
         <circleGeometry args={[0.13, 20]} />
         <meshPhysicalMaterial color={SCENE.tileStation} {...PLASTIC} />
       </mesh>
-      {/* 面包车：圆角车身 + 浅色窗带（比车身宽一档才看得出）+ 四轮 */}
-      <group position={[0.35, 0, 0.15]} rotation-y={0.15}>
-        <B args={[1.0, 0.44, 0.46]} p={[0, 0.36, 0]} c={PALETTE.orange} r={0.12} />
-        <B args={[0.7, 0.18, 0.54]} p={[-0.08, 0.44, 0]} c={SCENE.windowBlue} r={0.06} />
-        <B args={[0.12, 0.2, 0.4]} p={[0.52, 0.4, 0]} c={SCENE.windowBlue} r={0.03} />
-        <B args={[0.34, 0.32, 0.46]} p={[0.56, 0.26, 0]} c={SCENE.busCab} r={0.1} />
-        {(
-          [
-            [-0.32, 0.24],
-            [0.38, 0.24],
-            [-0.32, -0.24],
-            [0.38, -0.24],
-          ] as [number, number][]
-        ).map(([x, z], i) => (
-          <mesh key={i} position={[x, 0.11, z]} rotation-x={Math.PI / 2} castShadow>
-            <cylinderGeometry args={[0.11, 0.11, 0.07, 14]} />
-            <meshPhysicalMaterial color={PALETTE.ink} roughness={0.9} metalness={0} />
-          </mesh>
-        ))}
-      </group>
+      {/* 面包车：模型长轴沿 z、车头朝 +z；转 π/2 后车头朝 +x（与原方块车
+          同位同向），scale 0.45 → 长 1.24 / 高 0.61（原拼车约 1.23 / 0.58） */}
+      <Model
+        path="van.glb"
+        position={[0.35, 0, 0.15]}
+        rotation-y={Math.PI / 2 + 0.15}
+        scale={0.45}
+      />
     </group>
   );
 }
@@ -254,80 +219,71 @@ function ParentProps() {
   );
 }
 
-/** ⑦ 小卖部：小店面（开放柜台 + 货架 + 收银台 + 小棚） */
+/** ⑦ 小卖部：小店屋（Kenney City Kit Suburban type-a GLB）+ 开放柜台。
+ *  原三面盒子墙+木板屋顶+条板小棚已退役：Fantasy Town 的 stall.glb
+ *  试渲染后只是一张摊桌（无墙无顶，读不出「店」），故用郊区小屋 a 型
+ *  （d 型留给做饭站）；小屋自带屋顶，蓝条板棚随之取消（任何高度都会
+ *  与收银机或屋面相切）。货架箱原在墙内，改放屋旁作送货箱堆 */
 function StoreProps() {
   return (
     <group>
-      <B args={[1.2, 0.95, 0.1]} p={[0, 0.48, -0.42]} c={SCENE.islandRim} />
-      <B args={[0.1, 0.95, 0.6]} p={[-0.58, 0.48, -0.12]} c={SCENE.islandRim} />
-      <B args={[0.1, 0.95, 0.6]} p={[0.58, 0.48, -0.12]} c={SCENE.islandRim} />
-      <B args={[1.32, 0.08, 0.85]} p={[0, 1.0, -0.14]} c={SCENE.wood} />
-      <Awning w={1.28} d={0.55} y={0.98} colors={[PALETTE.blue, SCENE.tileStation]} />
+      <Model path="building-type-a.glb" position={[0, 0, -0.38]} scale={1.05} />
       <B args={[1.05, 0.36, 0.34]} p={[0, 0.18, 0.35]} c={SCENE.wood} />
-      <Model path="shelf-boxes.glb" position={[0, 0, -0.18]} scale={0.85} />
+      <Model path="shelf-boxes.glb" position={[0.95, 0, 0.15]} rotation-y={0.35} scale={0.85} />
       <Model path="cash-register-self.glb" position={[0.28, 0.36, 0.33]} scale={0.62} rotation-y={0.1} />
       <Model path="bag.glb" position={[-0.32, 0.36, 0.33]} scale={0.85} />
     </group>
   );
 }
 
-/** ⑧ 回家一起做饭：小房子（烟囱冒烟，烟圈上升变淡）+ 门口小饭桌 */
+/** ⑧ 回家一起做饭：小房子（Kenney City Kit Suburban type-d GLB，自带
+ *  烟囱，烟圈照旧上升变淡）+ 门口小饭桌（Furniture Kit 圆桌 GLB）。
+ *  原盒子墙+四棱锥顶与圆柱拼桌已退役。type-d 比 type-a 高挑且有烟囱，
+ *  与原拼房（总高 1.35）体量最接近，故选 d 不选 a（a 留给小卖部）。 */
 function CookProps() {
   const puffs = useRef<(THREE.Mesh | null)[]>([]);
   const mats = useRef<THREE.MeshStandardMaterial[]>([]);
+  // 烟囱口：模型局部 (0.81, 1.24, 0.06) × 0.92 + 房位 (-0.46, 0, -0.18)
+  // → 站点局部 (0.29, 1.14, -0.13)；烟从正上方起
   useAmbient(70, (t) => {
     for (let i = 0; i < 3; i++) {
       const m = puffs.current[i];
       const mat = mats.current[i];
       if (!m || !mat) continue;
       const k = ((t * 0.28 + i * 0.36) % 1 + 1) % 1; // 循环上升
-      m.position.set(-0.32 + i * 0.06 + Math.sin(t * 1.1 + i) * 0.05, 1.55 + k * 0.95, -0.2);
+      m.position.set(0.29 + i * 0.05 + Math.sin(t * 1.1 + i) * 0.05, 1.18 + k * 0.85, -0.13);
       m.scale.setScalar(0.6 + k * 0.9);
       mat.opacity = 0.75 * (1 - k);
     }
   });
   return (
     <group>
-      <group position={[-0.32, 0, -0.15]}>
-        <B args={[1.15, 0.85, 0.85]} p={[0, 0.43, 0]} c={SCENE.tileStation} r={0.08} />
-        <mesh position-y={1.08} rotation-y={Math.PI / 4} castShadow>
-          <coneGeometry args={[0.92, 0.55, 4]} />
-          <meshPhysicalMaterial color={PALETTE.orange} {...PLASTIC} />
-        </mesh>
-        <B args={[0.3, 0.48, 0.06]} p={[0.18, 0.24, 0.44]} c={PALETTE.purple} r={0.04} />
-        <B args={[0.22, 0.22, 0.04]} p={[-0.28, 0.52, 0.44]} c={SCENE.windowBlue} r={0.03} />
-        <B args={[0.14, 0.3, 0.14]} p={[-0.32, 1.18, -0.2]} c={SCENE.wood} r={0.02} />
-        {/* 烟囱冒烟：三团烟循环上升、变大变淡（§8.6） */}
-        {[0.14, 0.17, 0.2].map((r0, i) => (
-          <mesh
-            key={i}
+      <Model path="building-type-d.glb" position={[-0.46, 0, -0.18]} scale={0.92} />
+      {/* 烟囱冒烟：三团烟循环上升、变大变淡（§8.6） */}
+      {[0.14, 0.17, 0.2].map((r0, i) => (
+        <mesh
+          key={i}
+          ref={(m) => {
+            puffs.current[i] = m;
+          }}
+          position={[0.29 + i * 0.05, 1.18, -0.13]}
+        >
+          <sphereGeometry args={[r0, 10, 8]} />
+          <meshPhysicalMaterial
             ref={(m) => {
-              puffs.current[i] = m;
+              if (m) mats.current[i] = m;
             }}
-            position={[-0.32 + i * 0.06, 1.55, -0.2]}
-          >
-            <sphereGeometry args={[r0, 10, 8]} />
-            <meshPhysicalMaterial
-              ref={(m) => {
-                if (m) mats.current[i] = m;
-              }}
-              color={SCENE.tileStation}
-              transparent
-              opacity={0.6}
-            />
-          </mesh>
-        ))}
-      </group>
-      {/* 门口小饭桌 + 锅盘杯（Food Kit） */}
-      <group position={[0.62, 0, 0.45]}>
-        <mesh position-y={0.38} castShadow>
-          <cylinderGeometry args={[0.4, 0.4, 0.05, 20]} />
-          <meshPhysicalMaterial color={SCENE.wood} {...PLASTIC} />
+            color={SCENE.tileStation}
+            transparent
+            opacity={0.6}
+          />
         </mesh>
-        <mesh position-y={0.19}>
-          <cylinderGeometry args={[0.05, 0.08, 0.38, 10]} />
-          <meshPhysicalMaterial color={SCENE.trunk} {...PLASTIC} />
-        </mesh>
+      ))}
+      {/* 门口小饭桌 + 锅盘杯（Food Kit）。圆桌模型原点偏在桌角：
+          position 把几何中心 (0.35, -0.09, -0.40)×1.05 挪回组心、底落地面，
+          桌面高 0.39（原拼桌 0.40），锅盘杯 y 不变 */}
+      <group position={[0.7, 0, 0.48]}>
+        <Model path="table-round.glb" position={[-0.36, 0.28, 0.42]} scale={1.05} />
         <Model path="pot.glb" position={[-0.1, 0.4, -0.08]} scale={0.55} />
         <Model path="plate-dinner.glb" position={[0.14, 0.4, 0.1]} scale={0.5} />
         <Model path="cup.glb" position={[0.05, 0.4, -0.16]} scale={0.9} />
@@ -348,7 +304,7 @@ const PROPS: Record<string, () => JSX.Element> = {
 };
 
 const DIST: Record<string, number> = { market: 1.08 };
-const BLOB: Record<string, number> = { market: 1.9 };
+const BLOB: Record<string, number> = { market: 2.3, cook: 1.8, store: 1.5 };
 
 export function StationProps({ station, shadows }: { station: BoardStation; shadows: boolean }) {
   const Inner = PROPS[station.id];

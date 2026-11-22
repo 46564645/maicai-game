@@ -28,6 +28,7 @@ import { CardIcon } from './CardIcon';
 import { KeyHint } from './KeyHint';
 import { cardArtFor, cardArtInsetFor, cardBgFor } from './cards/cardArt';
 import { MetaIcon, type MetaIconKind } from './cards/MetaIcon';
+import { GlareHover } from './reactbits/GlareHover';
 
 export interface CardViewProps {
   icon: string;
@@ -111,6 +112,7 @@ function useNameFit(nameRef: React.RefObject<HTMLSpanElement | null>, name: stri
 export function CardView(props: CardViewProps) {
   const { supported: speakSupported, speak } = useSpeech();
   const nameRef = useRef<HTMLSpanElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
   useNameFit(nameRef, props.name);
   const cls = ['card-view', props.selected ? 'card-view--selected' : '']
     .filter(Boolean)
@@ -240,6 +242,7 @@ export function CardView(props: CardViewProps) {
     const btn = (
       <button
         type="button"
+        ref={btnRef}
         className={cls}
         style={rootStyle}
         onClick={props.onClick}
@@ -252,6 +255,11 @@ export function CardView(props: CardViewProps) {
         data-primary={props.primary ? 'true' : undefined}
       >
         {body}
+        {/* B4（React Bits "Glare Hover" 裁剪移植）：可点卡面的按压扫光
+            装饰层——pointerdown（含触屏）/鼠标移入/键盘 focus-visible
+            各扫一次；纯展示卡不挂（无交互则无反馈）。reduced-motion
+            下组件不渲染扫光 */}
+        <GlareHover host={btnRef} />
       </button>
     );
     if (!props.speakText || !speakSupported) return btn;

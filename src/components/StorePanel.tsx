@@ -18,13 +18,14 @@ import { adjacentDupCounts } from '../ui/dupBadges';
 import { panelHintFor } from '../ui/supportLevel';
 import type { CardId, Command, GameState } from '../game/types';
 import { Button } from './Button';
-import { CardIcon } from './CardIcon';
 import { CardView } from './CardView';
+/* KeyHelp 已删（审计 C5） */
 import { CoinBar } from './cards/CoinBar';
 import { Hand } from './cards/Hand';
 import { PlayableGlow } from './cards/PlayableGlow';
 import { playSparkAt } from './cards/PlaySpark';
 import { TiltCard } from './cards/TiltCard';
+import { PixelCard } from './reactbits/PixelCard';
 import { useDragPlay } from './cards/useDragPlay';
 import type { DropZoneRef } from './cards/useDragPlay';
 import type { HandItem } from './cards/Hand';
@@ -59,9 +60,7 @@ function ShelfCard({
     zones,
     onDrop,
   });
-  const dragCls =
-    `hand-drag${drag.dragging ? ' hand-drag--up' : ''}` +
-    `${drag.shaking ? ' hand-drag--shake' : ''}`;
+  const dragCls = `hand-drag${drag.dragging ? ' hand-drag--up' : ''}`;
   return (
     <>
       <div className={dragCls} ref={drag.ref} style={drag.style}>
@@ -173,24 +172,27 @@ export function StorePanel({
   });
 
   // 其他组 = 紧凑网格（§2.7），但卡面换成新剖面（cardId 直出美术）
+  // B11（React Bits "Pixel Card" 裁剪移植）：格子里的诱惑卡——
+  // 按下时一簇像素慢明灭（PRESS 触发，平板无悬停；reduced-motion 无层）
   const storeCard = (id: CardId) => {
     const ing = getIngredient(id);
     if (!ing) return null;
     return (
-      <CardView
-        key={id}
-        cardId={id}
-        icon={ing.icon}
-        name={cardName(ing.id)}
-        price={cost(id)}
-        mark={missing.includes(id)}
-        selected={selected === id}
-        disabled={boughtHere.includes(id)}
-        testid={`action-store-${id}`}
-        ariaLabel={`${cardName(ing.id)}, ${cost(id)} ${coinWord(cost(id))}`}
-        onClick={() => setSelected(selected === id ? null : id)}
-        onFocus={() => setSelected(id)}
-      />
+      <PixelCard key={id}>
+        <CardView
+          cardId={id}
+          icon={ing.icon}
+          name={cardName(ing.id)}
+          price={cost(id)}
+          mark={missing.includes(id)}
+          selected={selected === id}
+          disabled={boughtHere.includes(id)}
+          testid={`action-store-${id}`}
+          ariaLabel={`${cardName(ing.id)}, ${cost(id)} ${coinWord(cost(id))}`}
+          onClick={() => setSelected(selected === id ? null : id)}
+          onFocus={() => setSelected(id)}
+        />
+      </PixelCard>
     );
   };
 
@@ -228,27 +230,8 @@ export function StorePanel({
           busDebt={wallet.busDebt}
           spend={sel ? cost(selected!) : 0}
         />
-        {sel && (
-          <p className="panel-text panel-selected" aria-live="polite">
-            <span className="panel-selected-line">
-              {strings.panel.selectedMark}
-              <CardIcon icon={sel.icon} /> {cardName(sel.id)}{' '}
-              {/* R6 S2（与 MarketPanel 同口径）：价格括注独立成片——手机
-                  竖栏内容宽有限，整行 nowrap 时长名（如 Green Onion）会把
-                  竖栏 scrollWidth 撑出 24–36px 横向溢出（⑦ 并入后复量
-                  实测）；手机档藏掉这一片（价在卡面价丸/买钮/算式三处
-                  都在），只留「Picked: 名」短句一行 */}
-              <span className="sel-price-part">
-                ({cost(selected!)} {coinWord(cost(selected!))})
-              </span>
-            </span>
-            <span className="panel-selected-line">
-              {me.coins >= cost(selected!)
-                ? fmt(strings.panel.afterBuy, { n: me.coins - cost(selected!) })
-                : strings.panel.noCoins}
-            </span>
-          </p>
-        )}
+        {/* 交互审 U1（与 MarketPanel 同口径）：「Picked: … / After you
+            buy: …」信息丸已删——花费由上方金币条算式单一呈现 */}
         <div className="panel-actions">
           <Button
             variant="primary"
@@ -316,7 +299,7 @@ export function StorePanel({
         >
           {strings.panel.endTurn}
         </Button>
-        <p className="panel-keyhelp panel-keyhelp--kbd">{strings.panel.keyHelp}</p>
+        {/* 消息减负审计 C5：键盘帮助行删除（统一进指南第 2 页） */}
       </div>
     </div>
   );

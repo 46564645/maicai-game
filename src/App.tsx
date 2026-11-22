@@ -4,7 +4,7 @@
  * 演示条：仅 VITE_DEMO_BAR=1 的构建才有；此时 ?demo=1 初始打开、
  * D 开合（层栈 'demo' 为准，flags.demo 同步记录）。常规/生产构建不渲染。
  */
-import { Component, lazy, Suspense, useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
+import { Component, lazy, Suspense, useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 import type { Command, GameState } from './game/types';
 import type { ReactNode } from 'react';
 import { LangToggle } from './i18n/LangToggle';
@@ -18,7 +18,7 @@ import {
   reportSceneMounted,
   subscribeBoot,
 } from './boot';
-import { HelpCard } from './components/HelpCard';
+import { GuidePopup } from './components/GuidePopup';
 import { PopupOutlet } from './components/StationPopup';
 import { RotatePhone } from './components/RotatePhone';
 import { WalletDrawer } from './components/WalletDrawer';
@@ -121,14 +121,29 @@ export default function App() {
     }
   };
 
-  const toggleHelp = () => {
-    if (!layers.isOpen('help')) send({ type: 'TOGGLE_HELP' }); // 计次不展示
-    layers.toggleLayer('help');
-  };
+  /* 新手指南（消息减负审计 §4/§6）：复用 'help' 层 id，但开/关都不再
+     发引擎 TOGGLE_HELP——指南是纯表现层，老 HelpCard 的「计次不展示」
+     语义随之退役（引擎命令本身不动）。右上角入口（桌面顶栏 Guide /
+     手机竖栏 ? 钮）与 H 键都走这里。 */
+  const openGuide = useCallback(() => {
+    layers.openLayer('help');
+  }, [layers]);
+
+  /* 开局自动弹一次：选角后第一次进 station 相位时打开。ref 挂载级，
+     一次挂载只弹一次——页内 Play again 开新局（App 不重挂）不重弹，
+     刷新页面（重新挂载）才重弹；手动从右上角随时可开 */
+  const guideShownRef = useRef(false);
+  useEffect(() => {
+    if (state.phase === 'station' && !guideShownRef.current) {
+      guideShownRef.current = true;
+      layers.openLayer('help');
+    }
+  }, [state.phase, layers]);
+
   useHotkeys({
     closeTopLayer: layers.closeTop,
     toggleWallet: () => layers.toggleLayer('wallet'),
-    toggleHelp,
+    toggleHelp: openGuide,
     toggleDemo,
   });
 
@@ -151,7 +166,7 @@ export default function App() {
         <Game
           state={state}
           send={sendCmd}
-          onOpenHelp={toggleHelp}
+          onOpenGuide={openGuide}
           onOpenWallet={() => layers.openLayer('wallet')}
         />
       )}
@@ -172,11 +187,7 @@ export default function App() {
       </PopupOutlet>
 
       <PopupOutlet show={layers.isOpen('help')}>
-        <HelpCard
-          state={state}
-          playerId={human.id}
-          onClose={() => layers.closeLayer('help')}
-        />
+        <GuidePopup onClose={() => layers.closeLayer('help')} />
       </PopupOutlet>
 
       {/* 手机竖屏：全屏「把手机横过来」循环动画，转横后自动进入游戏 */}

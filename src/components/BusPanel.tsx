@@ -1,11 +1,13 @@
 /**
- * BusPanel.tsx —— 04 公交站（R10 Slice B）：车票卡一枚立在手位，
+ * BusPanel.tsx —— 04 公交站（R10 Slice B）：车票一枚立在手位，
  * 两个等价上车路径——
  *   · 拖拽：按住车票拖到「上车」车门区，松手命中 → PAY_BUS；
- *   · tap-tap：点车票选中（上抬+描边）→ 点「上车」大按钮 → PAY_BUS；
+ *   · tap-tap：点车票选中（撕票根）→ 点「上车」大按钮 → PAY_BUS；
  *     车票没选中也照点（与旧单按钮流程完全等价，键盘 [1]/Enter 不变）。
  * 打出时在车门区迸一次 PlaySpark。欠费 chip 与「车费一开始就说过啦」
  * 文案原样保留（REQUIREMENTS §5.04）。
+ * B12（React Bits "Tear Ticket"）：车票视觉为横版打孔票——点按撕票根
+ * = 选中态，再点贴回（流程/命令不变，纯演出层）。
  * 注（Slice B 记录）：上车只有「拖到车门」一条拖拽投放区——棋盘被弹窗
  * 遮住，「拖到棋盘」无意义；拖拽与 tap-tap 打的是同一命令。
  *
@@ -17,15 +19,14 @@
  */
 import { useRef, useState } from 'react';
 import { gameConfig } from '../config/gameConfig';
-import { strings } from '../data/strings';
+import { coinWord, strings } from '../data/strings';
 import { fmt } from '../game/stations/shared';
-import { bumpCoinHud } from '../ui/hudNudge';
+import { denyCoinGlow } from '../ui/hudNudge';
 import type { Command, GameState } from '../game/types';
 import { Button } from './Button';
-import { CardView } from './CardView';
 import { PlayableGlow } from './cards/PlayableGlow';
 import { playSparkAt } from './cards/PlaySpark';
-import { TiltCard } from './cards/TiltCard';
+import { TearTicket } from './reactbits/TearTicket';
 import { useDragPlay } from './cards/useDragPlay';
 import type { DropZoneRef } from './cards/useDragPlay';
 
@@ -52,13 +53,13 @@ export function BusPanel({
 
   const deny = () => {
     setDenyN((n) => n + 1);
-    bumpCoinHud();
+    denyCoinGlow();
   };
 
   const pay = () => {
     // 币不够车费：赊账上车是合法规则——命令照派，只是上车前币条先
     // 跳一下（与事件/市场同一第三通道；车票在弹窗关掉前已摇过）
-    if (!canPay && fee > 0) bumpCoinHud();
+    if (!canPay && fee > 0) denyCoinGlow();
     playSparkAt(doorRef.current);
     send({ type: 'PAY_BUS' });
   };
@@ -71,7 +72,7 @@ export function BusPanel({
   });
   const dragCls =
     `hand-drag bus-ticket-drag${denyN > 0 ? ' card-deny' : ''}` +
-    `${drag.dragging ? ' hand-drag--up' : ''}${drag.shaking ? ' hand-drag--shake' : ''}`;
+    `${drag.dragging ? ' hand-drag--up' : ''}`;
 
   const tapTicket = () => {
     if (!canPay && fee > 0) {
@@ -87,25 +88,31 @@ export function BusPanel({
       <div className="bus-stage">
         <div className={dragCls} ref={drag.ref} style={drag.style} key={denyN}>
           <PlayableGlow active sweepKey={`${state.lap}:${state.stationIndex}`}>
-            <TiltCard
-              glare
-              front={
-                <CardView
-                  icon="🚌"
-                  /* 可见名只留「Bus ticket」：票价已在价格宝石上，
-                     全名「Bus ticket · 2 coins」在 104px 卡上横溢出
-                     124px（全屏排查实测，B 口径缩短文案）；aria-label
-                     仍是完整动作句，信息不丢 */
-                  name={strings.panel.busTicket}
-                  price={fee > 0 ? fee : undefined}
-                  tag={!canPay && fee > 0 ? strings.panel.noCoins : undefined}
-                  selected={picked}
-                  testid="action-ticket"
-                  ariaLabel={label}
-                  onClick={tapTicket}
-                />
-              }
-            />
+            {/* B12（React Bits "Tear Ticket" 自包含改写）：车票从卡面
+                换成真车票——点一下沿打孔线撕票根（tap-to-tear，原版是
+                拖撕，1–3 年级精细拖拽不合适）；撕 = 选中，再点贴回。
+                票价/不够币/免票三副行照旧；拖拽到车门与车门按钮不变 */}
+            <button
+              type="button"
+              className="rb-tt-btn"
+              data-testid="action-ticket"
+              aria-label={label}
+              aria-pressed={picked}
+              onClick={tapTicket}
+            >
+              <TearTicket
+                fare={fee > 0 ? `${fee} ${coinWord(fee)}` : undefined}
+                name={strings.panel.busTicket}
+                sub={
+                  fee <= 0
+                    ? strings.actions.busFreeDone
+                    : !canPay
+                      ? strings.panel.noCoins
+                      : undefined
+                }
+                torn={picked}
+              />
+            </button>
           </PlayableGlow>
         </div>
         <span className="bus-stage-arrow" aria-hidden="true">
@@ -130,7 +137,8 @@ export function BusPanel({
       {me.busDebt > 0 && (
         <p className="panel-text">{fmt(strings.game.debtLeft, { n: me.busDebt })}</p>
       )}
-      <p className="panel-keyhelp">{strings.bus.announced}</p>
+      {/* 消息减负审计 D4：面板底广播复读行删除——票面状态 + 欠费行
+          已经把结果说清 */}
     </div>
   );
 }

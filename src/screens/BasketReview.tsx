@@ -12,8 +12,9 @@ import type { CardId, Command, GameState } from '../game/types';
 import { Button } from '../components/Button';
 import { Coins } from '../components/Coins';
 import { MiniCardRow } from '../components/MiniCardRow';
+import { BlurText } from '../components/text/BlurText';
 import { RecipeCard } from '../components/RecipeCard';
-import { CoinCounter } from '../components/cards/CoinCounter';
+import { AnimatedList } from '../components/reactbits/AnimatedList';
 
 function MiniChips({ ids }: { ids: CardId[] }) {
   if (ids.length === 0) return <span className="screen-note">—</span>;
@@ -35,7 +36,8 @@ export function BasketReview({
 
   return (
     <main className="intro-shell" data-testid="screen-basket">
-      <h1 className="intro-title intro-title--sm">{strings.screens.basketTitle}</h1>
+      {/* WS3 C15：屏幕级标题——错峰 + Blur Text 焦点回落 */}
+      <BlurText as="h1" className="intro-title intro-title--sm" text={strings.screens.basketTitle} />
 
       <div className="basket-self">
         <RecipeCard recipeId={human.recipeId} collected={human.collected} />
@@ -46,54 +48,90 @@ export function BasketReview({
               ` · ${fmt(strings.panel.recipeMissing, { items: missing.map(cardName).join(', ') })}`}
           </p>
         )}
-        {/* 币数与全局口径一致：真金币排 + 旁边的纯数字（CoinCounter），
-            「My coins: n」整句只走读屏 aria-label（同 WalletDrawer） */}
+        {/* 币数与全局口径一致：真金币排 + 旁边的数字（WS3 C4 起走
+            Count Up 滚动；「My coins: n」整句只走读屏 aria-label） */}
         <Coins
           count={human.coins}
           label={fmt(strings.game.myCoins, { n: human.coins })}
-          counter={
-            <CoinCounter
-              value={human.coins}
-              label={fmt(strings.game.myCoins, { n: human.coins })}
-            />
-          }
         />
-        <div className="basket-lines">
-          <p className="wallet-line">
-            {strings.hud.holdClip}:{' '}
-            {human.holdClip
-              ? `${cardName(human.holdClip)} (${marketPriceOf(human.holdClip)} ${coinWord(marketPriceOf(human.holdClip) ?? 0)})`
-              : strings.hud.empty}
-          </p>
-          <p className="wallet-line">
-            {strings.hud.busDebt}:{' '}
-            {human.busDebt > 0 ? `${human.busDebt} ${coinWord(human.busDebt)}` : strings.hud.empty}
-          </p>
-          <p className="wallet-line">
-            {strings.screens.extrasLabel}
-            <MiniChips ids={human.extras} />
-          </p>
-          {human.temptations.length > 0 && (
-            <p className="wallet-line">
-              {strings.screens.temptationsLabel}
-              <MiniChips ids={human.temptations} />
-            </p>
-          )}
-        </div>
+        {/* B23（React Bits "Animated List"，与 B19 共用移植件）：
+            自己篮子各行错峰弹入——内容、账本与版式不变，只加入场动效 */}
+        <AnimatedList
+          className="basket-lines"
+          animation="pop"
+          staggerMs={55}
+          items={[
+            {
+              key: 'hold-clip',
+              node: (
+                <p className="wallet-line">
+                  {strings.hud.holdClip}:{' '}
+                  {human.holdClip
+                    ? `${cardName(human.holdClip)} (${marketPriceOf(human.holdClip)} ${coinWord(marketPriceOf(human.holdClip) ?? 0)})`
+                    : strings.hud.empty}
+                </p>
+              ),
+            },
+            {
+              key: 'bus-debt',
+              node: (
+                <p className="wallet-line">
+                  {strings.hud.busDebt}:{' '}
+                  {human.busDebt > 0
+                    ? `${human.busDebt} ${coinWord(human.busDebt)}`
+                    : strings.hud.empty}
+                </p>
+              ),
+            },
+            {
+              key: 'extras',
+              node: (
+                <p className="wallet-line">
+                  {strings.screens.extrasLabel}
+                  <MiniChips ids={human.extras} />
+                </p>
+              ),
+            },
+            ...(human.temptations.length > 0
+              ? [
+                  {
+                    key: 'temptations',
+                    node: (
+                      <p className="wallet-line">
+                        {strings.screens.temptationsLabel}
+                        <MiniChips ids={human.temptations} />
+                      </p>
+                    ),
+                  },
+                ]
+              : []),
+          ]}
+        />
       </div>
 
       <section className="basket-others" aria-label={strings.screens.others}>
         <h2 className="basket-others-title">{strings.screens.others}</h2>
-        {state.players
-          .filter((p) => !p.isHuman)
-          .map((p) => {
-            const r = p.recipeId ? getRecipe(p.recipeId) : null;
-            return (
-              <p key={p.id} className="basket-other-line">
-                {playerDisplayName(p)}: {r ? `${cardName(r.id)} ${p.collected.length}/${r.ingredientIds.length}` : '—'}
-              </p>
-            );
-          })}
+        {/* B23：他人篮子行同一份错峰入场（只展示进度一句话，不比较不排序） */}
+        <AnimatedList
+          animation="pop"
+          staggerMs={70}
+          items={state.players
+            .filter((p) => !p.isHuman)
+            .map((p) => {
+              const r = p.recipeId ? getRecipe(p.recipeId) : null;
+              return {
+                key: p.id,
+                node: (
+                  <p className="basket-other-line">
+                    {playerDisplayName(p)}:{' '}
+                    {r
+                      ? `${cardName(r.id)} ${p.collected.length}/${r.ingredientIds.length}`
+                      : '—'}
+                  </p>
+                ),
+              };
+            })}
+        />
       </section>
 
       <Button
